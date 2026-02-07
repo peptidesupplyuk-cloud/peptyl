@@ -1,50 +1,67 @@
 import { useState, useMemo } from "react";
 import { motion } from "framer-motion";
-import { Beaker, Syringe, RotateCcw } from "lucide-react";
+import { Beaker, Syringe } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Button } from "@/components/ui/button";
 import { Slider } from "@/components/ui/slider";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 
+const syringeTypes = [
+  { label: "1ml / 100 unit insulin syringe", multiplier: 100 },
+  { label: "0.5ml / 50 unit insulin syringe", multiplier: 100 },
+  { label: "0.3ml / 30 unit insulin syringe", multiplier: 100 },
+  { label: "3ml / standard syringe", multiplier: 1 },
+];
+
+const doseRanges: Record<string, { name: string; min: number; max: number; unit: string; note: string }> = {
+  bpc157: { name: "BPC-157", min: 200, max: 800, unit: "mcg/day", note: "Typically split into 2 doses, morning and evening" },
+  ghkcu: { name: "GHK-Cu", min: 100, max: 600, unit: "mcg/day", note: "Start low and increase gradually over 2 weeks" },
+  tb500: { name: "TB-500", min: 2000, max: 5000, unit: "mcg/2x week", note: "Loading phase: higher dose for 4-6 weeks, then maintenance" },
+  ipamorelin: { name: "Ipamorelin", min: 100, max: 300, unit: "mcg/dose", note: "Best taken before bed on an empty stomach" },
+  cjc1295: { name: "CJC-1295 (no DAC)", min: 100, max: 300, unit: "mcg/dose", note: "Often paired with Ipamorelin for synergistic effect" },
+  semaglutide: { name: "Semaglutide", min: 250, max: 2500, unit: "mcg/week", note: "Start at lowest dose. Increase every 4 weeks as tolerated" },
+  tirzepatide: { name: "Tirzepatide", min: 2500, max: 15000, unit: "mcg/week", note: "Start at 2.5mg weekly. Increase every 4 weeks" },
+  retatrutide: { name: "Retatrutide", min: 4000, max: 12000, unit: "mcg/week", note: "Newest triple agonist. Start at 4mg weekly" },
+  sermorelin: { name: "Sermorelin", min: 200, max: 500, unit: "mcg/day", note: "Best taken before bed. Can be used long-term" },
+  hexarelin: { name: "Hexarelin", min: 100, max: 200, unit: "mcg/dose", note: "Most potent GHRP. Cycle 4 weeks on, 4 off" },
+  ghrp2: { name: "GHRP-2", min: 100, max: 300, unit: "mcg/dose", note: "Take on empty stomach. Moderate appetite increase" },
+  ghrp6: { name: "GHRP-6", min: 100, max: 300, unit: "mcg/dose", note: "Strongest appetite stimulation of all GHRPs" },
+  tesamorelin: { name: "Tesamorelin", min: 1000, max: 2000, unit: "mcg/day", note: "FDA-approved for visceral fat reduction" },
+};
+
 const CalculatorsPage = () => {
-  // Reconstitution calculator state
+  // Reconstitution state
   const [peptideAmount, setPeptideAmount] = useState<string>("5");
   const [bacWater, setBacWater] = useState<string>("2");
   const [desiredDose, setDesiredDose] = useState<string>("250");
+  const [syringeType, setSyringeType] = useState<string>("0");
 
   const reconResult = useMemo(() => {
     const pep = parseFloat(peptideAmount) || 0;
     const bac = parseFloat(bacWater) || 0;
     const dose = parseFloat(desiredDose) || 0;
     if (pep === 0 || bac === 0 || dose === 0) return null;
-    const concentration = (pep * 1000) / bac; // mcg/ml
-    const volumePerDose = dose / concentration; // ml
-    const iu = volumePerDose * 100; // IU (on a standard insulin syringe)
+    const concentration = (pep * 1000) / bac;
+    const volumePerDose = dose / concentration;
+    const syringe = syringeTypes[parseInt(syringeType)];
+    const iu = volumePerDose * syringe.multiplier;
     const totalDoses = (pep * 1000) / dose;
     return {
       concentration: concentration.toFixed(0),
       volumePerDose: volumePerDose.toFixed(2),
       iu: iu.toFixed(1),
       totalDoses: Math.floor(totalDoses),
+      syringeLabel: syringe.label,
     };
-  }, [peptideAmount, bacWater, desiredDose]);
+  }, [peptideAmount, bacWater, desiredDose, syringeType]);
 
   // Dose calculator state
   const [bodyWeight, setBodyWeight] = useState<string>("80");
   const [weightUnit, setWeightUnit] = useState<string>("kg");
   const [selectedPeptide, setSelectedPeptide] = useState<string>("bpc157");
   const [doseSlider, setDoseSlider] = useState([50]);
-
-  const doseRanges: Record<string, { name: string; min: number; max: number; unit: string; note: string }> = {
-    bpc157: { name: "BPC-157", min: 200, max: 800, unit: "mcg/day", note: "Typically split into 2 doses, morning and evening" },
-    ghkcu: { name: "GHK-Cu", min: 100, max: 600, unit: "mcg/day", note: "Start low and increase gradually over 2 weeks" },
-    tb500: { name: "TB-500", min: 2000, max: 5000, unit: "mcg/2x week", note: "Loading phase: higher dose for 4-6 weeks, then maintenance" },
-    ipamorelin: { name: "Ipamorelin", min: 100, max: 300, unit: "mcg/dose", note: "Best taken before bed on an empty stomach" },
-    semaglutide: { name: "Semaglutide", min: 250, max: 2500, unit: "mcg/week", note: "Start at lowest dose. Increase every 4 weeks as tolerated" },
-  };
 
   const doseInfo = doseRanges[selectedPeptide];
   const weightKg = weightUnit === "kg" ? parseFloat(bodyWeight) || 0 : ((parseFloat(bodyWeight) || 0) * 0.453592);
@@ -84,36 +101,28 @@ const CalculatorsPage = () => {
               <div className="space-y-5">
                 <div>
                   <Label className="text-sm font-medium">Peptide Amount (mg)</Label>
-                  <Input
-                    type="number"
-                    value={peptideAmount}
-                    onChange={(e) => setPeptideAmount(e.target.value)}
-                    className="mt-1.5"
-                    min="0"
-                    step="0.5"
-                  />
+                  <Input type="number" value={peptideAmount} onChange={(e) => setPeptideAmount(e.target.value)} className="mt-1.5" min="0" step="0.5" />
                 </div>
                 <div>
                   <Label className="text-sm font-medium">BAC Water (ml)</Label>
-                  <Input
-                    type="number"
-                    value={bacWater}
-                    onChange={(e) => setBacWater(e.target.value)}
-                    className="mt-1.5"
-                    min="0"
-                    step="0.5"
-                  />
+                  <Input type="number" value={bacWater} onChange={(e) => setBacWater(e.target.value)} className="mt-1.5" min="0" step="0.5" />
                 </div>
                 <div>
                   <Label className="text-sm font-medium">Desired Dose (mcg)</Label>
-                  <Input
-                    type="number"
-                    value={desiredDose}
-                    onChange={(e) => setDesiredDose(e.target.value)}
-                    className="mt-1.5"
-                    min="0"
-                    step="10"
-                  />
+                  <Input type="number" value={desiredDose} onChange={(e) => setDesiredDose(e.target.value)} className="mt-1.5" min="0" step="10" />
+                </div>
+                <div>
+                  <Label className="text-sm font-medium">Syringe Type</Label>
+                  <Select value={syringeType} onValueChange={setSyringeType}>
+                    <SelectTrigger className="mt-1.5">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {syringeTypes.map((s, i) => (
+                        <SelectItem key={i} value={String(i)}>{s.label}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                 </div>
 
                 {reconResult && (
@@ -133,8 +142,8 @@ const CalculatorsPage = () => {
                         <div className="text-xs text-muted-foreground">per dose</div>
                       </div>
                       <div>
-                        <div className="text-2xl font-heading font-bold text-primary">{reconResult.iu} IU</div>
-                        <div className="text-xs text-muted-foreground">on insulin syringe</div>
+                        <div className="text-2xl font-heading font-bold text-primary">{reconResult.iu} units</div>
+                        <div className="text-xs text-muted-foreground">on {reconResult.syringeLabel}</div>
                       </div>
                       <div>
                         <div className="text-2xl font-heading font-bold text-foreground">{reconResult.totalDoses}</div>
@@ -143,6 +152,20 @@ const CalculatorsPage = () => {
                     </div>
                   </motion.div>
                 )}
+              </div>
+
+              {/* How-to guide */}
+              <div className="mt-6 p-4 rounded-xl bg-muted/50 border border-border">
+                <h4 className="text-sm font-heading font-semibold text-foreground mb-3">How to Reconstitute</h4>
+                <ol className="text-xs text-muted-foreground space-y-1.5 list-decimal list-inside">
+                  <li>Gather supplies: peptide vial, BAC water, alcohol swabs, syringe</li>
+                  <li>Wipe vial tops with alcohol swabs</li>
+                  <li>Draw BAC water into syringe</li>
+                  <li>Inject slowly down the side of the vial (NOT onto powder)</li>
+                  <li>Swirl gently — do NOT shake</li>
+                  <li>Refrigerate at 2-8°C after reconstitution</li>
+                  <li>Use within 28-30 days</li>
+                </ol>
               </div>
             </motion.div>
 
@@ -181,13 +204,7 @@ const CalculatorsPage = () => {
                 <div>
                   <Label className="text-sm font-medium">Body Weight</Label>
                   <div className="flex gap-2 mt-1.5">
-                    <Input
-                      type="number"
-                      value={bodyWeight}
-                      onChange={(e) => setBodyWeight(e.target.value)}
-                      min="0"
-                      className="flex-1"
-                    />
+                    <Input type="number" value={bodyWeight} onChange={(e) => setBodyWeight(e.target.value)} min="0" className="flex-1" />
                     <Select value={weightUnit} onValueChange={setWeightUnit}>
                       <SelectTrigger className="w-20">
                         <SelectValue />
@@ -204,13 +221,7 @@ const CalculatorsPage = () => {
                   <Label className="text-sm font-medium">
                     Dose Level: {doseSlider[0] <= 33 ? "Low" : doseSlider[0] <= 66 ? "Moderate" : "High"}
                   </Label>
-                  <Slider
-                    value={doseSlider}
-                    onValueChange={setDoseSlider}
-                    max={100}
-                    step={1}
-                    className="mt-3"
-                  />
+                  <Slider value={doseSlider} onValueChange={setDoseSlider} max={100} step={1} className="mt-3" />
                   <div className="flex justify-between text-xs text-muted-foreground mt-1">
                     <span>Conservative</span>
                     <span>Aggressive</span>
@@ -230,9 +241,7 @@ const CalculatorsPage = () => {
                     <div className="text-3xl font-heading font-bold text-primary mb-1">
                       {recommendedDose} {doseInfo.unit}
                     </div>
-                    <p className="text-xs text-muted-foreground leading-relaxed mt-3">
-                      {doseInfo.note}
-                    </p>
+                    <p className="text-xs text-muted-foreground leading-relaxed mt-3">{doseInfo.note}</p>
                     {weightKg > 0 && (
                       <p className="text-xs text-muted-foreground mt-2">
                         Body weight: {weightKg.toFixed(1)} kg — dose may be adjusted proportionally.
