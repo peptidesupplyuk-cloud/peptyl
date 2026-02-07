@@ -33,7 +33,7 @@ const COASection = () => {
             viewport={{ once: true }}
             className="text-3xl sm:text-4xl font-heading font-bold text-foreground mb-4"
           >
-            Certificates of <span className="text-gradient-teal">Analysis</span>
+            Certificate of <span className="text-gradient-teal">Analysis</span>
           </motion.h2>
           <motion.p
             initial={{ opacity: 0, y: 20 }}
@@ -42,7 +42,7 @@ const COASection = () => {
             transition={{ delay: 0.1 }}
             className="text-muted-foreground text-lg"
           >
-            Transparency is non-negotiable. Every product ships with a third-party COA confirming purity and identity.
+            Below are example COAs provided by our suppliers. We strongly recommend all researchers conduct their own independent testing — not every batch is guaranteed to include a COA.
           </motion.p>
         </div>
 
