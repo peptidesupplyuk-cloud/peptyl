@@ -2,8 +2,9 @@ import { useState, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   Layers,
-  Plus,
+  Search,
   X,
+  Check,
   CheckCircle2,
   AlertTriangle,
   HelpCircle,
@@ -223,13 +224,13 @@ const StackBuilder = () => {
           <Beaker className="h-5 w-5 text-primary" />
           Custom Stack Builder
         </h2>
-        <p className="text-sm text-muted-foreground mb-6">
+        <p className="text-sm text-muted-foreground mb-4">
           Select up to 6 peptides to check compatibility and interactions.
         </p>
 
-        {/* Selected peptides */}
-        <div className="flex flex-wrap gap-2 mb-4 min-h-[2.5rem]">
-          <AnimatePresence>
+        {/* Selected pills */}
+        {selected.length > 0 && (
+          <div className="flex flex-wrap gap-2 mb-4">
             {selected.map((name) => (
               <motion.button
                 key={name}
@@ -243,44 +244,65 @@ const StackBuilder = () => {
                 <X className="h-3 w-3" />
               </motion.button>
             ))}
-          </AnimatePresence>
-          {selected.length === 0 && (
-            <p className="text-sm text-muted-foreground italic py-1">
-              No peptides selected — search below or load a recommended stack.
-            </p>
-          )}
-        </div>
-
-        {/* Search / Add */}
-        {selected.length < 6 && (
-          <div className="relative mb-6">
-            <Plus className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-            <input
-              type="text"
-              placeholder="Search peptides to add..."
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              className="w-full max-w-md pl-10 pr-4 py-2.5 rounded-xl bg-card border border-border text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-primary/40 transition-colors"
-            />
-            {search && (
-              <div className="absolute top-full left-0 mt-1 w-full max-w-md bg-card border border-border rounded-xl shadow-lg z-20 max-h-48 overflow-y-auto">
-                {filtered.length > 0 ? (
-                  filtered.slice(0, 8).map((name) => (
-                    <button
-                      key={name}
-                      onClick={() => addPeptide(name)}
-                      className="w-full text-left px-4 py-2.5 text-sm text-foreground hover:bg-muted/50 transition-colors first:rounded-t-xl last:rounded-b-xl"
-                    >
-                      {name}
-                    </button>
-                  ))
-                ) : (
-                  <p className="px-4 py-3 text-sm text-muted-foreground">No matches found</p>
-                )}
-              </div>
-            )}
+            <button
+              onClick={() => setSelected([])}
+              className="text-xs text-muted-foreground hover:text-foreground px-2 py-1.5 transition-colors"
+            >
+              Clear all
+            </button>
           </div>
         )}
+
+        {/* Search filter */}
+        <div className="relative mb-4 max-w-md">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+          <input
+            type="text"
+            placeholder="Filter peptides..."
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            className="w-full pl-10 pr-4 py-2.5 rounded-xl bg-card border border-border text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-primary/40 transition-colors"
+          />
+        </div>
+
+        {/* Peptide selection grid */}
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-2 mb-8">
+          {peptideNames
+            .filter((name) => name.toLowerCase().includes(search.toLowerCase()))
+            .map((name) => {
+              const isSelected = selected.includes(name);
+              const peptide = peptides.find((p) => p.name === name);
+              const disabled = !isSelected && selected.length >= 6;
+              return (
+                <button
+                  key={name}
+                  onClick={() => (isSelected ? removePeptide(name) : addPeptide(name))}
+                  disabled={disabled}
+                  className={`relative p-3 rounded-xl border text-left transition-all text-xs ${
+                    isSelected
+                      ? "bg-primary/10 border-primary/40 text-foreground"
+                      : disabled
+                      ? "bg-card border-border text-muted-foreground/40 cursor-not-allowed"
+                      : "bg-card border-border text-foreground hover:border-primary/30 hover:bg-card/80 cursor-pointer"
+                  }`}
+                >
+                  <div className="flex items-start justify-between gap-1">
+                    <div className="min-w-0">
+                      <p className="font-medium truncate">{name}</p>
+                      {peptide && (
+                        <p className="text-[10px] text-muted-foreground truncate mt-0.5">
+                          {peptide.category}
+                        </p>
+                      )}
+                    </div>
+                    {isSelected && (
+                      <Check className="h-3.5 w-3.5 text-primary flex-shrink-0 mt-0.5" />
+                    )}
+                  </div>
+                </button>
+              );
+            })}
+        </div>
 
         {/* Interaction Results */}
         {selected.length >= 2 && (
