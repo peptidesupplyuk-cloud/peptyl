@@ -47,11 +47,10 @@ const COASection = () => {
         </div>
 
         {/* Info cards */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-12 max-w-3xl mx-auto">
           {[
             { icon: FileCheck, title: "Third-Party Tested", text: "Independent HPLC & Mass Spec analysis on every batch — never self-tested." },
             { icon: ShieldCheck, title: "98%+ Purity Guaranteed", text: "We only stock peptides that meet our strict purity thresholds." },
-            { icon: FlaskConical, title: "Full Traceability", text: "Every COA links to a specific batch so you know exactly what you're working with." },
           ].map((card, i) => (
             <motion.div
               key={i}
