@@ -1,7 +1,9 @@
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import HeroSection from "@/components/HeroSection";
+import MissionSection from "@/components/MissionSection";
 import FeaturesSection from "@/components/FeaturesSection";
+import COASection from "@/components/COASection";
 import CommunitySection from "@/components/CommunitySection";
 
 const Index = () => {
@@ -9,7 +11,9 @@ const Index = () => {
     <div className="min-h-screen bg-background">
       <Header />
       <HeroSection />
+      <MissionSection />
       <FeaturesSection />
+      <COASection />
       <CommunitySection />
 
       {/* CTA Section */}
