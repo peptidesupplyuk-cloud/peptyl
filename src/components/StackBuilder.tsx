@@ -102,7 +102,10 @@ function useStackVotes() {
   useEffect(() => { fetchVotes(); }, [user]);
 
   const vote = async (stackName: string, voteType: "up" | "down") => {
-    if (!user) return;
+    if (!user) {
+      toast({ title: "Sign in required", description: "Create a free account to vote on stacks.", variant: "destructive" });
+      return;
+    }
     
     const existing = userVotes[stackName];
     
@@ -320,6 +323,10 @@ const StackBuilder = () => {
   };
 
   const handleSave = async () => {
+    if (!user) {
+      toast({ title: "Sign in required", description: "Create a free account to save stacks.", variant: "destructive" });
+      return;
+    }
     if (!saveName.trim() || selected.length < 2) return;
     await saveStack(saveName.trim(), selected);
     setSaveName("");

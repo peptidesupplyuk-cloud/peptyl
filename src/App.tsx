@@ -32,14 +32,14 @@ const App = () => (
             <Routes>
               <Route path="/" element={<Index />} />
               <Route path="/auth" element={<Auth />} />
-              <Route path="/peptides" element={<ProtectedRoute><Peptides /></ProtectedRoute>} />
-              <Route path="/calculators" element={<ProtectedRoute><Calculators /></ProtectedRoute>} />
-              <Route path="/education" element={<ProtectedRoute><Education /></ProtectedRoute>} />
-              <Route path="/education/beginners-guide-peptides" element={<ProtectedRoute><BeginnersGuide /></ProtectedRoute>} />
-              <Route path="/education/how-to-reconstitute-peptides" element={<ProtectedRoute><HowToReconstitute /></ProtectedRoute>} />
-              <Route path="/education/bpc157-vs-tb500" element={<ProtectedRoute><Bpc157VsTb500 /></ProtectedRoute>} />
-              <Route path="/education/peptide-storage-guide" element={<ProtectedRoute><StorageGuide /></ProtectedRoute>} />
-              <Route path="/education/understanding-glp1-peptides" element={<ProtectedRoute><Glp1Guide /></ProtectedRoute>} />
+              <Route path="/peptides" element={<Peptides />} />
+              <Route path="/calculators" element={<Calculators />} />
+              <Route path="/education" element={<Education />} />
+              <Route path="/education/beginners-guide-peptides" element={<BeginnersGuide />} />
+              <Route path="/education/how-to-reconstitute-peptides" element={<HowToReconstitute />} />
+              <Route path="/education/bpc157-vs-tb500" element={<Bpc157VsTb500 />} />
+              <Route path="/education/peptide-storage-guide" element={<StorageGuide />} />
+              <Route path="/education/understanding-glp1-peptides" element={<Glp1Guide />} />
               {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
               <Route path="*" element={<NotFound />} />
             </Routes>
