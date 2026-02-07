@@ -14,10 +14,160 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      benefit_votes: {
+        Row: {
+          benefit: string
+          created_at: string
+          id: string
+          stack_name: string
+          user_id: string
+          vote_type: string
+        }
+        Insert: {
+          benefit: string
+          created_at?: string
+          id?: string
+          stack_name: string
+          user_id: string
+          vote_type: string
+        }
+        Update: {
+          benefit?: string
+          created_at?: string
+          id?: string
+          stack_name?: string
+          user_id?: string
+          vote_type?: string
+        }
+        Relationships: []
+      }
+      profiles: {
+        Row: {
+          created_at: string
+          id: string
+          updated_at: string
+          user_id: string
+          username: string | null
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          updated_at?: string
+          user_id: string
+          username?: string | null
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          updated_at?: string
+          user_id?: string
+          username?: string | null
+        }
+        Relationships: []
+      }
+      saved_stacks: {
+        Row: {
+          created_at: string
+          id: string
+          name: string
+          peptides: string[]
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          name: string
+          peptides?: string[]
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          name?: string
+          peptides?: string[]
+          user_id?: string
+        }
+        Relationships: []
+      }
+      side_effect_votes: {
+        Row: {
+          created_at: string
+          id: string
+          side_effect: string
+          stack_name: string
+          user_id: string
+          vote_type: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          side_effect: string
+          stack_name: string
+          user_id: string
+          vote_type: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          side_effect?: string
+          stack_name?: string
+          user_id?: string
+          vote_type?: string
+        }
+        Relationships: []
+      }
+      stack_votes: {
+        Row: {
+          created_at: string
+          id: string
+          stack_name: string
+          user_id: string
+          vote_type: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          stack_name: string
+          user_id: string
+          vote_type: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          stack_name?: string
+          user_id?: string
+          vote_type?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
-      [_ in never]: never
+      benefit_vote_counts: {
+        Row: {
+          benefit: string | null
+          downvotes: number | null
+          stack_name: string | null
+          upvotes: number | null
+        }
+        Relationships: []
+      }
+      side_effect_vote_counts: {
+        Row: {
+          downvotes: number | null
+          side_effect: string | null
+          stack_name: string | null
+          upvotes: number | null
+        }
+        Relationships: []
+      }
+      stack_vote_counts: {
+        Row: {
+          downvotes: number | null
+          stack_name: string | null
+          upvotes: number | null
+        }
+        Relationships: []
+      }
     }
     Functions: {
       [_ in never]: never
