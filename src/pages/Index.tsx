@@ -27,7 +27,7 @@ const Index = () => {
             Join thousands of UK & European researchers using PeptideSupply's tools and community insights.
           </p>
           <div className="flex justify-center gap-4 flex-wrap">
-            <a href="/auth">
+            <a href="/peptides">
               <button className="px-8 py-3 rounded-xl bg-primary text-primary-foreground font-medium shadow-brand hover:opacity-90 transition-opacity">
                 Explore Database
               </button>
