@@ -6,6 +6,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { lazy, Suspense } from "react";
 import { AuthProvider } from "@/contexts/AuthContext";
 import ProtectedRoute from "@/components/ProtectedRoute";
+import PeptideChat from "@/components/PeptideChat";
 import Index from "./pages/Index";
 import Auth from "./pages/Auth";
 import Peptides from "./pages/Peptides";
@@ -44,6 +45,7 @@ const App = () => (
               <Route path="*" element={<NotFound />} />
             </Routes>
           </Suspense>
+          <PeptideChat />
         </BrowserRouter>
       </TooltipProvider>
     </AuthProvider>

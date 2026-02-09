@@ -1,1 +1,4 @@
 project_id = "wmdudifpbrtojkmtczaq"
+
+[functions.peptide-chat]
+verify_jwt = false
