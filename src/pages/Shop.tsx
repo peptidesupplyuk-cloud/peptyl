@@ -148,6 +148,18 @@ const Shop = () => {
         </div>
       </section>
 
+      {/* Regulatory Notice */}
+      <section className="py-10 border-t border-border">
+        <div className="container mx-auto px-6">
+          <div className="flex items-start gap-3 p-5 rounded-xl bg-muted/50 border border-border max-w-3xl mx-auto">
+            <FlaskConical className="h-5 w-5 text-muted-foreground mt-0.5 shrink-0" />
+            <p className="text-xs text-muted-foreground leading-relaxed">
+              All peptides are sold strictly for <strong className="text-foreground">in-vitro research and laboratory use only</strong>. Products are not intended for human consumption, veterinary use, or as food additives. All sales are subject to UK regulations including the Human Medicines Regulations 2012. Buyers must comply with all applicable local laws and are responsible for ensuring lawful use.
+            </p>
+          </div>
+        </div>
+      </section>
+
       {/* Newsletter CTA */}
       <section className="py-24 bg-hero relative overflow-hidden">
         <div className="absolute top-0 left-1/3 w-96 h-96 rounded-full bg-teal/5 blur-3xl" />
