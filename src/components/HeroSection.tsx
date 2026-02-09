@@ -46,7 +46,7 @@ const HeroSection = () => (
           transition={{ duration: 0.8, delay: 0.2 }}
           className="text-lg sm:text-xl text-primary-foreground/60 max-w-xl mb-10 leading-relaxed"
         >
-          Community-powered peptide database, precision calculators, and educational resources — built by researchers, for researchers.
+           Community-powered peptide database, precision calculators, and educational resources — built by researchers, for researchers.
         </motion.p>
 
         <motion.div

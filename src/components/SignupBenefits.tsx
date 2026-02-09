@@ -22,7 +22,7 @@ const benefits = [
   {
     icon: Sparkles,
     title: "AI Research Assistant",
-    description: "Ask PeptideBot anything — dosing, stacks, side effects, and more.",
+    description: "Ask BioBot anything — dosing, stacks, side effects, and more.",
   },
 ];
 
