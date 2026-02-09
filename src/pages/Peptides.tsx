@@ -7,6 +7,7 @@ import Footer from "@/components/Footer";
 import PeptideCard from "@/components/PeptideCard";
 import StackBuilder from "@/components/StackBuilder";
 import { peptides, categories } from "@/data/peptides";
+import SEO from "@/components/SEO";
 
 type Tab = "database" | "stacks";
 
@@ -37,6 +38,11 @@ const PeptidesPage = () => {
 
   return (
     <div className="min-h-screen bg-background">
+      <SEO
+        title="Peptide Database — 36+ Compounds with Dosing Protocols"
+        description="Searchable peptide database with detailed administration protocols, dose ranges, and community feedback. BPC-157, Semaglutide, Tirzepatide and more."
+        path="/peptides"
+      />
       <Header />
       <main className="pt-24 pb-16">
         <div className="container mx-auto px-6">

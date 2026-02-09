@@ -3,6 +3,7 @@ import { Award, Globe, Rocket, Shield, TrendingUp, Users } from "lucide-react";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { motion } from "framer-motion";
+import SEO from "@/components/SEO";
 
 const stats = [
   { label: "Years in Global Manufacturing", value: "10+", icon: Globe },
@@ -44,6 +45,11 @@ const fadeUp = {
 const About = () => {
   return (
     <div className="min-h-screen bg-background">
+      <SEO
+        title="About Us — Built on a Decade of Supply Chain Expertise"
+        description="Meet the founder behind Peptyl. 10+ years in Fortune 500 manufacturing, 6+ years scaling AI startups, and a personal peptide transformation story."
+        path="/about"
+      />
       <Header />
 
       {/* Hero */}

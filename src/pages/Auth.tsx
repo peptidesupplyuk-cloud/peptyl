@@ -5,6 +5,7 @@ import { Mail, Lock, AlertCircle, ArrowRight, Loader2 } from "lucide-react";
 import { z } from "zod";
 import { useAuth } from "@/contexts/AuthContext";
 import Logo from "@/components/Logo";
+import SEO from "@/components/SEO";
 
 const emailSchema = z.string().trim().email("Please enter a valid email address").max(255);
 const passwordSchema = z.string().min(6, "Password must be at least 6 characters").max(128);
@@ -76,6 +77,11 @@ const Auth = () => {
 
   return (
     <div className="min-h-screen bg-background flex items-center justify-center px-6">
+      <SEO
+        title="Sign In"
+        description="Sign in or create your free Peptyl account to access precision calculators, protocol tracking, and community tools."
+        path="/auth"
+      />
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}

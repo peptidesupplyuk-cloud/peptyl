@@ -6,10 +6,16 @@ import FeaturesSection from "@/components/FeaturesSection";
 import COASection from "@/components/COASection";
 import CommunitySection from "@/components/CommunitySection";
 import SignupBenefits from "@/components/SignupBenefits";
+import SEO from "@/components/SEO";
 
 const Index = () => {
   return (
     <div className="min-h-screen bg-background">
+      <SEO
+        title="Peptyl — UK's Leading Peptide Education & Research Platform"
+        description="Community-powered peptide database with 36+ compounds, precision calculators, biomarker tracking, and expert education. Free tools by Peptide Supply."
+        path="/"
+      />
       <Header />
       <HeroSection />
       <SignupBenefits />

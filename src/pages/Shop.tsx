@@ -2,6 +2,7 @@ import { Package, Pill, FlaskConical, Clock } from "lucide-react";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { motion } from "framer-motion";
+import SEO from "@/components/SEO";
 
 const peptideProducts = [
   { name: "BPC-157", size: "5mg / 10mg", description: "Recovery & tissue repair" },
@@ -77,6 +78,11 @@ const ProductCard = ({ name, size, description, index }: { name: string; size: s
 const Shop = () => {
   return (
     <div className="min-h-screen bg-background">
+      <SEO
+        title="Shop — Research-Grade Peptides & Supplements"
+        description="Browse research-grade peptides and supplements. BPC-157, Semaglutide, Tirzepatide, Retatrutide and more. Third-party tested with full COA documentation."
+        path="/shop"
+      />
       <Header />
 
       {/* Hero */}

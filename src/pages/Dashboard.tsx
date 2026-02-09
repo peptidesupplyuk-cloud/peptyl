@@ -16,6 +16,7 @@ import { useLogInjection } from "@/hooks/use-injections";
 import { getRecommendations, type Recommendation } from "@/data/recommendation-rules";
 import { useToast } from "@/hooks/use-toast";
 import { Checkbox } from "@/components/ui/checkbox";
+import SEO from "@/components/SEO";
 
 const Dashboard = () => {
   const { data: panels = [], refetch: refetchPanels } = useBloodworkPanels();
@@ -87,6 +88,11 @@ const Dashboard = () => {
 
   return (
     <div className="min-h-screen bg-background">
+      <SEO
+        title="Dashboard — Biomarker Tracking & Protocol Management"
+        description="Track bloodwork, manage peptide protocols, and monitor daily injections with smart recommendations powered by your biomarker data."
+        path="/dashboard"
+      />
       <Header />
       <main className="pt-20 pb-16">
         <div className="container mx-auto px-4 sm:px-6">

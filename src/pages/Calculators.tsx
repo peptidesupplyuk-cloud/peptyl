@@ -3,10 +3,16 @@ import Footer from "@/components/Footer";
 import ReconstitutionCalculator from "@/components/calculators/ReconstitutionCalculator";
 import DoseCalculator from "@/components/calculators/DoseCalculator";
 import CycleOrderCalculator from "@/components/calculators/CycleOrderCalculator";
+import SEO from "@/components/SEO";
 
 const CalculatorsPage = () => {
   return (
     <div className="min-h-screen bg-background">
+      <SEO
+        title="Peptide Calculators — Reconstitution, Dosing & Cycle Planning"
+        description="Free precision tools for peptide reconstitution, dose calculation with syringe diagrams, and cycle planning with waste buffers. U-100, U-40 and Tuberculin support."
+        path="/calculators"
+      />
       <Header />
       <main className="pt-24 pb-16">
         <div className="container mx-auto px-6">

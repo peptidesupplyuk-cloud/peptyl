@@ -1,10 +1,16 @@
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { motion } from "framer-motion";
+import SEO from "@/components/SEO";
 
 const PrivacyPolicy = () => {
   return (
     <div className="min-h-screen bg-background">
+      <SEO
+        title="Privacy Policy"
+        description="How Peptyl by PeptideSupplyUK collects, uses, and protects your personal data under UK GDPR. Your data rights explained."
+        path="/privacy-policy"
+      />
       <Header />
 
       <section className="pt-28 pb-16 bg-hero relative overflow-hidden">
