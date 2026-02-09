@@ -46,7 +46,7 @@ const About = () => {
   return (
     <div className="min-h-screen bg-background">
       <SEO
-        title="About Us — Built on a Decade of Supply Chain Expertise"
+        title="About Us — A Decade of Manufacturing Excellence Meets Modern Innovation"
         description="Meet the founder behind Peptyl. 10+ years in Fortune 500 manufacturing, 6+ years scaling AI startups, and a personal peptide transformation story."
         path="/about"
       />
@@ -69,8 +69,8 @@ const About = () => {
             transition={{ delay: 0.1 }}
             className="text-4xl sm:text-5xl lg:text-6xl font-heading font-bold text-primary-foreground leading-tight max-w-3xl"
           >
-            Built on a Decade of
-            <span className="text-primary"> Global Supply Chain</span> Expertise
+            A Decade of Manufacturing Excellence Meets
+            <span className="text-primary"> Modern Innovation</span>
           </motion.h1>
           <motion.p
             initial={{ opacity: 0, y: 20 }}
@@ -78,7 +78,7 @@ const About = () => {
             transition={{ delay: 0.2 }}
             className="mt-6 text-lg text-primary-foreground/60 max-w-2xl leading-relaxed"
           >
-            Peptyl is the result of combining world-class manufacturing knowledge with cutting-edge AI and startup agility — purpose-built for the UK &amp; European peptide community.
+            Peptyl combines proven supply chain expertise with advanced AI technology and agile development — specifically designed to serve the UK &amp; European peptide community.
           </motion.p>
         </div>
       </section>
