@@ -7,6 +7,7 @@ import { Button } from "./ui/button";
 import { useAuth } from "@/contexts/AuthContext";
 
 const navItems = [
+  { label: "Dashboard", href: "/dashboard" },
   { label: "Peptides", href: "/peptides" },
   { label: "Calculators", href: "/calculators" },
   { label: "Education", href: "/education" },

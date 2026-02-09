@@ -1,0 +1,110 @@
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/contexts/AuthContext";
+
+export interface ProtocolPeptide {
+  id: string;
+  protocol_id: string;
+  peptide_name: string;
+  dose_mcg: number;
+  frequency: string;
+  timing: string | null;
+  route: string | null;
+  notes: string | null;
+}
+
+export interface Protocol {
+  id: string;
+  user_id: string;
+  name: string;
+  goal: string | null;
+  status: string;
+  start_date: string;
+  end_date: string | null;
+  disclaimer_accepted: boolean;
+  created_at: string;
+  updated_at: string;
+  peptides: ProtocolPeptide[];
+}
+
+export function useProtocols() {
+  const { user } = useAuth();
+  return useQuery({
+    queryKey: ["protocols", user?.id],
+    enabled: !!user,
+    queryFn: async () => {
+      const { data: protocols, error } = await supabase
+        .from("protocols")
+        .select("*")
+        .order("created_at", { ascending: false });
+      if (error) throw error;
+
+      const results: Protocol[] = [];
+      for (const p of protocols ?? []) {
+        const { data: peptides } = await supabase
+          .from("protocol_peptides")
+          .select("*")
+          .eq("protocol_id", p.id);
+        results.push({ ...p, peptides: peptides ?? [] });
+      }
+      return results;
+    },
+  });
+}
+
+export function useCreateProtocol() {
+  const qc = useQueryClient();
+  const { user } = useAuth();
+
+  return useMutation({
+    mutationFn: async ({
+      name,
+      goal,
+      startDate,
+      endDate,
+      peptides,
+    }: {
+      name: string;
+      goal: string;
+      startDate: string;
+      endDate?: string;
+      peptides: { peptide_name: string; dose_mcg: number; frequency: string; timing: string; route: string }[];
+    }) => {
+      if (!user) throw new Error("Not authenticated");
+
+      const { data: protocol, error } = await supabase
+        .from("protocols")
+        .insert({
+          user_id: user.id,
+          name,
+          goal,
+          start_date: startDate,
+          end_date: endDate || null,
+          disclaimer_accepted: true,
+        })
+        .select()
+        .single();
+      if (error) throw error;
+
+      if (peptides.length > 0) {
+        const rows = peptides.map((p) => ({ protocol_id: protocol.id, ...p }));
+        const { error: pErr } = await supabase.from("protocol_peptides").insert(rows);
+        if (pErr) throw pErr;
+      }
+
+      return protocol;
+    },
+    onSuccess: () => qc.invalidateQueries({ queryKey: ["protocols"] }),
+  });
+}
+
+export function useUpdateProtocolStatus() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async ({ id, status }: { id: string; status: string }) => {
+      const { error } = await supabase.from("protocols").update({ status }).eq("id", id);
+      if (error) throw error;
+    },
+    onSuccess: () => qc.invalidateQueries({ queryKey: ["protocols"] }),
+  });
+}
