@@ -15,14 +15,18 @@ const peptideProducts = [
 ];
 
 const supplementProducts = [
-  { name: "Bacteriostatic Water", size: "30mL", description: "USP-grade reconstitution water" },
-  { name: "Insulin Syringes (U-100)", size: "100 pack", description: "0.5mL, 29G precision syringes" },
+  { name: "Berberine HCl", size: "500mg × 60", description: "Blood sugar & metabolic support" },
+  { name: "Creatine Monohydrate", size: "300g", description: "Strength, recovery & cognitive support" },
   { name: "NAC (N-Acetyl Cysteine)", size: "600mg × 60", description: "Liver & antioxidant support" },
   { name: "Tudca", size: "250mg × 60", description: "Bile acid for organ support" },
   { name: "Omega-3 Fish Oil", size: "1000mg × 90", description: "Heart & inflammation support" },
   { name: "Magnesium Glycinate", size: "400mg × 60", description: "Sleep & recovery mineral" },
   { name: "Vitamin D3 + K2", size: "5000IU × 90", description: "Immune & bone health" },
   { name: "Zinc Picolinate", size: "50mg × 60", description: "Immune & hormone support" },
+  { name: "Ashwagandha KSM-66", size: "600mg × 60", description: "Stress & cortisol management" },
+  { name: "L-Glutamine", size: "500g", description: "Gut health & muscle recovery" },
+  { name: "Bacteriostatic Water", size: "30mL", description: "USP-grade reconstitution water" },
+  { name: "Insulin Syringes (U-100)", size: "100 pack", description: "0.5mL, 29G precision syringes" },
 ];
 
 const fadeUp = {
