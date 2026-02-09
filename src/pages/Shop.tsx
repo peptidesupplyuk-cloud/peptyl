@@ -4,14 +4,21 @@ import Footer from "@/components/Footer";
 import { motion } from "framer-motion";
 
 const peptideProducts = [
-  { name: "BPC-157", size: "5mg", description: "Recovery & tissue repair" },
-  { name: "TB-500", size: "5mg", description: "Healing & flexibility" },
-  { name: "CJC-1295 / Ipamorelin", size: "Blend", description: "Growth hormone secretagogue stack" },
-  { name: "Semaglutide", size: "5mg", description: "GLP-1 receptor agonist" },
-  { name: "Tirzepatide", size: "10mg", description: "Dual GIP/GLP-1 agonist" },
-  { name: "KPV", size: "5mg", description: "Anti-inflammatory tripeptide" },
-  { name: "Retatrutide", size: "10mg", description: "Triple agonist peptide" },
-  { name: "AOD-9604", size: "5mg", description: "Fat metabolism fragment" },
+  { name: "BPC-157", size: "5mg / 10mg", description: "Recovery & tissue repair" },
+  { name: "TB-500", size: "2mg / 5mg / 10mg", description: "Healing & flexibility" },
+  { name: "BPC-157 + TB-500 Blend", size: "10mg / 20mg", description: "Synergistic recovery stack" },
+  { name: "CJC-1295 (no DAC)", size: "2mg / 5mg", description: "Growth hormone releasing hormone" },
+  { name: "Ipamorelin", size: "2mg / 5mg", description: "Growth hormone secretagogue" },
+  { name: "CJC-1295 / Ipamorelin Blend", size: "5mg / 10mg", description: "GH secretagogue stack" },
+  { name: "Semaglutide", size: "5mg / 10mg", description: "GLP-1 receptor agonist" },
+  { name: "Tirzepatide", size: "5mg / 10mg / 15mg / 30mg", description: "Dual GIP/GLP-1 agonist" },
+  { name: "Retatrutide", size: "10mg / 20mg / 40mg", description: "Triple GIP/GLP-1/Glucagon agonist" },
+  { name: "KPV", size: "5mg / 10mg", description: "Anti-inflammatory tripeptide" },
+  { name: "AOD-9604", size: "5mg / 10mg", description: "Fat metabolism fragment (hGH 176-191)" },
+  { name: "Thymosin Alpha-1", size: "5mg / 10mg", description: "Immune modulating peptide" },
+  { name: "MOTS-c", size: "5mg / 10mg", description: "Mitochondrial-derived peptide" },
+  { name: "GHK-Cu", size: "50mg / 100mg", description: "Copper peptide for skin & tissue" },
+  { name: "Selank", size: "5mg", description: "Anxiolytic neuropeptide" },
 ];
 
 const supplementProducts = [
