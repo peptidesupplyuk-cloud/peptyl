@@ -35,6 +35,7 @@ const Footer = () => (
           <h4 className="font-heading font-semibold text-sm text-primary-foreground mb-4">Legal</h4>
           <div className="flex flex-col gap-2.5">
             <span className="text-sm text-primary-foreground/50">For research purposes only</span>
+            <Link to="/about" className="text-sm text-primary-foreground/50 hover:text-primary transition-colors">About Us</Link>
             <Link to="#" className="text-sm text-primary-foreground/50 hover:text-primary transition-colors">Privacy Policy</Link>
             <Link to="#" className="text-sm text-primary-foreground/50 hover:text-primary transition-colors">Terms of Service</Link>
           </div>
