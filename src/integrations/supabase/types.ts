@@ -41,6 +41,118 @@ export type Database = {
         }
         Relationships: []
       }
+      bloodwork_markers: {
+        Row: {
+          created_at: string
+          id: string
+          marker_name: string
+          panel_id: string
+          unit: string
+          value: number | null
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          marker_name: string
+          panel_id: string
+          unit: string
+          value?: number | null
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          marker_name?: string
+          panel_id?: string
+          unit?: string
+          value?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "bloodwork_markers_panel_id_fkey"
+            columns: ["panel_id"]
+            isOneToOne: false
+            referencedRelation: "bloodwork_panels"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      bloodwork_panels: {
+        Row: {
+          created_at: string
+          id: string
+          panel_type: string
+          test_date: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          panel_type?: string
+          test_date: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          panel_type?: string
+          test_date?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      injection_logs: {
+        Row: {
+          completed_at: string | null
+          created_at: string
+          dose_mcg: number
+          id: string
+          injection_site: string | null
+          notes: string | null
+          peptide_name: string
+          protocol_peptide_id: string | null
+          scheduled_time: string
+          side_effects: string | null
+          status: string
+          user_id: string
+        }
+        Insert: {
+          completed_at?: string | null
+          created_at?: string
+          dose_mcg: number
+          id?: string
+          injection_site?: string | null
+          notes?: string | null
+          peptide_name: string
+          protocol_peptide_id?: string | null
+          scheduled_time: string
+          side_effects?: string | null
+          status?: string
+          user_id: string
+        }
+        Update: {
+          completed_at?: string | null
+          created_at?: string
+          dose_mcg?: number
+          id?: string
+          injection_site?: string | null
+          notes?: string | null
+          peptide_name?: string
+          protocol_peptide_id?: string | null
+          scheduled_time?: string
+          side_effects?: string | null
+          status?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "injection_logs_protocol_peptide_id_fkey"
+            columns: ["protocol_peptide_id"]
+            isOneToOne: false
+            referencedRelation: "protocol_peptides"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       profiles: {
         Row: {
           created_at: string
@@ -62,6 +174,89 @@ export type Database = {
           updated_at?: string
           user_id?: string
           username?: string | null
+        }
+        Relationships: []
+      }
+      protocol_peptides: {
+        Row: {
+          created_at: string
+          dose_mcg: number
+          frequency: string
+          id: string
+          notes: string | null
+          peptide_name: string
+          protocol_id: string
+          route: string | null
+          timing: string | null
+        }
+        Insert: {
+          created_at?: string
+          dose_mcg: number
+          frequency?: string
+          id?: string
+          notes?: string | null
+          peptide_name: string
+          protocol_id: string
+          route?: string | null
+          timing?: string | null
+        }
+        Update: {
+          created_at?: string
+          dose_mcg?: number
+          frequency?: string
+          id?: string
+          notes?: string | null
+          peptide_name?: string
+          protocol_id?: string
+          route?: string | null
+          timing?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "protocol_peptides_protocol_id_fkey"
+            columns: ["protocol_id"]
+            isOneToOne: false
+            referencedRelation: "protocols"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      protocols: {
+        Row: {
+          created_at: string
+          disclaimer_accepted: boolean
+          end_date: string | null
+          goal: string | null
+          id: string
+          name: string
+          start_date: string
+          status: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          disclaimer_accepted?: boolean
+          end_date?: string | null
+          goal?: string | null
+          id?: string
+          name: string
+          start_date?: string
+          status?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          disclaimer_accepted?: boolean
+          end_date?: string | null
+          goal?: string | null
+          id?: string
+          name?: string
+          start_date?: string
+          status?: string
+          updated_at?: string
+          user_id?: string
         }
         Relationships: []
       }
