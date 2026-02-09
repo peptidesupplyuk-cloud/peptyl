@@ -12,11 +12,11 @@ const Index = () => {
     <div className="min-h-screen bg-background">
       <Header />
       <HeroSection />
+      <SignupBenefits />
       <MissionSection />
       <FeaturesSection />
       <COASection />
       <CommunitySection />
-      <SignupBenefits />
 
       {/* CTA Section */}
       <section className="py-24 bg-hero relative overflow-hidden">
