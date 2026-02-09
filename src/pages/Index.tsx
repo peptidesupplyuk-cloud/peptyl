@@ -26,7 +26,7 @@ const Index = () => {
             Ready to Explore?
           </h2>
           <p className="text-primary-foreground/60 text-lg max-w-md mx-auto mb-8">
-            Join thousands of UK & European researchers using PeptideSupply's tools and community insights.
+            Join thousands of UK & European researchers using Peptyl's tools and community insights.
           </p>
           <div className="flex justify-center gap-4 flex-wrap">
             <a href="/peptides">

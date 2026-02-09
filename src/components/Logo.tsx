@@ -53,13 +53,13 @@ const Logo = ({ className, size = "md", variant = "full", inverted = false }: Lo
             s.text,
             inverted ? "text-primary-foreground" : "text-foreground"
           )}>
-            Peptide<span className="text-gradient-teal">Supply</span>
+            Pep<span className="text-gradient-teal">tyl</span>
           </span>
           <span className={cn(
-            "text-[0.6em] font-body font-medium tracking-[0.2em] uppercase mt-0.5",
-            inverted ? "text-primary-foreground/60" : "text-muted-foreground"
+            "text-[0.5em] font-body font-medium tracking-[0.15em] mt-0.5",
+            inverted ? "text-primary-foreground/40" : "text-muted-foreground/60"
           )}>
-            United Kingdom
+            by Peptide Supply
           </span>
         </div>
       )}

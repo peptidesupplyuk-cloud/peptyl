@@ -14,6 +14,7 @@ const SUGGESTIONS = [
   "Side effects of semaglutide?",
 ];
 
+
 const PeptideChat = () => {
   const [open, setOpen] = useState(false);
   const [messages, setMessages] = useState<Msg[]>([]);
@@ -50,7 +51,7 @@ const PeptideChat = () => {
 
       if (!resp.ok || !resp.body) {
         const errData = await resp.json().catch(() => null);
-        throw new Error(errData?.error || "Failed to connect to PeptideBot");
+        throw new Error(errData?.error || "Failed to connect to BioBot");
       }
 
       const reader = resp.body.getReader();
@@ -144,7 +145,7 @@ const PeptideChat = () => {
             exit={{ scale: 0, opacity: 0 }}
             onClick={() => setOpen(true)}
             className="fixed bottom-6 right-6 z-50 h-14 w-14 rounded-full bg-primary text-primary-foreground shadow-brand flex items-center justify-center hover:opacity-90 transition-opacity"
-            aria-label="Open PeptideBot chat"
+            aria-label="Open BioBot chat"
           >
             <MessageCircle className="h-6 w-6" />
           </motion.button>
@@ -168,7 +169,7 @@ const PeptideChat = () => {
                   <Bot className="h-4 w-4 text-primary" />
                 </div>
                 <div>
-                  <p className="text-sm font-heading font-semibold text-foreground">PeptideBot</p>
+                  <p className="text-sm font-heading font-semibold text-foreground">BioBot</p>
                   <p className="text-[10px] text-muted-foreground">AI research assistant</p>
                 </div>
               </div>
@@ -190,7 +191,7 @@ const PeptideChat = () => {
                     </div>
                     <div className="bg-muted/50 rounded-xl rounded-tl-sm px-3 py-2">
                       <p className="text-sm text-foreground">
-                        Hi! I'm PeptideBot 👋 Ask me about peptides, stacks, dosing protocols, or community experiences.
+                        Hi! I'm BioBot 👋 Ask me about peptides, stacks, dosing protocols, or community experiences.
                       </p>
                     </div>
                   </div>

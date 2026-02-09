@@ -38,7 +38,7 @@ const MissionSection = () => (
           viewport={{ once: true }}
           className="text-3xl sm:text-4xl font-heading font-bold text-foreground mb-4"
         >
-          Why <span className="text-gradient-teal">PeptideSupply</span>?
+          Why <span className="text-gradient-teal">Peptyl</span>?
         </motion.h2>
         <motion.p
           initial={{ opacity: 0, y: 20 }}
@@ -47,9 +47,9 @@ const MissionSection = () => (
           transition={{ delay: 0.1 }}
           className="text-muted-foreground text-lg leading-relaxed"
         >
-          We started PeptideSupply because the UK peptide space lacked a single trusted hub — 
-          one that combines a quality shop, real community data, and the tools researchers actually need. 
-          That's what we're building.
+           We started Peptyl because the UK peptide space lacked a single trusted hub — 
+            one that combines a quality shop, real community data, and the tools researchers actually need. 
+            That's what we're building.
         </motion.p>
       </div>
 

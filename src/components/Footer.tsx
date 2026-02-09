@@ -8,7 +8,7 @@ const Footer = () => (
         <div className="md:col-span-1">
           <Logo size="sm" inverted />
           <p className="mt-4 text-sm text-primary-foreground/50 leading-relaxed">
-            The UK's trusted source for peptide education, tools, and community-driven insights.
+            The UK's trusted source for peptide education, tools, and community-driven insights. Brought to you by Peptide Supply.
           </p>
         </div>
 
@@ -42,7 +42,7 @@ const Footer = () => (
       </div>
 
       <div className="mt-12 pt-8 border-t border-primary-foreground/10 flex flex-col md:flex-row items-center justify-between gap-4">
-        <p className="text-xs text-primary-foreground/40">© 2026 PeptideSupply UK. All rights reserved.</p>
+        <p className="text-xs text-primary-foreground/40">© 2026 Peptyl. All rights reserved. A Peptide Supply brand.</p>
         <p className="text-xs text-primary-foreground/40">Products are sold for research purposes only.</p>
       </div>
     </div>
