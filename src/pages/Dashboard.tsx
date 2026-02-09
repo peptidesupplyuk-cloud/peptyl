@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Activity, FlaskConical, Syringe, LayoutDashboard, AlertTriangle } from "lucide-react";
 import { addWeeks, format } from "date-fns";
@@ -10,6 +10,7 @@ import TodaysPlan from "@/components/dashboard/TodaysPlan";
 import BiomarkerSummary from "@/components/dashboard/BiomarkerSummary";
 import BiomarkerTrendChart from "@/components/dashboard/BiomarkerTrendChart";
 import ActiveProtocols from "@/components/dashboard/ActiveProtocols";
+import CreateProtocolForm from "@/components/dashboard/CreateProtocolForm";
 import { useBloodworkPanels } from "@/hooks/use-bloodwork";
 import { useCreateProtocol } from "@/hooks/use-protocols";
 import { useLogInjection } from "@/hooks/use-injections";
@@ -25,6 +26,7 @@ const Dashboard = () => {
   const { toast } = useToast();
   const [disclaimerAccepted, setDisclaimerAccepted] = useState(false);
   const [activeTab, setActiveTab] = useState("overview");
+  const [activatingProtocol, setActivatingProtocol] = useState(false);
 
   // Get recommendations from latest panel
   const latestPanel = panels[0];
@@ -42,6 +44,9 @@ const Dashboard = () => {
       });
       return;
     }
+
+    if (activatingProtocol) return;
+    setActivatingProtocol(true);
 
     try {
       const startDate = format(new Date(), "yyyy-MM-dd");
@@ -70,7 +75,6 @@ const Dashboard = () => {
           scheduled_time: `${startDate}T${timing}:00.000Z`,
         });
 
-        // If AM+PM, add a second dose
         if (p.timing === "AM+PM") {
           await logInjection.mutateAsync({
             peptide_name: p.name,
@@ -81,8 +85,10 @@ const Dashboard = () => {
       }
 
       toast({ title: "Protocol activated", description: `${rec.protocolName} is now active. Today's injections have been scheduled.` });
-    } catch {
-      toast({ title: "Error", description: "Failed to activate protocol.", variant: "destructive" });
+    } catch (err: any) {
+      toast({ title: "Error", description: err?.message || "Failed to activate protocol.", variant: "destructive" });
+    } finally {
+      setActivatingProtocol(false);
     }
   };
 
@@ -133,7 +139,7 @@ const Dashboard = () => {
                   <h2 className="font-heading font-semibold text-foreground">Recommendations</h2>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     {recommendations.slice(0, 2).map((rec) => (
-                      <RecommendationCard key={rec.id} recommendation={rec} onActivate={handleActivateProtocol} />
+                      <RecommendationCard key={rec.id} recommendation={rec} onActivate={handleActivateProtocol} isActivating={activatingProtocol} />
                     ))}
                   </div>
                 </div>
@@ -214,7 +220,7 @@ const Dashboard = () => {
                   </h2>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     {recommendations.map((rec) => (
-                      <RecommendationCard key={rec.id} recommendation={rec} onActivate={handleActivateProtocol} />
+                      <RecommendationCard key={rec.id} recommendation={rec} onActivate={handleActivateProtocol} isActivating={activatingProtocol} />
                     ))}
                   </div>
                 </div>
@@ -227,6 +233,8 @@ const Dashboard = () => {
                   </p>
                 </div>
               )}
+
+              <CreateProtocolForm disclaimerAccepted={disclaimerAccepted} />
 
               <ActiveProtocols />
             </TabsContent>

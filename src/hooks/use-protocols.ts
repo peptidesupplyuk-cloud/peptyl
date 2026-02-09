@@ -72,6 +72,19 @@ export function useCreateProtocol() {
     }) => {
       if (!user) throw new Error("Not authenticated");
 
+      // Check for duplicate active/paused protocol with same name
+      const { data: existing } = await supabase
+        .from("protocols")
+        .select("id")
+        .eq("user_id", user.id)
+        .eq("name", name)
+        .in("status", ["active", "paused"])
+        .maybeSingle();
+
+      if (existing) {
+        throw new Error("A protocol with this name is already active.");
+      }
+
       const { data: protocol, error } = await supabase
         .from("protocols")
         .insert({
