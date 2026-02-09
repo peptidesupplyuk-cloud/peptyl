@@ -5,6 +5,7 @@ import MissionSection from "@/components/MissionSection";
 import FeaturesSection from "@/components/FeaturesSection";
 import COASection from "@/components/COASection";
 import CommunitySection from "@/components/CommunitySection";
+import SignupBenefits from "@/components/SignupBenefits";
 
 const Index = () => {
   return (
@@ -15,6 +16,7 @@ const Index = () => {
       <FeaturesSection />
       <COASection />
       <CommunitySection />
+      <SignupBenefits />
 
       {/* CTA Section */}
       <section className="py-24 bg-hero relative overflow-hidden">
