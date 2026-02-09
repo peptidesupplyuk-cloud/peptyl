@@ -8,6 +8,7 @@ import BloodworkForm from "@/components/dashboard/BloodworkForm";
 import RecommendationCard from "@/components/dashboard/RecommendationCard";
 import TodaysPlan from "@/components/dashboard/TodaysPlan";
 import BiomarkerSummary from "@/components/dashboard/BiomarkerSummary";
+import BiomarkerTrendChart from "@/components/dashboard/BiomarkerTrendChart";
 import ActiveProtocols from "@/components/dashboard/ActiveProtocols";
 import { useBloodworkPanels } from "@/hooks/use-bloodwork";
 import { useCreateProtocol } from "@/hooks/use-protocols";
@@ -117,6 +118,7 @@ const Dashboard = () => {
             {/* OVERVIEW TAB */}
             <TabsContent value="overview" className="space-y-6">
               <TodaysPlan />
+              <BiomarkerTrendChart panels={panels} />
               <BiomarkerSummary panels={panels} />
               <ActiveProtocols />
 
@@ -151,6 +153,8 @@ const Dashboard = () => {
                 <h2 className="font-heading font-semibold text-foreground mb-4">Enter Bloodwork Results</h2>
                 <BloodworkForm onSaved={() => { refetchPanels(); setActiveTab("protocols"); }} />
               </div>
+
+              <BiomarkerTrendChart panels={panels} />
 
               {panels.length > 0 && (
                 <div className="bg-card rounded-2xl border border-border p-5">
