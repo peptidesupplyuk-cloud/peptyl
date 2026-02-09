@@ -4,10 +4,11 @@ import type { Recommendation } from "@/data/recommendation-rules";
 
 interface Props {
   recommendation: Recommendation;
+  isActivating?: boolean;
   onActivate: (rec: Recommendation) => void;
 }
 
-const RecommendationCard = ({ recommendation: rec, onActivate }: Props) => (
+const RecommendationCard = ({ recommendation: rec, onActivate, isActivating }: Props) => (
   <div className="bg-card rounded-2xl border border-border p-5 space-y-4">
     <div className="flex items-start justify-between">
       <div>
@@ -43,8 +44,8 @@ const RecommendationCard = ({ recommendation: rec, onActivate }: Props) => (
     </div>
 
     <div className="flex items-center gap-2">
-      <Button size="sm" onClick={() => onActivate(rec)} className="shadow-brand">
-        <Play className="h-3 w-3 mr-1" /> Start Protocol
+      <Button size="sm" onClick={() => onActivate(rec)} disabled={isActivating} className="shadow-brand">
+        <Play className="h-3 w-3 mr-1" /> {isActivating ? "Starting…" : "Start Protocol"}
       </Button>
     </div>
 
