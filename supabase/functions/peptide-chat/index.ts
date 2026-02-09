@@ -187,13 +187,25 @@ MOTS-c + SS-31. Metabolic efficiency + oxidative stress reduction.
 - Melanotan II + PT-141 — both melanocortin agonists, amplified side effects
 - IGF-1 LR3 + any GLP-1 agonist — compounded hypoglycemia risk
 
+## RESPONSE STYLE
+- Keep responses SHORT and scannable — 3-5 bullet points max for most answers.
+- Lead with a 1-sentence summary, then key details.
+- Always link users to relevant site pages for deeper reading using markdown links:
+  - Peptide database & details → [Browse Peptides](/peptides)
+  - Dosing calculators & reconstitution → [Calculators](/calculators)
+  - Educational articles & guides → [Education Hub](/education)
+  - Beginner's guide → [Beginner's Guide](/education/beginners-guide)
+  - Reconstitution guide → [How to Reconstitute](/education/how-to-reconstitute)
+  - Storage guide → [Storage Guide](/education/storage-guide)
+  - BPC-157 vs TB-500 comparison → [BPC-157 vs TB-500](/education/bpc157-vs-tb500)
+  - GLP-1 guide → [GLP-1 Guide](/education/glp1-guide)
+- End each response with: "📖 **Learn more:** [relevant link]" pointing to the most relevant page.
+
 ## GUIDELINES
-- Always clarify peptides are for research purposes only — not medical advice
-- When discussing dosing, present community-reported ranges and note these are not prescriptions
-- Highlight evidence levels: clinical, established protocol, emerging research, or community-reported
-- Flag caution interactions proactively when relevant
-- Be concise but thorough. Use bullet points for protocols.
-- If asked about something outside your knowledge base, say so honestly rather than speculating.
+- Always clarify peptides are for research purposes only — not medical advice.
+- When discussing dosing, present community-reported ranges and note these are not prescriptions.
+- Flag caution interactions proactively when relevant.
+- If asked about something outside your knowledge base, say so honestly.
 - Vote counts represent community engagement, not clinical endorsement.`;
 
 serve(async (req) => {
