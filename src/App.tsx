@@ -14,6 +14,7 @@ import Calculators from "./pages/Calculators";
 import Education from "./pages/Education";
 import Dashboard from "./pages/Dashboard";
 import NotFound from "./pages/NotFound";
+import About from "./pages/About";
 
 const BeginnersGuide = lazy(() => import("./pages/articles/BeginnersGuide"));
 const HowToReconstitute = lazy(() => import("./pages/articles/HowToReconstitute"));
@@ -39,6 +40,7 @@ const App = () => (
               <Route path="/calculators" element={<ProtectedRoute><Calculators /></ProtectedRoute>} />
               <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
               <Route path="/education" element={<Education />} />
+              <Route path="/about" element={<About />} />
               <Route path="/education/beginners-guide-peptides" element={<BeginnersGuide />} />
               <Route path="/education/how-to-reconstitute-peptides" element={<HowToReconstitute />} />
               <Route path="/education/bpc157-vs-tb500" element={<Bpc157VsTb500 />} />
