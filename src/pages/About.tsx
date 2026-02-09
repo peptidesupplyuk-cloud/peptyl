@@ -131,6 +131,9 @@ const About = () => {
               <p>
                 I built Peptyl because I was frustrated. The peptide community deserved better tools, better education, and more transparent pricing. I wanted to create a platform where researchers could access clinical-grade information, plan their protocols with confidence, and buy from a supplier they could actually trust.
               </p>
+              <p>
+                But this isn't just a business for me — <strong className="text-foreground">it's personal</strong>. Peptides genuinely changed my life. I lost a significant amount of weight, came off blood pressure medication entirely, and no longer need acid reflux medication. For the first time in years, I feel in control of my health. That transformation is what fuels my mission: to help educate and empower others to make informed decisions that can change their lives for the better.
+              </p>
               <p className="text-foreground font-medium">
                 This is that platform. And we're just getting started.
               </p>
