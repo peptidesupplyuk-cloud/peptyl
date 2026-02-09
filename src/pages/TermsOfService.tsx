@@ -2,10 +2,16 @@ import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { motion } from "framer-motion";
 import { AlertTriangle } from "lucide-react";
+import SEO from "@/components/SEO";
 
 const TermsOfService = () => {
   return (
     <div className="min-h-screen bg-background">
+      <SEO
+        title="Terms of Service"
+        description="Terms and conditions for using PeptideSupplyUK. Research chemical purchase terms, shipping, returns, and legal obligations under UK law."
+        path="/terms-of-service"
+      />
       <Header />
 
       <section className="pt-28 pb-16 bg-hero relative overflow-hidden">

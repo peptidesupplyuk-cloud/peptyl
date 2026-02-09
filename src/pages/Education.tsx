@@ -4,10 +4,16 @@ import { Clock, ArrowRight, BookOpen } from "lucide-react";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { blogPosts } from "@/data/blog-posts";
+import SEO from "@/components/SEO";
 
 const EducationPage = () => {
   return (
     <div className="min-h-screen bg-background">
+      <SEO
+        title="Peptide Education Hub — Science-Backed Guides"
+        description="Learn about peptide reconstitution, storage, GLP-1 protocols, BPC-157 vs TB-500, and more. Free, science-backed educational resources."
+        path="/education"
+      />
       <Header />
       <main className="pt-24 pb-16">
         <div className="container mx-auto px-6">
