@@ -8,7 +8,7 @@ const PrivacyPolicy = () => {
     <div className="min-h-screen bg-background">
       <SEO
         title="Privacy Policy"
-        description="How Peptyl by PeptideSupplyUK collects, uses, and protects your personal data under UK GDPR. Your data rights explained."
+        description="How Peptyl collects, uses, and protects your personal data under UK GDPR. Your data rights explained."
         path="/privacy-policy"
       />
       <Header />

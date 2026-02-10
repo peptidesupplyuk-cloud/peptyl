@@ -7,6 +7,8 @@ const Bpc157VsTb500 = () => (
     title="BPC-157 vs TB-500: Which Healing Peptide is Right for Your Research?"
     readTime="10 min read"
     date="February 2026"
+    slug="bpc157-vs-tb500"
+    description="Compare BPC-157 and TB-500: mechanisms, dosing, research applications. Detailed analysis of both healing peptides."
   >
     <p>BPC-157 and TB-500 are two of the most researched peptides in the healing and recovery category. While both show promise in tissue repair research, they work through different mechanisms and have distinct applications.</p>
 

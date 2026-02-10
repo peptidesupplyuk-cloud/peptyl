@@ -15,8 +15,20 @@ const Index = () => {
     <div className="min-h-screen bg-background">
       <SEO
         title="Peptyl — UK's Leading Peptide Education & Research Platform"
-        description="Community-powered peptide database with 36+ compounds, precision calculators, biomarker tracking, and expert education. Free tools by Peptide Supply."
+        description="Community-powered peptide database with 56+ compounds, precision calculators, biomarker tracking, and expert education. Free research tools for the UK & Europe."
         path="/"
+        jsonLd={{
+          "@context": "https://schema.org",
+          "@type": "WebSite",
+          "name": "Peptyl",
+          "url": "https://peptyl.co.uk",
+          "description": "UK & Europe's free peptide research platform with 56+ compounds, precision calculators, and biomarker tracking.",
+          "potentialAction": {
+            "@type": "SearchAction",
+            "target": "https://peptyl.co.uk/peptides?q={search_term_string}",
+            "query-input": "required name=search_term_string"
+          }
+        }}
       />
       <Header />
       <HeroSection />
