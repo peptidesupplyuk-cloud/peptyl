@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Switch } from "@/components/ui/switch";
 import {
-  Twitter, Plus, Loader2, Trash2, RefreshCw, Clock,
+  Twitter, Plus, Loader2, Trash2, RefreshCw, Clock, Search,
 } from "lucide-react";
 
 const MonitoredAccounts = () => {
@@ -17,6 +17,7 @@ const MonitoredAccounts = () => {
   const queryClient = useQueryClient();
   const [newHandle, setNewHandle] = useState("");
   const [isScanning, setIsScanning] = useState(false);
+  const [isDiscovering, setIsDiscovering] = useState(false);
 
   const { data: accounts = [], isLoading } = useQuery({
     queryKey: ["monitored-accounts"],
@@ -99,16 +100,52 @@ const MonitoredAccounts = () => {
     }
   };
 
+  const handleDiscover = async () => {
+    setIsDiscovering(true);
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      const resp = await fetch(
+        `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/discover-accounts`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${session?.access_token || import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
+          },
+        }
+      );
+      const result = await resp.json();
+      if (!resp.ok) throw new Error(result.error || "Discovery failed");
+      toast({
+        title: "Discovery complete",
+        description: result.discovered > 0
+          ? `Found ${result.discovered} new accounts: ${result.accounts.join(", ")}. They're added as inactive — toggle them on to start scanning.`
+          : "No new accounts found this time.",
+      });
+      queryClient.invalidateQueries({ queryKey: ["monitored-accounts"] });
+    } catch (err: any) {
+      toast({ title: "Discovery failed", description: err.message, variant: "destructive" });
+    } finally {
+      setIsDiscovering(false);
+    }
+  };
+
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
         <h2 className="font-heading font-semibold text-foreground flex items-center gap-2">
           <Twitter className="h-5 w-5 text-primary" /> Monitored X Accounts ({accounts.length})
         </h2>
-        <Button size="sm" variant="outline" onClick={handleScanAll} disabled={isScanning || accounts.length === 0}>
-          {isScanning ? <Loader2 className="h-4 w-4 animate-spin mr-1" /> : <RefreshCw className="h-4 w-4 mr-1" />}
-          Scan Now
-        </Button>
+        <div className="flex gap-2">
+          <Button size="sm" variant="outline" onClick={handleDiscover} disabled={isDiscovering}>
+            {isDiscovering ? <Loader2 className="h-4 w-4 animate-spin mr-1" /> : <Search className="h-4 w-4 mr-1" />}
+            Discover
+          </Button>
+          <Button size="sm" variant="outline" onClick={handleScanAll} disabled={isScanning || accounts.length === 0}>
+            {isScanning ? <Loader2 className="h-4 w-4 animate-spin mr-1" /> : <RefreshCw className="h-4 w-4 mr-1" />}
+            Scan Now
+          </Button>
+        </div>
       </div>
 
       <form

@@ -11,3 +11,6 @@ verify_jwt = false
 
 [functions.scan-twitter]
 verify_jwt = false
+
+[functions.discover-accounts]
+verify_jwt = false
