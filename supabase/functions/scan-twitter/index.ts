@@ -32,12 +32,13 @@ serve(async (req) => {
     const supabaseKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
     const supabase = createClient(supabaseUrl, supabaseKey);
 
-    // Get active monitored accounts
+    // Get active monitored accounts, sorted by quality score (best first)
     const { data: accounts, error: accErr } = await supabase
       .from("monitored_accounts")
       .select("*")
       .eq("is_active", true)
-      .eq("platform", "twitter");
+      .eq("platform", "twitter")
+      .order("quality_score", { ascending: false });
 
     if (accErr) throw new Error(`Failed to fetch accounts: ${accErr.message}`);
     if (!accounts || accounts.length === 0) {
@@ -106,10 +107,23 @@ serve(async (req) => {
           continue;
         }
 
-        // Filter for peptide-relevant tweets
+        // Filter for peptide-relevant tweets using base keywords + learned high-scoring keywords
+        const { data: learnedKeywords } = await supabase
+          .from("keyword_scores")
+          .select("keyword")
+          .gte("score", 40)
+          .order("score", { ascending: false })
+          .limit(50);
+        
+        const allKeywords = [
+          ...PEPTIDE_KEYWORDS,
+          ...(learnedKeywords || []).map((k: any) => k.keyword),
+        ];
+        const uniqueKeywords = [...new Set(allKeywords.map((k: string) => k.toLowerCase()))];
+
         const relevantTweets = tweets.filter((t: any) => {
           const lower = t.text.toLowerCase();
-          return PEPTIDE_KEYWORDS.some((kw) => lower.includes(kw.toLowerCase()));
+          return uniqueKeywords.some((kw) => lower.includes(kw));
         });
 
         if (relevantTweets.length > 0) {
@@ -217,11 +231,12 @@ serve(async (req) => {
             if (toolCall?.function?.arguments) {
               const extracted = JSON.parse(toolCall.function.arguments);
 
-              // Create article
+              // Create article with source_account_handle for learning
               const { data: article } = await supabase
                 .from("articles")
                 .insert({
                   source_id: sourceId,
+                  source_account_handle: account.handle.replace("@", ""),
                   title: extracted.title || `X Digest: @${account.handle}`,
                   url: `https://x.com/${account.handle.replace("@", "")}`,
                   raw_content: combinedContent,
@@ -268,6 +283,7 @@ serve(async (req) => {
           status: "scanned",
           total_tweets: tweets.length,
           relevant_tweets: relevantTweets.length,
+          quality_score: account.quality_score,
         });
       } catch (accError) {
         console.error(`Error scanning ${account.handle}:`, accError);
@@ -275,8 +291,23 @@ serve(async (req) => {
       }
     }
 
+    // Auto-pause accounts with very low quality scores (below 15) and at least 5 reviews
+    const { data: lowScoreAccounts } = await supabase
+      .from("monitored_accounts")
+      .select("id, handle, quality_score, total_accepted, total_rejected")
+      .eq("is_active", true)
+      .lt("quality_score", 15);
+
+    const autoPaused: string[] = [];
+    for (const acc of (lowScoreAccounts || [])) {
+      if ((acc.total_accepted + acc.total_rejected) >= 5) {
+        await supabase.from("monitored_accounts").update({ is_active: false }).eq("id", acc.id);
+        autoPaused.push(acc.handle);
+      }
+    }
+
     return new Response(
-      JSON.stringify({ success: true, scanned: results.length, results }),
+      JSON.stringify({ success: true, scanned: results.length, results, auto_paused: autoPaused }),
       { headers: { ...corsHeaders, "Content-Type": "application/json" } }
     );
   } catch (e) {
