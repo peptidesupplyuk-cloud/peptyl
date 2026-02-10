@@ -47,8 +47,11 @@ serve(async (req) => {
     }
 
     const results: any[] = [];
+    const delay = (ms: number) => new Promise((r) => setTimeout(r, ms));
 
     for (const account of accounts) {
+      // Rate-limit: wait 1.5s between accounts to stay under Twitter API limits
+      if (results.length > 0) await delay(1500);
       try {
         // Look up user ID from handle
         const userLookup = await fetch(
@@ -69,11 +72,13 @@ serve(async (req) => {
           continue;
         }
 
-        // Fetch recent tweets
+        // Fetch recent tweets (last 5 days max)
+        const fiveDaysAgo = new Date(Date.now() - 5 * 24 * 60 * 60 * 1000).toISOString();
         const params = new URLSearchParams({
           max_results: "10",
           "tweet.fields": "created_at,text,public_metrics",
           exclude: "retweets",
+          start_time: fiveDaysAgo,
         });
         if (account.last_tweet_id) {
           params.set("since_id", account.last_tweet_id);
