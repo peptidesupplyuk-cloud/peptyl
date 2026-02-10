@@ -1,24 +1,24 @@
 import { motion } from "framer-motion";
-import { Shield, Banknote, GraduationCap, HeartHandshake } from "lucide-react";
+import { Shield, Activity, GraduationCap, HeartHandshake } from "lucide-react";
 
 const pillars = [
   {
     icon: HeartHandshake,
     title: "Community First",
     description:
-      "We exist to support the UK & European peptide research community with transparent, crowd-sourced data and honest guidance.",
+      "Built for the UK & European research community — with transparent, crowd-sourced data and honest guidance.",
   },
   {
-    icon: Banknote,
-    title: "Leading Prices",
+    icon: Activity,
+    title: "Biomarker Driven",
     description:
-      "Research-grade peptides at prices that make sense. No inflated margins — just fair, competitive pricing across our entire range.",
+      "Upload your bloodwork and get personalised peptide and supplement insights based on your actual biology.",
   },
   {
     icon: Shield,
-    title: "Quality Assured",
+    title: "Research Verified",
     description:
-      "Every batch is third-party tested with full Certificates of Analysis. We never compromise on purity or authenticity.",
+      "Every compound in our database is backed by cited research. We prioritise clinical evidence over anecdote.",
   },
   {
     icon: GraduationCap,
@@ -47,9 +47,8 @@ const MissionSection = () => (
           transition={{ delay: 0.1 }}
           className="text-muted-foreground text-lg leading-relaxed"
         >
-           We started Peptyl because the UK peptide space lacked a single trusted hub — 
-            one that combines a quality shop, real community data, and the tools researchers actually need. 
-            That's what we're building.
+           We built Peptyl because the UK peptide space lacked a single trusted research hub — 
+            one that connects your biomarkers to real data, community insights, and the tools researchers actually need.
         </motion.p>
       </div>
 
