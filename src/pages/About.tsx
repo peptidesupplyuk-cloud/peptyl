@@ -2,6 +2,7 @@ import { Link } from "react-router-dom";
 import { Award, Globe, Rocket, Shield, TrendingUp, Users } from "lucide-react";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
+import ContactForm from "@/components/about/ContactForm";
 import { motion } from "framer-motion";
 import SEO from "@/components/SEO";
 
@@ -118,7 +119,6 @@ const About = () => {
             >
               The Person Behind Peptyl
             </motion.h2>
-
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
@@ -180,6 +180,9 @@ const About = () => {
           </div>
         </div>
       </section>
+
+      {/* Contact Form */}
+      <ContactForm />
 
       {/* CTA */}
       <section className="py-24 bg-hero relative overflow-hidden">
