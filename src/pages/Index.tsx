@@ -5,7 +5,7 @@ import Footer from "@/components/Footer";
 import HeroSection from "@/components/HeroSection";
 import MissionSection from "@/components/MissionSection";
 import FeaturesSection from "@/components/FeaturesSection";
-import COASection from "@/components/COASection";
+import LatestArticlesSection from "@/components/LatestArticlesSection";
 import CommunitySection from "@/components/CommunitySection";
 import SignupBenefits from "@/components/SignupBenefits";
 import SEO from "@/components/SEO";
@@ -23,7 +23,7 @@ const Index = () => {
       <SignupBenefits />
       <MissionSection />
       <FeaturesSection />
-      <COASection />
+      <LatestArticlesSection />
       <CommunitySection />
 
       {/* CTA Section */}
