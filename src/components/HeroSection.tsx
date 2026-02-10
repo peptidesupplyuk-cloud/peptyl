@@ -25,7 +25,7 @@ const HeroSection = () => (
         >
           <span className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-primary-foreground/10 backdrop-blur-sm border border-primary-foreground/10 text-primary text-sm font-medium mb-6">
             <FlaskConical className="h-3.5 w-3.5" />
-            UK's Leading Research Platform
+            By Peptide Supply — For the UK &amp; European Community
           </span>
         </motion.div>
 
@@ -35,9 +35,9 @@ const HeroSection = () => (
           transition={{ duration: 0.8, delay: 0.1 }}
           className="text-4xl sm:text-5xl lg:text-7xl font-heading font-bold text-primary-foreground leading-[1.1] mb-6"
         >
-          Research-Grade
+          Your Peptide
           <br />
-          <span className="text-gradient-teal">Peptide Intelligence</span>
+          <span className="text-gradient-teal">Research Hub</span>
         </motion.h1>
 
         <motion.p
@@ -46,7 +46,7 @@ const HeroSection = () => (
           transition={{ duration: 0.8, delay: 0.2 }}
           className="text-lg sm:text-xl text-primary-foreground/60 max-w-xl mb-10 leading-relaxed"
         >
-           Community-powered peptide database, precision calculators, and educational resources — built by researchers, for researchers.
+           Free tools, verified research, and community insights to support your peptide journey. Database, calculators, and biomarker tracking — all in one place.
         </motion.p>
 
         <motion.div
@@ -77,10 +77,10 @@ const HeroSection = () => (
         className="mt-20 grid grid-cols-2 md:grid-cols-4 gap-6"
       >
         {[
-          { icon: Database, label: "Peptides Catalogued", value: "120+" },
-          { icon: Users, label: "Community Votes", value: "12,400+" },
-          { icon: Calculator, label: "Calculations Made", value: "48,000+" },
-          { icon: FlaskConical, label: "Research Resources", value: "200+" },
+          { icon: Database, label: "Peptides in Database", value: "36" },
+          { icon: Calculator, label: "Precision Calculators", value: "3" },
+          { icon: FlaskConical, label: "Educational Guides", value: "5+" },
+          { icon: Users, label: "Community Driven", value: "Free" },
         ].map((stat, i) => (
           <div key={i} className="bg-glass rounded-xl p-5 border border-primary-foreground/10">
             <stat.icon className="h-5 w-5 text-primary mb-3" />
