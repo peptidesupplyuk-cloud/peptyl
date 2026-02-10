@@ -310,7 +310,27 @@ const ProcessingQueue = () => {
 };
 
 /* ---------- Main Page ---------- */
+const ADMIN_EMAIL = "peptidesupplyuk@gmail.com";
+
 const ContentAdmin = () => {
+  const { user } = useAuth();
+
+  if (user?.email !== ADMIN_EMAIL) {
+    return (
+      <div className="min-h-screen bg-background">
+        <Header />
+        <main className="pt-20 pb-16 flex items-center justify-center">
+          <div className="text-center">
+            <AlertTriangle className="h-10 w-10 text-destructive mx-auto mb-3" />
+            <h1 className="text-xl font-heading font-bold text-foreground">Access Denied</h1>
+            <p className="text-muted-foreground text-sm mt-1">You do not have permission to view this page.</p>
+          </div>
+        </main>
+        <Footer />
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-background">
       <SEO title="Content Admin — Ingestion & Review" description="Manage content ingestion pipeline and review AI-extracted peptide data." path="/admin/content" />
