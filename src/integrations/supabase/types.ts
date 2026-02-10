@@ -437,25 +437,37 @@ export type Database = {
       }
       profiles: {
         Row: {
+          bp_diastolic: number | null
+          bp_systolic: number | null
           created_at: string
+          height_cm: number | null
           id: string
           updated_at: string
           user_id: string
           username: string | null
+          weight_kg: number | null
         }
         Insert: {
+          bp_diastolic?: number | null
+          bp_systolic?: number | null
           created_at?: string
+          height_cm?: number | null
           id?: string
           updated_at?: string
           user_id: string
           username?: string | null
+          weight_kg?: number | null
         }
         Update: {
+          bp_diastolic?: number | null
+          bp_systolic?: number | null
           created_at?: string
+          height_cm?: number | null
           id?: string
           updated_at?: string
           user_id?: string
           username?: string | null
+          weight_kg?: number | null
         }
         Relationships: []
       }
