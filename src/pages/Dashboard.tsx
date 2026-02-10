@@ -1,6 +1,6 @@
-import { useState, useRef } from "react";
+import { useState } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Activity, FlaskConical, Syringe, LayoutDashboard, AlertTriangle } from "lucide-react";
+import { Activity, FlaskConical, Syringe, LayoutDashboard, AlertTriangle, User } from "lucide-react";
 import { addWeeks, format } from "date-fns";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
@@ -11,10 +11,11 @@ import BiomarkerSummary from "@/components/dashboard/BiomarkerSummary";
 import BiomarkerTrendChart from "@/components/dashboard/BiomarkerTrendChart";
 import ActiveProtocols from "@/components/dashboard/ActiveProtocols";
 import CreateProtocolForm from "@/components/dashboard/CreateProtocolForm";
+import ProfileBiometrics from "@/components/dashboard/ProfileBiometrics";
 import { useBloodworkPanels } from "@/hooks/use-bloodwork";
 import { useCreateProtocol } from "@/hooks/use-protocols";
 import { useLogInjection } from "@/hooks/use-injections";
-import { getRecommendations, type Recommendation } from "@/data/recommendation-rules";
+import { getRecommendations, getBiometricRecommendations, type Recommendation, type BiometricRecommendation } from "@/data/recommendation-rules";
 import { useToast } from "@/hooks/use-toast";
 import { Checkbox } from "@/components/ui/checkbox";
 import SEO from "@/components/SEO";
@@ -27,6 +28,7 @@ const Dashboard = () => {
   const [disclaimerAccepted, setDisclaimerAccepted] = useState(false);
   const [activeTab, setActiveTab] = useState("overview");
   const [activatingProtocol, setActivatingProtocol] = useState(false);
+  const [bioRecs, setBioRecs] = useState<BiometricRecommendation[]>([]);
 
   // Get recommendations from latest panel
   const latestPanel = panels[0];
@@ -112,9 +114,12 @@ const Dashboard = () => {
           </div>
 
           <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-            <TabsList className="grid w-full grid-cols-4 max-w-lg">
+            <TabsList className="grid w-full grid-cols-5 max-w-2xl">
               <TabsTrigger value="overview" className="text-xs sm:text-sm">
                 <LayoutDashboard className="h-4 w-4 mr-1.5 hidden sm:inline" />Overview
+              </TabsTrigger>
+              <TabsTrigger value="profile" className="text-xs sm:text-sm">
+                <User className="h-4 w-4 mr-1.5 hidden sm:inline" />Profile
               </TabsTrigger>
               <TabsTrigger value="bloodwork" className="text-xs sm:text-sm">
                 <Activity className="h-4 w-4 mr-1.5 hidden sm:inline" />Bloodwork
@@ -126,6 +131,11 @@ const Dashboard = () => {
                 <Syringe className="h-4 w-4 mr-1.5 hidden sm:inline" />Tracker
               </TabsTrigger>
             </TabsList>
+
+            {/* PROFILE TAB */}
+            <TabsContent value="profile" className="space-y-6">
+              <ProfileBiometrics onUpdate={(bio) => setBioRecs(getBiometricRecommendations(bio))} />
+            </TabsContent>
 
             {/* OVERVIEW TAB */}
             <TabsContent value="overview" className="space-y-6">
@@ -145,12 +155,35 @@ const Dashboard = () => {
                 </div>
               )}
 
+              {bioRecs.length > 0 && (
+                <div className="space-y-4">
+                  <h2 className="font-heading font-semibold text-foreground">Supplement Suggestions (Based on Profile)</h2>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    {bioRecs.map((rec) => (
+                      <div key={rec.id} className="bg-card rounded-2xl border border-border p-5 space-y-3">
+                        <h3 className="font-heading font-semibold text-foreground">{rec.title}</h3>
+                        <p className="text-sm text-muted-foreground">{rec.description}</p>
+                        <div className="space-y-1.5">
+                          {rec.supplements.map((s) => (
+                            <div key={s.name} className="flex items-center justify-between text-xs bg-muted/50 rounded-lg px-3 py-2">
+                              <span className="font-medium text-foreground">{s.name}</span>
+                              <span className="text-muted-foreground">{s.dose} — {s.frequency}</span>
+                            </div>
+                          ))}
+                        </div>
+                        <p className="text-[10px] text-muted-foreground italic">Source: {rec.source}</p>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
               {panels.length === 0 && (
                 <div className="bg-card rounded-2xl border border-border p-8 text-center">
                   <Activity className="h-10 w-10 text-primary mx-auto mb-3" />
                   <h3 className="font-heading font-semibold text-foreground mb-1">Get Started</h3>
                   <p className="text-sm text-muted-foreground mb-4">
-                    Upload your bloodwork to receive personalised peptide recommendations.
+                    Upload your bloodwork to receive personalised peptide and supplement recommendations.
                   </p>
                   <button onClick={() => setActiveTab("bloodwork")} className="text-sm text-primary font-medium hover:underline">
                     Upload Bloodwork →

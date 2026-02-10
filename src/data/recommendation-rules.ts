@@ -10,8 +10,14 @@ export interface Recommendation {
     timing: string;
     route: string;
   }[];
+  supplements?: {
+    name: string;
+    dose: string;
+    frequency: string;
+  }[];
   durationWeeks: number;
   retestWeeks: number;
+  source?: string;
 }
 
 interface Rule {
@@ -33,8 +39,13 @@ export const RECOMMENDATION_RULES: Rule[] = [
         { name: "CJC-1295 (no DAC)", dose_mcg: 100, frequency: "5on/2off", timing: "PM", route: "SubQ" },
         { name: "Ipamorelin", dose_mcg: 200, frequency: "5on/2off", timing: "PM", route: "SubQ" },
       ],
+      supplements: [
+        { name: "Magnesium Glycinate", dose: "400mg", frequency: "Before bed" },
+        { name: "Zinc Picolinate", dose: "50mg", frequency: "Daily" },
+      ],
       durationWeeks: 12,
       retestWeeks: 8,
+      source: "Clinical endocrinology guidelines",
     },
   },
   {
@@ -48,8 +59,13 @@ export const RECOMMENDATION_RULES: Rule[] = [
       peptides: [
         { name: "BPC-157", dose_mcg: 250, frequency: "daily", timing: "AM+PM", route: "SubQ" },
       ],
+      supplements: [
+        { name: "Omega-3 Fish Oil", dose: "2000mg EPA/DHA", frequency: "Daily" },
+        { name: "NAC", dose: "600mg", frequency: "Twice daily" },
+      ],
       durationWeeks: 4,
       retestWeeks: 6,
+      source: "Inflammation biomarker research",
     },
   },
   {
@@ -63,8 +79,13 @@ export const RECOMMENDATION_RULES: Rule[] = [
       peptides: [
         { name: "AOD-9604", dose_mcg: 300, frequency: "daily", timing: "AM", route: "SubQ" },
       ],
+      supplements: [
+        { name: "Berberine HCl", dose: "500mg", frequency: "With meals, 2-3x daily" },
+        { name: "Creatine Monohydrate", dose: "5g", frequency: "Daily" },
+      ],
       durationWeeks: 12,
       retestWeeks: 12,
+      source: "Metabolic research",
     },
   },
   {
@@ -78,8 +99,14 @@ export const RECOMMENDATION_RULES: Rule[] = [
       peptides: [
         { name: "Gonadorelin", dose_mcg: 200, frequency: "3x/week", timing: "AM", route: "SubQ" },
       ],
+      supplements: [
+        { name: "Zinc Picolinate", dose: "50mg", frequency: "Daily" },
+        { name: "Vitamin D3 + K2", dose: "5000 IU", frequency: "Daily" },
+        { name: "Ashwagandha KSM-66", dose: "600mg", frequency: "Daily" },
+      ],
       durationWeeks: 8,
       retestWeeks: 8,
+      source: "Endocrinology literature",
     },
   },
   {
@@ -91,8 +118,13 @@ export const RECOMMENDATION_RULES: Rule[] = [
       goal: "Increase Vitamin D to optimal range (50-80 ng/mL)",
       triggerDescription: "Vitamin D below 30 ng/mL — supplement recommended",
       peptides: [],
+      supplements: [
+        { name: "Vitamin D3 + K2", dose: "5000 IU", frequency: "Daily with fat-containing meal" },
+        { name: "Magnesium Glycinate", dose: "400mg", frequency: "Daily" },
+      ],
       durationWeeks: 12,
       retestWeeks: 12,
+      source: "Vitamin D Council guidelines",
     },
   },
   {
@@ -107,8 +139,13 @@ export const RECOMMENDATION_RULES: Rule[] = [
         { name: "BPC-157", dose_mcg: 250, frequency: "daily", timing: "AM", route: "SubQ" },
         { name: "TB-500", dose_mcg: 2500, frequency: "2x/week", timing: "AM", route: "SubQ" },
       ],
+      supplements: [
+        { name: "Omega-3 Fish Oil", dose: "1000mg EPA/DHA", frequency: "Daily" },
+        { name: "L-Glutamine", dose: "5g", frequency: "Twice daily" },
+      ],
       durationWeeks: 6,
       retestWeeks: 8,
+      source: "Anti-inflammatory protocol research",
     },
   },
   {
@@ -122,11 +159,79 @@ export const RECOMMENDATION_RULES: Rule[] = [
       peptides: [
         { name: "MOTS-c", dose_mcg: 5000, frequency: "3x/week", timing: "AM", route: "SubQ" },
       ],
+      supplements: [
+        { name: "Berberine HCl", dose: "500mg", frequency: "With meals, 2-3x daily" },
+        { name: "NAC", dose: "600mg", frequency: "Twice daily" },
+      ],
       durationWeeks: 8,
       retestWeeks: 8,
+      source: "Insulin resistance research",
     },
   },
 ];
+
+// BMI-based recommendations (called separately with biometrics)
+export interface BiometricRecommendation {
+  id: string;
+  title: string;
+  description: string;
+  supplements: { name: string; dose: string; frequency: string }[];
+  source: string;
+}
+
+export function getBiometricRecommendations(bio: {
+  height_cm?: number | null;
+  weight_kg?: number | null;
+  bp_systolic?: number | null;
+  bp_diastolic?: number | null;
+}): BiometricRecommendation[] {
+  const results: BiometricRecommendation[] = [];
+
+  if (bio.height_cm && bio.weight_kg) {
+    const bmi = bio.weight_kg / Math.pow(bio.height_cm / 100, 2);
+    if (bmi >= 30) {
+      results.push({
+        id: "bmi_obese",
+        title: "Weight Management Support",
+        description: `BMI ${bmi.toFixed(1)} — consider metabolic support alongside lifestyle changes.`,
+        supplements: [
+          { name: "Berberine HCl", dose: "500mg", frequency: "With meals" },
+          { name: "Omega-3 Fish Oil", dose: "2000mg EPA/DHA", frequency: "Daily" },
+          { name: "Creatine Monohydrate", dose: "5g", frequency: "Daily" },
+        ],
+        source: "Metabolic health guidelines",
+      });
+    } else if (bmi >= 25) {
+      results.push({
+        id: "bmi_overweight",
+        title: "Metabolic Optimisation",
+        description: `BMI ${bmi.toFixed(1)} — consider supporting metabolic health.`,
+        supplements: [
+          { name: "Berberine HCl", dose: "500mg", frequency: "With meals" },
+          { name: "Omega-3 Fish Oil", dose: "1000mg EPA/DHA", frequency: "Daily" },
+        ],
+        source: "Metabolic health research",
+      });
+    }
+  }
+
+  if (bio.bp_systolic && bio.bp_diastolic) {
+    if (bio.bp_systolic >= 130 || bio.bp_diastolic >= 85) {
+      results.push({
+        id: "bp_elevated",
+        title: "Blood Pressure Support",
+        description: `BP ${bio.bp_systolic}/${bio.bp_diastolic} mmHg — consider cardiovascular support supplements.`,
+        supplements: [
+          { name: "Magnesium Glycinate", dose: "400mg", frequency: "Before bed" },
+          { name: "Omega-3 Fish Oil", dose: "2000mg EPA/DHA", frequency: "Daily" },
+        ],
+        source: "Cardiovascular health guidelines",
+      });
+    }
+  }
+
+  return results;
+}
 
 export function getRecommendations(markers: Record<string, number>): Recommendation[] {
   const seen = new Set<string>();

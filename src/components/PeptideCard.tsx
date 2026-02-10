@@ -89,7 +89,12 @@ const PeptideCard = ({ peptide, index, userVotes, onVote }: PeptideCardProps) =>
                    exp.sentiment === "caution" ? <AlertTriangle className="h-3.5 w-3.5" /> :
                    <Clock className="h-3.5 w-3.5" />}
                 </div>
-                <p className="flex-1 text-sm text-foreground/80 leading-relaxed">{exp.text}</p>
+                <div className="flex-1">
+                  <p className="text-sm text-foreground/80 leading-relaxed">{exp.text}</p>
+                  {(exp as any).source && (
+                    <p className="text-[10px] text-muted-foreground mt-0.5 italic">Source: {(exp as any).source}</p>
+                  )}
+                </div>
                 <div className="flex items-center gap-1 flex-shrink-0">
                   <button
                     onClick={() => onVote(ei, "up")}
