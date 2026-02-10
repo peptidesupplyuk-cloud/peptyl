@@ -85,7 +85,28 @@ const Shop = () => {
       />
       <Header />
 
-      {/* Hero */}
+      <div className="relative">
+        {/* Blur overlay */}
+        <div className="absolute inset-0 z-20 backdrop-blur-md bg-background/40 flex items-center justify-center">
+          <motion.div
+            initial={{ opacity: 0, scale: 0.9 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ delay: 0.3, duration: 0.5 }}
+            className="text-center px-6"
+          >
+            <div className="inline-flex items-center gap-2 text-sm font-medium px-4 py-2 rounded-full bg-warm/10 text-warm border border-warm/20 mb-6">
+              <Clock className="h-4 w-4" /> Coming Soon
+            </div>
+            <h2 className="text-4xl sm:text-5xl font-heading font-bold text-foreground mb-4">
+              Our Store is <span className="text-primary">Launching Soon</span>
+            </h2>
+            <p className="text-muted-foreground text-lg max-w-md mx-auto">
+              Research-grade peptides & supplements at market-leading prices. Stay tuned.
+            </p>
+          </motion.div>
+        </div>
+
+        {/* Hero */}
       <section className="pt-28 pb-16 bg-hero relative overflow-hidden">
         <div className="absolute top-1/4 right-0 w-[400px] h-[400px] rounded-full bg-teal/5 blur-3xl" />
         <div className="container mx-auto px-6 relative z-10">
@@ -181,6 +202,8 @@ const Shop = () => {
           </span>
         </div>
       </section>
+
+      </div>
 
       <Footer />
     </div>
