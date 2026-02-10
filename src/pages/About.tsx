@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom";
-import { Award, Globe, Rocket, Shield, TrendingUp, Users } from "lucide-react";
+import { Brain, Globe, Rocket, TrendingUp, Users, Beaker } from "lucide-react";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import ContactForm from "@/components/about/ContactForm";
@@ -7,19 +7,13 @@ import { motion } from "framer-motion";
 import SEO from "@/components/SEO";
 
 const stats = [
-  { label: "Years in Global Manufacturing", value: "10+", icon: Globe },
+  { label: "Peptides in Our Database", value: "56+", icon: Beaker },
   { label: "Years Scaling AI Startups", value: "6+", icon: Rocket },
-  { label: "Fortune 500 Experience", value: "✓", icon: Award },
-  { label: "Countries Supplied", value: "30+", icon: TrendingUp },
+  { label: "Years Biohacking", value: "5+", icon: Brain },
+  { label: "Built for the UK & EU", value: "🇬🇧", icon: Globe },
 ];
 
 const values = [
-  {
-    icon: Shield,
-    title: "Quality Without Compromise",
-    description:
-      "Every product is third-party tested with full Certificates of Analysis. A decade in Fortune 500 supply chain means we hold ourselves to the highest global manufacturing standards.",
-  },
   {
     icon: TrendingUp,
     title: "Data-Driven Innovation",
@@ -30,7 +24,7 @@ const values = [
     icon: Users,
     title: "Community First",
     description:
-      "Peptyl exists because the peptide community deserves better — better education, better tools, and transparent pricing. Everything we build starts with what our users need.",
+      "Peptyl exists because the peptide community deserves better — better education, better tools, and accessible research. Everything we build starts with what our users need.",
   },
 ];
 
@@ -47,8 +41,8 @@ const About = () => {
   return (
     <div className="min-h-screen bg-background">
       <SEO
-        title="About Us — A Decade of Manufacturing Excellence Meets Modern Innovation"
-        description="Meet the founder behind Peptyl. 10+ years in Fortune 500 manufacturing, 6+ years scaling AI startups, and a personal peptide transformation story."
+        title="About Peptyl — The Peptide Research Hub for the UK & Europe"
+        description="Built by biohackers and AI engineers. Peptyl is the research platform the UK & European peptide community deserved."
         path="/about"
       />
       <Header />
@@ -70,8 +64,8 @@ const About = () => {
             transition={{ delay: 0.1 }}
             className="text-4xl sm:text-5xl lg:text-6xl font-heading font-bold text-primary-foreground leading-tight max-w-3xl"
           >
-            A Decade of Manufacturing Excellence Meets
-            <span className="text-primary"> Modern Innovation</span>
+            Built by Biohackers,
+            <span className="text-primary"> Powered by AI</span>
           </motion.h1>
           <motion.p
             initial={{ opacity: 0, y: 20 }}
@@ -79,7 +73,7 @@ const About = () => {
             transition={{ delay: 0.2 }}
             className="mt-6 text-lg text-primary-foreground/60 max-w-2xl leading-relaxed"
           >
-            Peptyl combines proven supply chain expertise with advanced AI technology and agile development — specifically designed to serve the UK &amp; European peptide community.
+            Peptyl is the research hub we wished existed — combining AI-driven tools, real biomarker data, and community knowledge for the UK &amp; European peptide community.
           </motion.p>
         </div>
       </section>
@@ -87,7 +81,7 @@ const About = () => {
       {/* Stats */}
       <section className="py-16 -mt-10 relative z-20">
         <div className="container mx-auto px-6">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 max-w-4xl mx-auto">
             {stats.map((stat, i) => (
               <motion.div
                 key={stat.label}
@@ -150,7 +144,7 @@ const About = () => {
           >
             What Drives Us
           </motion.h2>
-          <div className="grid md:grid-cols-3 gap-6 max-w-5xl mx-auto">
+          <div className="grid md:grid-cols-2 gap-6 max-w-3xl mx-auto">
             {values.map((value, i) => (
               <motion.div
                 key={value.title}
