@@ -77,7 +77,7 @@ const HeroSection = () => (
         className="mt-20 grid grid-cols-2 md:grid-cols-4 gap-6"
       >
         {[
-          { icon: Database, label: "Peptides in Database", value: "36" },
+          { icon: Database, label: "Peptides in Database", value: "56" },
           { icon: Calculator, label: "Precision Calculators", value: "3" },
           { icon: FlaskConical, label: "Educational Guides", value: "5+" },
           { icon: Users, label: "Community Driven", value: "Free" },
