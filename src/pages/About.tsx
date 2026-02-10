@@ -107,7 +107,7 @@ const About = () => {
         </div>
       </section>
 
-      {/* Founder Story */}
+      {/* Why We Started */}
       <section className="py-20">
         <div className="container mx-auto px-6">
           <div className="max-w-3xl mx-auto">
@@ -117,7 +117,7 @@ const About = () => {
               viewport={{ once: true }}
               className="text-3xl font-heading font-bold text-foreground mb-8"
             >
-              The Person Behind Peptyl
+              Why We Started
             </motion.h2>
             <motion.div
               initial={{ opacity: 0, y: 20 }}
@@ -126,22 +126,13 @@ const About = () => {
               className="space-y-6 text-muted-foreground leading-relaxed"
             >
               <p>
-                With <strong className="text-foreground">over 10 years of experience in global manufacturing and supply chain management</strong> for one of the world's largest Fortune 500 companies, I've seen first-hand what separates truly world-class operations from the rest: rigorous quality control, transparent sourcing, and an obsession with consistency.
+                The UK &amp; European peptide community deserved better — better education, better tools, and more transparency. We couldn't find a single platform that combined reliable research data with practical dosing tools and genuine community support. So we built one.
               </p>
               <p>
-                That foundation shaped everything about how Peptyl operates. Every supplier is vetted to the same standards I applied managing global logistics at scale. Every batch is third-party tested. Every Certificate of Analysis is published openly.
-              </p>
-              <p>
-                But Peptyl isn't just about supply chain excellence. Over the past <strong className="text-foreground">6+ years, I've been deeply embedded in the startup ecosystem</strong>, scaling early-stage companies with a sharp focus on <strong className="text-foreground">artificial intelligence and data-driven product development</strong>. That experience is why Peptyl's tools — from our precision dose calculators to our biomarker tracking dashboard — feel fundamentally different from anything else in this space.
-              </p>
-              <p>
-                I built Peptyl because I was frustrated. The peptide community deserved better tools, better education, and more transparent pricing. I wanted to create a platform where researchers could access clinical-grade information, plan their protocols with confidence, and buy from a supplier they could actually trust.
-              </p>
-              <p>
-                But this isn't just a business for me — <strong className="text-foreground">it's personal</strong>. Peptides genuinely changed my life. I lost a significant amount of weight, came off blood pressure medication entirely, and no longer need acid reflux medication. For the first time in years, I feel in control of my health. That transformation is what fuels my mission: to help educate and empower others to make informed decisions that can change their lives for the better.
+                Our team brings together <strong className="text-foreground">10+ years in global manufacturing and supply chain</strong> for Fortune 500 companies, <strong className="text-foreground">6+ years scaling AI-driven startups</strong>, and first-hand experience in the <strong className="text-foreground">biohacking and peptide research space</strong>. That combination is what makes Peptyl's tools, data, and sourcing standards fundamentally different.
               </p>
               <p className="text-foreground font-medium">
-                This is that platform. And we're just getting started.
+                We're building the research hub we wish existed. And we're just getting started.
               </p>
             </motion.div>
           </div>
