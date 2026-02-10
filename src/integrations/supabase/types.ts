@@ -14,6 +14,74 @@ export type Database = {
   }
   public: {
     Tables: {
+      articles: {
+        Row: {
+          created_at: string
+          credibility_tier: Database["public"]["Enums"]["credibility_tier"]
+          dosing_details: Json | null
+          evidence_quality: string | null
+          findings: Json | null
+          id: string
+          peptides_mentioned: string[] | null
+          published_at: string | null
+          raw_content: string | null
+          reviewed_at: string | null
+          reviewed_by: string | null
+          source_id: string | null
+          status: string
+          summary: string | null
+          title: string
+          updated_at: string
+          url: string | null
+        }
+        Insert: {
+          created_at?: string
+          credibility_tier?: Database["public"]["Enums"]["credibility_tier"]
+          dosing_details?: Json | null
+          evidence_quality?: string | null
+          findings?: Json | null
+          id?: string
+          peptides_mentioned?: string[] | null
+          published_at?: string | null
+          raw_content?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          source_id?: string | null
+          status?: string
+          summary?: string | null
+          title: string
+          updated_at?: string
+          url?: string | null
+        }
+        Update: {
+          created_at?: string
+          credibility_tier?: Database["public"]["Enums"]["credibility_tier"]
+          dosing_details?: Json | null
+          evidence_quality?: string | null
+          findings?: Json | null
+          id?: string
+          peptides_mentioned?: string[] | null
+          published_at?: string | null
+          raw_content?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          source_id?: string | null
+          status?: string
+          summary?: string | null
+          title?: string
+          updated_at?: string
+          url?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "articles_source_id_fkey"
+            columns: ["source_id"]
+            isOneToOne: false
+            referencedRelation: "sources"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       benefit_votes: {
         Row: {
           benefit: string
@@ -97,6 +165,130 @@ export type Database = {
           panel_type?: string
           test_date?: string
           user_id?: string
+        }
+        Relationships: []
+      }
+      content_embeddings: {
+        Row: {
+          article_id: string
+          chunk_index: number
+          chunk_text: string
+          created_at: string
+          embedding: string | null
+          id: string
+          metadata: Json | null
+        }
+        Insert: {
+          article_id: string
+          chunk_index?: number
+          chunk_text: string
+          created_at?: string
+          embedding?: string | null
+          id?: string
+          metadata?: Json | null
+        }
+        Update: {
+          article_id?: string
+          chunk_index?: number
+          chunk_text?: string
+          created_at?: string
+          embedding?: string | null
+          id?: string
+          metadata?: Json | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "content_embeddings_article_id_fkey"
+            columns: ["article_id"]
+            isOneToOne: false
+            referencedRelation: "articles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      content_queue: {
+        Row: {
+          article_id: string | null
+          content_type: string
+          created_at: string
+          id: string
+          processing_error: string | null
+          processing_status: string
+          raw_input: string
+          source_url: string | null
+          submitted_by: string
+          updated_at: string
+        }
+        Insert: {
+          article_id?: string | null
+          content_type?: string
+          created_at?: string
+          id?: string
+          processing_error?: string | null
+          processing_status?: string
+          raw_input: string
+          source_url?: string | null
+          submitted_by: string
+          updated_at?: string
+        }
+        Update: {
+          article_id?: string | null
+          content_type?: string
+          created_at?: string
+          id?: string
+          processing_error?: string | null
+          processing_status?: string
+          raw_input?: string
+          source_url?: string | null
+          submitted_by?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "content_queue_article_id_fkey"
+            columns: ["article_id"]
+            isOneToOne: false
+            referencedRelation: "articles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      feed_posts: {
+        Row: {
+          content: string
+          created_at: string
+          id: string
+          post_type: string
+          published_at: string | null
+          related_article_ids: string[] | null
+          related_peptides: string[] | null
+          status: string
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          content: string
+          created_at?: string
+          id?: string
+          post_type?: string
+          published_at?: string | null
+          related_article_ids?: string[] | null
+          related_peptides?: string[] | null
+          status?: string
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          content?: string
+          created_at?: string
+          id?: string
+          post_type?: string
+          published_at?: string | null
+          related_article_ids?: string[] | null
+          related_peptides?: string[] | null
+          status?: string
+          title?: string
+          updated_at?: string
         }
         Relationships: []
       }
@@ -311,6 +503,36 @@ export type Database = {
         }
         Relationships: []
       }
+      sources: {
+        Row: {
+          created_at: string
+          credibility: Database["public"]["Enums"]["credibility_tier"]
+          description: string | null
+          id: string
+          name: string
+          updated_at: string
+          url: string | null
+        }
+        Insert: {
+          created_at?: string
+          credibility?: Database["public"]["Enums"]["credibility_tier"]
+          description?: string | null
+          id?: string
+          name: string
+          updated_at?: string
+          url?: string | null
+        }
+        Update: {
+          created_at?: string
+          credibility?: Database["public"]["Enums"]["credibility_tier"]
+          description?: string | null
+          id?: string
+          name?: string
+          updated_at?: string
+          url?: string | null
+        }
+        Relationships: []
+      }
       stack_votes: {
         Row: {
           created_at: string
@@ -365,10 +587,28 @@ export type Database = {
       }
     }
     Functions: {
-      [_ in never]: never
+      match_embeddings: {
+        Args: {
+          match_count?: number
+          match_threshold?: number
+          query_embedding: string
+        }
+        Returns: {
+          article_id: string
+          chunk_text: string
+          id: string
+          similarity: number
+        }[]
+      }
     }
     Enums: {
-      [_ in never]: never
+      credibility_tier:
+        | "peer_reviewed"
+        | "clinical_trial"
+        | "expert_review"
+        | "established_media"
+        | "community_verified"
+        | "anecdotal"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -495,6 +735,15 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      credibility_tier: [
+        "peer_reviewed",
+        "clinical_trial",
+        "expert_review",
+        "established_media",
+        "community_verified",
+        "anecdotal",
+      ],
+    },
   },
 } as const
