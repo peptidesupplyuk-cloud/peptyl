@@ -20,6 +20,7 @@ import Shop from "./pages/Shop";
 import PrivacyPolicy from "./pages/PrivacyPolicy";
 import TermsOfService from "./pages/TermsOfService";
 const ContentAdmin = lazy(() => import("./pages/ContentAdmin"));
+const AdminDashboard = lazy(() => import("./pages/AdminDashboard"));
 
 const BeginnersGuide = lazy(() => import("./pages/articles/BeginnersGuide"));
 const HowToReconstitute = lazy(() => import("./pages/articles/HowToReconstitute"));
@@ -52,6 +53,7 @@ const App = () => (
               <Route path="/privacy-policy" element={<PrivacyPolicy />} />
               <Route path="/terms-of-service" element={<TermsOfService />} />
               <Route path="/admin/content" element={<ProtectedRoute><ContentAdmin /></ProtectedRoute>} />
+              <Route path="/admin/dashboard" element={<ProtectedRoute><AdminDashboard /></ProtectedRoute>} />
               <Route path="/education/beginners-guide-peptides" element={<BeginnersGuide />} />
               <Route path="/education/how-to-reconstitute-peptides" element={<HowToReconstitute />} />
               <Route path="/education/bpc157-vs-tb500" element={<Bpc157VsTb500 />} />

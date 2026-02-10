@@ -15,7 +15,7 @@ const navItems = [
   { label: "Education", href: "/education" },
   { label: "Shop", href: "/shop" },
   { label: "About", href: "/about" },
-  { label: "Admin", href: "/admin/content", adminOnly: true },
+  { label: "Admin", href: "/admin/dashboard", adminOnly: true },
 ];
 
 const Header = () => {
