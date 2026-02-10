@@ -27,6 +27,7 @@ export type Database = {
           raw_content: string | null
           reviewed_at: string | null
           reviewed_by: string | null
+          search_vector: unknown
           source_id: string | null
           status: string
           summary: string | null
@@ -46,6 +47,7 @@ export type Database = {
           raw_content?: string | null
           reviewed_at?: string | null
           reviewed_by?: string | null
+          search_vector?: unknown
           source_id?: string | null
           status?: string
           summary?: string | null
@@ -65,6 +67,7 @@ export type Database = {
           raw_content?: string | null
           reviewed_at?: string | null
           reviewed_by?: string | null
+          search_vector?: unknown
           source_id?: string | null
           status?: string
           summary?: string | null
@@ -344,6 +347,51 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      monitored_accounts: {
+        Row: {
+          added_by: string | null
+          bio: string | null
+          created_at: string
+          display_name: string | null
+          handle: string
+          id: string
+          is_active: boolean
+          last_scanned_at: string | null
+          last_tweet_id: string | null
+          platform: string
+          scan_frequency: string
+          updated_at: string
+        }
+        Insert: {
+          added_by?: string | null
+          bio?: string | null
+          created_at?: string
+          display_name?: string | null
+          handle: string
+          id?: string
+          is_active?: boolean
+          last_scanned_at?: string | null
+          last_tweet_id?: string | null
+          platform?: string
+          scan_frequency?: string
+          updated_at?: string
+        }
+        Update: {
+          added_by?: string | null
+          bio?: string | null
+          created_at?: string
+          display_name?: string | null
+          handle?: string
+          id?: string
+          is_active?: boolean
+          last_scanned_at?: string | null
+          last_tweet_id?: string | null
+          platform?: string
+          scan_frequency?: string
+          updated_at?: string
+        }
+        Relationships: []
       }
       profiles: {
         Row: {
