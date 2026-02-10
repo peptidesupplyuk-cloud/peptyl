@@ -6,7 +6,7 @@ const pillars = [
     icon: HeartHandshake,
     title: "Community First",
     description:
-      "Built for the UK & European research community — with transparent, crowd-sourced data and honest guidance.",
+      "Built for the global research community — with transparent, crowd-sourced data and honest guidance.",
   },
   {
     icon: Activity,

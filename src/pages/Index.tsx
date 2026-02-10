@@ -14,15 +14,15 @@ const Index = () => {
   return (
     <div className="min-h-screen bg-background">
       <SEO
-        title="Peptyl — UK's Leading Peptide Education & Research Platform"
-        description="Community-powered peptide database with 56+ compounds, precision calculators, biomarker tracking, and expert education. Free research tools for the UK & Europe."
+        title="Peptyl — Leading Peptide Education & Research Platform"
+        description="Community-powered peptide database with 56+ compounds, precision calculators, biomarker tracking, and expert education. Free research tools worldwide."
         path="/"
         jsonLd={{
           "@context": "https://schema.org",
           "@type": "WebSite",
           "name": "Peptyl",
           "url": "https://peptyl.co.uk",
-          "description": "UK & Europe's free peptide research platform with 56+ compounds, precision calculators, and biomarker tracking.",
+          "description": "Free peptide research platform with 56+ compounds, precision calculators, and biomarker tracking.",
           "potentialAction": {
             "@type": "SearchAction",
             "target": "https://peptyl.co.uk/peptides?q={search_term_string}",
@@ -46,7 +46,7 @@ const Index = () => {
             Ready to Explore?
           </h2>
           <p className="text-primary-foreground/60 text-lg max-w-md mx-auto mb-8">
-            Join thousands of UK & European researchers using Peptyl's tools and community insights.
+            Join thousands of researchers worldwide using Peptyl's tools and community insights.
           </p>
           <div className="flex justify-center gap-4 flex-wrap">
             <a href="/peptides">

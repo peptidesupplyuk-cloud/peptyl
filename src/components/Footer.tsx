@@ -8,7 +8,7 @@ const Footer = () => (
         <div className="md:col-span-1">
           <Logo size="sm" inverted />
           <p className="mt-4 text-sm text-primary-foreground/50 leading-relaxed">
-            The UK's trusted source for peptide education, tools, and community-driven insights. Brought to you by Peptide Supply.
+            Your trusted source for peptide education, tools, and community-driven insights. Brought to you by Peptide Supply.
           </p>
         </div>
 

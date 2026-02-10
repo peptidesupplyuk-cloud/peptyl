@@ -25,7 +25,7 @@ const LatestArticlesSection = () => {
             transition={{ delay: 0.1 }}
             className="text-muted-foreground text-lg"
           >
-            In-depth articles, guides, and comparisons written for the UK &amp; European research community.
+            In-depth articles, guides, and comparisons written for the global research community.
           </motion.p>
         </div>
 

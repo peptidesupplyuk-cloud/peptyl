@@ -46,7 +46,7 @@ const FeaturesSection = () => (
           <span className="text-gradient-teal">One Platform</span>
         </h2>
         <p className="text-muted-foreground text-lg">
-          Tools, data, and community — designed for the UK & European peptide research community.
+          Tools, data, and community — designed for the global peptide research community.
         </p>
       </div>
 

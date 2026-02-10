@@ -25,7 +25,7 @@ const HeroSection = () => (
         >
           <span className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-primary-foreground/10 backdrop-blur-sm border border-primary-foreground/10 text-primary text-sm font-medium mb-6">
             <FlaskConical className="h-3.5 w-3.5" />
-            UK &amp; Europe's Free Peptide Research Platform
+            The World's Free Peptide Research Platform
           </span>
         </motion.div>
 
@@ -46,7 +46,7 @@ const HeroSection = () => (
           transition={{ duration: 0.8, delay: 0.2 }}
           className="text-lg sm:text-xl text-primary-foreground/60 max-w-xl mb-10 leading-relaxed"
         >
-          Upload bloodwork. Get personalised peptide and supplement protocols. Track what's working. The UK's first platform connecting your biomarkers to research-backed compounds and targeted supplementation — for longevity, performance, and metabolic health.
+          Upload bloodwork. Get personalised peptide and supplement protocols. Track what's working. The first platform connecting your biomarkers to research-backed compounds and targeted supplementation — for longevity, performance, and metabolic health.
         </motion.p>
 
         <motion.div
