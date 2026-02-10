@@ -1,3 +1,5 @@
+import { AlertTriangle } from "lucide-react";
+import { Link } from "react-router-dom";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import HeroSection from "@/components/HeroSection";
@@ -45,6 +47,22 @@ const Index = () => {
                 Try Calculators
               </button>
             </a>
+          </div>
+        </div>
+      </section>
+
+      {/* Research-Only Legal Disclaimer */}
+      <section className="py-8 bg-background border-t border-border">
+        <div className="container mx-auto px-6">
+          <div className="flex items-start gap-3 bg-muted/50 rounded-xl p-5 border border-border">
+            <AlertTriangle className="h-5 w-5 text-destructive mt-0.5 shrink-0" />
+            <div>
+              <p className="text-sm font-medium text-foreground mb-1">Research Use Only — Not for Human Consumption</p>
+              <p className="text-xs text-muted-foreground leading-relaxed">
+                All peptides, compounds, and products referenced on this platform are intended strictly for in-vitro research and laboratory use only, in accordance with the Human Medicines Regulations 2012 (UK). Nothing on this website constitutes medical advice, diagnosis, or treatment. Peptyl does not endorse or encourage the use of any compound for human consumption. By using this platform you agree to our{" "}
+                <Link to="/terms-of-service" className="text-primary underline hover:text-primary/80">Terms of Service</Link>.
+              </p>
+            </div>
           </div>
         </div>
       </section>
