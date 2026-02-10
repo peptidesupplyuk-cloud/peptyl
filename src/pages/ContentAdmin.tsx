@@ -13,8 +13,9 @@ import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
 import {
   Upload, CheckCircle, XCircle, Clock, Loader2, FileText, AlertTriangle,
-  ExternalLink, FlaskConical,
+  ExternalLink, FlaskConical, Twitter,
 } from "lucide-react";
+import MonitoredAccounts from "@/components/admin/MonitoredAccounts";
 
 /* ---------- Ingest Form ---------- */
 const IngestForm = () => {
@@ -142,10 +143,30 @@ const ReviewQueue = () => {
       }
       const { error } = await supabase.from("articles").update(updates).eq("id", id);
       if (error) throw error;
+
+      // If publishing, trigger embedding generation
+      if (status === "published") {
+        try {
+          const { data: { session } } = await supabase.auth.getSession();
+          await fetch(
+            `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/chunk-content`,
+            {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+                Authorization: `Bearer ${session?.access_token || import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
+              },
+              body: JSON.stringify({ article_id: id }),
+            }
+          );
+        } catch (embErr) {
+          console.error("Embedding generation failed:", embErr);
+        }
+      }
     },
     onSuccess: (_, { status }) => {
       queryClient.invalidateQueries({ queryKey: ["admin-articles"] });
-      toast({ title: status === "published" ? "Article published" : "Article rejected" });
+      toast({ title: status === "published" ? "Article published & embeddings generated" : "Article rejected" });
     },
     onError: (err: any) => {
       toast({ title: "Error", description: err.message, variant: "destructive" });
@@ -188,7 +209,6 @@ const ReviewQueue = () => {
                 </div>
               </div>
 
-              {/* Extracted data preview */}
               <div className="flex flex-wrap gap-1.5">
                 {(article.peptides_mentioned as string[] || []).map((p: string) => (
                   <span key={p} className="text-[10px] px-2 py-0.5 rounded-md bg-primary/5 text-primary border border-primary/10">
@@ -302,14 +322,17 @@ const ContentAdmin = () => {
               Content <span className="text-gradient-teal">Admin</span>
             </h1>
             <p className="text-muted-foreground text-sm mt-1">
-              Ingest raw content, review AI extractions, and manage the knowledge base.
+              Ingest raw content, review AI extractions, monitor X accounts, and manage the knowledge base.
             </p>
           </div>
 
           <Tabs defaultValue="ingest" className="space-y-6">
-            <TabsList className="grid w-full grid-cols-3 max-w-md">
+            <TabsList className="grid w-full grid-cols-4 max-w-lg">
               <TabsTrigger value="ingest" className="text-xs sm:text-sm">
                 <Upload className="h-4 w-4 mr-1.5 hidden sm:inline" /> Ingest
+              </TabsTrigger>
+              <TabsTrigger value="twitter" className="text-xs sm:text-sm">
+                <Twitter className="h-4 w-4 mr-1.5 hidden sm:inline" /> X Feed
               </TabsTrigger>
               <TabsTrigger value="review" className="text-xs sm:text-sm">
                 <FileText className="h-4 w-4 mr-1.5 hidden sm:inline" /> Review
@@ -321,6 +344,9 @@ const ContentAdmin = () => {
 
             <TabsContent value="ingest">
               <IngestForm />
+            </TabsContent>
+            <TabsContent value="twitter">
+              <MonitoredAccounts />
             </TabsContent>
             <TabsContent value="review">
               <ReviewQueue />

@@ -5,3 +5,9 @@ verify_jwt = false
 
 [functions.ingest-content]
 verify_jwt = false
+
+[functions.chunk-content]
+verify_jwt = false
+
+[functions.scan-twitter]
+verify_jwt = false
