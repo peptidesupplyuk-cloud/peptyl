@@ -13,6 +13,7 @@ const navItems = [
   { label: "Education", href: "/education" },
   { label: "Shop", href: "/shop" },
   { label: "About", href: "/about" },
+  { label: "Admin", href: "/admin/content", authOnly: true },
 ];
 
 const Header = () => {
@@ -52,7 +53,7 @@ const Header = () => {
 
         {/* Desktop nav */}
         <nav className="hidden md:flex items-center gap-1">
-          {navItems.map((item) => (
+          {navItems.filter(item => !item.authOnly || user).map((item) => (
             <Link
               key={item.href}
               to={item.href}
@@ -115,7 +116,7 @@ const Header = () => {
             className="md:hidden bg-card/95 backdrop-blur-xl border-b border-border"
           >
             <nav className="container mx-auto px-6 py-4 flex flex-col gap-1">
-              {navItems.map((item) => (
+              {navItems.filter(item => !item.authOnly || user).map((item) => (
                 <Link
                   key={item.href}
                   to={item.href}
