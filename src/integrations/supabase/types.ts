@@ -28,6 +28,7 @@ export type Database = {
           reviewed_at: string | null
           reviewed_by: string | null
           search_vector: unknown
+          source_account_handle: string | null
           source_id: string | null
           status: string
           summary: string | null
@@ -48,6 +49,7 @@ export type Database = {
           reviewed_at?: string | null
           reviewed_by?: string | null
           search_vector?: unknown
+          source_account_handle?: string | null
           source_id?: string | null
           status?: string
           summary?: string | null
@@ -68,6 +70,7 @@ export type Database = {
           reviewed_at?: string | null
           reviewed_by?: string | null
           search_vector?: unknown
+          source_account_handle?: string | null
           source_id?: string | null
           status?: string
           summary?: string | null
@@ -348,6 +351,36 @@ export type Database = {
           },
         ]
       }
+      keyword_scores: {
+        Row: {
+          accept_count: number
+          created_at: string
+          id: string
+          keyword: string
+          reject_count: number
+          score: number
+          updated_at: string
+        }
+        Insert: {
+          accept_count?: number
+          created_at?: string
+          id?: string
+          keyword: string
+          reject_count?: number
+          score?: number
+          updated_at?: string
+        }
+        Update: {
+          accept_count?: number
+          created_at?: string
+          id?: string
+          keyword?: string
+          reject_count?: number
+          score?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
       monitored_accounts: {
         Row: {
           added_by: string | null
@@ -360,7 +393,10 @@ export type Database = {
           last_scanned_at: string | null
           last_tweet_id: string | null
           platform: string
+          quality_score: number
           scan_frequency: string
+          total_accepted: number
+          total_rejected: number
           updated_at: string
         }
         Insert: {
@@ -374,7 +410,10 @@ export type Database = {
           last_scanned_at?: string | null
           last_tweet_id?: string | null
           platform?: string
+          quality_score?: number
           scan_frequency?: string
+          total_accepted?: number
+          total_rejected?: number
           updated_at?: string
         }
         Update: {
@@ -388,7 +427,10 @@ export type Database = {
           last_scanned_at?: string | null
           last_tweet_id?: string | null
           platform?: string
+          quality_score?: number
           scan_frequency?: string
+          total_accepted?: number
+          total_rejected?: number
           updated_at?: string
         }
         Relationships: []

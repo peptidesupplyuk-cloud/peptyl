@@ -179,12 +179,21 @@ const MonitoredAccounts = () => {
                 onCheckedChange={(checked) => toggleAccount.mutate({ id: acc.id, is_active: checked })}
               />
               <div className="flex-1 min-w-0">
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-2 flex-wrap">
                   <span className="font-mono text-sm text-foreground">@{acc.handle}</span>
                   {acc.display_name && <span className="text-xs text-muted-foreground">({acc.display_name})</span>}
                   <Badge variant="outline" className={`text-[10px] ${acc.is_active ? "text-green-600" : "text-muted-foreground"}`}>
                     {acc.is_active ? "active" : "paused"}
                   </Badge>
+                  {((acc as any).total_accepted > 0 || (acc as any).total_rejected > 0) && (
+                    <span className={`text-[10px] font-mono px-1.5 py-0.5 rounded ${
+                      (acc as any).quality_score >= 60 ? "bg-green-500/10 text-green-600" :
+                      (acc as any).quality_score >= 30 ? "bg-yellow-500/10 text-yellow-600" :
+                      "bg-red-500/10 text-red-600"
+                    }`}>
+                      Q:{Math.round((acc as any).quality_score)} ({(acc as any).total_accepted}✓ {(acc as any).total_rejected}✗)
+                    </span>
+                  )}
                 </div>
                 <div className="flex items-center gap-2 text-[10px] text-muted-foreground mt-0.5">
                   <Clock className="h-3 w-3" />
