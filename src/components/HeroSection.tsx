@@ -25,7 +25,7 @@ const HeroSection = () => (
         >
           <span className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-primary-foreground/10 backdrop-blur-sm border border-primary-foreground/10 text-primary text-sm font-medium mb-6">
             <FlaskConical className="h-3.5 w-3.5" />
-            By Peptide Supply — For the UK &amp; European Community
+            By Peptide Supply — UK &amp; Europe's Research Platform
           </span>
         </motion.div>
 
@@ -35,9 +35,9 @@ const HeroSection = () => (
           transition={{ duration: 0.8, delay: 0.1 }}
           className="text-4xl sm:text-5xl lg:text-7xl font-heading font-bold text-primary-foreground leading-[1.1] mb-6"
         >
-          Your Peptide
+          Optimise Your Biology
           <br />
-          <span className="text-gradient-teal">Research Hub</span>
+          <span className="text-gradient-teal">With Data.</span>
         </motion.h1>
 
         <motion.p
@@ -46,7 +46,7 @@ const HeroSection = () => (
           transition={{ duration: 0.8, delay: 0.2 }}
           className="text-lg sm:text-xl text-primary-foreground/60 max-w-xl mb-10 leading-relaxed"
         >
-           Free tools, verified research, and community insights to support your peptide journey. Database, calculators, and biomarker tracking — all in one place.
+          Upload bloodwork. Get personalised peptide protocols. Track what's working. The UK's first platform connecting your biomarkers to 56 research-backed compounds — built for longevity, performance, and metabolic health.
         </motion.p>
 
         <motion.div
