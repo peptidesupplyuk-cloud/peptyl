@@ -26,6 +26,8 @@ const HowToReconstitute = lazy(() => import("./pages/articles/HowToReconstitute"
 const Bpc157VsTb500 = lazy(() => import("./pages/articles/Bpc157VsTb500"));
 const StorageGuide = lazy(() => import("./pages/articles/StorageGuide"));
 const Glp1Guide = lazy(() => import("./pages/articles/Glp1Guide"));
+const RetatrutideReview = lazy(() => import("./pages/articles/RetatrutideReview"));
+const GhkCuGuide = lazy(() => import("./pages/articles/GhkCuGuide"));
 
 const queryClient = new QueryClient();
 
@@ -55,6 +57,8 @@ const App = () => (
               <Route path="/education/bpc157-vs-tb500" element={<Bpc157VsTb500 />} />
               <Route path="/education/peptide-storage-guide" element={<StorageGuide />} />
               <Route path="/education/understanding-glp1-peptides" element={<Glp1Guide />} />
+              <Route path="/education/retatrutide-triple-agonist-review" element={<RetatrutideReview />} />
+              <Route path="/education/ghk-cu-pretty-peptide" element={<GhkCuGuide />} />
               {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
               <Route path="*" element={<NotFound />} />
             </Routes>

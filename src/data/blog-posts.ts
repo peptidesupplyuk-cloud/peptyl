@@ -48,4 +48,20 @@ export const blogPosts: BlogPost[] = [
     readTime: "12 min read",
     date: "February 2026",
   },
+  {
+    slug: "retatrutide-triple-agonist-review",
+    title: "Retatrutide: Why the Triple-Agonist Is Turning Heads",
+    category: "Deep Dive",
+    excerpt: "A straightforward look at Retatrutide — the first triple-agonist GLP-1 — and why researchers think it could outperform semaglutide and tirzepatide.",
+    readTime: "7 min read",
+    date: "February 2026",
+  },
+  {
+    slug: "ghk-cu-pretty-peptide",
+    title: "GHK-Cu: Why Everyone's Talking About the 'Pretty Peptide'",
+    category: "Trending",
+    excerpt: "GHK-Cu is surging in popularity for skin, hair and tissue repair. Here's what the research actually says about the copper peptide everyone's calling the 'pretty peptide'.",
+    readTime: "6 min read",
+    date: "February 2026",
+  },
 ];
