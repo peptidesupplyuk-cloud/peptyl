@@ -464,10 +464,12 @@ export type Database = {
           age: number | null
           bp_diastolic: number | null
           bp_systolic: number | null
+          country: string | null
           created_at: string
           gender: string | null
           height_cm: number | null
           id: string
+          research_goal: string | null
           updated_at: string
           user_id: string
           username: string | null
@@ -477,10 +479,12 @@ export type Database = {
           age?: number | null
           bp_diastolic?: number | null
           bp_systolic?: number | null
+          country?: string | null
           created_at?: string
           gender?: string | null
           height_cm?: number | null
           id?: string
+          research_goal?: string | null
           updated_at?: string
           user_id: string
           username?: string | null
@@ -490,10 +494,12 @@ export type Database = {
           age?: number | null
           bp_diastolic?: number | null
           bp_systolic?: number | null
+          country?: string | null
           created_at?: string
           gender?: string | null
           height_cm?: number | null
           id?: string
+          research_goal?: string | null
           updated_at?: string
           user_id?: string
           username?: string | null

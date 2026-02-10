@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
-import { Mail, Lock, AlertCircle, ArrowRight, Loader2 } from "lucide-react";
+import { Mail, Lock, AlertCircle, ArrowRight, Loader2, Globe, Target } from "lucide-react";
 import { z } from "zod";
 import { useAuth } from "@/contexts/AuthContext";
 import Logo from "@/components/Logo";
@@ -10,17 +10,35 @@ import SEO from "@/components/SEO";
 const emailSchema = z.string().trim().email("Please enter a valid email address").max(255);
 const passwordSchema = z.string().min(6, "Password must be at least 6 characters").max(128);
 
+const COUNTRIES = [
+  "United Kingdom", "United States", "Canada", "Australia", "Germany", "France",
+  "Spain", "Italy", "Netherlands", "Sweden", "Norway", "Denmark", "Finland",
+  "Ireland", "Belgium", "Austria", "Switzerland", "Portugal", "Poland", "Czech Republic",
+  "Greece", "Romania", "Hungary", "New Zealand", "Japan", "South Korea", "Singapore",
+  "India", "Brazil", "Mexico", "South Africa", "United Arab Emirates", "Other",
+];
+
+const RESEARCH_GOALS = [
+  { value: "weight_loss", label: "Weight Loss / Metabolic Health" },
+  { value: "longevity", label: "Longevity / Anti-Ageing" },
+  { value: "healing", label: "Healing / Recovery" },
+  { value: "performance", label: "Performance / Muscle" },
+  { value: "cognitive", label: "Cognitive / Nootropic" },
+  { value: "general", label: "General Research" },
+];
+
 const Auth = () => {
   const [isSignUp, setIsSignUp] = useState(false);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [country, setCountry] = useState("");
+  const [researchGoal, setResearchGoal] = useState("");
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
   const [loading, setLoading] = useState(false);
   const { signIn, signUp, user } = useAuth();
   const navigate = useNavigate();
 
-  // Redirect if already logged in
   if (user) {
     navigate("/peptides", { replace: true });
     return null;
@@ -31,7 +49,6 @@ const Auth = () => {
     setError("");
     setSuccess("");
 
-    // Validate
     const emailResult = emailSchema.safeParse(email);
     if (!emailResult.success) {
       setError(emailResult.error.errors[0].message);
@@ -43,10 +60,18 @@ const Auth = () => {
       return;
     }
 
+    if (isSignUp && !country) {
+      setError("Please select your country.");
+      return;
+    }
+
     setLoading(true);
     try {
       if (isSignUp) {
-        const { error } = await signUp(emailResult.data, password);
+        const { error } = await signUp(emailResult.data, password, {
+          country,
+          research_goal: researchGoal || undefined,
+        });
         if (error) {
           if (error.message.includes("already registered")) {
             setError("This email is already registered. Try signing in instead.");
@@ -74,6 +99,8 @@ const Auth = () => {
       setLoading(false);
     }
   };
+
+  const selectClass = "w-full pl-10 pr-4 py-2.5 rounded-xl bg-background border border-border text-sm text-foreground focus:outline-none focus:border-primary/40 transition-colors appearance-none";
 
   return (
     <div className="min-h-screen bg-background flex items-center justify-center px-6">
@@ -132,6 +159,44 @@ const Auth = () => {
                 />
               </div>
             </div>
+
+            {isSignUp && (
+              <>
+                <div>
+                  <label className="text-xs font-medium text-foreground mb-1.5 block">Country <span className="text-destructive">*</span></label>
+                  <div className="relative">
+                    <Globe className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                    <select
+                      value={country}
+                      onChange={(e) => setCountry(e.target.value)}
+                      className={selectClass}
+                    >
+                      <option value="">Select your country</option>
+                      {COUNTRIES.map((c) => (
+                        <option key={c} value={c}>{c}</option>
+                      ))}
+                    </select>
+                  </div>
+                </div>
+
+                <div>
+                  <label className="text-xs font-medium text-foreground mb-1.5 block">Research Interest <span className="text-muted-foreground">(optional)</span></label>
+                  <div className="relative">
+                    <Target className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                    <select
+                      value={researchGoal}
+                      onChange={(e) => setResearchGoal(e.target.value)}
+                      className={selectClass}
+                    >
+                      <option value="">Select a research interest</option>
+                      {RESEARCH_GOALS.map((g) => (
+                        <option key={g.value} value={g.value}>{g.label}</option>
+                      ))}
+                    </select>
+                  </div>
+                </div>
+              </>
+            )}
 
             {error && (
               <div className="flex items-start gap-2 p-3 rounded-xl bg-destructive/10 border border-destructive/20">

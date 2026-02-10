@@ -2,11 +2,16 @@ import { createContext, useContext, useEffect, useState, type ReactNode } from "
 import { supabase } from "@/integrations/supabase/client";
 import type { User, Session } from "@supabase/supabase-js";
 
+interface SignUpMeta {
+  country?: string;
+  research_goal?: string;
+}
+
 interface AuthContextType {
   user: User | null;
   session: Session | null;
   loading: boolean;
-  signUp: (email: string, password: string) => Promise<{ error: Error | null }>;
+  signUp: (email: string, password: string, meta?: SignUpMeta) => Promise<{ error: Error | null }>;
   signIn: (email: string, password: string) => Promise<{ error: Error | null }>;
   signOut: () => Promise<void>;
 }
@@ -44,12 +49,19 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     return () => subscription.unsubscribe();
   }, []);
 
-  const signUp = async (email: string, password: string) => {
-    const { error } = await supabase.auth.signUp({
+  const signUp = async (email: string, password: string, meta?: SignUpMeta) => {
+    const { data, error } = await supabase.auth.signUp({
       email,
       password,
       options: { emailRedirectTo: `${window.location.origin}/` },
     });
+    // Store extra profile fields after signup
+    if (!error && data.user && meta) {
+      await supabase.from("profiles").update({
+        country: meta.country || null,
+        research_goal: meta.research_goal || null,
+      }).eq("user_id", data.user.id);
+    }
     return { error: error ? new Error(error.message) : null };
   };
 
