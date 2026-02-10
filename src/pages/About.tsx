@@ -10,7 +10,7 @@ const stats = [
   { label: "Peptides in Our Database", value: "56+", icon: Beaker },
   { label: "Years Scaling AI Startups", value: "6+", icon: Rocket },
   { label: "Years Biohacking", value: "5+", icon: Brain },
-  { label: "Built for the UK & EU", value: "🇬🇧", icon: Globe },
+  { label: "Serving Researchers Globally", value: "🌍", icon: Globe },
 ];
 
 const values = [
@@ -41,8 +41,8 @@ const About = () => {
   return (
     <div className="min-h-screen bg-background">
       <SEO
-        title="About Peptyl — The Peptide Research Hub for the UK & Europe"
-        description="Built by biohackers and AI engineers. Peptyl is the research platform the UK & European peptide community deserved."
+        title="About Peptyl — The Global Peptide Research Hub"
+        description="Built by biohackers and AI engineers. Peptyl is the research platform the global peptide community deserved."
         path="/about"
       />
       <Header />
@@ -73,7 +73,7 @@ const About = () => {
             transition={{ delay: 0.2 }}
             className="mt-6 text-lg text-primary-foreground/60 max-w-2xl leading-relaxed"
           >
-            Peptyl is the research hub we wished existed — combining AI-driven tools, real biomarker data, and community knowledge for the UK &amp; European peptide community.
+            Peptyl is the research hub we wished existed — combining AI-driven tools, real biomarker data, and community knowledge for the global peptide research community.
           </motion.p>
         </div>
       </section>
@@ -120,7 +120,7 @@ const About = () => {
               className="space-y-6 text-muted-foreground leading-relaxed"
             >
               <p>
-                The UK &amp; European peptide community deserved better — better education, better tools, and more transparency. We couldn't find a single platform that combined reliable research data with practical dosing tools and genuine community support. So we built one.
+                The peptide community deserved better — better education, better tools, and more transparency. We couldn't find a single platform that combined reliable research data with practical dosing tools and genuine community support. So we built one.
               </p>
               <p>
                 Our team brings together <strong className="text-foreground">10+ years in global manufacturing and supply chain</strong> for Fortune 500 companies, <strong className="text-foreground">6+ years scaling AI-driven startups</strong>, and first-hand experience in the <strong className="text-foreground">biohacking and peptide research space</strong>. That combination is what makes Peptyl's tools, data, and sourcing standards fundamentally different.
