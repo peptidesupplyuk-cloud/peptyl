@@ -46,7 +46,7 @@ const HeroSection = () => (
           transition={{ duration: 0.8, delay: 0.2 }}
           className="text-lg sm:text-xl text-primary-foreground/60 max-w-xl mb-10 leading-relaxed"
         >
-          Upload bloodwork. Get personalised peptide protocols. Track what's working. The UK's first platform connecting your biomarkers to 56 research-backed compounds — built for longevity, performance, and metabolic health.
+          Upload bloodwork. Get personalised peptide and supplement protocols. Track what's working. The UK's first platform connecting your biomarkers to research-backed compounds and targeted supplementation — for longevity, performance, and metabolic health.
         </motion.p>
 
         <motion.div
