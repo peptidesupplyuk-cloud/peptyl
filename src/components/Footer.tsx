@@ -44,7 +44,7 @@ const Footer = () => (
 
       <div className="mt-12 pt-8 border-t border-primary-foreground/10">
         <div className="flex flex-col md:flex-row items-center justify-between gap-4 mb-4">
-          <p className="text-xs text-primary-foreground/40">© 2026 Peptyl. All rights reserved. A Peptide Supply brand.</p>
+          <p className="text-xs text-primary-foreground/40">© 2026 Peptyl. All rights reserved.</p>
           <p className="text-xs text-primary-foreground/40">
             <Link to="/terms-of-service" className="hover:text-primary transition-colors">Terms</Link>
             {" · "}
