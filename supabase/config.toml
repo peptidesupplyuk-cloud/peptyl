@@ -2,3 +2,6 @@ project_id = "wmdudifpbrtojkmtczaq"
 
 [functions.peptide-chat]
 verify_jwt = false
+
+[functions.ingest-content]
+verify_jwt = false
