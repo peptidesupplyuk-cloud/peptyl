@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { User, Ruler, Weight, Heart, Loader2, Save } from "lucide-react";
+import { User, Ruler, Weight, Heart, Loader2, Save, Calendar, Users } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { useToast } from "@/hooks/use-toast";
@@ -9,6 +9,8 @@ interface Biometrics {
   weight_kg: number | null;
   bp_systolic: number | null;
   bp_diastolic: number | null;
+  gender: string | null;
+  age: number | null;
 }
 
 const ProfileBiometrics = ({ onUpdate }: { onUpdate?: (bio: Biometrics) => void }) => {
@@ -21,13 +23,15 @@ const ProfileBiometrics = ({ onUpdate }: { onUpdate?: (bio: Biometrics) => void 
     weight_kg: null,
     bp_systolic: null,
     bp_diastolic: null,
+    gender: null,
+    age: null,
   });
 
   useEffect(() => {
     if (!user) return;
     supabase
       .from("profiles")
-      .select("height_cm, weight_kg, bp_systolic, bp_diastolic")
+      .select("height_cm, weight_kg, bp_systolic, bp_diastolic, gender, age")
       .eq("user_id", user.id)
       .single()
       .then(({ data }) => {
@@ -37,6 +41,8 @@ const ProfileBiometrics = ({ onUpdate }: { onUpdate?: (bio: Biometrics) => void 
             weight_kg: data.weight_kg as number | null,
             bp_systolic: data.bp_systolic as number | null,
             bp_diastolic: data.bp_diastolic as number | null,
+            gender: (data as any).gender as string | null,
+            age: (data as any).age as number | null,
           });
         }
         setLoading(false);
@@ -71,7 +77,9 @@ const ProfileBiometrics = ({ onUpdate }: { onUpdate?: (bio: Biometrics) => void 
         weight_kg: bio.weight_kg,
         bp_systolic: bio.bp_systolic,
         bp_diastolic: bio.bp_diastolic,
-      })
+        gender: bio.gender,
+        age: bio.age,
+      } as any)
       .eq("user_id", user.id);
 
     if (error) {
@@ -105,6 +113,37 @@ const ProfileBiometrics = ({ onUpdate }: { onUpdate?: (bio: Biometrics) => void 
             </p>
           </div>
         )}
+      </div>
+
+      <div className="grid grid-cols-2 gap-3">
+        <div>
+          <label className="text-xs font-medium text-muted-foreground mb-1 block flex items-center gap-1">
+            <Users className="h-3 w-3" /> Gender
+          </label>
+          <select
+            value={bio.gender ?? ""}
+            onChange={(e) => setBio({ ...bio, gender: e.target.value || null })}
+            className="w-full px-3 py-2 rounded-xl bg-background border border-border text-sm text-foreground focus:outline-none focus:border-primary/40"
+          >
+            <option value="">Select</option>
+            <option value="male">Male</option>
+            <option value="female">Female</option>
+            <option value="other">Other</option>
+            <option value="prefer_not_to_say">Prefer not to say</option>
+          </select>
+        </div>
+        <div>
+          <label className="text-xs font-medium text-muted-foreground mb-1 block flex items-center gap-1">
+            <Calendar className="h-3 w-3" /> Age
+          </label>
+          <input
+            type="number"
+            value={bio.age ?? ""}
+            onChange={(e) => setBio({ ...bio, age: e.target.value ? parseInt(e.target.value) : null })}
+            placeholder="30"
+            className="w-full px-3 py-2 rounded-xl bg-background border border-border text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-primary/40"
+          />
+        </div>
       </div>
 
       <div className="grid grid-cols-2 gap-3">

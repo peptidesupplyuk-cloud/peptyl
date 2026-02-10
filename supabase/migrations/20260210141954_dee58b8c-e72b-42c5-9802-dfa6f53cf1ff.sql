@@ -1,0 +1,4 @@
+
+ALTER TABLE public.profiles
+ADD COLUMN gender text,
+ADD COLUMN age integer;

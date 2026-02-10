@@ -461,9 +461,11 @@ export type Database = {
       }
       profiles: {
         Row: {
+          age: number | null
           bp_diastolic: number | null
           bp_systolic: number | null
           created_at: string
+          gender: string | null
           height_cm: number | null
           id: string
           updated_at: string
@@ -472,9 +474,11 @@ export type Database = {
           weight_kg: number | null
         }
         Insert: {
+          age?: number | null
           bp_diastolic?: number | null
           bp_systolic?: number | null
           created_at?: string
+          gender?: string | null
           height_cm?: number | null
           id?: string
           updated_at?: string
@@ -483,9 +487,11 @@ export type Database = {
           weight_kg?: number | null
         }
         Update: {
+          age?: number | null
           bp_diastolic?: number | null
           bp_systolic?: number | null
           created_at?: string
+          gender?: string | null
           height_cm?: number | null
           id?: string
           updated_at?: string
