@@ -9,7 +9,7 @@ const TermsOfService = () => {
     <div className="min-h-screen bg-background">
       <SEO
         title="Terms of Service"
-        description="Terms and conditions for using PeptideSupplyUK. Research chemical purchase terms, shipping, returns, and legal obligations under UK law."
+        description="Terms and conditions for using Peptyl. Research platform usage terms, data handling, and legal obligations under UK law."
         path="/terms-of-service"
       />
       <Header />

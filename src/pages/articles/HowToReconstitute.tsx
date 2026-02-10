@@ -7,6 +7,8 @@ const HowToReconstitute = () => (
     title="How to Reconstitute Peptides: Step-by-Step Guide"
     readTime="6 min read"
     date="February 2026"
+    slug="how-to-reconstitute-peptides"
+    description="Master peptide reconstitution with this complete guide. Learn proper technique, avoid common mistakes, and ensure optimal peptide stability."
   >
     <p>Reconstitution is one of the most important skills in peptide research. Done correctly, it ensures maximum peptide stability and accurate dosing. Done incorrectly, it can render your expensive peptides useless.</p>
 

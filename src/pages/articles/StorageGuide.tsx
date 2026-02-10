@@ -6,6 +6,8 @@ const StorageGuide = () => (
     title="The Complete Peptide Storage Guide"
     readTime="5 min read"
     date="February 2026"
+    slug="peptide-storage-guide"
+    description="Proper storage is critical for peptide stability. Learn temperature requirements, light protection, and how to maximize shelf life."
   >
     <p>Proper storage is absolutely critical for maintaining peptide integrity. Even the highest quality peptides will degrade if stored incorrectly, wasting your research investment.</p>
 

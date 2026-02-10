@@ -7,6 +7,8 @@ const Glp1Guide = () => (
     title="Understanding GLP-1 Peptides: Semaglutide, Tirzepatide & Retatrutide"
     readTime="12 min read"
     date="February 2026"
+    slug="understanding-glp1-peptides"
+    description="Comprehensive guide to GLP-1 receptor agonists. Learn how these compounds work and their applications in research."
   >
     <p>GLP-1 receptor agonists represent some of the most researched peptides in metabolic science. Understanding how these compounds work, their differences, and proper research protocols is essential for anyone conducting related studies.</p>
 

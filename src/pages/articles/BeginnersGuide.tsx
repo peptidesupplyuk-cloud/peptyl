@@ -7,6 +7,8 @@ const BeginnersGuide = () => (
     title="Complete Beginner's Guide to Research Peptides"
     readTime="8 min read"
     date="February 2026"
+    slug="beginners-guide-peptides"
+    description="Everything you need to know before starting peptide research. Storage, reconstitution, dosing, and safety guidelines for beginners."
   >
     <p>Starting your first peptide research project can feel overwhelming. With hundreds of peptides available and conflicting information online, where do you even begin?</p>
     <p>This comprehensive guide will walk you through everything you need to know as a complete beginner, from understanding what peptides are to safely handling and storing them.</p>

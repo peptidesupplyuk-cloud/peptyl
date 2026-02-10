@@ -1,5 +1,6 @@
 import { Link } from "react-router-dom";
 import { ArrowLeft, Clock, Calendar } from "lucide-react";
+import { Helmet } from "react-helmet-async";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 
@@ -9,12 +10,40 @@ interface ArticleLayoutProps {
   readTime: string;
   date: string;
   children: React.ReactNode;
+  slug?: string;
+  description?: string;
 }
 
-const ArticleLayout = ({ category, title, readTime, date, children }: ArticleLayoutProps) => {
+const BASE_URL = "https://peptyl.co.uk";
+
+const ArticleLayout = ({ category, title, readTime, date, children, slug, description }: ArticleLayoutProps) => {
+  const articleJsonLd = slug ? {
+    "@context": "https://schema.org",
+    "@type": "Article",
+    "headline": title,
+    "description": description || title,
+    "datePublished": "2026-02-01",
+    "dateModified": "2026-02-01",
+    "author": { "@type": "Organization", "name": "Peptyl" },
+    "publisher": { "@type": "Organization", "name": "Peptyl", "url": BASE_URL },
+    "mainEntityOfPage": `${BASE_URL}/education/${slug}`,
+  } : null;
+
   return (
     <div className="min-h-screen bg-background">
       <Header />
+      {articleJsonLd && (
+        <Helmet>
+          <title>{`${title} | Peptyl`}</title>
+          <meta name="description" content={description || title} />
+          <link rel="canonical" href={`${BASE_URL}/education/${slug}`} />
+          <meta property="og:title" content={`${title} | Peptyl`} />
+          <meta property="og:description" content={description || title} />
+          <meta property="og:type" content="article" />
+          <meta property="og:url" content={`${BASE_URL}/education/${slug}`} />
+          <script type="application/ld+json">{JSON.stringify(articleJsonLd)}</script>
+        </Helmet>
+      )}
       <main className="pt-24 pb-16">
         <div className="container mx-auto px-6">
           <div className="max-w-3xl mx-auto">

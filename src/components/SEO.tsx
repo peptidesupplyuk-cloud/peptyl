@@ -5,12 +5,13 @@ interface SEOProps {
   description: string;
   path: string;
   type?: string;
+  jsonLd?: Record<string, unknown>;
 }
 
 const SITE_NAME = "Peptyl";
 const BASE_URL = "https://peptyl.co.uk";
 
-const SEO = ({ title, description, path, type = "website" }: SEOProps) => {
+const SEO = ({ title, description, path, type = "website", jsonLd }: SEOProps) => {
   const fullTitle = path === "/" ? title : `${title} | ${SITE_NAME}`;
   const url = `${BASE_URL}${path}`;
 
@@ -29,6 +30,12 @@ const SEO = ({ title, description, path, type = "website" }: SEOProps) => {
       <meta name="twitter:card" content="summary_large_image" />
       <meta name="twitter:title" content={fullTitle} />
       <meta name="twitter:description" content={description} />
+
+      {jsonLd && (
+        <script type="application/ld+json">
+          {JSON.stringify(jsonLd)}
+        </script>
+      )}
     </Helmet>
   );
 };

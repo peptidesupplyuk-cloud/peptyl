@@ -13,6 +13,17 @@ const EducationPage = () => {
         title="Peptide Education Hub — Science-Backed Guides"
         description="Learn about peptide reconstitution, storage, GLP-1 protocols, BPC-157 vs TB-500, and more. Free, science-backed educational resources."
         path="/education"
+        jsonLd={{
+          "@context": "https://schema.org",
+          "@type": "ItemList",
+          "name": "Peptide Education Articles",
+          "itemListElement": blogPosts.map((post, i) => ({
+            "@type": "ListItem",
+            "position": i + 1,
+            "url": `https://peptyl.co.uk/education/${post.slug}`,
+            "name": post.title,
+          })),
+        }}
       />
       <Header />
       <main className="pt-24 pb-16">
