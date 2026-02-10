@@ -25,7 +25,7 @@ const HeroSection = () => (
         >
           <span className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-primary-foreground/10 backdrop-blur-sm border border-primary-foreground/10 text-primary text-sm font-medium mb-6">
             <FlaskConical className="h-3.5 w-3.5" />
-            UK's Leading Peptide Platform
+            UK's Leading Research Platform
           </span>
         </motion.div>
 
@@ -62,7 +62,7 @@ const HeroSection = () => (
             </Button>
           </Link>
           <Link to="/calculators">
-            <Button size="lg" variant="outline" className="border-primary-foreground/20 text-primary-foreground hover:bg-primary-foreground/10 text-base px-8">
+            <Button size="lg" variant="outline" className="border-primary-foreground/20 text-primary-foreground hover:bg-primary-foreground/10 text-base px-8 bg-primary-foreground/5">
               Try Calculators
             </Button>
           </Link>
