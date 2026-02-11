@@ -13,10 +13,11 @@ import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
 import {
   AlertTriangle, Users, Globe, Mail, Activity, FlaskConical, Droplets, Loader2,
-  Upload, CheckCircle, XCircle, Clock, FileText, ExternalLink, Twitter, BarChart3, Target, Sparkles,
+  Upload, CheckCircle, XCircle, Clock, FileText, ExternalLink, Twitter, BarChart3, Target, Sparkles, Megaphone, Search, Copy, Link as LinkIcon,
 } from "lucide-react";
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from "recharts";
 import MonitoredAccounts from "@/components/admin/MonitoredAccounts";
+import { campaigns } from "@/data/campaigns";
 import IngestChat from "@/components/admin/IngestChat";
 
 const ADMIN_EMAIL = "peptidesupplyuk@gmail.com";
@@ -406,6 +407,105 @@ const ContentTab = () => (
   </Tabs>
 );
 
+/* ========== CAMPAIGNS TAB ========== */
+
+const CampaignsTab = () => {
+  const [search, setSearch] = useState("");
+  const [copied, setCopied] = useState<string | null>(null);
+
+  const filtered = campaigns.filter(
+    (c) =>
+      c.name.toLowerCase().includes(search.toLowerCase()) ||
+      c.slug.toLowerCase().includes(search.toLowerCase()) ||
+      c.headline.toLowerCase().includes(search.toLowerCase())
+  );
+
+  const copyUrl = (slug: string) => {
+    const url = `https://peptyl.co.uk/start/${slug}`;
+    navigator.clipboard.writeText(url);
+    setCopied(slug);
+    setTimeout(() => setCopied(null), 2000);
+  };
+
+  return (
+    <div className="space-y-4">
+      <div className="flex items-center justify-between gap-4 flex-wrap">
+        <h2 className="font-heading font-semibold text-foreground flex items-center gap-2">
+          <Megaphone className="h-5 w-5 text-primary" /> Ad Landing Pages ({campaigns.length})
+        </h2>
+        <div className="relative w-full max-w-xs">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+          <Input
+            placeholder="Search campaigns..."
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            className="pl-9 h-9"
+          />
+        </div>
+      </div>
+
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+        {filtered.map((c) => {
+          const Icon = c.icon;
+          return (
+            <div key={c.slug} className="bg-card border border-border rounded-xl p-4 space-y-3">
+              <div className="flex items-start gap-3">
+                <div className="p-2 rounded-lg bg-primary/10">
+                  <Icon className="h-4 w-4 text-primary" />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <h3 className="font-heading font-semibold text-foreground text-sm">{c.name}</h3>
+                  <p className="text-[11px] text-muted-foreground truncate mt-0.5">{c.headline}</p>
+                </div>
+              </div>
+              <div className="flex items-center gap-1.5">
+                <code className="flex-1 text-[10px] bg-muted/50 rounded-md px-2 py-1.5 text-muted-foreground truncate font-mono">
+                  /start/{c.slug}
+                </code>
+                <Button
+                  size="sm"
+                  variant="ghost"
+                  className="h-7 w-7 p-0 shrink-0"
+                  onClick={() => copyUrl(c.slug)}
+                >
+                  {copied === c.slug ? (
+                    <CheckCircle className="h-3.5 w-3.5 text-green-500" />
+                  ) : (
+                    <Copy className="h-3.5 w-3.5" />
+                  )}
+                </Button>
+                <a
+                  href={`/start/${c.slug}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  <Button size="sm" variant="ghost" className="h-7 w-7 p-0 shrink-0">
+                    <ExternalLink className="h-3.5 w-3.5" />
+                  </Button>
+                </a>
+              </div>
+              <div className="flex gap-1.5 flex-wrap">
+                {c.stats.map((s, i) => (
+                  <span key={i} className="text-[10px] px-2 py-0.5 rounded-md bg-primary/5 text-primary border border-primary/10">
+                    {s.value} {s.label}
+                  </span>
+                ))}
+              </div>
+            </div>
+          );
+        })}
+      </div>
+
+      {filtered.length === 0 && (
+        <div className="bg-card border border-border rounded-2xl p-8 text-center">
+          <Search className="h-10 w-10 text-muted-foreground mx-auto mb-3" />
+          <p className="text-sm text-muted-foreground">No campaigns match "{search}"</p>
+        </div>
+      )}
+    </div>
+  );
+};
+
 /* ========== MAIN PAGE ========== */
 
 const AdminDashboard = () => {
@@ -448,6 +548,9 @@ const AdminDashboard = () => {
               <TabsTrigger value="content" className="gap-1.5">
                 <FileText className="h-4 w-4" /> Content
               </TabsTrigger>
+              <TabsTrigger value="campaigns" className="gap-1.5">
+                <Megaphone className="h-4 w-4" /> Campaigns
+              </TabsTrigger>
             </TabsList>
 
             <TabsContent value="analytics">
@@ -455,6 +558,9 @@ const AdminDashboard = () => {
             </TabsContent>
             <TabsContent value="content">
               <ContentTab />
+            </TabsContent>
+            <TabsContent value="campaigns">
+              <CampaignsTab />
             </TabsContent>
           </Tabs>
         </div>
