@@ -19,6 +19,7 @@ import { getRecommendations, getBiometricRecommendations, type Recommendation, t
 import { useToast } from "@/hooks/use-toast";
 import { Checkbox } from "@/components/ui/checkbox";
 import SEO from "@/components/SEO";
+import ExperienceChat from "@/components/dashboard/ExperienceChat";
 
 const Dashboard = () => {
   const { data: panels = [], refetch: refetchPanels } = useBloodworkPanels();
@@ -177,6 +178,8 @@ const Dashboard = () => {
                   </div>
                 </div>
               )}
+
+              <ExperienceChat />
 
               {panels.length === 0 && (
                 <div className="bg-card rounded-2xl border border-border p-8 text-center">
