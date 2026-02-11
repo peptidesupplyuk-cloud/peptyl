@@ -64,4 +64,12 @@ export const blogPosts: BlogPost[] = [
     readTime: "6 min read",
     date: "February 2026",
   },
+  {
+    slug: "russia-cognitive-peptides",
+    title: "Why Russia Is Ahead of the Game on Cognitive Peptides",
+    category: "Deep Dive",
+    excerpt: "Russia has approved Semax, Selank, Noopept, Cortexin, and Cerebrolysin while Western regulators remain cautious. Here's what they've approved, why, and what researchers should know.",
+    readTime: "9 min read",
+    date: "February 2026",
+  },
 ];
