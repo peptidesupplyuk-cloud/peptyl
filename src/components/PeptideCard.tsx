@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
-import { ThumbsUp, ThumbsDown, TrendingUp, AlertTriangle, Clock, Filter, ChevronDown, ChevronUp, Syringe, CalendarDays, Sparkles } from "lucide-react";
-import type { PeptideData } from "@/data/peptides";
+import { ThumbsUp, ThumbsDown, TrendingUp, AlertTriangle, Clock, Filter, ChevronDown, ChevronUp, Syringe, CalendarDays, Sparkles, CheckCircle2, FlaskConical, Minus } from "lucide-react";
+import type { PeptideData, ApprovalStatus } from "@/data/peptides";
 
 interface PeptideCardProps {
   peptide: PeptideData;
@@ -9,6 +9,25 @@ interface PeptideCardProps {
   userVotes: Record<number, "up" | "down">;
   onVote: (expIndex: number, direction: "up" | "down") => void;
 }
+
+const ApprovalBadge = ({ region, approval }: { region: string; approval: ApprovalStatus }) => {
+  if (approval.status === "none") return null;
+  if (approval.status === "approved") {
+    return (
+      <span className="flex items-center gap-1 px-2 py-0.5 rounded-full bg-success/10 text-success text-[10px] font-medium">
+        <CheckCircle2 className="h-3 w-3" />
+        {region}: {approval.label}
+      </span>
+    );
+  }
+  // trial
+  return (
+    <span className="flex items-center gap-1 px-2 py-0.5 rounded-full bg-warm/10 text-warm text-[10px] font-medium">
+      <FlaskConical className="h-3 w-3" />
+      {region}: {approval.phase}
+    </span>
+  );
+};
 
 const PeptideCard = ({ peptide, index, userVotes, onVote }: PeptideCardProps) => {
   const [expanded, setExpanded] = useState(false);
@@ -55,6 +74,21 @@ const PeptideCard = ({ peptide, index, userVotes, onVote }: PeptideCardProps) =>
           </span>
         )}
       </div>
+
+      {/* Regulatory status */}
+      {peptide.regulatoryStatus && (
+        (() => {
+          const rs = peptide.regulatoryStatus;
+          const hasBadges = (rs.us && rs.us.status !== "none") || (rs.eu && rs.eu.status !== "none") || (rs.uk && rs.uk.status !== "none");
+          return hasBadges ? (
+            <div className="flex flex-wrap gap-1.5 mb-4">
+              {rs.us && <ApprovalBadge region="US" approval={rs.us} />}
+              {rs.uk && <ApprovalBadge region="UK" approval={rs.uk} />}
+              {rs.eu && <ApprovalBadge region="EU" approval={rs.eu} />}
+            </div>
+          ) : null;
+        })()
+      )}
 
       {/* Expand/collapse for details */}
       <button
