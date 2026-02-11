@@ -13,10 +13,11 @@ import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
 import {
   AlertTriangle, Users, Globe, Mail, Activity, FlaskConical, Droplets, Loader2,
-  Upload, CheckCircle, XCircle, Clock, FileText, ExternalLink, Twitter, BarChart3, Target,
+  Upload, CheckCircle, XCircle, Clock, FileText, ExternalLink, Twitter, BarChart3, Target, Sparkles,
 } from "lucide-react";
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from "recharts";
 import MonitoredAccounts from "@/components/admin/MonitoredAccounts";
+import IngestChat from "@/components/admin/IngestChat";
 
 const ADMIN_EMAIL = "peptidesupplyuk@gmail.com";
 
@@ -389,13 +390,15 @@ const ProcessingQueue = () => {
 /* ========== CONTENT TAB (combined) ========== */
 
 const ContentTab = () => (
-  <Tabs defaultValue="ingest" className="space-y-6">
-    <TabsList className="grid w-full grid-cols-4 max-w-lg">
+  <Tabs defaultValue="chat" className="space-y-6">
+    <TabsList className="grid w-full grid-cols-5 max-w-xl">
+      <TabsTrigger value="chat" className="text-xs sm:text-sm"><Sparkles className="h-4 w-4 mr-1.5 hidden sm:inline" /> Chat</TabsTrigger>
       <TabsTrigger value="ingest" className="text-xs sm:text-sm"><Upload className="h-4 w-4 mr-1.5 hidden sm:inline" /> Ingest</TabsTrigger>
       <TabsTrigger value="twitter" className="text-xs sm:text-sm"><Twitter className="h-4 w-4 mr-1.5 hidden sm:inline" /> X Feed</TabsTrigger>
       <TabsTrigger value="review" className="text-xs sm:text-sm"><FileText className="h-4 w-4 mr-1.5 hidden sm:inline" /> Review</TabsTrigger>
       <TabsTrigger value="queue" className="text-xs sm:text-sm"><Clock className="h-4 w-4 mr-1.5 hidden sm:inline" /> Queue</TabsTrigger>
     </TabsList>
+    <TabsContent value="chat"><IngestChat /></TabsContent>
     <TabsContent value="ingest"><IngestForm /></TabsContent>
     <TabsContent value="twitter"><MonitoredAccounts /></TabsContent>
     <TabsContent value="review"><ReviewQueue /></TabsContent>
