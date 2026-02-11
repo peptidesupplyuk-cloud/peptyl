@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Activity, FlaskConical, Syringe, LayoutDashboard, AlertTriangle, User } from "lucide-react";
+import { Activity, FlaskConical, Syringe, LayoutDashboard, AlertTriangle, User, BookOpen } from "lucide-react";
 import { addWeeks, format } from "date-fns";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
@@ -115,9 +115,12 @@ const Dashboard = () => {
           </div>
 
           <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-            <TabsList className="grid w-full grid-cols-5 max-w-2xl">
+            <TabsList className="grid w-full grid-cols-6 max-w-3xl">
               <TabsTrigger value="overview" className="text-xs sm:text-sm">
                 <LayoutDashboard className="h-4 w-4 mr-1.5 hidden sm:inline" />Overview
+              </TabsTrigger>
+              <TabsTrigger value="journal" className="text-xs sm:text-sm">
+                <BookOpen className="h-4 w-4 mr-1.5 hidden sm:inline" />Journal
               </TabsTrigger>
               <TabsTrigger value="profile" className="text-xs sm:text-sm">
                 <User className="h-4 w-4 mr-1.5 hidden sm:inline" />Profile
@@ -132,6 +135,11 @@ const Dashboard = () => {
                 <Syringe className="h-4 w-4 mr-1.5 hidden sm:inline" />Tracker
               </TabsTrigger>
             </TabsList>
+
+            {/* JOURNAL TAB */}
+            <TabsContent value="journal" className="space-y-6">
+              <ExperienceChat />
+            </TabsContent>
 
             {/* PROFILE TAB */}
             <TabsContent value="profile" className="space-y-6">
@@ -179,7 +187,7 @@ const Dashboard = () => {
                 </div>
               )}
 
-              <ExperienceChat />
+              
 
               {panels.length === 0 && (
                 <div className="bg-card rounded-2xl border border-border p-8 text-center">
