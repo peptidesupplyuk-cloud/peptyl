@@ -202,6 +202,28 @@ export const peptides: PeptideData[] = [
     ],
   },
   {
+    name: "AHK-Cu",
+    fullName: "Alanine-Histidine-Lysine Copper Peptide",
+    category: "Anti-Aging & Skin",
+    description: "Synthetic copper tripeptide analog of GHK-Cu. Stimulates collagen production, improves skin elasticity, and supports wound healing with enhanced stability over its parent compound.",
+    icon: Sparkles,
+    administration: "Topical/SubQ",
+    frequency: "Daily",
+    doseRange: "1-3 mg/day (topical); 100-500 mcg/day (SubQ)",
+    cycleDuration: "8-12 weeks",
+    isNew: true,
+    regulatoryStatus: {
+      us: { status: "approved", label: "Cosmetic ingredient" },
+      eu: { status: "approved", label: "Cosmetic ingredient (CosIng listed)" },
+      uk: { status: "approved", label: "Cosmetic ingredient" },
+    },
+    experiences: [
+      { text: "Enhanced collagen synthesis with improved stability compared to GHK-Cu", votes: 0, sentiment: "positive", source: "Dermatology research" },
+      { text: "Frequently used in anti-ageing serums alongside microneedling protocols", votes: 0, sentiment: "positive", source: "Cosmetic literature" },
+      { text: "Mild skin irritation possible with high-concentration topical use", votes: 0, sentiment: "caution", source: "Community reports" },
+    ],
+  },
+  {
     name: "GHK-Cu",
     fullName: "Copper Peptide",
     category: "Anti-Aging & Skin",
