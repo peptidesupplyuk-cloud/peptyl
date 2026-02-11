@@ -212,7 +212,9 @@ export const peptides: PeptideData[] = [
     doseRange: "100-600 mcg/day",
     cycleDuration: "8-12 weeks",
     regulatoryStatus: {
-      us: { status: "none" },
+      us: { status: "approved", label: "OTC cosmetic ingredient" },
+      eu: { status: "approved", label: "Cosmetic ingredient (CosIng listed)" },
+      uk: { status: "approved", label: "Cosmetic ingredient" },
     },
     experiences: [
       { text: "Stimulates collagen type I and III synthesis — well established in dermatology", votes: 0, sentiment: "positive", source: "Peer-reviewed research" },
