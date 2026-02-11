@@ -7,6 +7,17 @@ export interface PeptideExperience {
   source?: string;
 }
 
+export type ApprovalStatus =
+  | { status: "approved"; label: string } // e.g. "Approved (Ozempic/Wegovy)"
+  | { status: "trial"; phase: string }    // e.g. "Phase III"
+  | { status: "none" };                   // not pursued / no data
+
+export interface RegulatoryStatus {
+  us?: ApprovalStatus;
+  uk?: ApprovalStatus;
+  eu?: ApprovalStatus;
+}
+
 export interface PeptideData {
   name: string;
   fullName: string;
@@ -19,6 +30,7 @@ export interface PeptideData {
   cycleDuration?: string;
   notes?: string;
   isNew?: boolean;
+  regulatoryStatus?: RegulatoryStatus;
   experiences: PeptideExperience[];
 }
 
@@ -50,6 +62,11 @@ export const peptides: PeptideData[] = [
     frequency: "Daily",
     doseRange: "250-500 mcg/day",
     cycleDuration: "12 weeks",
+    regulatoryStatus: {
+      us: { status: "none" },
+      eu: { status: "none" },
+      uk: { status: "none" },
+    },
     experiences: [
       { text: "Targets fat metabolism without affecting blood sugar — confirmed in clinical trials", votes: 0, sentiment: "positive", source: "Clinical trial data" },
       { text: "Works best alongside caloric deficit for measurable fat reduction", votes: 0, sentiment: "neutral", source: "Research literature" },
@@ -66,6 +83,9 @@ export const peptides: PeptideData[] = [
     doseRange: "200-500 mcg/day",
     cycleDuration: "4-6 weeks",
     notes: "Typically split into 2 doses, morning and evening",
+    regulatoryStatus: {
+      us: { status: "none" },
+    },
     experiences: [
       { text: "Accelerated tendon and ligament healing demonstrated in animal studies", votes: 0, sentiment: "positive", source: "Preclinical research" },
       { text: "Gastroprotective effects observed in gastric injury models", votes: 0, sentiment: "positive", source: "Peer-reviewed studies" },
@@ -82,6 +102,10 @@ export const peptides: PeptideData[] = [
     frequency: "Once weekly",
     doseRange: "1-4.5 mg/week",
     isNew: true,
+    regulatoryStatus: {
+      us: { status: "trial", phase: "Phase III" },
+      eu: { status: "trial", phase: "Phase III" },
+    },
     experiences: [
       { text: "Strong appetite suppression via amylin receptor activation", votes: 0, sentiment: "positive", source: "Phase III trial data" },
       { text: "GI side effects (nausea) common during initial titration", votes: 0, sentiment: "caution", source: "Clinical trial data" },
@@ -97,6 +121,9 @@ export const peptides: PeptideData[] = [
     frequency: "Daily/alternate",
     doseRange: "5-10 ml/day",
     cycleDuration: "10-20 days",
+    regulatoryStatus: {
+      eu: { status: "approved", label: "Approved in select EU countries" },
+    },
     experiences: [
       { text: "Neuroprotective effects demonstrated in stroke patients", votes: 0, sentiment: "positive", source: "Clinical studies" },
       { text: "Requires IM/IV administration — not suitable for SubQ", votes: 0, sentiment: "caution", source: "Prescribing guidelines" },
@@ -112,6 +139,9 @@ export const peptides: PeptideData[] = [
     frequency: "2-3x weekly",
     doseRange: "100-300 mcg/dose",
     cycleDuration: "8-12 weeks",
+    regulatoryStatus: {
+      us: { status: "none" },
+    },
     experiences: [
       { text: "Synergistic GH release when paired with Ipamorelin — well-documented protocol", votes: 0, sentiment: "positive", source: "Established protocol" },
       { text: "Tingling or numbness in extremities reported in early weeks", votes: 0, sentiment: "caution", source: "Community reports" },
@@ -127,6 +157,9 @@ export const peptides: PeptideData[] = [
     frequency: "Daily",
     doseRange: "10-40 mg/day (oral)",
     isNew: true,
+    regulatoryStatus: {
+      us: { status: "none" },
+    },
     experiences: [
       { text: "Potent pro-cognitive effects in preclinical models", votes: 0, sentiment: "positive", source: "Preclinical research" },
       { text: "Long-term human safety data is limited — caution advised", votes: 0, sentiment: "caution", source: "Research status" },
@@ -141,6 +174,9 @@ export const peptides: PeptideData[] = [
     administration: "SubQ/Nasal",
     frequency: "Before bed",
     doseRange: "100-300 mcg/night",
+    regulatoryStatus: {
+      us: { status: "none" },
+    },
     experiences: [
       { text: "Enhances delta wave sleep without sedative hangover effects", votes: 0, sentiment: "positive", source: "Research literature" },
       { text: "Tolerance may develop with extended continuous use", votes: 0, sentiment: "neutral", source: "Community reports" },
@@ -157,6 +193,9 @@ export const peptides: PeptideData[] = [
     doseRange: "5-10 mg/day",
     cycleDuration: "10-20 day cycles",
     isNew: true,
+    regulatoryStatus: {
+      us: { status: "none" },
+    },
     experiences: [
       { text: "Telomerase activation demonstrated in cell culture studies", votes: 0, sentiment: "positive", source: "In-vitro research" },
       { text: "Human longevity data is preliminary — requires further study", votes: 0, sentiment: "neutral", source: "Research status" },
@@ -172,6 +211,9 @@ export const peptides: PeptideData[] = [
     frequency: "Daily",
     doseRange: "100-600 mcg/day",
     cycleDuration: "8-12 weeks",
+    regulatoryStatus: {
+      us: { status: "none" },
+    },
     experiences: [
       { text: "Stimulates collagen type I and III synthesis — well established in dermatology", votes: 0, sentiment: "positive", source: "Peer-reviewed research" },
       { text: "Injection site reactions (redness/stinging) reported initially", votes: 0, sentiment: "caution", source: "Community reports" },
@@ -186,6 +228,9 @@ export const peptides: PeptideData[] = [
     administration: "SubQ injection",
     frequency: "2-3x daily",
     doseRange: "100-300 mcg/dose",
+    regulatoryStatus: {
+      us: { status: "none" },
+    },
     experiences: [
       { text: "Potent GH release with less appetite stimulation than GHRP-6", votes: 0, sentiment: "positive", source: "Comparative studies" },
       { text: "Best administered on empty stomach for maximum GH pulse", votes: 0, sentiment: "neutral", source: "Dosing guidelines" },
@@ -200,6 +245,9 @@ export const peptides: PeptideData[] = [
     administration: "SubQ injection",
     frequency: "2-3x daily",
     doseRange: "100-300 mcg/dose",
+    regulatoryStatus: {
+      us: { status: "none" },
+    },
     experiences: [
       { text: "Strong GH release with significant appetite stimulation via ghrelin activation", votes: 0, sentiment: "positive", source: "Clinical pharmacology" },
       { text: "Greater cortisol and prolactin elevation compared to newer GHRPs", votes: 0, sentiment: "caution", source: "Comparative research" },
@@ -214,6 +262,11 @@ export const peptides: PeptideData[] = [
     administration: "SubQ injection",
     frequency: "2-3x weekly",
     doseRange: "100-500 mcg/dose",
+    regulatoryStatus: {
+      us: { status: "approved", label: "Approved (Factrel — diagnostic)" },
+      eu: { status: "approved", label: "Approved (diagnostic)" },
+      uk: { status: "approved", label: "Approved (diagnostic)" },
+    },
     experiences: [
       { text: "Maintains LH/FSH during TRT — supports fertility preservation", votes: 0, sentiment: "positive", source: "Endocrinology literature" },
       { text: "Mild injection site irritation reported by some", votes: 0, sentiment: "caution", source: "Community reports" },
@@ -228,6 +281,9 @@ export const peptides: PeptideData[] = [
     administration: "SubQ injection",
     frequency: "1-2x daily",
     doseRange: "100-200 mcg/dose",
+    regulatoryStatus: {
+      us: { status: "none" },
+    },
     experiences: [
       { text: "Strongest GH pulse among GHRPs — confirmed in comparative studies", votes: 0, sentiment: "positive", source: "Comparative clinical data" },
       { text: "Rapid receptor desensitisation — requires cycling (4 weeks on/off)", votes: 0, sentiment: "caution", source: "Pharmacology research" },
@@ -244,6 +300,9 @@ export const peptides: PeptideData[] = [
     doseRange: "20-80 mcg/day",
     cycleDuration: "4-6 weeks",
     isNew: true,
+    regulatoryStatus: {
+      us: { status: "none" },
+    },
     experiences: [
       { text: "Promotes muscle cell hyperplasia — distinct from hypertrophy", votes: 0, sentiment: "positive", source: "Preclinical research" },
       { text: "Hypoglycaemia risk — must eat before and after dosing", votes: 0, sentiment: "caution", source: "Safety literature" },
@@ -260,6 +319,9 @@ export const peptides: PeptideData[] = [
     doseRange: "100-300 mcg/dose",
     cycleDuration: "8-12 weeks",
     notes: "Best taken before bed on an empty stomach",
+    regulatoryStatus: {
+      us: { status: "none" },
+    },
     experiences: [
       { text: "Selective GH release with minimal cortisol/prolactin impact", votes: 0, sentiment: "positive", source: "Clinical pharmacology" },
       { text: "Transient water retention during first 1-2 weeks", votes: 0, sentiment: "caution", source: "Community reports" },
@@ -274,6 +336,9 @@ export const peptides: PeptideData[] = [
     administration: "SubQ injection",
     frequency: "2-3x weekly",
     doseRange: "100-500 mcg/dose",
+    regulatoryStatus: {
+      us: { status: "trial", phase: "Phase II" },
+    },
     experiences: [
       { text: "Triggers significant LH pulse — confirmed in clinical studies", votes: 0, sentiment: "positive", source: "Clinical endocrinology" },
       { text: "Relatively new compound — long-term data still emerging", votes: 0, sentiment: "caution", source: "Research status" },
@@ -288,6 +353,9 @@ export const peptides: PeptideData[] = [
     administration: "SubQ/IM/Oral",
     frequency: "1-2x daily",
     doseRange: "200-500 mcg/day",
+    regulatoryStatus: {
+      us: { status: "none" },
+    },
     experiences: [
       { text: "Reduces inflammatory cytokines — demonstrated in preclinical models", votes: 0, sentiment: "positive", source: "Preclinical research" },
       { text: "Oral bioavailability is a practical advantage", votes: 0, sentiment: "positive", source: "Pharmacology" },
@@ -302,6 +370,9 @@ export const peptides: PeptideData[] = [
     administration: "SubQ/Topical",
     frequency: "Daily/EOD",
     doseRange: "50-100 mcg/day",
+    regulatoryStatus: {
+      us: { status: "none" },
+    },
     experiences: [
       { text: "Broad-spectrum antimicrobial activity confirmed in research", votes: 0, sentiment: "positive", source: "Immunology research" },
       { text: "Injection site redness is common but resolves quickly", votes: 0, sentiment: "caution", source: "Community reports" },
@@ -316,6 +387,9 @@ export const peptides: PeptideData[] = [
     administration: "SubQ injection",
     frequency: "Daily/EOD",
     doseRange: "250-500 mcg/dose",
+    regulatoryStatus: {
+      us: { status: "none" },
+    },
     experiences: [
       { text: "Stimulates melanogenesis — tanning effect is well documented", votes: 0, sentiment: "positive", source: "Dermatology research" },
       { text: "Nausea and facial flushing common at initial doses", votes: 0, sentiment: "caution", source: "Clinical observations" },
@@ -331,6 +405,9 @@ export const peptides: PeptideData[] = [
     administration: "SubQ/IM",
     frequency: "2-3x weekly",
     doseRange: "5-10 mg/week",
+    regulatoryStatus: {
+      us: { status: "none" },
+    },
     experiences: [
       { text: "Enhances AMPK activation and metabolic function", votes: 0, sentiment: "positive", source: "Cell metabolism research" },
       { text: "Improved insulin sensitivity in preclinical models", votes: 0, sentiment: "positive", source: "Preclinical research" },
@@ -345,6 +422,9 @@ export const peptides: PeptideData[] = [
     administration: "SubQ/IM/IV",
     frequency: "1-3x weekly",
     doseRange: "50-200 mg/dose",
+    regulatoryStatus: {
+      us: { status: "none" },
+    },
     experiences: [
       { text: "Restores cellular NAD+ levels — supported by aging research", votes: 0, sentiment: "positive", source: "Longevity research" },
       { text: "IV administration commonly causes flushing and nausea", votes: 0, sentiment: "caution", source: "Clinical observations" },
@@ -359,6 +439,11 @@ export const peptides: PeptideData[] = [
     administration: "Nasal/SubQ",
     frequency: "As needed",
     doseRange: "10-40 IU/dose",
+    regulatoryStatus: {
+      us: { status: "approved", label: "Approved (Pitocin)" },
+      eu: { status: "approved", label: "Approved (Syntocinon)" },
+      uk: { status: "approved", label: "Approved (Syntocinon)" },
+    },
     experiences: [
       { text: "Anxiolytic and prosocial effects well-established in research", votes: 0, sentiment: "positive", source: "Neuroscience research" },
       { text: "Effects are subtle and context-dependent", votes: 0, sentiment: "neutral", source: "Research literature" },
@@ -373,6 +458,9 @@ export const peptides: PeptideData[] = [
     administration: "SubQ injection",
     frequency: "As needed",
     doseRange: "1-2 mg/dose",
+    regulatoryStatus: {
+      us: { status: "approved", label: "Approved (Vyleesi)" },
+    },
     experiences: [
       { text: "FDA-approved for hypoactive sexual desire disorder in women", votes: 0, sentiment: "positive", source: "FDA approval data" },
       { text: "Nausea is a very common side effect — anti-emetics may help", votes: 0, sentiment: "caution", source: "Prescribing information" },
@@ -389,6 +477,10 @@ export const peptides: PeptideData[] = [
     doseRange: "4-12 mg/week",
     cycleDuration: "12+ weeks",
     isNew: true,
+    regulatoryStatus: {
+      us: { status: "trial", phase: "Phase III" },
+      eu: { status: "trial", phase: "Phase III" },
+    },
     experiences: [
       { text: "Up to 24% body weight reduction in Phase II trials", votes: 0, sentiment: "positive", source: "Phase II clinical trial" },
       { text: "GI side effects reported, particularly during titration", votes: 0, sentiment: "caution", source: "Clinical trial data" },
@@ -403,6 +495,9 @@ export const peptides: PeptideData[] = [
     administration: "Nasal/SubQ",
     frequency: "1-3x daily",
     doseRange: "250-500 mcg/dose",
+    regulatoryStatus: {
+      us: { status: "none" },
+    },
     experiences: [
       { text: "Anxiolytic effects without sedation — approved medication in Russia", votes: 0, sentiment: "positive", source: "Regulatory approval" },
       { text: "Short duration of action (4-6 hours) requires multiple daily doses", votes: 0, sentiment: "neutral", source: "Pharmacokinetics" },
@@ -419,6 +514,11 @@ export const peptides: PeptideData[] = [
     doseRange: "0.25-2.4 mg/week",
     cycleDuration: "Ongoing",
     notes: "Start at lowest dose. Increase every 4 weeks as tolerated",
+    regulatoryStatus: {
+      us: { status: "approved", label: "Approved (Ozempic/Wegovy)" },
+      eu: { status: "approved", label: "Approved (Ozempic/Wegovy)" },
+      uk: { status: "approved", label: "Approved (Ozempic/Wegovy)" },
+    },
     experiences: [
       { text: "Average 15% body weight reduction in STEP trials", votes: 0, sentiment: "positive", source: "STEP clinical trials" },
       { text: "GI side effects (nausea, vomiting) common during dose escalation", votes: 0, sentiment: "caution", source: "Prescribing information" },
@@ -433,6 +533,9 @@ export const peptides: PeptideData[] = [
     administration: "Nasal/SubQ",
     frequency: "1-3x daily",
     doseRange: "200-600 mcg/dose",
+    regulatoryStatus: {
+      us: { status: "none" },
+    },
     experiences: [
       { text: "Enhances BDNF expression and neuroplasticity", votes: 0, sentiment: "positive", source: "Neuroscience research" },
       { text: "Approved medication in Russia — clinical data available", votes: 0, sentiment: "positive", source: "Regulatory approval" },
@@ -448,6 +551,9 @@ export const peptides: PeptideData[] = [
     frequency: "Daily",
     doseRange: "200-500 mcg/day",
     cycleDuration: "3-6 months",
+    regulatoryStatus: {
+      us: { status: "approved", label: "Previously approved (Geref — discontinued)" },
+    },
     experiences: [
       { text: "Stimulates physiological GH release — well-studied compound", votes: 0, sentiment: "positive", source: "Clinical history" },
       { text: "More gradual effects compared to direct GH or GHRPs", votes: 0, sentiment: "neutral", source: "Pharmacology" },
@@ -462,6 +568,9 @@ export const peptides: PeptideData[] = [
     administration: "SubQ/IV",
     frequency: "Daily/3-5x weekly",
     doseRange: "5-50 mg/day",
+    regulatoryStatus: {
+      us: { status: "trial", phase: "Phase III" },
+    },
     experiences: [
       { text: "Targets cardiolipin in inner mitochondrial membrane — unique mechanism", votes: 0, sentiment: "positive", source: "Mitochondrial research" },
       { text: "Mostly preclinical data — human studies are limited", votes: 0, sentiment: "neutral", source: "Research status" },
@@ -477,6 +586,10 @@ export const peptides: PeptideData[] = [
     frequency: "Once weekly",
     doseRange: "2.4-6 mg/week",
     isNew: true,
+    regulatoryStatus: {
+      us: { status: "trial", phase: "Phase III" },
+      eu: { status: "trial", phase: "Phase III" },
+    },
     experiences: [
       { text: "Significant liver fat reduction demonstrated in clinical trials", votes: 0, sentiment: "positive", source: "Phase II trial data" },
       { text: "GI side effects during titration phase", votes: 0, sentiment: "caution", source: "Clinical trial data" },
@@ -492,6 +605,9 @@ export const peptides: PeptideData[] = [
     frequency: "2-3x weekly",
     doseRange: "2-5 mg, 2x/week",
     cycleDuration: "4-8 weeks loading, then maintenance",
+    regulatoryStatus: {
+      us: { status: "none" },
+    },
     experiences: [
       { text: "Promotes cell migration and wound healing — extensively researched", votes: 0, sentiment: "positive", source: "Peer-reviewed research" },
       { text: "Synergistic effects with BPC-157 for musculoskeletal recovery", votes: 0, sentiment: "positive", source: "Established protocol" },
@@ -506,6 +622,9 @@ export const peptides: PeptideData[] = [
     administration: "SubQ injection",
     frequency: "Daily",
     doseRange: "1-2 mg/day",
+    regulatoryStatus: {
+      us: { status: "approved", label: "Approved (Egrifta)" },
+    },
     experiences: [
       { text: "FDA-approved for HIV-associated lipodystrophy — strong evidence base", votes: 0, sentiment: "positive", source: "FDA approval" },
       { text: "Targeted visceral fat reduction demonstrated on DEXA imaging", votes: 0, sentiment: "positive", source: "Clinical trial data" },
@@ -520,6 +639,9 @@ export const peptides: PeptideData[] = [
     administration: "SubQ injection",
     frequency: "2-3x weekly",
     doseRange: "1.6 mg/dose",
+    regulatoryStatus: {
+      eu: { status: "approved", label: "Approved in select countries (Zadaxin)" },
+    },
     experiences: [
       { text: "Approved medication for hepatitis B/C in multiple countries", votes: 0, sentiment: "positive", source: "Regulatory approvals" },
       { text: "Well-tolerated with minimal reported side effects", votes: 0, sentiment: "positive", source: "Clinical safety data" },
@@ -535,6 +657,11 @@ export const peptides: PeptideData[] = [
     frequency: "Once weekly",
     doseRange: "2.5-15 mg/week",
     cycleDuration: "Ongoing",
+    regulatoryStatus: {
+      us: { status: "approved", label: "Approved (Mounjaro/Zepbound)" },
+      eu: { status: "approved", label: "Approved (Mounjaro)" },
+      uk: { status: "approved", label: "Approved (Mounjaro)" },
+    },
     experiences: [
       { text: "Up to 21% weight reduction in SURMOUNT trials — superior to semaglutide", votes: 0, sentiment: "positive", source: "SURMOUNT clinical trials" },
       { text: "GI side effects similar to semaglutide during dose titration", votes: 0, sentiment: "caution", source: "Prescribing information" },
@@ -550,6 +677,9 @@ export const peptides: PeptideData[] = [
     frequency: "2-3x weekly",
     doseRange: "200-600 mg/dose",
     cycleDuration: "8-12 weeks",
+    regulatoryStatus: {
+      us: { status: "none" },
+    },
     experiences: [
       { text: "Master antioxidant — critical role in detoxification pathways well-established", votes: 0, sentiment: "positive", source: "Biochemistry literature" },
       { text: "Skin lightening effect documented in dermatology studies", votes: 0, sentiment: "positive", source: "Dermatology research" },
@@ -565,6 +695,9 @@ export const peptides: PeptideData[] = [
     frequency: "Daily",
     doseRange: "10-25 mg/day",
     cycleDuration: "8-16 weeks",
+    regulatoryStatus: {
+      us: { status: "trial", phase: "Phase II completed" },
+    },
     experiences: [
       { text: "Sustained IGF-1 elevation for 24h after single dose — confirmed in clinical studies", votes: 0, sentiment: "positive", source: "Clinical pharmacology" },
       { text: "Significant appetite increase and water retention are common", votes: 0, sentiment: "caution", source: "Clinical trial data" },
@@ -581,6 +714,9 @@ export const peptides: PeptideData[] = [
     frequency: "Once weekly",
     doseRange: "1-2 mg/week",
     cycleDuration: "8-12 weeks",
+    regulatoryStatus: {
+      us: { status: "none" },
+    },
     experiences: [
       { text: "Extended half-life provides sustained GH elevation — fewer injections needed", votes: 0, sentiment: "positive", source: "Pharmacokinetics" },
       { text: "Non-pulsatile GH release — some researchers prefer no-DAC variant", votes: 0, sentiment: "neutral", source: "Research discussion" },
@@ -596,6 +732,11 @@ export const peptides: PeptideData[] = [
     frequency: "Daily",
     doseRange: "0.6-3 mg/day",
     cycleDuration: "Ongoing",
+    regulatoryStatus: {
+      us: { status: "approved", label: "Approved (Saxenda/Victoza)" },
+      eu: { status: "approved", label: "Approved (Saxenda/Victoza)" },
+      uk: { status: "approved", label: "Approved (Saxenda/Victoza)" },
+    },
     experiences: [
       { text: "FDA-approved for weight management (Saxenda) and diabetes (Victoza)", votes: 0, sentiment: "positive", source: "FDA approval" },
       { text: "Requires daily injection — less convenient than weekly semaglutide", votes: 0, sentiment: "neutral", source: "Prescribing information" },
@@ -611,6 +752,9 @@ export const peptides: PeptideData[] = [
     frequency: "Daily",
     doseRange: "50-150 mg/day",
     isNew: true,
+    regulatoryStatus: {
+      us: { status: "none" },
+    },
     experiences: [
       { text: "NNMT inhibition shown to increase NAD+ levels and reduce fat in preclinical models", votes: 0, sentiment: "positive", source: "Preclinical research" },
       { text: "Human clinical data is still limited — early-stage compound", votes: 0, sentiment: "caution", source: "Research status" },
@@ -626,6 +770,9 @@ export const peptides: PeptideData[] = [
     frequency: "Daily for 10-30 days",
     doseRange: "100-300 mcg/day",
     cycleDuration: "10-30 day cycles",
+    regulatoryStatus: {
+      us: { status: "none" },
+    },
     experiences: [
       { text: "Myostatin inhibition leads to increased muscle mass in animal models", votes: 0, sentiment: "positive", source: "Preclinical research" },
       { text: "Short cycle protocols recommended — long-term effects unknown", votes: 0, sentiment: "caution", source: "Safety considerations" },
@@ -641,6 +788,9 @@ export const peptides: PeptideData[] = [
     frequency: "Post-workout",
     doseRange: "100-200 mcg/dose",
     cycleDuration: "4-6 weeks",
+    regulatoryStatus: {
+      us: { status: "none" },
+    },
     experiences: [
       { text: "Activates satellite cells for muscle repair — distinct from IGF-1", votes: 0, sentiment: "positive", source: "Muscle physiology research" },
       { text: "Very short half-life (~5 min) — must inject immediately post-training", votes: 0, sentiment: "caution", source: "Pharmacokinetics" },
@@ -656,6 +806,9 @@ export const peptides: PeptideData[] = [
     frequency: "2-3x weekly",
     doseRange: "100-200 mcg/dose",
     cycleDuration: "4-6 weeks",
+    regulatoryStatus: {
+      us: { status: "none" },
+    },
     experiences: [
       { text: "Extended half-life allows systemic distribution — more practical than standard MGF", votes: 0, sentiment: "positive", source: "Pharmacology" },
       { text: "Systemic action means less targeted muscle repair than local MGF", votes: 0, sentiment: "neutral", source: "Research comparison" },
@@ -671,6 +824,9 @@ export const peptides: PeptideData[] = [
     frequency: "Daily/3x weekly",
     doseRange: "1-5 mg/dose",
     isNew: true,
+    regulatoryStatus: {
+      us: { status: "none" },
+    },
     experiences: [
       { text: "Cytoprotective effects demonstrated against amyloid-beta toxicity", votes: 0, sentiment: "positive", source: "Neuroscience research" },
       { text: "Most data is preclinical — human dosing protocols still emerging", votes: 0, sentiment: "neutral", source: "Research status" },
@@ -685,6 +841,9 @@ export const peptides: PeptideData[] = [
     administration: "Nasal/SubQ",
     frequency: "1-2x daily",
     doseRange: "50-100 mcg/dose (nasal)",
+    regulatoryStatus: {
+      us: { status: "trial", phase: "Phase II" },
+    },
     experiences: [
       { text: "Used in CIRS protocols — supported by Dr. Shoemaker's clinical work", votes: 0, sentiment: "positive", source: "Clinical protocols" },
       { text: "Nasal delivery preferred — must be compounded fresh", votes: 0, sentiment: "neutral", source: "Administration guidelines" },
@@ -700,6 +859,9 @@ export const peptides: PeptideData[] = [
     frequency: "Daily for 5-10 days",
     doseRange: "10-20 mg/day",
     cycleDuration: "5-10 day cycles, 2-3x/year",
+    regulatoryStatus: {
+      us: { status: "none" },
+    },
     experiences: [
       { text: "Thymic immune restoration studied in Khavinson bioregulator research", votes: 0, sentiment: "positive", source: "Bioregulator research" },
       { text: "Short cycle protocol — typically used seasonally", votes: 0, sentiment: "neutral", source: "Dosing protocols" },
@@ -715,6 +877,9 @@ export const peptides: PeptideData[] = [
     frequency: "Pulsed protocols",
     doseRange: "Variable — research protocols",
     isNew: true,
+    regulatoryStatus: {
+      us: { status: "none" },
+    },
     experiences: [
       { text: "Selectively targets senescent cells — promising senolytic mechanism", votes: 0, sentiment: "positive", source: "Cell biology research" },
       { text: "Highly experimental — human safety data is very limited", votes: 0, sentiment: "caution", source: "Research status" },
@@ -730,6 +895,9 @@ export const peptides: PeptideData[] = [
     frequency: "Daily",
     doseRange: "200-500 mcg/day",
     isNew: true,
+    regulatoryStatus: {
+      us: { status: "none" },
+    },
     experiences: [
       { text: "Rapid antidepressant-like effects via TREK-1 blockade in animal models", votes: 0, sentiment: "positive", source: "Preclinical research" },
       { text: "Very limited human data — novel compound", votes: 0, sentiment: "caution", source: "Research status" },
@@ -744,6 +912,9 @@ export const peptides: PeptideData[] = [
     administration: "Topical",
     frequency: "1-2x daily",
     doseRange: "3-10% concentration",
+    regulatoryStatus: {
+      us: { status: "none" },
+    },
     experiences: [
       { text: "Reduces expression line depth via SNARE complex modulation", votes: 0, sentiment: "positive", source: "Cosmeceutical research" },
       { text: "Effects are milder and more gradual than injectable neurotoxins", votes: 0, sentiment: "neutral", source: "Comparative studies" },
@@ -758,6 +929,9 @@ export const peptides: PeptideData[] = [
     administration: "Nasal/SubQ",
     frequency: "1-2x daily",
     doseRange: "250-750 mcg/dose",
+    regulatoryStatus: {
+      us: { status: "none" },
+    },
     experiences: [
       { text: "Improved stability and bioavailability versus standard Selank", votes: 0, sentiment: "positive", source: "Pharmacology" },
       { text: "Same anxiolytic mechanism as Selank with potentially longer duration", votes: 0, sentiment: "positive", source: "Comparative analysis" },
@@ -772,6 +946,9 @@ export const peptides: PeptideData[] = [
     administration: "Nasal/SubQ",
     frequency: "1-2x daily",
     doseRange: "200-600 mcg/dose",
+    regulatoryStatus: {
+      us: { status: "none" },
+    },
     experiences: [
       { text: "Enhanced BDNF expression compared to standard Semax", votes: 0, sentiment: "positive", source: "Preclinical research" },
       { text: "Stronger and longer-lasting effects — lower frequency may suffice", votes: 0, sentiment: "positive", source: "Pharmacology" },
@@ -786,6 +963,9 @@ export const peptides: PeptideData[] = [
     administration: "Topical",
     frequency: "1-2x daily",
     doseRange: "2-5% concentration",
+    regulatoryStatus: {
+      us: { status: "none" },
+    },
     experiences: [
       { text: "Stimulates collagen synthesis — well-validated in dermatology clinical trials", votes: 0, sentiment: "positive", source: "Clinical dermatology" },
       { text: "Topical only — no systemic bioavailability concerns", votes: 0, sentiment: "positive", source: "Safety profile" },
@@ -800,6 +980,9 @@ export const peptides: PeptideData[] = [
     administration: "SubQ/IM/Oral",
     frequency: "Weekly/Twice weekly",
     doseRange: "2 mg/kg SubQ or 100 mg oral 3x/day",
+    regulatoryStatus: {
+      us: { status: "approved", label: "Approved (Elmiron)" },
+    },
     experiences: [
       { text: "Chondroprotective effects demonstrated in osteoarthritis studies", votes: 0, sentiment: "positive", source: "Clinical research" },
       { text: "Long-term high-dose use linked to maculopathy — ophthalmology monitoring recommended", votes: 0, sentiment: "caution", source: "FDA safety update" },
@@ -815,6 +998,11 @@ export const peptides: PeptideData[] = [
     frequency: "Daily or weekly (ER)",
     doseRange: "5-10 mcg twice daily or 2 mg weekly (ER)",
     cycleDuration: "Ongoing",
+    regulatoryStatus: {
+      us: { status: "approved", label: "Approved (Byetta/Bydureon)" },
+      eu: { status: "approved", label: "Approved (Byetta/Bydureon)" },
+      uk: { status: "approved", label: "Approved (Byetta/Bydureon)" },
+    },
     experiences: [
       { text: "FDA-approved GLP-1 agonist — extensive long-term safety data", votes: 0, sentiment: "positive", source: "FDA approval" },
       { text: "Less weight loss efficacy than semaglutide in head-to-head comparisons", votes: 0, sentiment: "neutral", source: "Comparative trials" },
