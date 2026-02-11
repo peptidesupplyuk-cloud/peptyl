@@ -20,6 +20,8 @@ import { useToast } from "@/hooks/use-toast";
 import { Checkbox } from "@/components/ui/checkbox";
 import SEO from "@/components/SEO";
 import ExperienceChat from "@/components/dashboard/ExperienceChat";
+import ProtocolNudges from "@/components/dashboard/ProtocolNudges";
+import CollaborativeRecommendations from "@/components/dashboard/CollaborativeRecommendations";
 
 const Dashboard = () => {
   const { data: panels = [], refetch: refetchPanels } = useBloodworkPanels();
@@ -148,6 +150,7 @@ const Dashboard = () => {
 
             {/* OVERVIEW TAB */}
             <TabsContent value="overview" className="space-y-6">
+              <ProtocolNudges onNavigate={setActiveTab} />
               <TodaysPlan />
               <BiomarkerTrendChart panels={panels} />
               <BiomarkerSummary panels={panels} />
@@ -188,6 +191,8 @@ const Dashboard = () => {
               )}
 
               
+
+              <CollaborativeRecommendations />
 
               {panels.length === 0 && (
                 <div className="bg-card rounded-2xl border border-border p-8 text-center">
