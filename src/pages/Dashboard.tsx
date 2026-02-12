@@ -127,7 +127,7 @@ const Dashboard = () => {
           </div>
 
           <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-            <TabsList className="grid w-full grid-cols-6 max-w-3xl">
+            <TabsList className="flex w-full overflow-x-auto max-w-3xl no-scrollbar">
               <TabsTrigger value="overview" className="text-xs sm:text-sm">
                 <LayoutDashboard className="h-4 w-4 mr-1.5 hidden sm:inline" />Overview
               </TabsTrigger>
