@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Carousel, CarouselContent, CarouselItem, CarouselPrevious, CarouselNext } from "@/components/ui/carousel";
 import { Activity, FlaskConical, LayoutDashboard, AlertTriangle, User, BookOpen, CalendarDays } from "lucide-react";
 import { addWeeks, format } from "date-fns";
 import Header from "@/components/Header";
@@ -168,11 +169,19 @@ const Dashboard = () => {
               {recommendations.length > 0 && (
                 <div className="space-y-4">
                   <h2 className="font-heading font-semibold text-foreground">🎯 Personalised Recommendations</h2>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    {recommendations.slice(0, 2).map((rec) => (
-                      <RecommendationCard key={rec.id} recommendation={rec} onActivate={handleActivateProtocol} isActivating={activatingProtocol} badge="Personalised" />
-                    ))}
-                  </div>
+                  <Carousel opts={{ align: "start", loop: false }} className="w-full">
+                    <CarouselContent className="-ml-3">
+                      {recommendations.slice(0, 4).map((rec) => (
+                        <CarouselItem key={rec.id} className="pl-3 basis-[85%] sm:basis-[70%] md:basis-1/2 lg:basis-[45%]">
+                          <RecommendationCard recommendation={rec} onActivate={handleActivateProtocol} isActivating={activatingProtocol} badge="Personalised" />
+                        </CarouselItem>
+                      ))}
+                    </CarouselContent>
+                    <div className="flex justify-end gap-2 mt-3">
+                      <CarouselPrevious className="static translate-y-0 h-8 w-8" />
+                      <CarouselNext className="static translate-y-0 h-8 w-8" />
+                    </div>
+                  </Carousel>
                 </div>
               )}
 
@@ -277,11 +286,19 @@ const Dashboard = () => {
                     🎯 Personalised Recommendations
                     <span className="text-xs font-normal text-muted-foreground">Based on your bloodwork</span>
                   </h2>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    {recommendations.map((rec) => (
-                      <RecommendationCard key={rec.id} recommendation={rec} onActivate={handleActivateProtocol} isActivating={activatingProtocol} badge="Personalised" />
-                    ))}
-                  </div>
+                  <Carousel opts={{ align: "start", loop: false }} className="w-full">
+                    <CarouselContent className="-ml-3">
+                      {recommendations.map((rec) => (
+                        <CarouselItem key={rec.id} className="pl-3 basis-[85%] sm:basis-[70%] md:basis-1/2 lg:basis-[45%]">
+                          <RecommendationCard recommendation={rec} onActivate={handleActivateProtocol} isActivating={activatingProtocol} badge="Personalised" />
+                        </CarouselItem>
+                      ))}
+                    </CarouselContent>
+                    <div className="flex justify-end gap-2 mt-3">
+                      <CarouselPrevious className="static translate-y-0 h-8 w-8" />
+                      <CarouselNext className="static translate-y-0 h-8 w-8" />
+                    </div>
+                  </Carousel>
                 </div>
               ) : (
                 <div className="bg-card rounded-2xl border border-border p-8 text-center">
