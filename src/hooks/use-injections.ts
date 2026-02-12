@@ -17,6 +17,32 @@ export interface InjectionLog {
   created_at: string;
 }
 
+/** Check if a peptide is due today based on its frequency */
+function isDueToday(frequency: string, protocolStartDate: string): boolean {
+  const today = new Date();
+  const start = new Date(protocolStartDate);
+  const daysSinceStart = Math.floor((today.getTime() - start.getTime()) / (1000 * 60 * 60 * 24));
+  const dayOfWeek = today.getDay(); // 0=Sun
+
+  switch (frequency.toLowerCase()) {
+    case "daily":
+      return true;
+    case "weekly":
+      return daysSinceStart % 7 === 0;
+    case "2x/week":
+      return dayOfWeek === 1 || dayOfWeek === 4; // Mon, Thu
+    case "3x/week":
+      return dayOfWeek === 1 || dayOfWeek === 3 || dayOfWeek === 5; // Mon, Wed, Fri
+    case "5on/2off":
+      return dayOfWeek >= 1 && dayOfWeek <= 5; // Weekdays
+    case "eod":
+    case "every other day":
+      return daysSinceStart % 2 === 0;
+    default:
+      return true;
+  }
+}
+
 export function useTodayInjections() {
   const { user } = useAuth();
   const today = new Date().toISOString().split("T")[0];
@@ -28,14 +54,75 @@ export function useTodayInjections() {
       const startOfDay = `${today}T00:00:00.000Z`;
       const endOfDay = `${today}T23:59:59.999Z`;
 
-      const { data, error } = await supabase
+      // Check existing logs for today
+      const { data: existing, error } = await supabase
         .from("injection_logs")
         .select("*")
         .gte("scheduled_time", startOfDay)
         .lte("scheduled_time", endOfDay)
         .order("scheduled_time", { ascending: true });
       if (error) throw error;
-      return (data ?? []) as InjectionLog[];
+
+      if (existing && existing.length > 0) {
+        return existing as InjectionLog[];
+      }
+
+      // No logs yet — auto-generate from active protocols
+      const { data: protocols } = await supabase
+        .from("protocols")
+        .select("*")
+        .eq("status", "active");
+
+      if (!protocols || protocols.length === 0) return [];
+
+      const logsToInsert: Array<{
+        user_id: string;
+        peptide_name: string;
+        dose_mcg: number;
+        scheduled_time: string;
+        protocol_peptide_id: string;
+        status: string;
+      }> = [];
+
+      for (const protocol of protocols) {
+        const { data: peptides } = await supabase
+          .from("protocol_peptides")
+          .select("*")
+          .eq("protocol_id", protocol.id);
+
+        if (!peptides) continue;
+
+        for (const pep of peptides) {
+          if (!isDueToday(pep.frequency, protocol.start_date)) continue;
+
+          const timings: string[] = [];
+          const timing = (pep.timing || "AM").toUpperCase();
+          if (timing.includes("AM")) timings.push("09:00");
+          if (timing.includes("PM") || timing.includes("BED")) timings.push("21:00");
+          if (timings.length === 0) timings.push("09:00");
+
+          for (const t of timings) {
+            logsToInsert.push({
+              user_id: user!.id,
+              peptide_name: pep.peptide_name,
+              dose_mcg: pep.dose_mcg,
+              scheduled_time: `${today}T${t}:00.000Z`,
+              protocol_peptide_id: pep.id,
+              status: "scheduled",
+            });
+          }
+        }
+      }
+
+      if (logsToInsert.length === 0) return [];
+
+      const { data: inserted, error: insertErr } = await supabase
+        .from("injection_logs")
+        .insert(logsToInsert)
+        .select();
+      if (insertErr) throw insertErr;
+
+      return (inserted ?? []) as InjectionLog[];
     },
   });
 }
