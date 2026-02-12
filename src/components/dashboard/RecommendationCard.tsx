@@ -73,38 +73,52 @@ const RecommendationCard = ({ recommendation: initialRec, onActivate, isActivati
           <p className="text-[10px] font-medium text-muted-foreground uppercase tracking-wider">Peptides</p>
           {rec.peptides.map((p, i) =>
             editing ? (
-              <div key={i} className="grid grid-cols-[1fr_70px_80px_65px_60px] gap-1.5 items-center">
-                <span className="text-xs font-medium text-foreground truncate">{p.name}</span>
-                <Input
-                  type="number"
-                  value={p.dose_mcg}
-                  onChange={(e) => updatePeptide(i, "dose_mcg", Number(e.target.value))}
-                  className="text-xs h-7 px-2"
-                />
-                <Select value={p.frequency} onValueChange={(v) => updatePeptide(i, "frequency", v)}>
-                  <SelectTrigger className="text-[10px] h-7 px-2"><SelectValue /></SelectTrigger>
-                  <SelectContent>
-                    {FREQUENCIES.map((f) => (
-                      <SelectItem key={f} value={f} className="text-xs">{f}</SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-                <Select value={p.timing} onValueChange={(v) => updatePeptide(i, "timing", v)}>
-                  <SelectTrigger className="text-[10px] h-7 px-2"><SelectValue /></SelectTrigger>
-                  <SelectContent>
-                    {TIMINGS.map((t) => (
-                      <SelectItem key={t} value={t} className="text-xs">{t}</SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-                <Select value={p.route} onValueChange={(v) => updatePeptide(i, "route", v)}>
-                  <SelectTrigger className="text-[10px] h-7 px-2"><SelectValue /></SelectTrigger>
-                  <SelectContent>
-                    {ROUTES.map((r) => (
-                      <SelectItem key={r} value={r} className="text-xs">{r}</SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+              <div key={i} className="space-y-1.5 bg-muted/30 rounded-lg p-2.5">
+                <span className="text-xs font-medium text-foreground">{p.name}</span>
+                <div className="grid grid-cols-2 gap-1.5">
+                  <div>
+                    <label className="text-[9px] text-muted-foreground uppercase">Dose (mcg)</label>
+                    <Input
+                      type="number"
+                      value={p.dose_mcg}
+                      onChange={(e) => updatePeptide(i, "dose_mcg", Number(e.target.value))}
+                      className="text-xs h-7 px-2"
+                    />
+                  </div>
+                  <div>
+                    <label className="text-[9px] text-muted-foreground uppercase">Frequency</label>
+                    <Select value={p.frequency} onValueChange={(v) => updatePeptide(i, "frequency", v)}>
+                      <SelectTrigger className="text-[10px] h-7 px-2"><SelectValue /></SelectTrigger>
+                      <SelectContent>
+                        {FREQUENCIES.map((f) => (
+                          <SelectItem key={f} value={f} className="text-xs">{f}</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div>
+                    <label className="text-[9px] text-muted-foreground uppercase">Timing</label>
+                    <Select value={p.timing} onValueChange={(v) => updatePeptide(i, "timing", v)}>
+                      <SelectTrigger className="text-[10px] h-7 px-2"><SelectValue /></SelectTrigger>
+                      <SelectContent>
+                        {TIMINGS.map((t) => (
+                          <SelectItem key={t} value={t} className="text-xs">{t}</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div>
+                    <label className="text-[9px] text-muted-foreground uppercase">Route</label>
+                    <Select value={p.route} onValueChange={(v) => updatePeptide(i, "route", v)}>
+                      <SelectTrigger className="text-[10px] h-7 px-2"><SelectValue /></SelectTrigger>
+                      <SelectContent>
+                        {ROUTES.map((r) => (
+                          <SelectItem key={r} value={r} className="text-xs">{r}</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
               </div>
             ) : (
               <div key={i} className="flex items-center justify-between text-sm bg-muted/50 rounded-lg px-3 py-2">
