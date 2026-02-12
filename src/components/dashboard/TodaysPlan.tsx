@@ -1,4 +1,4 @@
-import { Check, SkipForward, Clock, Syringe } from "lucide-react";
+import { Check, SkipForward, Clock, FlaskConical } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useTodayInjections, useUpdateInjectionStatus } from "@/hooks/use-injections";
 import { format } from "date-fns";
@@ -25,8 +25,8 @@ const TodaysPlan = () => {
     <div className="bg-card rounded-2xl border border-border p-5 space-y-4">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
-          <Syringe className="h-5 w-5 text-primary" />
-          <h2 className="font-heading font-semibold text-foreground">Today's Injections</h2>
+          <FlaskConical className="h-5 w-5 text-primary" />
+          <h2 className="font-heading font-semibold text-foreground">Today's Protocol</h2>
         </div>
         <div className="flex items-center gap-3">
           <InjectionCalendar />
@@ -36,7 +36,7 @@ const TodaysPlan = () => {
 
       {injections.length === 0 ? (
         <p className="text-sm text-muted-foreground py-4 text-center">
-          No injections scheduled for today. Activate a protocol to get started.
+          No doses scheduled for today. Activate a protocol to get started.
         </p>
       ) : (
         <div className="space-y-2">
