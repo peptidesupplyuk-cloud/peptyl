@@ -1,4 +1,4 @@
-import { Calculator, Database, Users, BookOpen, FlaskConical, Brain, Heart, Dumbbell, Sparkles, Activity, Microscope, Layers } from "lucide-react";
+import { Calculator, Database, Users, BookOpen, FlaskConical, Brain, Heart, Dumbbell, Sparkles, Activity, Microscope, Layers, ShoppingCart, TestTubes } from "lucide-react";
 
 export interface Campaign {
   slug: string;
@@ -305,6 +305,54 @@ export const campaigns: Campaign[] = [
     ],
     seoTitle: "Retatrutide Triple-Agonist Review | Peptyl",
     seoDescription: "Retatrutide review: the triple-agonist GLP-1/GIP/Glucagon peptide. Clinical trial data and comparison to Semaglutide.",
+  },
+  {
+    slug: "wegovy-mounjaro-prices",
+    name: "Wegovy & Mounjaro Prices",
+    headline: "Compare Wegovy & Mounjaro Prices Across 16+ UK Pharmacies",
+    subheadline: "Stop overpaying. We compare Semaglutide, Tirzepatide, and Saxenda prices from every major UK online pharmacy — updated regularly.",
+    cta: "Compare Prices Now",
+    ctaHref: "/suppliers",
+    secondaryCta: "Create Free Account",
+    secondaryCtaHref: "/auth",
+    icon: ShoppingCart,
+    color: "success",
+    stats: [
+      { value: "16+", label: "Pharmacies Compared" },
+      { value: "9", label: "Medications Tracked" },
+      { value: "Free", label: "Price Comparison" },
+    ],
+    features: [
+      { title: "Real Pricing Data", description: "Side-by-side prices from Boots, Superdrug, LloydsDirect, Simple Online Pharmacy and more." },
+      { title: "Stock Availability", description: "See which pharmacies have your dose in stock right now — no wasted clicks." },
+      { title: "Best Price Highlighted", description: "Instantly spot the cheapest option with automatic best-price tagging." },
+    ],
+    seoTitle: "Compare Wegovy & Mounjaro Prices UK | Peptyl",
+    seoDescription: "Compare Wegovy, Mounjaro, and Saxenda prices across 16+ UK pharmacies. Find the cheapest option with stock availability.",
+  },
+  {
+    slug: "bloodwork-prices",
+    name: "Bloodwork Price Comparison",
+    headline: "UK Blood Test Prices Compared — Find the Cheapest Option",
+    subheadline: "Medichecks, Forth, Thriva, Randox — we compare blood test prices from 10+ UK labs so you don't have to.",
+    cta: "Compare Blood Tests",
+    ctaHref: "/suppliers",
+    secondaryCta: "Sign Up Free",
+    secondaryCtaHref: "/auth",
+    icon: TestTubes,
+    color: "info",
+    stats: [
+      { value: "10+", label: "Labs Compared" },
+      { value: "8", label: "Test Panels" },
+      { value: "Free", label: "Comparison Tool" },
+    ],
+    features: [
+      { title: "Every Major Lab", description: "Medichecks, Forth, Thriva, Randox, Blue Crest, LetsGetChecked — all in one place." },
+      { title: "Panel Breakdowns", description: "Compare prices for testosterone, thyroid, liver function, full body MOTs and more." },
+      { title: "Track Over Time", description: "Create a free account to log results and track biomarker trends with our dashboard." },
+    ],
+    seoTitle: "Compare UK Blood Test Prices — 10+ Labs | Peptyl",
+    seoDescription: "Compare blood test prices from Medichecks, Forth, Thriva, Randox and more. Find the cheapest UK blood tests.",
   },
 ];
 
