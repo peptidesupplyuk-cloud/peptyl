@@ -618,8 +618,10 @@ export type Database = {
           goal: string | null
           id: string
           name: string
+          notes: string | null
           start_date: string
           status: string
+          supplements: Json | null
           updated_at: string
           user_id: string
         }
@@ -630,8 +632,10 @@ export type Database = {
           goal?: string | null
           id?: string
           name: string
+          notes?: string | null
           start_date?: string
           status?: string
+          supplements?: Json | null
           updated_at?: string
           user_id: string
         }
@@ -642,8 +646,10 @@ export type Database = {
           goal?: string | null
           id?: string
           name?: string
+          notes?: string | null
           start_date?: string
           status?: string
+          supplements?: Json | null
           updated_at?: string
           user_id?: string
         }
