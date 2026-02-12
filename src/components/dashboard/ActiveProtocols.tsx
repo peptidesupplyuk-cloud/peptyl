@@ -1,12 +1,26 @@
-import { Pause, Play, CheckCircle2, Clock, FlaskConical } from "lucide-react";
+import { useState } from "react";
+import { Pause, Play, CheckCircle2, Clock, FlaskConical, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { useProtocols, useUpdateProtocolStatus, type Protocol } from "@/hooks/use-protocols";
+import { useProtocols, useUpdateProtocolStatus, useDeleteProtocol, type Protocol } from "@/hooks/use-protocols";
 import { differenceInDays } from "date-fns";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+import { useToast } from "@/hooks/use-toast";
 
 const ActiveProtocols = () => {
   const { data: protocols = [], isLoading } = useProtocols();
   const updateStatus = useUpdateProtocolStatus();
-
+  const deleteProtocol = useDeleteProtocol();
+  const { toast } = useToast();
+  const [deleteTarget, setDeleteTarget] = useState<Protocol | null>(null);
   const active = protocols.filter((p) => p.status === "active");
   const paused = protocols.filter((p) => p.status === "paused");
   const completed = protocols.filter((p) => p.status === "completed");
@@ -81,6 +95,9 @@ const ActiveProtocols = () => {
                 <Play className="h-3 w-3" />
               </Button>
             )}
+            <Button size="sm" variant="ghost" className="h-7 text-xs text-destructive hover:text-destructive" onClick={() => setDeleteTarget(p)}>
+              <Trash2 className="h-3 w-3" />
+            </Button>
           </div>
         </div>
       </div>
@@ -114,6 +131,38 @@ const ActiveProtocols = () => {
           )}
         </div>
       )}
+
+      <AlertDialog open={!!deleteTarget} onOpenChange={(open) => !open && setDeleteTarget(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete Protocol</AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to delete <strong>{deleteTarget?.name}</strong>? This will permanently remove the protocol and all its peptide entries. This action cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+              onClick={() => {
+                if (deleteTarget) {
+                  deleteProtocol.mutate(deleteTarget.id, {
+                    onSuccess: () => {
+                      toast({ title: "Protocol deleted", description: `${deleteTarget.name} has been removed.` });
+                      setDeleteTarget(null);
+                    },
+                    onError: (err: any) => {
+                      toast({ title: "Error", description: err?.message || "Failed to delete.", variant: "destructive" });
+                    },
+                  });
+                }
+              }}
+            >
+              Delete
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 };

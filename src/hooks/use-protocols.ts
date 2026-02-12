@@ -121,3 +121,20 @@ export function useUpdateProtocolStatus() {
     onSuccess: () => qc.invalidateQueries({ queryKey: ["protocols"] }),
   });
 }
+
+export function useDeleteProtocol() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async (id: string) => {
+      // Delete peptides first, then protocol
+      const { error: pepErr } = await supabase.from("protocol_peptides").delete().eq("protocol_id", id);
+      if (pepErr) throw pepErr;
+      const { error } = await supabase.from("protocols").delete().eq("id", id);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["protocols"] });
+      qc.invalidateQueries({ queryKey: ["injections_today"] });
+    },
+  });
+}
