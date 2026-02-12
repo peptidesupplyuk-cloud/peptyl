@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import type { Recommendation } from "@/data/recommendation-rules";
+import PeptideInfoTooltip from "./PeptideInfoTooltip";
 
 interface Props {
   recommendation: Recommendation;
@@ -74,7 +75,7 @@ const RecommendationCard = ({ recommendation: initialRec, onActivate, isActivati
           {rec.peptides.map((p, i) =>
             editing ? (
               <div key={i} className="space-y-1.5 bg-muted/30 rounded-lg p-2.5">
-                <span className="text-xs font-medium text-foreground">{p.name}</span>
+                <span className="text-xs font-medium text-foreground flex items-center gap-1.5">{p.name} <PeptideInfoTooltip peptideName={p.name} /></span>
                 <div className="grid grid-cols-2 gap-1.5">
                   <div>
                     <label className="text-[9px] text-muted-foreground uppercase">Dose (mcg)</label>
@@ -122,7 +123,7 @@ const RecommendationCard = ({ recommendation: initialRec, onActivate, isActivati
               </div>
             ) : (
               <div key={i} className="flex items-center justify-between text-sm bg-muted/50 rounded-lg px-3 py-2">
-                <span className="font-medium text-foreground">{p.name}</span>
+                <span className="font-medium text-foreground flex items-center gap-1.5">{p.name} <PeptideInfoTooltip peptideName={p.name} /></span>
                 <span className="text-muted-foreground text-xs">
                   {p.dose_mcg}mcg · {p.frequency} · {p.timing} · {p.route}
                 </span>

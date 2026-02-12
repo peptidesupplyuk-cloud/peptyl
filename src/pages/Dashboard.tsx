@@ -24,6 +24,8 @@ import SEO from "@/components/SEO";
 import ExperienceChat from "@/components/dashboard/ExperienceChat";
 import ProtocolNudges from "@/components/dashboard/ProtocolNudges";
 import CollaborativeRecommendations from "@/components/dashboard/CollaborativeRecommendations";
+import MobileTabNav from "@/components/dashboard/MobileTabNav";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 const Dashboard = () => {
   const { data: panels = [], refetch: refetchPanels } = useBloodworkPanels();
@@ -34,6 +36,7 @@ const Dashboard = () => {
   const [activeTab, setActiveTab] = useState("overview");
   const [activatingProtocol, setActivatingProtocol] = useState(false);
   const [bioRecs, setBioRecs] = useState<BiometricRecommendation[]>([]);
+  const isMobile = useIsMobile();
 
   // Get recommendations from latest panel
   const latestPanel = panels[0];
@@ -115,7 +118,7 @@ const Dashboard = () => {
         path="/dashboard"
       />
       <Header />
-      <main className="pt-20 pb-16">
+      <main className="pt-20 pb-24 md:pb-16">
         <div className="container mx-auto px-4 sm:px-6">
           <div className="mb-8">
             <h1 className="text-2xl sm:text-3xl font-heading font-bold text-foreground">
@@ -127,24 +130,24 @@ const Dashboard = () => {
           </div>
 
           <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-            <TabsList className="flex w-full overflow-x-auto max-w-3xl no-scrollbar">
+            <TabsList className="hidden md:flex w-full overflow-x-auto max-w-3xl no-scrollbar">
               <TabsTrigger value="overview" className="text-xs sm:text-sm">
-                <LayoutDashboard className="h-4 w-4 mr-1.5 hidden sm:inline" />Overview
+                <LayoutDashboard className="h-4 w-4 mr-1.5" />Overview
               </TabsTrigger>
               <TabsTrigger value="journal" className="text-xs sm:text-sm">
-                <BookOpen className="h-4 w-4 mr-1.5 hidden sm:inline" />Journal
+                <BookOpen className="h-4 w-4 mr-1.5" />Journal
               </TabsTrigger>
               <TabsTrigger value="profile" className="text-xs sm:text-sm">
-                <User className="h-4 w-4 mr-1.5 hidden sm:inline" />Profile
+                <User className="h-4 w-4 mr-1.5" />Profile
               </TabsTrigger>
               <TabsTrigger value="bloodwork" className="text-xs sm:text-sm">
-                <Activity className="h-4 w-4 mr-1.5 hidden sm:inline" />Bloodwork
+                <Activity className="h-4 w-4 mr-1.5" />Bloodwork
               </TabsTrigger>
               <TabsTrigger value="protocols" className="text-xs sm:text-sm">
-                <FlaskConical className="h-4 w-4 mr-1.5 hidden sm:inline" />Protocols
+                <FlaskConical className="h-4 w-4 mr-1.5" />Protocols
               </TabsTrigger>
               <TabsTrigger value="injections" className="text-xs sm:text-sm">
-                <CalendarDays className="h-4 w-4 mr-1.5 hidden sm:inline" />Tracker
+                <CalendarDays className="h-4 w-4 mr-1.5" />Tracker
               </TabsTrigger>
             </TabsList>
 
@@ -178,7 +181,7 @@ const Dashboard = () => {
                     </div>
                     <CarouselContent className="-ml-3 mt-3">
                       {recommendations.slice(0, 4).map((rec) => (
-                        <CarouselItem key={rec.id} className="pl-3 basis-[85%] sm:basis-[70%] md:basis-1/2 lg:basis-[45%]">
+                        <CarouselItem key={rec.id} className="pl-3 basis-full sm:basis-[70%] md:basis-1/2 lg:basis-[45%]">
                           <RecommendationCard recommendation={rec} onActivate={handleActivateProtocol} isActivating={activatingProtocol} badge="Personalised" />
                         </CarouselItem>
                       ))}
@@ -297,7 +300,7 @@ const Dashboard = () => {
                     </div>
                     <CarouselContent className="-ml-3 mt-3">
                       {recommendations.map((rec) => (
-                        <CarouselItem key={rec.id} className="pl-3 basis-[85%] sm:basis-[70%] md:basis-1/2 lg:basis-[45%]">
+                        <CarouselItem key={rec.id} className="pl-3 basis-full sm:basis-[70%] md:basis-1/2 lg:basis-[45%]">
                           <RecommendationCard recommendation={rec} onActivate={handleActivateProtocol} isActivating={activatingProtocol} badge="Personalised" />
                         </CarouselItem>
                       ))}
@@ -331,6 +334,7 @@ const Dashboard = () => {
               <ActiveProtocols />
             </TabsContent>
           </Tabs>
+          <MobileTabNav activeTab={activeTab} onTabChange={setActiveTab} />
         </div>
       </main>
       <Footer />
