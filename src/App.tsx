@@ -32,6 +32,7 @@ const Glp1Guide = lazy(() => import("./pages/articles/Glp1Guide"));
 const RetatrutideReview = lazy(() => import("./pages/articles/RetatrutideReview"));
 const GhkCuGuide = lazy(() => import("./pages/articles/GhkCuGuide"));
 const RussiaPeptides = lazy(() => import("./pages/articles/RussiaPeptides"));
+const WhatIsPeptyl = lazy(() => import("./pages/articles/WhatIsPeptyl"));
 const CampaignPage = lazy(() => import("./pages/CampaignPage"));
 
 const queryClient = new QueryClient();
@@ -68,6 +69,7 @@ const App = () => (
               <Route path="/education/retatrutide-triple-agonist-review" element={<RetatrutideReview />} />
               <Route path="/education/ghk-cu-pretty-peptide" element={<GhkCuGuide />} />
               <Route path="/education/russia-cognitive-peptides" element={<RussiaPeptides />} />
+              <Route path="/education/what-is-peptyl" element={<WhatIsPeptyl />} />
               <Route path="/start/:slug" element={<CampaignPage />} />
               {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
               <Route path="*" element={<NotFound />} />

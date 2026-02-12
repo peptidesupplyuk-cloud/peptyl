@@ -9,6 +9,14 @@ export interface BlogPost {
 
 export const blogPosts: BlogPost[] = [
   {
+    slug: "what-is-peptyl",
+    title: "What Is Peptyl? The Free Research Platform Built for the Global Peptide Community",
+    category: "Platform",
+    excerpt: "Peptyl combines AI tools, biomarker tracking, dosing calculators, and community data into one free platform for peptide researchers worldwide.",
+    readTime: "5 min read",
+    date: "February 2026",
+  },
+  {
     slug: "beginners-guide-peptides",
     title: "Complete Beginner's Guide to Research Peptides",
     category: "Beginner Guide",
