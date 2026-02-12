@@ -102,7 +102,7 @@ const InjectionCalendar = () => {
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
           <CalendarDays className="h-5 w-5 text-primary" />
-          <h2 className="font-heading font-semibold text-foreground">Injection Calendar</h2>
+          <h2 className="font-heading font-semibold text-foreground">Calendar</h2>
         </div>
         <div className="flex items-center gap-2">
           <div className="flex items-center gap-1">
