@@ -21,12 +21,47 @@ serve(async (req) => {
   }
 
   try {
-    const FIRECRAWL_API_KEY = Deno.env.get("FIRECRAWL_API_KEY");
-    if (!FIRECRAWL_API_KEY) throw new Error("FIRECRAWL_API_KEY not configured");
+    // Auth check - require authenticated admin user
+    const authHeader = req.headers.get("Authorization");
+    if (!authHeader?.startsWith("Bearer ")) {
+      return new Response(JSON.stringify({ error: "Unauthorized" }), {
+        status: 401,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
 
     const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
     const supabaseKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
+
+    const anonClient = createClient(supabaseUrl, Deno.env.get("SUPABASE_ANON_KEY")!);
+    const token = authHeader.replace("Bearer ", "");
+    const { data: { user }, error: authError } = await anonClient.auth.getUser(token);
+    if (authError || !user) {
+      return new Response(JSON.stringify({ error: "Invalid auth token" }), {
+        status: 401,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
     const supabase = createClient(supabaseUrl, supabaseKey);
+
+    // Verify admin role
+    const { data: roleData } = await supabase
+      .from("user_roles")
+      .select("role")
+      .eq("user_id", user.id)
+      .eq("role", "admin")
+      .maybeSingle();
+
+    if (!roleData) {
+      return new Response(JSON.stringify({ error: "Forbidden: admin role required" }), {
+        status: 403,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+    const FIRECRAWL_API_KEY = Deno.env.get("FIRECRAWL_API_KEY");
+    if (!FIRECRAWL_API_KEY) throw new Error("FIRECRAWL_API_KEY not configured");
 
     // Get existing handles to avoid duplicates
     const { data: existing } = await supabase
