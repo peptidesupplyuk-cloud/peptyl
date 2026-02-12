@@ -1,17 +1,10 @@
 import { useState, useRef, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+import { useJournalEntries, useAddJournalEntry } from "@/hooks/use-journal";
 import { Send, Loader2, Bot, User, BookOpen, ChevronDown, ChevronUp, Sparkles } from "lucide-react";
 
 type Msg = { role: "user" | "system"; content: string };
-
-type JournalEntry = {
-  date: string;
-  peptides: string[];
-  summary: string;
-  evidenceQuality?: string;
-  findingsCount?: number;
-};
 
 const STARTERS = [
   "I've been running BPC-157 at 250mcg 2x daily for 4 weeks…",
@@ -19,28 +12,16 @@ const STARTERS = [
   "Side effects I noticed on Tirzepatide 5mg weekly…",
 ];
 
-const JOURNAL_KEY = "peptyl_user_journal";
-
-const loadJournal = (): JournalEntry[] => {
-  try {
-    return JSON.parse(localStorage.getItem(JOURNAL_KEY) || "[]");
-  } catch {
-    return [];
-  }
-};
-
-const saveJournal = (entries: JournalEntry[]) => {
-  localStorage.setItem(JOURNAL_KEY, JSON.stringify(entries));
-};
-
 const ExperienceChat = () => {
   const { toast } = useToast();
   const [messages, setMessages] = useState<Msg[]>([]);
   const [input, setInput] = useState("");
   const [isProcessing, setIsProcessing] = useState(false);
-  const [journal, setJournal] = useState<JournalEntry[]>(loadJournal);
   const [showJournal, setShowJournal] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
+
+  const { data: journal = [], isLoading: journalLoading } = useJournalEntries();
+  const addEntry = useAddJournalEntry();
 
   useEffect(() => {
     if (scrollRef.current) scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
@@ -82,17 +63,15 @@ const ExperienceChat = () => {
       const result = await resp.json();
       const ex = result.extracted || {};
 
-      // Save to local journal
-      const entry: JournalEntry = {
-        date: new Date().toISOString(),
+      // Save to database
+      await addEntry.mutateAsync({
+        content: text.trim(),
         peptides: ex.peptides || [],
         summary: ex.summary || text.trim().slice(0, 200),
-        evidenceQuality: ex.evidence_quality,
-        findingsCount: ex.findings_count,
-      };
-      const updated = [entry, ...journal];
-      setJournal(updated);
-      saveJournal(updated);
+        evidence_quality: ex.evidence_quality || null,
+        findings_count: ex.findings_count || null,
+        article_id: result.article_id || null,
+      });
 
       const summary = [
         `📓 **Saved to your journal!**`,
@@ -101,7 +80,7 @@ const ExperienceChat = () => {
         ex.findings_count ? `**Data points extracted:** ${ex.findings_count}` : "",
         ex.evidence_quality ? `**Evidence quality:** ${ex.evidence_quality}` : "",
         "",
-        `Your entry is saved locally and also contributes to our community knowledge base. You can review your journal history below. 🙌`,
+        `Your entry is saved and also contributes to our community knowledge base. You can review your journal history below. 🙌`,
       ].filter(Boolean).join("\n");
 
       setMessages((prev) => [...prev, { role: "system", content: summary }]);
@@ -122,7 +101,7 @@ const ExperienceChat = () => {
           </div>
           <div>
             <p className="text-sm font-heading font-semibold text-foreground">My Peptide Journal</p>
-            <p className="text-[10px] text-muted-foreground">Log your results, side effects & progress — your data stays with you</p>
+            <p className="text-[10px] text-muted-foreground">Log your results, side effects & progress — persisted to your account</p>
           </div>
         </div>
         {journal.length > 0 && (
@@ -140,14 +119,14 @@ const ExperienceChat = () => {
       {/* Journal History */}
       {showJournal && journal.length > 0 && (
         <div className="border-b border-border bg-muted/20 max-h-48 overflow-y-auto">
-          {journal.map((entry, i) => (
-            <div key={i} className="px-4 py-2.5 border-b border-border/50 last:border-0">
+          {journal.map((entry) => (
+            <div key={entry.id} className="px-4 py-2.5 border-b border-border/50 last:border-0">
               <div className="flex items-center justify-between mb-1">
                 <span className="text-[11px] font-medium text-foreground">
-                  {new Date(entry.date).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" })}
+                  {new Date(entry.created_at).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" })}
                 </span>
-                {entry.evidenceQuality && (
-                  <span className="text-[10px] px-1.5 py-0.5 rounded bg-primary/10 text-primary">{entry.evidenceQuality}</span>
+                {entry.evidence_quality && (
+                  <span className="text-[10px] px-1.5 py-0.5 rounded bg-primary/10 text-primary">{entry.evidence_quality}</span>
                 )}
               </div>
               {entry.peptides.length > 0 && (
@@ -157,7 +136,7 @@ const ExperienceChat = () => {
                   ))}
                 </div>
               )}
-              <p className="text-[11px] text-muted-foreground line-clamp-2">{entry.summary}</p>
+              <p className="text-[11px] text-muted-foreground line-clamp-2">{entry.summary || entry.content.slice(0, 200)}</p>
             </div>
           ))}
         </div>
@@ -173,7 +152,7 @@ const ExperienceChat = () => {
               </div>
               <div className="bg-muted/50 rounded-xl rounded-tl-sm px-3 py-2">
                 <p className="text-sm text-foreground">
-                  Welcome to your peptide journal. Log your experiences here — dosing, results, bloodwork changes, side effects. Each entry is <strong>saved privately for you</strong> and also helps build our community knowledge base (anonymised).
+                  Welcome to your peptide journal. Log your experiences here — dosing, results, bloodwork changes, side effects. Each entry is <strong>saved to your account</strong> and also helps build our community knowledge base (anonymised).
                 </p>
               </div>
             </div>

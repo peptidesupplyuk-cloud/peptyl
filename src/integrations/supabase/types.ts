@@ -375,6 +375,50 @@ export type Database = {
           },
         ]
       }
+      journal_entries: {
+        Row: {
+          article_id: string | null
+          content: string
+          created_at: string
+          evidence_quality: string | null
+          findings_count: number | null
+          id: string
+          peptides: string[] | null
+          summary: string | null
+          user_id: string
+        }
+        Insert: {
+          article_id?: string | null
+          content: string
+          created_at?: string
+          evidence_quality?: string | null
+          findings_count?: number | null
+          id?: string
+          peptides?: string[] | null
+          summary?: string | null
+          user_id: string
+        }
+        Update: {
+          article_id?: string | null
+          content?: string
+          created_at?: string
+          evidence_quality?: string | null
+          findings_count?: number | null
+          id?: string
+          peptides?: string[] | null
+          summary?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "journal_entries_article_id_fkey"
+            columns: ["article_id"]
+            isOneToOne: false
+            referencedRelation: "articles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       keyword_scores: {
         Row: {
           accept_count: number
