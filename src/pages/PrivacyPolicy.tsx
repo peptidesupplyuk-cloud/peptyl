@@ -44,7 +44,7 @@ const PrivacyPolicy = () => {
             <div className="space-y-10 text-muted-foreground leading-relaxed">
               <div>
                 <h2 className="text-xl font-heading font-bold text-primary mb-4">1. Data Controller Information</h2>
-                <p><strong className="text-foreground">Data Controller:</strong> PeptideSupplyUK.co.uk</p>
+                <p><strong className="text-foreground">Data Controller:</strong> Peptyl (peptyl.co.uk)</p>
                 <p><strong className="text-foreground">Contact:</strong> Available via our contact page</p>
                 <p><strong className="text-foreground">Jurisdiction:</strong> United Kingdom</p>
                 <p className="mt-3">We are the data controller responsible for your personal data. If you have any questions about this privacy policy or our data practices, please contact us.</p>

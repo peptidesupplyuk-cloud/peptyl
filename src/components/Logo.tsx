@@ -59,7 +59,7 @@ const Logo = ({ className, size = "md", variant = "full", inverted = false }: Lo
             "text-[0.5em] font-body font-medium tracking-[0.15em] mt-0.5",
             inverted ? "text-primary-foreground/40" : "text-muted-foreground/60"
           )}>
-            by Peptide Supply
+            PEPTIDE RESEARCH
           </span>
         </div>
       )}
