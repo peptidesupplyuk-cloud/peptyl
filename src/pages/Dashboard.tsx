@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Activity, FlaskConical, Syringe, LayoutDashboard, AlertTriangle, User, BookOpen } from "lucide-react";
+import { Activity, FlaskConical, LayoutDashboard, AlertTriangle, User, BookOpen, CalendarDays } from "lucide-react";
 import { addWeeks, format } from "date-fns";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
@@ -134,7 +134,7 @@ const Dashboard = () => {
                 <FlaskConical className="h-4 w-4 mr-1.5 hidden sm:inline" />Protocols
               </TabsTrigger>
               <TabsTrigger value="injections" className="text-xs sm:text-sm">
-                <Syringe className="h-4 w-4 mr-1.5 hidden sm:inline" />Tracker
+                <CalendarDays className="h-4 w-4 mr-1.5 hidden sm:inline" />Tracker
               </TabsTrigger>
             </TabsList>
 
