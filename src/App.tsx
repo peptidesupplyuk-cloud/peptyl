@@ -8,6 +8,7 @@ import { AuthProvider } from "@/contexts/AuthContext";
 import ProtectedRoute from "@/components/ProtectedRoute";
 import PeptideChat from "@/components/PeptideChat";
 import SignupBanner from "@/components/SignupBanner";
+import FeedbackBanner from "@/components/FeedbackBanner";
 import ScrollToTop from "@/components/ScrollToTop";
 import Index from "./pages/Index";
 import Auth from "./pages/Auth";
@@ -74,6 +75,7 @@ const App = () => (
           </Suspense>
           <PeptideChat />
           <SignupBanner />
+          <FeedbackBanner />
         </BrowserRouter>
       </TooltipProvider>
     </AuthProvider>

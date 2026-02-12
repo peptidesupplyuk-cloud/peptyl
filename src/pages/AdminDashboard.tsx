@@ -13,7 +13,7 @@ import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
 import {
   AlertTriangle, Users, Globe, Mail, Activity, FlaskConical, Droplets, Loader2,
-  Upload, CheckCircle, XCircle, Clock, FileText, ExternalLink, Twitter, BarChart3, Target, Sparkles, Megaphone, Search, Copy, Link as LinkIcon,
+  Upload, CheckCircle, XCircle, Clock, FileText, ExternalLink, Twitter, BarChart3, Target, Sparkles, Megaphone, Search, Copy, Link as LinkIcon, MessageSquare, Trash2,
 } from "lucide-react";
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from "recharts";
 import MonitoredAccounts from "@/components/admin/MonitoredAccounts";
@@ -506,6 +506,65 @@ const CampaignsTab = () => {
   );
 };
 
+/* ========== FEEDBACK TAB ========== */
+
+const FeedbackTab = () => {
+  const queryClient = useQueryClient();
+  const { toast } = useToast();
+
+  const { data: feedback = [], isLoading } = useQuery({
+    queryKey: ["admin-feedback"],
+    queryFn: async () => {
+      const { data, error } = await supabase.from("feedback" as any).select("*").order("created_at", { ascending: false }).limit(100);
+      if (error) throw error;
+      return data as any[];
+    },
+  });
+
+  const deleteFeedback = useMutation({
+    mutationFn: async (id: string) => {
+      const { error } = await supabase.from("feedback" as any).delete().eq("id", id);
+      if (error) throw error;
+    },
+    onSuccess: () => { queryClient.invalidateQueries({ queryKey: ["admin-feedback"] }); toast({ title: "Feedback deleted" }); },
+  });
+
+  if (isLoading) return <div className="flex items-center justify-center py-12"><Loader2 className="h-6 w-6 animate-spin text-muted-foreground" /></div>;
+
+  return (
+    <div className="space-y-4">
+      <h2 className="font-heading font-semibold text-foreground flex items-center gap-2">
+        <MessageSquare className="h-5 w-5 text-primary" /> User Feedback ({feedback.length})
+      </h2>
+      {feedback.length === 0 ? (
+        <div className="bg-card border border-border rounded-2xl p-8 text-center">
+          <MessageSquare className="h-10 w-10 text-muted-foreground mx-auto mb-3" />
+          <p className="text-sm text-muted-foreground">No feedback yet.</p>
+        </div>
+      ) : (
+        <div className="space-y-3">
+          {feedback.map((f: any) => (
+            <div key={f.id} className="bg-card border border-border rounded-xl p-4">
+              <div className="flex items-start justify-between gap-3">
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm text-foreground">{f.message}</p>
+                  <div className="flex items-center gap-3 mt-2">
+                    {f.page && <span className="text-[10px] px-2 py-0.5 rounded-md bg-muted text-muted-foreground">{f.page}</span>}
+                    <span className="text-[10px] text-muted-foreground">{new Date(f.created_at).toLocaleString()}</span>
+                  </div>
+                </div>
+                <Button size="sm" variant="ghost" className="h-7 w-7 p-0 text-muted-foreground hover:text-destructive shrink-0" onClick={() => deleteFeedback.mutate(f.id)}>
+                  <Trash2 className="h-3.5 w-3.5" />
+                </Button>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+};
+
 /* ========== MAIN PAGE ========== */
 
 const AdminDashboard = () => {
@@ -541,7 +600,7 @@ const AdminDashboard = () => {
           </div>
 
           <Tabs defaultValue="analytics" className="space-y-6">
-            <TabsList className="w-auto">
+            <TabsList className="w-auto overflow-x-auto no-scrollbar">
               <TabsTrigger value="analytics" className="gap-1.5">
                 <BarChart3 className="h-4 w-4" /> Analytics
               </TabsTrigger>
@@ -550,6 +609,9 @@ const AdminDashboard = () => {
               </TabsTrigger>
               <TabsTrigger value="campaigns" className="gap-1.5">
                 <Megaphone className="h-4 w-4" /> Campaigns
+              </TabsTrigger>
+              <TabsTrigger value="feedback" className="gap-1.5">
+                <MessageSquare className="h-4 w-4" /> Feedback
               </TabsTrigger>
             </TabsList>
 
@@ -561,6 +623,9 @@ const AdminDashboard = () => {
             </TabsContent>
             <TabsContent value="campaigns">
               <CampaignsTab />
+            </TabsContent>
+            <TabsContent value="feedback">
+              <FeedbackTab />
             </TabsContent>
           </Tabs>
         </div>
