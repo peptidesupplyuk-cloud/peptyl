@@ -168,7 +168,337 @@ export const RECOMMENDATION_RULES: Rule[] = [
       source: "Insulin resistance research",
     },
   },
+  // --- NEW RULES ---
+  {
+    marker: "ferritin",
+    condition: (v) => v > 300,
+    recommendation: {
+      id: "iron_overload",
+      protocolName: "Iron Overload Management",
+      goal: "Reduce ferritin to optimal range (40-150 ng/mL)",
+      triggerDescription: "Ferritin above 300 ng/mL — potential iron overload",
+      peptides: [],
+      supplements: [
+        { name: "IP6 (Inositol Hexaphosphate)", dose: "800mg", frequency: "On empty stomach, daily" },
+        { name: "Curcumin (Longvida)", dose: "400mg", frequency: "Daily" },
+        { name: "Green Tea Extract (EGCG)", dose: "400mg", frequency: "Daily" },
+      ],
+      durationWeeks: 12,
+      retestWeeks: 12,
+      source: "Iron metabolism research",
+    },
+  },
+  {
+    marker: "thyroid_tsh",
+    condition: (v) => v > 4.0,
+    recommendation: {
+      id: "thyroid_support",
+      protocolName: "Thyroid Support Protocol",
+      goal: "Optimise TSH to 1.0-2.5 mIU/L range",
+      triggerDescription: "TSH above 4.0 mIU/L — subclinical hypothyroidism",
+      peptides: [
+        { name: "Thymosin Alpha-1", dose_mcg: 1600, frequency: "2x/week", timing: "AM", route: "SubQ" },
+      ],
+      supplements: [
+        { name: "Selenium (Selenomethionine)", dose: "200mcg", frequency: "Daily" },
+        { name: "Zinc Picolinate", dose: "30mg", frequency: "Daily" },
+        { name: "Iodine (from kelp)", dose: "150mcg", frequency: "Daily" },
+      ],
+      durationWeeks: 12,
+      retestWeeks: 8,
+      source: "Thyroid endocrinology guidelines",
+    },
+  },
+  {
+    marker: "cortisol_am",
+    condition: (v) => v > 25,
+    recommendation: {
+      id: "cortisol_management",
+      protocolName: "Stress & Cortisol Management",
+      goal: "Reduce AM cortisol to optimal range (10-20 µg/dL)",
+      triggerDescription: "Morning cortisol elevated (>25 µg/dL)",
+      peptides: [
+        { name: "Selank", dose_mcg: 300, frequency: "daily", timing: "AM", route: "Nasal" },
+      ],
+      supplements: [
+        { name: "Ashwagandha KSM-66", dose: "600mg", frequency: "Daily" },
+        { name: "Phosphatidylserine", dose: "300mg", frequency: "Before bed" },
+        { name: "Magnesium Glycinate", dose: "400mg", frequency: "Before bed" },
+      ],
+      durationWeeks: 8,
+      retestWeeks: 8,
+      source: "HPA axis & stress research",
+    },
+  },
+  {
+    marker: "alt",
+    condition: (v) => v > 50,
+    recommendation: {
+      id: "liver_support",
+      protocolName: "Liver Support Protocol",
+      goal: "Reduce ALT to optimal range (<30 U/L)",
+      triggerDescription: "ALT elevated (>50 U/L) — liver stress indicated",
+      peptides: [
+        { name: "BPC-157", dose_mcg: 500, frequency: "daily", timing: "AM", route: "Oral" },
+      ],
+      supplements: [
+        { name: "NAC", dose: "600mg", frequency: "Twice daily" },
+        { name: "Milk Thistle (Silymarin)", dose: "600mg", frequency: "Daily" },
+        { name: "TUDCA", dose: "500mg", frequency: "Daily" },
+      ],
+      durationWeeks: 8,
+      retestWeeks: 6,
+      source: "Hepatology research",
+    },
+  },
+  {
+    marker: "ldl_cholesterol",
+    condition: (v) => v > 160,
+    recommendation: {
+      id: "lipid_optimisation",
+      protocolName: "Lipid Optimisation Protocol",
+      goal: "Reduce LDL cholesterol to <130 mg/dL",
+      triggerDescription: "LDL cholesterol elevated (>160 mg/dL)",
+      peptides: [],
+      supplements: [
+        { name: "Berberine HCl", dose: "500mg", frequency: "Twice daily with meals" },
+        { name: "Omega-3 Fish Oil", dose: "3000mg EPA/DHA", frequency: "Daily" },
+        { name: "Red Yeast Rice", dose: "1200mg", frequency: "Daily" },
+        { name: "CoQ10", dose: "200mg", frequency: "Daily" },
+      ],
+      durationWeeks: 12,
+      retestWeeks: 12,
+      source: "Cardiovascular lipid research",
+    },
+  },
 ];
+
+// --- POPULAR PROTOCOL STACKS ---
+
+export interface PopularProtocol {
+  id: string;
+  protocolName: string;
+  category: "healing" | "anti-aging" | "fat-loss" | "performance" | "cognitive" | "immune";
+  goal: string;
+  description: string;
+  peptides: {
+    name: string;
+    dose_mcg: number;
+    frequency: string;
+    timing: string;
+    route: string;
+  }[];
+  supplements?: {
+    name: string;
+    dose: string;
+    frequency: string;
+  }[];
+  durationWeeks: number;
+  retestWeeks: number;
+  source?: string;
+  popularity: number; // 1-5 stars
+}
+
+export const POPULAR_PROTOCOLS: PopularProtocol[] = [
+  {
+    id: "glow_stack",
+    protocolName: "GLOW Stack",
+    category: "anti-aging",
+    goal: "Skin rejuvenation, collagen synthesis & tissue repair",
+    description: "The viral GLOW stack combines three synergistic peptides for skin, hair, and healing. Popular on social media for visible results.",
+    peptides: [
+      { name: "BPC-157", dose_mcg: 250, frequency: "daily", timing: "AM", route: "SubQ" },
+      { name: "TB-500", dose_mcg: 2500, frequency: "2x/week", timing: "AM", route: "SubQ" },
+      { name: "GHK-Cu", dose_mcg: 200, frequency: "daily", timing: "PM", route: "SubQ" },
+    ],
+    supplements: [
+      { name: "Vitamin C", dose: "1000mg", frequency: "Daily" },
+      { name: "Collagen Peptides", dose: "10g", frequency: "Daily" },
+    ],
+    durationWeeks: 8,
+    retestWeeks: 8,
+    source: "Community-verified protocol",
+    popularity: 5,
+  },
+  {
+    id: "wolverine_stack",
+    protocolName: "Wolverine Stack",
+    category: "healing",
+    goal: "Accelerated injury recovery & tissue regeneration",
+    description: "The most popular healing stack. BPC-157 + TB-500 work synergistically for gut, tendon, ligament, and muscle repair.",
+    peptides: [
+      { name: "BPC-157", dose_mcg: 250, frequency: "daily", timing: "AM+PM", route: "SubQ" },
+      { name: "TB-500", dose_mcg: 2500, frequency: "2x/week", timing: "AM", route: "SubQ" },
+    ],
+    supplements: [
+      { name: "Collagen Peptides", dose: "10g", frequency: "Daily" },
+      { name: "Omega-3 Fish Oil", dose: "2000mg EPA/DHA", frequency: "Daily" },
+    ],
+    durationWeeks: 6,
+    retestWeeks: 6,
+    source: "Widely documented healing protocol",
+    popularity: 5,
+  },
+  {
+    id: "gh_secretagogue",
+    protocolName: "GH Secretagogue Stack",
+    category: "anti-aging",
+    goal: "Optimise natural growth hormone release for recovery & anti-aging",
+    description: "Classic GHRH + GHRP combo for pulsatile GH release. Best taken on an empty stomach before bed.",
+    peptides: [
+      { name: "CJC-1295 (no DAC)", dose_mcg: 100, frequency: "5on/2off", timing: "Pre-bed", route: "SubQ" },
+      { name: "Ipamorelin", dose_mcg: 200, frequency: "5on/2off", timing: "Pre-bed", route: "SubQ" },
+    ],
+    supplements: [
+      { name: "Magnesium Glycinate", dose: "400mg", frequency: "Before bed" },
+      { name: "Zinc Picolinate", dose: "50mg", frequency: "Daily" },
+    ],
+    durationWeeks: 12,
+    retestWeeks: 8,
+    source: "Clinical GH research protocols",
+    popularity: 5,
+  },
+  {
+    id: "fat_loss_stack",
+    protocolName: "Fat Loss Stack",
+    category: "fat-loss",
+    goal: "Accelerate fat metabolism while preserving lean mass",
+    description: "Combines a GH fragment for targeted fat burning with a GLP-1 receptor agonist for appetite control.",
+    peptides: [
+      { name: "AOD-9604", dose_mcg: 300, frequency: "daily", timing: "AM", route: "SubQ" },
+      { name: "Tesamorelin", dose_mcg: 2000, frequency: "daily", timing: "Pre-bed", route: "SubQ" },
+    ],
+    supplements: [
+      { name: "L-Carnitine", dose: "2000mg", frequency: "Before exercise" },
+      { name: "Berberine HCl", dose: "500mg", frequency: "With meals" },
+    ],
+    durationWeeks: 12,
+    retestWeeks: 8,
+    source: "Metabolic & body composition research",
+    popularity: 4,
+  },
+  {
+    id: "cognitive_stack",
+    protocolName: "Cognitive Enhancement Stack",
+    category: "cognitive",
+    goal: "Improve focus, memory, and neuroprotection",
+    description: "Russian nootropic peptides combined for cognitive enhancement and anxiolytic effects. Popular in biohacking communities.",
+    peptides: [
+      { name: "Semax", dose_mcg: 600, frequency: "daily", timing: "AM", route: "Nasal" },
+      { name: "Selank", dose_mcg: 300, frequency: "daily", timing: "AM", route: "Nasal" },
+    ],
+    supplements: [
+      { name: "Lion's Mane", dose: "1000mg", frequency: "Daily" },
+      { name: "Alpha-GPC", dose: "300mg", frequency: "Daily" },
+      { name: "Omega-3 Fish Oil", dose: "2000mg EPA/DHA", frequency: "Daily" },
+    ],
+    durationWeeks: 8,
+    retestWeeks: 8,
+    source: "Nootropic research & Russian clinical data",
+    popularity: 4,
+  },
+  {
+    id: "immune_stack",
+    protocolName: "Immune Fortification Stack",
+    category: "immune",
+    goal: "Strengthen immune function and reduce infection susceptibility",
+    description: "Thymosin-based immune modulation with KPV for anti-inflammatory support. Ideal during seasonal transitions.",
+    peptides: [
+      { name: "Thymosin Alpha-1", dose_mcg: 1600, frequency: "2x/week", timing: "AM", route: "SubQ" },
+      { name: "KPV", dose_mcg: 500, frequency: "daily", timing: "AM", route: "SubQ" },
+    ],
+    supplements: [
+      { name: "Vitamin C", dose: "2000mg", frequency: "Daily" },
+      { name: "Vitamin D3 + K2", dose: "5000 IU", frequency: "Daily" },
+      { name: "Zinc Picolinate", dose: "30mg", frequency: "Daily" },
+    ],
+    durationWeeks: 8,
+    retestWeeks: 8,
+    source: "Immunology & thymic peptide research",
+    popularity: 4,
+  },
+  {
+    id: "gut_repair",
+    protocolName: "Gut Repair Protocol",
+    category: "healing",
+    goal: "Heal gut lining, reduce inflammation & improve digestion",
+    description: "Targeted gut healing combining BPC-157 (oral route for direct gut contact) with KPV's anti-inflammatory action.",
+    peptides: [
+      { name: "BPC-157", dose_mcg: 500, frequency: "daily", timing: "AM", route: "Oral" },
+      { name: "KPV", dose_mcg: 500, frequency: "daily", timing: "AM", route: "Oral" },
+    ],
+    supplements: [
+      { name: "L-Glutamine", dose: "5g", frequency: "Twice daily" },
+      { name: "Zinc Carnosine", dose: "75mg", frequency: "Twice daily" },
+      { name: "Probiotics (Multi-strain)", dose: "50B CFU", frequency: "Daily" },
+    ],
+    durationWeeks: 8,
+    retestWeeks: 8,
+    source: "GI repair & gut permeability research",
+    popularity: 4,
+  },
+  {
+    id: "longevity_stack",
+    protocolName: "Longevity Stack",
+    category: "anti-aging",
+    goal: "Cellular repair, mitochondrial health & anti-aging",
+    description: "Multi-targeted anti-aging approach combining skin repair, immune modulation, and metabolic optimisation peptides.",
+    peptides: [
+      { name: "GHK-Cu", dose_mcg: 200, frequency: "daily", timing: "PM", route: "SubQ" },
+      { name: "Thymosin Alpha-1", dose_mcg: 1600, frequency: "2x/week", timing: "AM", route: "SubQ" },
+      { name: "MOTS-c", dose_mcg: 5000, frequency: "3x/week", timing: "AM", route: "SubQ" },
+    ],
+    supplements: [
+      { name: "NMN", dose: "500mg", frequency: "Daily" },
+      { name: "Resveratrol", dose: "500mg", frequency: "Daily with fat" },
+      { name: "CoQ10", dose: "200mg", frequency: "Daily" },
+    ],
+    durationWeeks: 12,
+    retestWeeks: 12,
+    source: "Longevity & senescence research",
+    popularity: 3,
+  },
+  {
+    id: "performance_stack",
+    protocolName: "Performance & Recovery Stack",
+    category: "performance",
+    goal: "Enhanced athletic recovery, lean mass support & endurance",
+    description: "Optimise training output with GH support for recovery and BPC-157 for injury prevention.",
+    peptides: [
+      { name: "CJC-1295 (no DAC)", dose_mcg: 100, frequency: "5on/2off", timing: "Pre-bed", route: "SubQ" },
+      { name: "Ipamorelin", dose_mcg: 200, frequency: "5on/2off", timing: "Pre-bed", route: "SubQ" },
+      { name: "BPC-157", dose_mcg: 250, frequency: "daily", timing: "AM", route: "SubQ" },
+    ],
+    supplements: [
+      { name: "Creatine Monohydrate", dose: "5g", frequency: "Daily" },
+      { name: "L-Carnitine", dose: "2000mg", frequency: "Before exercise" },
+      { name: "Magnesium Glycinate", dose: "400mg", frequency: "Before bed" },
+    ],
+    durationWeeks: 12,
+    retestWeeks: 8,
+    source: "Sports performance & recovery research",
+    popularity: 4,
+  },
+];
+
+// Category display helpers
+export const CATEGORY_LABELS: Record<PopularProtocol["category"], string> = {
+  healing: "Healing & Recovery",
+  "anti-aging": "Anti-Aging & Longevity",
+  "fat-loss": "Fat Loss & Metabolic",
+  performance: "Performance & Athletic",
+  cognitive: "Cognitive & Nootropic",
+  immune: "Immune Support",
+};
+
+export const CATEGORY_COLORS: Record<PopularProtocol["category"], string> = {
+  healing: "bg-green-500/10 text-green-600",
+  "anti-aging": "bg-purple-500/10 text-purple-600",
+  "fat-loss": "bg-orange-500/10 text-orange-600",
+  performance: "bg-blue-500/10 text-blue-600",
+  cognitive: "bg-indigo-500/10 text-indigo-600",
+  immune: "bg-teal-500/10 text-teal-600",
+};
 
 // BMI-based recommendations (called separately with biometrics)
 export interface BiometricRecommendation {
