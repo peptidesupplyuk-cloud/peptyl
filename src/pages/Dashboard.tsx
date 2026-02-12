@@ -69,6 +69,14 @@ const Dashboard = () => {
           timing: p.timing,
           route: p.route,
         })),
+        supplements: rec.supplements?.map((s) => ({
+          name: s.name,
+          dose: s.dose,
+          frequency: s.frequency,
+        })),
+        notes: rec.supplements?.length
+          ? `Suggested supplements: ${rec.supplements.map((s) => `${s.name} (${s.dose}, ${s.frequency})`).join(", ")}`
+          : undefined,
       });
 
       // Generate today's injection logs for the new protocol

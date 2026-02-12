@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Pause, Play, CheckCircle2, Clock, FlaskConical, Trash2 } from "lucide-react";
+import { Pause, Play, CheckCircle2, Clock, FlaskConical, Trash2, Pill } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useProtocols, useUpdateProtocolStatus, useDeleteProtocol, type Protocol } from "@/hooks/use-protocols";
 import { differenceInDays } from "date-fns";
@@ -65,6 +65,24 @@ const ActiveProtocols = () => {
               </div>
             ))}
           </div>
+        )}
+
+        {p.supplements && p.supplements.length > 0 && (
+          <div className="space-y-1 border-t border-border/50 pt-2">
+            <p className="text-[10px] font-medium text-muted-foreground uppercase tracking-wider flex items-center gap-1">
+              <Pill className="h-3 w-3" /> Suggested Supplements
+            </p>
+            {p.supplements.map((s, i) => (
+              <div key={i} className="flex items-center justify-between text-xs">
+                <span className="text-foreground">{s.name}</span>
+                <span className="text-muted-foreground">{s.dose} · {s.frequency}</span>
+              </div>
+            ))}
+          </div>
+        )}
+
+        {p.notes && (
+          <p className="text-[10px] text-muted-foreground italic border-t border-border/50 pt-2">{p.notes}</p>
         )}
 
         <div className="flex items-center justify-between">

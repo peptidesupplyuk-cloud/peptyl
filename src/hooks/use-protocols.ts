@@ -13,6 +13,12 @@ export interface ProtocolPeptide {
   notes: string | null;
 }
 
+export interface ProtocolSupplement {
+  name: string;
+  dose: string;
+  frequency: string;
+}
+
 export interface Protocol {
   id: string;
   user_id: string;
@@ -24,6 +30,8 @@ export interface Protocol {
   disclaimer_accepted: boolean;
   created_at: string;
   updated_at: string;
+  supplements: ProtocolSupplement[];
+  notes: string | null;
   peptides: ProtocolPeptide[];
 }
 
@@ -45,7 +53,12 @@ export function useProtocols() {
           .from("protocol_peptides")
           .select("*")
           .eq("protocol_id", p.id);
-        results.push({ ...p, peptides: peptides ?? [] });
+        results.push({
+          ...p,
+          supplements: (Array.isArray(p.supplements) ? p.supplements : []) as unknown as ProtocolSupplement[],
+          notes: p.notes ?? null,
+          peptides: peptides ?? [],
+        });
       }
       return results;
     },
@@ -63,12 +76,16 @@ export function useCreateProtocol() {
       startDate,
       endDate,
       peptides,
+      supplements,
+      notes,
     }: {
       name: string;
       goal: string;
       startDate: string;
       endDate?: string;
       peptides: { peptide_name: string; dose_mcg: number; frequency: string; timing: string; route: string }[];
+      supplements?: ProtocolSupplement[];
+      notes?: string;
     }) => {
       if (!user) throw new Error("Not authenticated");
 
@@ -94,6 +111,8 @@ export function useCreateProtocol() {
           start_date: startDate,
           end_date: endDate || null,
           disclaimer_accepted: true,
+          supplements: (supplements || []) as any,
+          notes: notes || null,
         })
         .select()
         .single();
