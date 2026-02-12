@@ -32,11 +32,6 @@ const Index = () => {
       />
       <Header />
 
-      {/* Android App Coming Soon Banner */}
-      <div className="bg-primary text-primary-foreground py-2.5 text-center text-sm font-medium tracking-wide mt-16">
-        📱 Android App Coming Soon — Get Peptyl on the Go!
-      </div>
-
       <HeroSection />
       <SignupBenefits />
       <MissionSection />

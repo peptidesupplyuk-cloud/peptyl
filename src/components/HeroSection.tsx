@@ -5,7 +5,13 @@ import { Button } from "@/components/ui/button";
 import heroBg from "@/assets/hero-bg.jpg";
 
 const HeroSection = () => (
-  <section className="relative min-h-screen flex items-center overflow-hidden">
+  <section className="relative min-h-screen flex flex-col overflow-hidden">
+    {/* Android App Coming Soon Banner */}
+    <div className="relative z-10 bg-primary/90 backdrop-blur-sm text-primary-foreground py-2.5 text-center text-sm font-medium tracking-wide mt-16">
+      📱 Android App Coming Soon — Get Peptyl on the Go!
+    </div>
+
+    <div className="flex-1 flex items-center relative">
     {/* BG image */}
     <div className="absolute inset-0">
       <img src={heroBg} alt="" className="w-full h-full object-cover" />
@@ -89,6 +95,7 @@ const HeroSection = () => (
           </div>
         ))}
       </motion.div>
+    </div>
     </div>
   </section>
 );
