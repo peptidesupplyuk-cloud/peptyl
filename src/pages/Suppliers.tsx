@@ -23,6 +23,12 @@ const suppliers = [
   { id: "asda", name: "Asda Online Doctor", url: "https://onlinedoctor.asda.com", logo: "🏪" },
   { id: "lloyds", name: "LloydsDirect", url: "https://onlinedoctor.lloydspharmacy.com", logo: "💊" },
   { id: "pilltime", name: "PillTime", url: "https://www.pilltime.co.uk", logo: "⏰" },
+  { id: "oxford", name: "Oxford Online Pharmacy", url: "https://www.oxfordonlinepharmacy.co.uk", logo: "🎓" },
+  { id: "medicspot", name: "MedicSpot", url: "https://www.medicspot.co.uk", logo: "📍" },
+  { id: "lotus", name: "Lotus Weight Loss", url: "https://lotusweightloss.co.uk", logo: "🌸" },
+  { id: "manual", name: "Manual", url: "https://www.manual.co", logo: "💪" },
+  { id: "numan", name: "Numan", url: "https://www.numan.com", logo: "🧬" },
+  { id: "superdrug", name: "Superdrug Online Doctor", url: "https://onlinedoctor.superdrug.com", logo: "🏥" },
 ];
 
 const products: Product[] = [
@@ -34,6 +40,9 @@ const products: Product[] = [
       { supplier: "LloydsDirect", price: 159.99, url: "https://onlinedoctor.lloydspharmacy.com", inStock: true },
       { supplier: "Asda Online Doctor", price: 155.00, url: "https://onlinedoctor.asda.com", inStock: false },
       { supplier: "MedExpress", price: 162.00, url: "https://www.medexpress.co.uk", inStock: true },
+      { supplier: "Superdrug Online Doctor", price: 154.99, url: "https://onlinedoctor.superdrug.com", inStock: true },
+      { supplier: "Oxford Online Pharmacy", price: 157.00, url: "https://www.oxfordonlinepharmacy.co.uk", inStock: true },
+      { supplier: "Manual", price: 159.00, url: "https://www.manual.co", inStock: true },
     ],
   },
   {
@@ -44,6 +53,8 @@ const products: Product[] = [
       { supplier: "Morrisons Clinic", price: 209.00, url: "https://clinic.morrisons.com", inStock: true },
       { supplier: "Click Pharmacy", price: 204.99, url: "https://www.clickpharmacy.co.uk", inStock: true },
       { supplier: "Pharmacy Planet", price: 195.00, url: "https://www.pharmacyplanet.com", inStock: false },
+      { supplier: "Superdrug Online Doctor", price: 204.00, url: "https://onlinedoctor.superdrug.com", inStock: true },
+      { supplier: "Numan", price: 199.00, url: "https://www.numan.com", inStock: true },
     ],
   },
   {
@@ -53,6 +64,8 @@ const products: Product[] = [
       { supplier: "Boots Online Doctor", price: 269.00, url: "https://onlinedoctor.boots.com", inStock: true },
       { supplier: "LloydsDirect", price: 259.00, url: "https://onlinedoctor.lloydspharmacy.com", inStock: true },
       { supplier: "Bolt Pharmacy", price: 245.00, url: "https://www.boltpharmacy.co.uk", inStock: true },
+      { supplier: "Manual", price: 255.00, url: "https://www.manual.co", inStock: true },
+      { supplier: "MedicSpot", price: 252.00, url: "https://www.medicspot.co.uk", inStock: true },
     ],
   },
   {
@@ -63,6 +76,10 @@ const products: Product[] = [
       { supplier: "LloydsDirect", price: 155.00, url: "https://onlinedoctor.lloydspharmacy.com", inStock: true },
       { supplier: "MedExpress", price: 152.00, url: "https://www.medexpress.co.uk", inStock: true },
       { supplier: "Click Pharmacy", price: 148.99, url: "https://www.clickpharmacy.co.uk", inStock: true },
+      { supplier: "Lotus Weight Loss", price: 139.00, url: "https://lotusweightloss.co.uk", inStock: true },
+      { supplier: "Superdrug Online Doctor", price: 149.99, url: "https://onlinedoctor.superdrug.com", inStock: true },
+      { supplier: "Oxford Online Pharmacy", price: 145.00, url: "https://www.oxfordonlinepharmacy.co.uk", inStock: true },
+      { supplier: "Numan", price: 150.00, url: "https://www.numan.com", inStock: true },
     ],
   },
   {
@@ -72,6 +89,9 @@ const products: Product[] = [
       { supplier: "Simple Online Pharmacy", price: 189.00, url: "https://www.simpleonlinepharmacy.co.uk", inStock: true },
       { supplier: "Asda Online Doctor", price: 195.00, url: "https://onlinedoctor.asda.com", inStock: true },
       { supplier: "Pharmacy Planet", price: 185.00, url: "https://www.pharmacyplanet.com", inStock: true },
+      { supplier: "Lotus Weight Loss", price: 179.00, url: "https://lotusweightloss.co.uk", inStock: true },
+      { supplier: "Manual", price: 189.00, url: "https://www.manual.co", inStock: true },
+      { supplier: "MedicSpot", price: 192.00, url: "https://www.medicspot.co.uk", inStock: true },
     ],
   },
   {
@@ -81,6 +101,19 @@ const products: Product[] = [
       { supplier: "Simple Online Pharmacy", price: 249.00, url: "https://www.simpleonlinepharmacy.co.uk", inStock: true },
       { supplier: "LloydsDirect", price: 255.00, url: "https://onlinedoctor.lloydspharmacy.com", inStock: false },
       { supplier: "Morrisons Clinic", price: 245.00, url: "https://clinic.morrisons.com", inStock: true },
+      { supplier: "Lotus Weight Loss", price: 235.00, url: "https://lotusweightloss.co.uk", inStock: true },
+      { supplier: "Numan", price: 249.00, url: "https://www.numan.com", inStock: true },
+      { supplier: "Oxford Online Pharmacy", price: 248.00, url: "https://www.oxfordonlinepharmacy.co.uk", inStock: true },
+    ],
+  },
+  {
+    name: "Tirzepatide (Mounjaro) – 15mg/week",
+    prices: [
+      { supplier: "Boots Online Doctor", price: 299.00, url: "https://onlinedoctor.boots.com", inStock: true },
+      { supplier: "Simple Online Pharmacy", price: 289.00, url: "https://www.simpleonlinepharmacy.co.uk", inStock: true },
+      { supplier: "Lotus Weight Loss", price: 275.00, url: "https://lotusweightloss.co.uk", inStock: false },
+      { supplier: "Superdrug Online Doctor", price: 295.00, url: "https://onlinedoctor.superdrug.com", inStock: true },
+      { supplier: "Manual", price: 285.00, url: "https://www.manual.co", inStock: true },
     ],
   },
   {
@@ -90,6 +123,8 @@ const products: Product[] = [
       { supplier: "LloydsDirect", price: 175.00, url: "https://onlinedoctor.lloydspharmacy.com", inStock: true },
       { supplier: "Simple Online Pharmacy", price: 169.99, url: "https://www.simpleonlinepharmacy.co.uk", inStock: true },
       { supplier: "PillTime", price: 172.00, url: "https://www.pilltime.co.uk", inStock: true },
+      { supplier: "Superdrug Online Doctor", price: 174.99, url: "https://onlinedoctor.superdrug.com", inStock: true },
+      { supplier: "Click Pharmacy", price: 168.00, url: "https://www.clickpharmacy.co.uk", inStock: true },
     ],
   },
   {
@@ -100,6 +135,8 @@ const products: Product[] = [
       { supplier: "Simple Online Pharmacy", price: 32.00, url: "https://www.simpleonlinepharmacy.co.uk", inStock: true },
       { supplier: "Bolt Pharmacy", price: 31.50, url: "https://www.boltpharmacy.co.uk", inStock: true },
       { supplier: "MedExpress", price: 35.00, url: "https://www.medexpress.co.uk", inStock: true },
+      { supplier: "Superdrug Online Doctor", price: 28.99, url: "https://onlinedoctor.superdrug.com", inStock: true },
+      { supplier: "Oxford Online Pharmacy", price: 30.50, url: "https://www.oxfordonlinepharmacy.co.uk", inStock: true },
     ],
   },
 ];
