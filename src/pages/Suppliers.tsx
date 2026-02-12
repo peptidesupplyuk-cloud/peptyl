@@ -7,10 +7,9 @@ import { Button } from "@/components/ui/button";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { useState, useMemo } from "react";
 import {
-  medicationSuppliers, medicationProducts,
-  bloodworkSuppliers, bloodworkProducts,
+  medicationProducts,
+  bloodworkProducts,
 } from "@/data/suppliers";
-import SupplierList from "@/components/suppliers/SupplierList";
 import ProductCards from "@/components/suppliers/ProductCards";
 
 const Suppliers = () => {
@@ -19,7 +18,6 @@ const Suppliers = () => {
   const [tab, setTab] = useState("medications");
 
   const activeProducts = tab === "medications" ? medicationProducts : bloodworkProducts;
-  const activeSuppliers = tab === "medications" ? medicationSuppliers : bloodworkSuppliers;
 
   const filtered = useMemo(() => {
     const q = search.toLowerCase();
@@ -94,12 +92,16 @@ const Suppliers = () => {
 
             <TabsContent value="medications" className="mt-0">
               <div className="space-y-8">
-                {/* Suppliers */}
+                {/* Offering chips */}
                 <div>
                   <h2 className="text-xl font-heading font-bold text-foreground mb-4 flex items-center gap-2">
-                    <ShieldCheck className="h-5 w-5 text-primary" /> Approved Pharmacies
+                    <ShieldCheck className="h-5 w-5 text-primary" /> Available Medications
                   </h2>
-                  <SupplierList suppliers={medicationSuppliers} />
+                  <div className="flex gap-2 flex-wrap">
+                    {["Semaglutide (Wegovy)", "Tirzepatide (Mounjaro)", "Liraglutide (Saxenda)", "Orlistat"].map(name => (
+                      <span key={name} className="px-3 py-1.5 rounded-full border border-border bg-card text-sm font-medium text-foreground">{name}</span>
+                    ))}
+                  </div>
                 </div>
 
                 {/* Search + Sort */}
@@ -126,12 +128,16 @@ const Suppliers = () => {
 
             <TabsContent value="bloodwork" className="mt-0">
               <div className="space-y-8">
-                {/* Suppliers */}
+                {/* Offering chips */}
                 <div>
                   <h2 className="text-xl font-heading font-bold text-foreground mb-4 flex items-center gap-2">
-                    <ShieldCheck className="h-5 w-5 text-primary" /> Approved Labs & Testing Providers
+                    <ShieldCheck className="h-5 w-5 text-primary" /> Available Tests
                   </h2>
-                  <SupplierList suppliers={bloodworkSuppliers} />
+                  <div className="flex gap-2 flex-wrap">
+                    {["Basic Health Check", "Well Man / Well Woman", "Testosterone Panel", "Thyroid Function", "HbA1c (Diabetes)", "Hormone Panel", "Liver Function", "Full Body MOT"].map(name => (
+                      <span key={name} className="px-3 py-1.5 rounded-full border border-border bg-card text-sm font-medium text-foreground">{name}</span>
+                    ))}
+                  </div>
                 </div>
 
                 {/* Search + Sort */}
