@@ -153,8 +153,8 @@ const ContactForm = () => {
               <div className="pt-4 border-t border-border space-y-3">
                 <div>
                   <p className="text-xs text-muted-foreground">Email</p>
-                  <a href="mailto:cs@peptidesupplyuk.co.uk" className="text-sm text-foreground hover:text-primary transition-colors">
-                    cs@peptidesupplyuk.co.uk
+                  <a href="mailto:hello@peptyl.co.uk" className="text-sm text-foreground hover:text-primary transition-colors">
+                    hello@peptyl.co.uk
                   </a>
                 </div>
                 <div>

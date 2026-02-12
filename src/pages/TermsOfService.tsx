@@ -45,12 +45,12 @@ const TermsOfService = () => {
             <div className="space-y-10 text-muted-foreground leading-relaxed">
               <div>
                 <h2 className="text-xl font-heading font-bold text-primary mb-4">1. Agreement to Terms</h2>
-                <p>By accessing and using PeptideSupplyUK.co.uk ("the Website"), and by purchasing any products from us, you agree to be bound by these Terms of Service and all applicable laws and regulations. If you do not agree with any of these terms, you are prohibited from using or accessing this site.</p>
+                <p>By accessing and using Peptyl (peptyl.co.uk, "the Website"), you agree to be bound by these Terms of Service and all applicable laws and regulations. If you do not agree with any of these terms, you are prohibited from using or accessing this site.</p>
               </div>
 
               <div>
                 <h2 className="text-xl font-heading font-bold text-primary mb-4">2. Company Information</h2>
-                <p><strong className="text-foreground">Trading Name:</strong> PeptideSupplyUK.co.uk</p>
+                <p><strong className="text-foreground">Trading Name:</strong> Peptyl (peptyl.co.uk)</p>
                 <p><strong className="text-foreground">Registered in:</strong> United Kingdom</p>
                 <p><strong className="text-foreground">Contact:</strong> Available via our contact page</p>
               </div>
@@ -59,7 +59,7 @@ const TermsOfService = () => {
                 <h2 className="text-xl font-heading font-bold text-primary mb-4">3. Products and Research Use Only</h2>
 
                 <h3 className="text-lg font-semibold text-foreground mt-6 mb-3">3.1 Research Chemicals</h3>
-                <p>All peptides and related products sold by PeptideSupplyUK are <strong className="text-foreground">research chemicals intended for in-vitro research and laboratory use only</strong>. These products are:</p>
+                <p>All peptides and related products referenced on Peptyl are <strong className="text-foreground">research chemicals intended for in-vitro research and laboratory use only</strong>. These products are:</p>
                 <ul className="list-disc pl-6 mt-2 space-y-2">
                   <li>NOT intended for human consumption or use</li>
                   <li>NOT intended for veterinary use</li>
@@ -142,7 +142,7 @@ const TermsOfService = () => {
 
               <div>
                 <h2 className="text-xl font-heading font-bold text-primary mb-4">7. Intellectual Property</h2>
-                <p>All content on this website, including but not limited to text, graphics, logos, images, and software, is the property of PeptideSupplyUK or its content suppliers and is protected by UK and international copyright laws. Unauthorized use of any content may violate copyright, trademark, and other laws.</p>
+                <p>All content on this website, including but not limited to text, graphics, logos, images, and software, is the property of Peptyl or its content suppliers and is protected by UK and international copyright laws. Unauthorized use of any content may violate copyright, trademark, and other laws.</p>
               </div>
 
               <div>
@@ -154,7 +154,7 @@ const TermsOfService = () => {
                   </div>
                   <p className="text-sm"><strong className="text-foreground">To the fullest extent permitted by law:</strong></p>
                   <ul className="list-disc pl-6 mt-2 space-y-2 text-sm">
-                    <li>PeptideSupplyUK shall not be liable for any damages arising from the use or misuse of products</li>
+                    <li>Peptyl shall not be liable for any damages arising from the use or misuse of products</li>
                     <li>We provide no warranties regarding product fitness for any particular purpose</li>
                     <li>Our total liability shall not exceed the purchase price of the product in question</li>
                     <li>We are not responsible for any health consequences resulting from misuse of research chemicals</li>
@@ -165,7 +165,7 @@ const TermsOfService = () => {
 
               <div>
                 <h2 className="text-xl font-heading font-bold text-primary mb-4">9. Indemnification</h2>
-                <p>You agree to indemnify and hold harmless PeptideSupplyUK, its officers, directors, employees, and agents from any claims, damages, losses, liabilities, and expenses (including legal fees) arising from:</p>
+                <p>You agree to indemnify and hold harmless Peptyl, its officers, directors, employees, and agents from any claims, damages, losses, liabilities, and expenses (including legal fees) arising from:</p>
                 <ul className="list-disc pl-6 mt-2 space-y-2">
                   <li>Your use or misuse of products purchased from us</li>
                   <li>Your violation of these Terms of Service</li>
@@ -211,7 +211,7 @@ const TermsOfService = () => {
 
               <div>
                 <h2 className="text-xl font-heading font-bold text-primary mb-4">17. Entire Agreement</h2>
-                <p>These Terms of Service, together with our Privacy Policy and Refund Policy, constitute the entire agreement between you and PeptideSupplyUK regarding your use of the website and purchase of products.</p>
+                <p>These Terms of Service, together with our Privacy Policy and Refund Policy, constitute the entire agreement between you and Peptyl regarding your use of the website.</p>
               </div>
 
               <div>
