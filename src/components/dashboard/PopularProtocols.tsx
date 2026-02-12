@@ -33,45 +33,49 @@ const PopularProtocols = ({ onActivate, isActivating, disclaimerAccepted }: Prop
 
   return (
     <div className="space-y-4">
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-2">
-          <TrendingUp className="h-5 w-5 text-primary" />
-          <h2 className="font-heading font-semibold text-foreground">Popular Protocols</h2>
+      <Carousel opts={{ align: "start", loop: false }} className="w-full">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <TrendingUp className="h-5 w-5 text-primary" />
+            <h2 className="font-heading font-semibold text-foreground">Popular Protocols</h2>
+          </div>
+          <div className="flex items-center gap-1">
+            <CarouselPrevious className="static translate-y-0 h-7 w-7" />
+            <CarouselNext className="static translate-y-0 h-7 w-7" />
+          </div>
         </div>
-      </div>
-      <p className="text-xs text-muted-foreground -mt-2">
-        Community-verified stacks used by researchers worldwide. Tap the pencil icon to customise dosages before starting.
-      </p>
+        <p className="text-xs text-muted-foreground mt-1">
+          Community-verified stacks. Tap the pencil icon to customise dosages before starting.
+        </p>
 
-      {/* Category filter */}
-      <div className="flex flex-wrap gap-1.5">
-        <button
-          onClick={() => setSelectedCategory("all")}
-          className={`text-[11px] px-2.5 py-1 rounded-full border transition-colors ${
-            selectedCategory === "all"
-              ? "bg-primary text-primary-foreground border-primary"
-              : "bg-muted/50 text-muted-foreground border-border hover:bg-muted"
-          }`}
-        >
-          All
-        </button>
-        {categories.map((cat) => (
+        {/* Category filter */}
+        <div className="flex flex-wrap gap-1.5 mt-3">
           <button
-            key={cat}
-            onClick={() => setSelectedCategory(cat)}
+            onClick={() => setSelectedCategory("all")}
             className={`text-[11px] px-2.5 py-1 rounded-full border transition-colors ${
-              selectedCategory === cat
+              selectedCategory === "all"
                 ? "bg-primary text-primary-foreground border-primary"
-                : `${CATEGORY_COLORS[cat]} border-transparent hover:opacity-80`
+                : "bg-muted/50 text-muted-foreground border-border hover:bg-muted"
             }`}
           >
-            {CATEGORY_LABELS[cat]}
+            All
           </button>
-        ))}
-      </div>
+          {categories.map((cat) => (
+            <button
+              key={cat}
+              onClick={() => setSelectedCategory(cat)}
+              className={`text-[11px] px-2.5 py-1 rounded-full border transition-colors ${
+                selectedCategory === cat
+                  ? "bg-primary text-primary-foreground border-primary"
+                  : `${CATEGORY_COLORS[cat]} border-transparent hover:opacity-80`
+              }`}
+            >
+              {CATEGORY_LABELS[cat]}
+            </button>
+          ))}
+        </div>
 
-      <Carousel opts={{ align: "start", loop: false }} className="w-full">
-        <CarouselContent className="-ml-3">
+        <CarouselContent className="-ml-3 mt-3">
           {filtered.map((protocol) => (
             <CarouselItem key={protocol.id} className="pl-3 basis-[85%] sm:basis-[70%] md:basis-1/2 lg:basis-[45%]">
               <div className="relative h-full">
@@ -90,10 +94,6 @@ const PopularProtocols = ({ onActivate, isActivating, disclaimerAccepted }: Prop
             </CarouselItem>
           ))}
         </CarouselContent>
-        <div className="flex justify-end gap-2 mt-3">
-          <CarouselPrevious className="static translate-y-0 h-8 w-8" />
-          <CarouselNext className="static translate-y-0 h-8 w-8" />
-        </div>
       </Carousel>
     </div>
   );
