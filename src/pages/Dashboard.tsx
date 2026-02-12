@@ -16,6 +16,7 @@ import { useBloodworkPanels } from "@/hooks/use-bloodwork";
 import { useCreateProtocol } from "@/hooks/use-protocols";
 import { useLogInjection } from "@/hooks/use-injections";
 import { getRecommendations, getBiometricRecommendations, type Recommendation, type BiometricRecommendation } from "@/data/recommendation-rules";
+import PopularProtocols from "@/components/dashboard/PopularProtocols";
 import { useToast } from "@/hooks/use-toast";
 import { Checkbox } from "@/components/ui/checkbox";
 import SEO from "@/components/SEO";
@@ -166,10 +167,10 @@ const Dashboard = () => {
 
               {recommendations.length > 0 && (
                 <div className="space-y-4">
-                  <h2 className="font-heading font-semibold text-foreground">Recommendations</h2>
+                  <h2 className="font-heading font-semibold text-foreground">🎯 Personalised Recommendations</h2>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     {recommendations.slice(0, 2).map((rec) => (
-                      <RecommendationCard key={rec.id} recommendation={rec} onActivate={handleActivateProtocol} isActivating={activatingProtocol} />
+                      <RecommendationCard key={rec.id} recommendation={rec} onActivate={handleActivateProtocol} isActivating={activatingProtocol} badge="Personalised" />
                     ))}
                   </div>
                 </div>
@@ -272,24 +273,31 @@ const Dashboard = () => {
 
               {recommendations.length > 0 ? (
                 <div className="space-y-4">
-                  <h2 className="font-heading font-semibold text-foreground">
-                    Personalised Recommendations ({recommendations.length})
+                  <h2 className="font-heading font-semibold text-foreground flex items-center gap-2">
+                    🎯 Personalised Recommendations
+                    <span className="text-xs font-normal text-muted-foreground">Based on your bloodwork</span>
                   </h2>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     {recommendations.map((rec) => (
-                      <RecommendationCard key={rec.id} recommendation={rec} onActivate={handleActivateProtocol} isActivating={activatingProtocol} />
+                      <RecommendationCard key={rec.id} recommendation={rec} onActivate={handleActivateProtocol} isActivating={activatingProtocol} badge="Personalised" />
                     ))}
                   </div>
                 </div>
               ) : (
                 <div className="bg-card rounded-2xl border border-border p-8 text-center">
                   <FlaskConical className="h-10 w-10 text-primary mx-auto mb-3" />
-                  <h3 className="font-heading font-semibold text-foreground mb-1">No Recommendations Yet</h3>
+                  <h3 className="font-heading font-semibold text-foreground mb-1">No Personalised Recommendations Yet</h3>
                   <p className="text-sm text-muted-foreground">
-                    Upload bloodwork to get personalised protocol recommendations.
+                    Upload bloodwork to get personalised protocol recommendations based on your biomarkers.
                   </p>
                 </div>
               )}
+
+              <PopularProtocols
+                onActivate={handleActivateProtocol}
+                isActivating={activatingProtocol}
+                disclaimerAccepted={disclaimerAccepted}
+              />
 
               <CreateProtocolForm disclaimerAccepted={disclaimerAccepted} />
 
