@@ -1,7 +1,8 @@
 import { useState } from "react";
-import { Star, TrendingUp, Filter } from "lucide-react";
+import { Star, TrendingUp } from "lucide-react";
 import { POPULAR_PROTOCOLS, CATEGORY_LABELS, CATEGORY_COLORS, type PopularProtocol, type Recommendation } from "@/data/recommendation-rules";
 import RecommendationCard from "./RecommendationCard";
+import { Carousel, CarouselContent, CarouselItem, CarouselPrevious, CarouselNext } from "@/components/ui/carousel";
 
 interface Props {
   onActivate: (rec: Recommendation) => void;
@@ -69,24 +70,31 @@ const PopularProtocols = ({ onActivate, isActivating, disclaimerAccepted }: Prop
         ))}
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        {filtered.map((protocol) => (
-          <div key={protocol.id} className="relative">
-            {/* Popularity stars */}
-            <div className="absolute top-3 right-14 flex items-center gap-0.5 z-10">
-              {Array.from({ length: protocol.popularity }).map((_, i) => (
-                <Star key={i} className="h-3 w-3 fill-primary text-primary" />
-              ))}
-            </div>
-            <RecommendationCard
-              recommendation={toRecommendation(protocol)}
-              onActivate={onActivate}
-              isActivating={isActivating}
-              badge={CATEGORY_LABELS[protocol.category]}
-            />
-          </div>
-        ))}
-      </div>
+      <Carousel opts={{ align: "start", loop: false }} className="w-full">
+        <CarouselContent className="-ml-3">
+          {filtered.map((protocol) => (
+            <CarouselItem key={protocol.id} className="pl-3 basis-[85%] sm:basis-[70%] md:basis-1/2 lg:basis-[45%]">
+              <div className="relative h-full">
+                <div className="absolute top-3 right-14 flex items-center gap-0.5 z-10">
+                  {Array.from({ length: protocol.popularity }).map((_, i) => (
+                    <Star key={i} className="h-3 w-3 fill-primary text-primary" />
+                  ))}
+                </div>
+                <RecommendationCard
+                  recommendation={toRecommendation(protocol)}
+                  onActivate={onActivate}
+                  isActivating={isActivating}
+                  badge={CATEGORY_LABELS[protocol.category]}
+                />
+              </div>
+            </CarouselItem>
+          ))}
+        </CarouselContent>
+        <div className="flex justify-end gap-2 mt-3">
+          <CarouselPrevious className="static translate-y-0 h-8 w-8" />
+          <CarouselNext className="static translate-y-0 h-8 w-8" />
+        </div>
+      </Carousel>
     </div>
   );
 };
