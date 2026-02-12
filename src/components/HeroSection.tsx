@@ -5,17 +5,16 @@ import { Button } from "@/components/ui/button";
 import heroBg from "@/assets/hero-bg.jpg";
 
 const HeroSection = () => (
-  <section className="relative min-h-screen flex flex-col overflow-hidden">
-    {/* Android App Coming Soon Banner */}
-    <div className="relative z-10 bg-primary/90 backdrop-blur-sm text-primary-foreground py-2.5 text-center text-sm font-medium tracking-wide mt-16">
-      📱 Android App Coming Soon — Get Peptyl on the Go!
-    </div>
-
-    <div className="flex-1 flex items-center relative">
+  <section className="relative min-h-screen flex items-center overflow-hidden">
     {/* BG image */}
     <div className="absolute inset-0">
       <img src={heroBg} alt="" className="w-full h-full object-cover" />
       <div className="absolute inset-0 bg-gradient-to-b from-navy/60 via-navy/80 to-navy" />
+    </div>
+
+    {/* Android App Coming Soon Banner - sits below the fixed header */}
+    <div className="absolute top-16 left-0 right-0 z-10 bg-primary/90 backdrop-blur-sm text-primary-foreground py-2 text-center text-sm font-medium tracking-wide">
+      📱 Android App Coming Soon — Get Peptyl on the Go!
     </div>
 
     {/* Floating orbs */}
@@ -95,7 +94,6 @@ const HeroSection = () => (
           </div>
         ))}
       </motion.div>
-    </div>
     </div>
   </section>
 );
