@@ -11,6 +11,7 @@ import {
   bloodworkProducts,
 } from "@/data/suppliers";
 import ProductCards from "@/components/suppliers/ProductCards";
+import EligibilityIndicator from "@/components/suppliers/EligibilityIndicator";
 
 const Suppliers = () => {
   const [search, setSearch] = useState("");
@@ -121,6 +122,8 @@ const Suppliers = () => {
                     Price: {sortAsc ? "Low → High" : "High → Low"}
                   </Button>
                 </div>
+
+                <EligibilityIndicator />
 
                 <ProductCards products={filtered} />
               </div>
