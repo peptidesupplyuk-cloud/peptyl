@@ -2,6 +2,7 @@ import { Check, SkipForward, Clock, Syringe } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useTodayInjections, useUpdateInjectionStatus } from "@/hooks/use-injections";
 import { format } from "date-fns";
+import InjectionCalendar from "./InjectionCalendar";
 
 const TodaysPlan = () => {
   const { data: injections = [], isLoading } = useTodayInjections();
@@ -27,7 +28,10 @@ const TodaysPlan = () => {
           <Syringe className="h-5 w-5 text-primary" />
           <h2 className="font-heading font-semibold text-foreground">Today's Injections</h2>
         </div>
-        <span className="text-xs text-muted-foreground">{format(new Date(), "EEEE, MMM d")}</span>
+        <div className="flex items-center gap-3">
+          <InjectionCalendar />
+          <span className="text-xs text-muted-foreground">{format(new Date(), "EEEE, MMM d")}</span>
+        </div>
       </div>
 
       {injections.length === 0 ? (
