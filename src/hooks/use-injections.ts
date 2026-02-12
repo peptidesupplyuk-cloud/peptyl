@@ -75,13 +75,10 @@ export function useTodayInjections() {
 
       if (!protocols || protocols.length === 0) return [];
 
-      const logsToInsert: Array<{
-        user_id: string;
-        peptide_name: string;
-        dose_mcg: number;
-        scheduled_time: string;
-        protocol_peptide_id: string;
-        status: string;
+      // Gather all peptides from all active protocols
+      const allPeptides: Array<{
+        pep: any;
+        protocolStartDate: string;
       }> = [];
 
       for (const protocol of protocols) {
@@ -94,25 +91,48 @@ export function useTodayInjections() {
 
         for (const pep of peptides) {
           if (!isDueToday(pep.frequency, protocol.start_date)) continue;
+          allPeptides.push({ pep, protocolStartDate: protocol.start_date });
+        }
+      }
 
-          const timings: string[] = [];
-          const timing = (pep.timing || "AM").toUpperCase();
-          if (timing.includes("AM")) timings.push("09:00");
-          if (timing.includes("PM") || timing.includes("BED")) timings.push("21:00");
-          if (timings.length === 0) timings.push("09:00");
+      // Deduplicate: merge same compound + same timing slot, sum doses
+      const mergeKey = (name: string, time: string) => `${name}||${time}`;
+      const merged = new Map<string, {
+        peptide_name: string;
+        dose_mcg: number;
+        scheduled_time: string;
+        protocol_peptide_id: string;
+      }>();
 
-          for (const t of timings) {
-            logsToInsert.push({
-              user_id: user!.id,
+      for (const { pep } of allPeptides) {
+        const timings: string[] = [];
+        const timing = (pep.timing || "AM").toUpperCase();
+        if (timing.includes("AM")) timings.push("09:00");
+        if (timing.includes("PM") || timing.includes("BED")) timings.push("21:00");
+        if (timings.length === 0) timings.push("09:00");
+
+        for (const t of timings) {
+          const key = mergeKey(pep.peptide_name, t);
+          const existing = merged.get(key);
+          if (existing) {
+            // Same compound at same time — sum the doses
+            existing.dose_mcg += pep.dose_mcg;
+          } else {
+            merged.set(key, {
               peptide_name: pep.peptide_name,
               dose_mcg: pep.dose_mcg,
               scheduled_time: `${today}T${t}:00.000Z`,
               protocol_peptide_id: pep.id,
-              status: "scheduled",
             });
           }
         }
       }
+
+      const logsToInsert = Array.from(merged.values()).map((entry) => ({
+        user_id: user!.id,
+        ...entry,
+        status: "scheduled",
+      }));
 
       if (logsToInsert.length === 0) return [];
 

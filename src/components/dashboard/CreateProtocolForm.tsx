@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { peptides as peptideDatabase } from "@/data/peptides";
-import { useCreateProtocol } from "@/hooks/use-protocols";
+import { useCreateProtocol, useProtocols } from "@/hooks/use-protocols";
 import { useToast } from "@/hooks/use-toast";
 import { format, addWeeks } from "date-fns";
 
@@ -30,7 +30,15 @@ const CreateProtocolForm = ({ disclaimerAccepted }: { disclaimerAccepted: boolea
   const [durationWeeks, setDurationWeeks] = useState(8);
   const [peptideRows, setPeptideRows] = useState<PeptideRow[]>([{ ...emptyPeptide }]);
   const createProtocol = useCreateProtocol();
+  const { data: existingProtocols = [] } = useProtocols();
   const { toast } = useToast();
+
+  // Get all compounds currently in active/paused protocols
+  const activeCompounds = new Set(
+    existingProtocols
+      .filter((p) => p.status === "active" || p.status === "paused")
+      .flatMap((p) => p.peptides.map((pp) => pp.peptide_name))
+  );
 
   const updateRow = (index: number, field: keyof PeptideRow, value: string | number) => {
     setPeptideRows((prev) => prev.map((r, i) => (i === index ? { ...r, [field]: value } : r)));
@@ -51,6 +59,18 @@ const CreateProtocolForm = ({ disclaimerAccepted }: { disclaimerAccepted: boolea
     const validPeptides = peptideRows.filter((p) => p.peptide_name && p.dose_mcg > 0);
     if (validPeptides.length === 0) {
       toast({ title: "No peptides", description: "Add at least one peptide with a dose.", variant: "destructive" });
+      return;
+    }
+
+    // Check for duplicate compounds already in active protocols
+    const duplicates = validPeptides.filter((p) => activeCompounds.has(p.peptide_name));
+    if (duplicates.length > 0) {
+      const names = duplicates.map((d) => d.peptide_name).join(", ");
+      toast({
+        title: "Compound already active",
+        description: `${names} already exist in an active protocol. Please update the existing protocol's dosage instead of creating a duplicate.`,
+        variant: "destructive",
+      });
       return;
     }
 
