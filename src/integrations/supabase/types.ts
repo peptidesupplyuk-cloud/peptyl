@@ -469,11 +469,16 @@ export type Database = {
           gender: string | null
           height_cm: number | null
           id: string
+          notify_am_time: string
+          notify_email: boolean
+          notify_pm_time: string
+          notify_whatsapp: boolean
           research_goal: string | null
           updated_at: string
           user_id: string
           username: string | null
           weight_kg: number | null
+          whatsapp_number: string | null
         }
         Insert: {
           age?: number | null
@@ -484,11 +489,16 @@ export type Database = {
           gender?: string | null
           height_cm?: number | null
           id?: string
+          notify_am_time?: string
+          notify_email?: boolean
+          notify_pm_time?: string
+          notify_whatsapp?: boolean
           research_goal?: string | null
           updated_at?: string
           user_id: string
           username?: string | null
           weight_kg?: number | null
+          whatsapp_number?: string | null
         }
         Update: {
           age?: number | null
@@ -499,11 +509,16 @@ export type Database = {
           gender?: string | null
           height_cm?: number | null
           id?: string
+          notify_am_time?: string
+          notify_email?: boolean
+          notify_pm_time?: string
+          notify_whatsapp?: boolean
           research_goal?: string | null
           updated_at?: string
           user_id?: string
           username?: string | null
           weight_kg?: number | null
+          whatsapp_number?: string | null
         }
         Relationships: []
       }
