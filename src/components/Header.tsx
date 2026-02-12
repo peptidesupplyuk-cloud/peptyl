@@ -13,6 +13,7 @@ const navItems = [
   { label: "Peptides", href: "/peptides" },
   { label: "Calculators", href: "/calculators" },
   { label: "Education", href: "/education" },
+  { label: "Suppliers", href: "/suppliers" },
   { label: "Shop", href: "/shop" },
   { label: "About", href: "/about" },
   { label: "Admin", href: "/admin/dashboard", adminOnly: true },
