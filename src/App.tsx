@@ -18,6 +18,7 @@ import Dashboard from "./pages/Dashboard";
 import NotFound from "./pages/NotFound";
 import About from "./pages/About";
 import Shop from "./pages/Shop";
+import Suppliers from "./pages/Suppliers";
 import PrivacyPolicy from "./pages/PrivacyPolicy";
 import TermsOfService from "./pages/TermsOfService";
 const AdminDashboard = lazy(() => import("./pages/AdminDashboard"));
@@ -52,6 +53,7 @@ const App = () => (
               <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
               <Route path="/education" element={<Education />} />
               <Route path="/about" element={<About />} />
+              <Route path="/suppliers" element={<Suppliers />} />
               <Route path="/shop" element={<Shop />} />
               <Route path="/privacy-policy" element={<PrivacyPolicy />} />
               <Route path="/terms-of-service" element={<TermsOfService />} />
