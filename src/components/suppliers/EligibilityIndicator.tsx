@@ -1,6 +1,8 @@
 import { useState } from "react";
-import { Activity, AlertTriangle, ChevronDown, ChevronUp, Stethoscope } from "lucide-react";
+import { Activity, AlertTriangle, ChevronDown, ChevronUp, Stethoscope, LogIn } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
+import { Link } from "react-router-dom";
+import { Button } from "@/components/ui/button";
 
 interface MarkerFlag {
   label: string;
@@ -101,15 +103,22 @@ const EligibilityIndicator = () => {
                 ))}
               </div>
 
-              {/* CTA message */}
-              <div className="flex items-start gap-2.5 p-4 rounded-xl bg-card border border-primary/15">
-                <Stethoscope className="h-4 w-4 text-primary mt-0.5 shrink-0" />
-                <p className="text-sm text-foreground leading-relaxed">
-                  <strong>People with these markers often discuss GLP-1 treatment with their clinician.</strong>{" "}
-                  <span className="text-muted-foreground">
-                    If any of these apply to you, booking a consultation with a prescribing pharmacy above could be a good first step.
-                  </span>
-                </p>
+              {/* CTA — sign up & track */}
+              <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 p-4 rounded-xl bg-gradient-to-r from-primary/10 to-primary/5 border border-primary/15">
+                <div className="flex-1">
+                  <p className="text-sm font-medium text-foreground">
+                    People with these markers often discuss GLP-1 treatment with their clinician.
+                  </p>
+                  <p className="text-xs text-muted-foreground mt-1 leading-relaxed">
+                    Sign up free to upload your bloodwork results and see how your markers compare — all in one private dashboard.
+                  </p>
+                </div>
+                <Link to="/auth" className="shrink-0">
+                  <Button size="sm" className="gap-2 shadow-brand">
+                    <LogIn className="h-3.5 w-3.5" />
+                    Log In & Compare
+                  </Button>
+                </Link>
               </div>
 
               {/* Legal */}
