@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { Pause, Play, CheckCircle2, Clock, FlaskConical, Trash2, Pill } from "lucide-react";
+import PeptideInfoTooltip from "./PeptideInfoTooltip";
 import { Button } from "@/components/ui/button";
 import { useProtocols, useUpdateProtocolStatus, useDeleteProtocol, type Protocol } from "@/hooks/use-protocols";
 import { differenceInDays } from "date-fns";
@@ -60,7 +61,7 @@ const ActiveProtocols = () => {
           <div className="space-y-1">
             {p.peptides.map((pp) => (
               <div key={pp.id} className="flex items-center justify-between text-xs">
-                <span className="text-foreground">{pp.peptide_name}</span>
+                <span className="text-foreground flex items-center gap-1.5">{pp.peptide_name} <PeptideInfoTooltip peptideName={pp.peptide_name} /></span>
                 <span className="text-muted-foreground">{pp.dose_mcg}mcg · {pp.frequency} · {pp.timing}</span>
               </div>
             ))}

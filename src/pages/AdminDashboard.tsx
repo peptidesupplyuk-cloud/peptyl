@@ -508,9 +508,20 @@ const CampaignsTab = () => {
 
 /* ========== FEEDBACK TAB ========== */
 
+const FEEDBACK_CATEGORIES = [
+  { value: "all", label: "All", color: "" },
+  { value: "ui_ux", label: "UI/UX", color: "bg-blue-500/10 text-blue-600 border-blue-500/20" },
+  { value: "error", label: "Error", color: "bg-red-500/10 text-red-600 border-red-500/20" },
+  { value: "feature_request", label: "Feature Request", color: "bg-purple-500/10 text-purple-600 border-purple-500/20" },
+  { value: "not_relevant", label: "Not Relevant", color: "bg-muted text-muted-foreground border-border" },
+  { value: "other", label: "Other", color: "bg-yellow-500/10 text-yellow-600 border-yellow-500/20" },
+  { value: "uncategorised", label: "Uncategorised", color: "" },
+];
+
 const FeedbackTab = () => {
   const queryClient = useQueryClient();
   const { toast } = useToast();
+  const [filter, setFilter] = useState("all");
 
   const { data: feedback = [], isLoading } = useQuery({
     queryKey: ["admin-feedback"],
@@ -521,6 +532,14 @@ const FeedbackTab = () => {
     },
   });
 
+  const updateCategory = useMutation({
+    mutationFn: async ({ id, category }: { id: string; category: string }) => {
+      const { error } = await supabase.from("feedback" as any).update({ category } as any).eq("id", id);
+      if (error) throw error;
+    },
+    onSuccess: () => { queryClient.invalidateQueries({ queryKey: ["admin-feedback"] }); },
+  });
+
   const deleteFeedback = useMutation({
     mutationFn: async (id: string) => {
       const { error } = await supabase.from("feedback" as any).delete().eq("id", id);
@@ -529,36 +548,94 @@ const FeedbackTab = () => {
     onSuccess: () => { queryClient.invalidateQueries({ queryKey: ["admin-feedback"] }); toast({ title: "Feedback deleted" }); },
   });
 
+  const filtered = filter === "all"
+    ? feedback
+    : filter === "uncategorised"
+      ? feedback.filter((f: any) => !f.category)
+      : feedback.filter((f: any) => f.category === filter);
+
+  const getCategoryMeta = (cat: string | null) =>
+    FEEDBACK_CATEGORIES.find((c) => c.value === cat) || FEEDBACK_CATEGORIES.find((c) => c.value === "uncategorised")!;
+
   if (isLoading) return <div className="flex items-center justify-center py-12"><Loader2 className="h-6 w-6 animate-spin text-muted-foreground" /></div>;
 
   return (
     <div className="space-y-4">
-      <h2 className="font-heading font-semibold text-foreground flex items-center gap-2">
-        <MessageSquare className="h-5 w-5 text-primary" /> User Feedback ({feedback.length})
-      </h2>
-      {feedback.length === 0 ? (
+      <div className="flex items-center justify-between flex-wrap gap-2">
+        <h2 className="font-heading font-semibold text-foreground flex items-center gap-2">
+          <MessageSquare className="h-5 w-5 text-primary" /> User Feedback ({feedback.length})
+        </h2>
+      </div>
+
+      {/* Category filter chips */}
+      <div className="flex flex-wrap gap-1.5">
+        {FEEDBACK_CATEGORIES.map((cat) => {
+          const count = cat.value === "all"
+            ? feedback.length
+            : cat.value === "uncategorised"
+              ? feedback.filter((f: any) => !f.category).length
+              : feedback.filter((f: any) => f.category === cat.value).length;
+          return (
+            <button
+              key={cat.value}
+              onClick={() => setFilter(cat.value)}
+              className={`text-[11px] px-2.5 py-1 rounded-full border transition-colors ${
+                filter === cat.value
+                  ? "bg-primary text-primary-foreground border-primary"
+                  : "bg-card border-border text-muted-foreground hover:text-foreground"
+              }`}
+            >
+              {cat.label} ({count})
+            </button>
+          );
+        })}
+      </div>
+
+      {filtered.length === 0 ? (
         <div className="bg-card border border-border rounded-2xl p-8 text-center">
           <MessageSquare className="h-10 w-10 text-muted-foreground mx-auto mb-3" />
-          <p className="text-sm text-muted-foreground">No feedback yet.</p>
+          <p className="text-sm text-muted-foreground">No feedback in this category.</p>
         </div>
       ) : (
         <div className="space-y-3">
-          {feedback.map((f: any) => (
-            <div key={f.id} className="bg-card border border-border rounded-xl p-4">
-              <div className="flex items-start justify-between gap-3">
-                <div className="flex-1 min-w-0">
-                  <p className="text-sm text-foreground">{f.message}</p>
-                  <div className="flex items-center gap-3 mt-2">
-                    {f.page && <span className="text-[10px] px-2 py-0.5 rounded-md bg-muted text-muted-foreground">{f.page}</span>}
-                    <span className="text-[10px] text-muted-foreground">{new Date(f.created_at).toLocaleString()}</span>
+          {filtered.map((f: any) => {
+            const catMeta = getCategoryMeta(f.category);
+            return (
+              <div key={f.id} className="bg-card border border-border rounded-xl p-4">
+                <div className="flex items-start justify-between gap-3">
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm text-foreground">{f.message}</p>
+                    <div className="flex items-center gap-2 mt-2 flex-wrap">
+                      {f.page && <span className="text-[10px] px-2 py-0.5 rounded-md bg-muted text-muted-foreground">{f.page}</span>}
+                      {f.category && (
+                        <span className={`text-[10px] px-2 py-0.5 rounded-md border ${catMeta.color}`}>
+                          {catMeta.label}
+                        </span>
+                      )}
+                      <span className="text-[10px] text-muted-foreground">{new Date(f.created_at).toLocaleString()}</span>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-1 shrink-0">
+                    <select
+                      value={f.category || ""}
+                      onChange={(e) => updateCategory.mutate({ id: f.id, category: e.target.value })}
+                      className="text-[10px] bg-muted border border-border rounded-md px-1.5 py-1 text-foreground cursor-pointer"
+                    >
+                      <option value="">Tag…</option>
+                      <option value="ui_ux">UI/UX</option>
+                      <option value="error">Error</option>
+                      <option value="feature_request">Feature Request</option>
+                      <option value="not_relevant">Not Relevant</option>
+                      <option value="other">Other</option>
+                    </select>
+                    <Button size="sm" variant="ghost" className="h-7 w-7 p-0 text-muted-foreground hover:text-destructive" onClick={() => deleteFeedback.mutate(f.id)}>
+                      <Trash2 className="h-3.5 w-3.5" />
+                    </Button>
                   </div>
                 </div>
-                <Button size="sm" variant="ghost" className="h-7 w-7 p-0 text-muted-foreground hover:text-destructive shrink-0" onClick={() => deleteFeedback.mutate(f.id)}>
-                  <Trash2 className="h-3.5 w-3.5" />
-                </Button>
               </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
       )}
     </div>
