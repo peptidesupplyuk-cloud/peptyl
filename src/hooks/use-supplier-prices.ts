@@ -1,7 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import type { Product } from "@/data/suppliers";
-import { medicationProducts, bloodworkProducts } from "@/data/suppliers";
 
 type SupplierPriceRow = {
   product_name: string;
@@ -40,8 +39,6 @@ function buildProducts(rows: SupplierPriceRow[]): Product[] {
 }
 
 export function useSupplierPrices(category: "medication" | "bloodwork") {
-  const fallback = category === "medication" ? medicationProducts : bloodworkProducts;
-
   const { data, isLoading, error } = useQuery({
     queryKey: ["supplier-prices", category],
     queryFn: async () => {
@@ -77,8 +74,9 @@ export function useSupplierPrices(category: "medication" | "bloodwork") {
     retry: 1,
   });
 
+  // No fallback — only database data is used
   return {
-    products: data?.products && data.products.length > 0 ? data.products : fallback,
+    products: data?.products ?? [],
     lastUpdated: data?.scrapedAt || null,
     isLive: !!data?.products && data.products.length > 0,
     isLoading,

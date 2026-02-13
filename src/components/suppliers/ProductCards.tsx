@@ -13,13 +13,19 @@ const fadeUp = {
 
 const ProductCards = ({ products }: { products: Product[] }) => {
   if (products.length === 0) {
-    return <p className="text-muted-foreground text-center py-12">No products match your search.</p>;
+    return (
+      <div className="text-center py-16 space-y-2">
+        <p className="text-muted-foreground font-medium">No pricing data available.</p>
+        <p className="text-sm text-muted-foreground">Prices will appear here once they have been added to the database.</p>
+      </div>
+    );
   }
 
   return (
     <div className="space-y-6">
       {products.map((product, i) => {
-        const lowest = Math.min(...product.prices.filter(p => p.inStock).map(p => p.price));
+        const inStockPrices = product.prices.filter(p => p.inStock);
+        const lowest = inStockPrices.length > 0 ? Math.min(...inStockPrices.map(p => p.price)) : null;
         return (
           <motion.div
             key={product.name}
@@ -33,12 +39,15 @@ const ProductCards = ({ products }: { products: Product[] }) => {
             <div className="p-5 sm:p-6 border-b border-border bg-muted/30">
               <h3 className="font-heading font-semibold text-foreground text-lg">{product.name}</h3>
               <p className="text-sm text-muted-foreground mt-1">
-                {product.prices.length} suppliers · Best price: <span className="text-primary font-semibold">£{lowest.toFixed(2)}</span>
+                {product.prices.length} suppliers · Best price:{" "}
+                <span className="text-primary font-semibold">
+                  {lowest !== null ? `£${lowest.toFixed(2)}` : "—"}
+                </span>
               </p>
             </div>
             <div className="divide-y divide-border">
               {product.prices.map((entry, j) => {
-                const isBest = entry.inStock && entry.price === lowest;
+                const isBest = entry.inStock && lowest !== null && entry.price === lowest;
                 return (
                   <div
                     key={`${entry.supplier}-${j}`}
