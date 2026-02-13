@@ -82,17 +82,21 @@ const Suppliers = () => {
       </section>
 
       {/* Last Updated Indicator */}
-      {lastUpdated && (
-        <section className="py-3 border-b border-border">
-          <div className="container mx-auto px-6">
-            <div className="flex items-center gap-2 text-xs text-muted-foreground">
-              <RefreshCw className="h-3 w-3" />
-              <span>Prices last updated {formatDistanceToNow(new Date(lastUpdated), { addSuffix: true })}</span>
-              {isLive && <span className="px-1.5 py-0.5 rounded bg-success/10 text-success text-[10px] font-medium">Live</span>}
-            </div>
+      <section className="py-3 border-b border-border">
+        <div className="container mx-auto px-6">
+          <div className="flex items-center gap-2 text-xs text-muted-foreground">
+            <RefreshCw className="h-3 w-3" />
+            {lastUpdated ? (
+              <>
+                <span>Prices last updated {formatDistanceToNow(new Date(lastUpdated), { addSuffix: true })}</span>
+                {isLive && <span className="px-1.5 py-0.5 rounded bg-success/10 text-success text-[10px] font-medium">Live</span>}
+              </>
+            ) : (
+              <span>No pricing data has been added yet. All prices are sourced from the database.</span>
+            )}
           </div>
-        </section>
-      )}
+        </div>
+      </section>
 
       {/* Tabs */}
       <section className="pt-8">
