@@ -13,9 +13,18 @@ type SupplierPriceRow = {
 };
 
 function buildProducts(rows: SupplierPriceRow[]): Product[] {
-  const grouped = new Map<string, Product>();
-
+  // De-duplicate: keep only the latest entry per product+supplier combo
+  const latest = new Map<string, SupplierPriceRow>();
   for (const row of rows) {
+    const key = `${row.product_name}|||${row.supplier_name}`;
+    const existing = latest.get(key);
+    if (!existing || new Date(row.scraped_at) > new Date(existing.scraped_at)) {
+      latest.set(key, row);
+    }
+  }
+
+  const grouped = new Map<string, Product>();
+  for (const row of latest.values()) {
     if (!grouped.has(row.product_name)) {
       grouped.set(row.product_name, { name: row.product_name, prices: [] });
     }
@@ -47,12 +56,16 @@ export function useSupplierPrices(category: "medication" | "bloodwork") {
 
       if (!latestScrape?.scraped_at) return null;
 
-      // Get all prices from the latest scrape
+      const latestTime = new Date(latestScrape.scraped_at);
+      // Go back 30 minutes to capture all batches from the same scrape run
+      const windowStart = new Date(latestTime.getTime() - 30 * 60 * 1000).toISOString();
+
+      // Get all prices from the scrape run window
       const { data: prices, error } = await (supabase as any)
         .from("supplier_prices")
         .select("product_name, supplier_name, price, url, in_stock, scraped_at")
         .eq("category", category)
-        .eq("scraped_at", latestScrape.scraped_at);
+        .gte("scraped_at", windowStart);
 
       if (error) throw error;
       return {
@@ -60,7 +73,7 @@ export function useSupplierPrices(category: "medication" | "bloodwork") {
         scrapedAt: latestScrape.scraped_at as string,
       };
     },
-    staleTime: 1000 * 60 * 30, // 30 minutes
+    staleTime: 1000 * 60 * 30,
     retry: 1,
   });
 
