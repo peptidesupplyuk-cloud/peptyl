@@ -149,7 +149,7 @@ const Suppliers = () => {
                     <ShieldCheck className="h-5 w-5 text-primary" /> Available Tests
                   </h2>
                   <div className="flex gap-2 flex-wrap">
-                    {["Basic Health Check", "Well Man / Well Woman", "Testosterone Panel", "Thyroid Function", "HbA1c (Diabetes)", "Hormone Panel", "Liver Function", "Full Body MOT"].map(name => (
+                    {["Basic Health Check", "Well Man / Well Woman", "Testosterone Panel", "Thyroid Function", "HbA1c (Diabetes)", "Hormone Panel", "Liver Function", "Full Body MOT", "Cholesterol & Lipids", "Vitamin D"].map(name => (
                       <span key={name} className="px-3 py-1.5 rounded-full border border-border bg-card text-sm font-medium text-foreground">{name}</span>
                     ))}
                   </div>
