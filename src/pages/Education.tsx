@@ -1,12 +1,24 @@
+import { useState, useMemo } from "react";
 import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
-import { Clock, ArrowRight, BookOpen } from "lucide-react";
+import { Clock, ArrowRight } from "lucide-react";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { blogPosts } from "@/data/blog-posts";
 import SEO from "@/components/SEO";
 
+const ALL = "All";
+
 const EducationPage = () => {
+  const categories = useMemo(() => {
+    const cats = Array.from(new Set(blogPosts.map((p) => p.category)));
+    return [ALL, ...cats];
+  }, []);
+
+  const [active, setActive] = useState(ALL);
+
+  const filtered = active === ALL ? blogPosts : blogPosts.filter((p) => p.category === active);
+
   return (
     <div className="min-h-screen bg-background">
       <SEO
@@ -28,17 +40,34 @@ const EducationPage = () => {
       <Header />
       <main className="pt-24 pb-16">
         <div className="container mx-auto px-6">
-          <div className="max-w-2xl mb-12">
+          <div className="max-w-2xl mb-10">
             <h1 className="text-3xl sm:text-4xl font-heading font-bold text-foreground mb-3">
               Education <span className="text-gradient-teal">Hub</span>
             </h1>
             <p className="text-muted-foreground text-lg">
-              Simple, science-backed guides to understanding peptides.
+              Simple, science-backed guides to understanding peptides and supplements.
             </p>
           </div>
 
+          {/* Category filter pills */}
+          <div className="flex flex-wrap gap-2 mb-10">
+            {categories.map((cat) => (
+              <button
+                key={cat}
+                onClick={() => setActive(cat)}
+                className={`px-4 py-1.5 rounded-full text-xs font-medium border transition-all ${
+                  active === cat
+                    ? "bg-primary text-primary-foreground border-primary"
+                    : "bg-card text-muted-foreground border-border hover:border-primary/30"
+                }`}
+              >
+                {cat}
+              </button>
+            ))}
+          </div>
+
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {blogPosts.map((post, i) => (
+            {filtered.map((post, i) => (
               <motion.div
                 key={post.slug}
                 initial={{ opacity: 0, y: 20 }}
