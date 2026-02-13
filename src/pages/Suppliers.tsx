@@ -1,4 +1,4 @@
-import { ShieldCheck, AlertTriangle, Search, ArrowUpDown } from "lucide-react";
+import { ShieldCheck, AlertTriangle, Search, ArrowUpDown, RefreshCw } from "lucide-react";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { motion } from "framer-motion";
@@ -6,19 +6,18 @@ import SEO from "@/components/SEO";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { useState, useMemo } from "react";
-import {
-  medicationProducts,
-  bloodworkProducts,
-} from "@/data/suppliers";
 import ProductCards from "@/components/suppliers/ProductCards";
 import EligibilityIndicator from "@/components/suppliers/EligibilityIndicator";
+import { useSupplierPrices } from "@/hooks/use-supplier-prices";
+import { formatDistanceToNow } from "date-fns";
 
 const Suppliers = () => {
   const [search, setSearch] = useState("");
   const [sortAsc, setSortAsc] = useState(true);
-  const [tab, setTab] = useState("medications");
+  const [tab, setTab] = useState<"medications" | "bloodwork">("medications");
 
-  const activeProducts = tab === "medications" ? medicationProducts : bloodworkProducts;
+  const category = tab === "medications" ? "medication" : "bloodwork";
+  const { products: activeProducts, lastUpdated, isLive } = useSupplierPrices(category as "medication" | "bloodwork");
 
   const filtered = useMemo(() => {
     const q = search.toLowerCase();
@@ -82,10 +81,23 @@ const Suppliers = () => {
         </div>
       </section>
 
+      {/* Last Updated Indicator */}
+      {lastUpdated && (
+        <section className="py-3 border-b border-border">
+          <div className="container mx-auto px-6">
+            <div className="flex items-center gap-2 text-xs text-muted-foreground">
+              <RefreshCw className="h-3 w-3" />
+              <span>Prices last updated {formatDistanceToNow(new Date(lastUpdated), { addSuffix: true })}</span>
+              {isLive && <span className="px-1.5 py-0.5 rounded bg-success/10 text-success text-[10px] font-medium">Live</span>}
+            </div>
+          </div>
+        </section>
+      )}
+
       {/* Tabs */}
       <section className="pt-8">
         <div className="container mx-auto px-6">
-          <Tabs value={tab} onValueChange={(v) => { setTab(v); setSearch(""); }} className="w-full">
+          <Tabs value={tab} onValueChange={(v) => { setTab(v as "medications" | "bloodwork"); setSearch(""); }} className="w-full">
             <TabsList className="w-full max-w-md mx-auto grid grid-cols-2 mb-8">
               <TabsTrigger value="medications" className="gap-1.5">💊 Medications</TabsTrigger>
               <TabsTrigger value="bloodwork" className="gap-1.5">🩸 Bloodwork</TabsTrigger>

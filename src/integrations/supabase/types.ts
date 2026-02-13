@@ -787,6 +787,75 @@ export type Database = {
         }
         Relationships: []
       }
+      supplier_prices: {
+        Row: {
+          category: string
+          created_at: string
+          currency: string
+          id: string
+          in_stock: boolean
+          price: number
+          product_name: string
+          scraped_at: string
+          supplier_name: string
+          url: string
+        }
+        Insert: {
+          category?: string
+          created_at?: string
+          currency?: string
+          id?: string
+          in_stock?: boolean
+          price: number
+          product_name: string
+          scraped_at?: string
+          supplier_name: string
+          url: string
+        }
+        Update: {
+          category?: string
+          created_at?: string
+          currency?: string
+          id?: string
+          in_stock?: boolean
+          price?: number
+          product_name?: string
+          scraped_at?: string
+          supplier_name?: string
+          url?: string
+        }
+        Relationships: []
+      }
+      supplier_scrape_log: {
+        Row: {
+          completed_at: string | null
+          errors: Json | null
+          id: string
+          products_matched: number | null
+          started_at: string
+          status: string
+          suppliers_scraped: number | null
+        }
+        Insert: {
+          completed_at?: string | null
+          errors?: Json | null
+          id?: string
+          products_matched?: number | null
+          started_at?: string
+          status?: string
+          suppliers_scraped?: number | null
+        }
+        Update: {
+          completed_at?: string | null
+          errors?: Json | null
+          id?: string
+          products_matched?: number | null
+          started_at?: string
+          status?: string
+          suppliers_scraped?: number | null
+        }
+        Relationships: []
+      }
       user_roles: {
         Row: {
           created_at: string
