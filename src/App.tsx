@@ -33,6 +33,10 @@ const RetatrutideReview = lazy(() => import("./pages/articles/RetatrutideReview"
 const GhkCuGuide = lazy(() => import("./pages/articles/GhkCuGuide"));
 const RussiaPeptides = lazy(() => import("./pages/articles/RussiaPeptides"));
 const WhatIsPeptyl = lazy(() => import("./pages/articles/WhatIsPeptyl"));
+const BpSupplementStack = lazy(() => import("./pages/articles/BpSupplementStack"));
+const LongevityStack = lazy(() => import("./pages/articles/LongevityStack"));
+const RecoveryStack = lazy(() => import("./pages/articles/RecoveryStack"));
+const CognitiveStack = lazy(() => import("./pages/articles/CognitiveStack"));
 const CampaignPage = lazy(() => import("./pages/CampaignPage"));
 
 const queryClient = new QueryClient();
@@ -70,6 +74,10 @@ const App = () => (
               <Route path="/education/ghk-cu-pretty-peptide" element={<GhkCuGuide />} />
               <Route path="/education/russia-cognitive-peptides" element={<RussiaPeptides />} />
               <Route path="/education/what-is-peptyl" element={<WhatIsPeptyl />} />
+              <Route path="/education/bp-supplement-stack" element={<BpSupplementStack />} />
+              <Route path="/education/longevity-supplement-stack" element={<LongevityStack />} />
+              <Route path="/education/recovery-supplement-stack" element={<RecoveryStack />} />
+              <Route path="/education/cognitive-supplement-stack" element={<CognitiveStack />} />
               <Route path="/start/:slug" element={<CampaignPage />} />
               {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
               <Route path="*" element={<NotFound />} />
