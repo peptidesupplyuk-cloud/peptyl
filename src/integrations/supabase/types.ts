@@ -877,6 +877,27 @@ export type Database = {
         }
         Relationships: []
       }
+      video_views: {
+        Row: {
+          created_at: string
+          id: string
+          user_id: string | null
+          video_name: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          user_id?: string | null
+          video_name: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          user_id?: string | null
+          video_name?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       benefit_vote_counts: {
