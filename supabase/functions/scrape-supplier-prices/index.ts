@@ -14,9 +14,13 @@ const MEDICATION_PRODUCTS = [
   "Semaglutide (Wegovy) – 0.25mg/week starter",
   "Semaglutide (Wegovy) – 0.5mg/week",
   "Semaglutide (Wegovy) – 1mg/week",
+  "Semaglutide (Wegovy) – 1.7mg/week",
+  "Semaglutide (Wegovy) – 2.4mg/week maintenance",
   "Tirzepatide (Mounjaro) – 2.5mg/week starter",
   "Tirzepatide (Mounjaro) – 5mg/week",
+  "Tirzepatide (Mounjaro) – 7.5mg/week",
   "Tirzepatide (Mounjaro) – 10mg/week",
+  "Tirzepatide (Mounjaro) – 12.5mg/week",
   "Tirzepatide (Mounjaro) – 15mg/week",
   "Liraglutide (Saxenda) – starter pack",
   "Orlistat 120mg – 84 capsules",
@@ -31,25 +35,27 @@ const BLOODWORK_PRODUCTS = [
   "Comprehensive Hormone Panel (Male)",
   "Liver Function Test",
   "Full Body MOT / Ultimate Health Check",
+  "Cholesterol & Lipid Panel",
+  "Vitamin D Test",
 ];
 
 type SupplierConfig = {
   name: string;
   url: string;
   category: "medication" | "bloodwork";
-  scrapePaths?: string[]; // specific pages to scrape for better results
+  scrapePaths?: string[];
 };
 
 const SUPPLIERS: SupplierConfig[] = [
-  // Medication suppliers
+  // UK Medication suppliers
   { name: "Simple Online Pharmacy", url: "https://www.simpleonlinepharmacy.co.uk", category: "medication", scrapePaths: ["/weight-loss"] },
   { name: "Boots Online Doctor", url: "https://onlinedoctor.boots.com", category: "medication", scrapePaths: ["/weight-loss"] },
-  { name: "LloydsDirect", url: "https://onlinedoctor.lloydspharmacy.com", category: "medication", scrapePaths: ["/weight-loss"] },
+  { name: "LloydsDirect", url: "https://onlinedoctor.lloydspharmacy.com", category: "medication", scrapePaths: ["/uk/weight-loss/mounjaro", "/uk/weight-loss/wegovy"] },
   { name: "Superdrug Online Doctor", url: "https://onlinedoctor.superdrug.com", category: "medication", scrapePaths: ["/weight-loss"] },
   { name: "Click Pharmacy", url: "https://www.clickpharmacy.co.uk", category: "medication", scrapePaths: ["/weight-loss"] },
   { name: "MedExpress", url: "https://www.medexpress.co.uk", category: "medication", scrapePaths: ["/weight-loss"] },
   { name: "Morrisons Clinic", url: "https://clinic.morrisons.com", category: "medication" },
-  { name: "Bolt Pharmacy", url: "https://www.boltpharmacy.co.uk", category: "medication" },
+  { name: "Bolt Pharmacy", url: "https://www.boltpharmacy.co.uk", category: "medication", scrapePaths: ["/wegovy", "/mounjaro"] },
   { name: "Pharmacy Planet", url: "https://www.pharmacyplanet.com", category: "medication" },
   { name: "Asda Online Doctor", url: "https://onlinedoctor.asda.com", category: "medication" },
   { name: "Oxford Online Pharmacy", url: "https://www.oxfordonlinepharmacy.co.uk", category: "medication" },
@@ -58,17 +64,29 @@ const SUPPLIERS: SupplierConfig[] = [
   { name: "Manual", url: "https://www.manual.co", category: "medication", scrapePaths: ["/weight-loss"] },
   { name: "Numan", url: "https://www.numan.com", category: "medication", scrapePaths: ["/weight-loss"] },
   { name: "PillTime", url: "https://www.pilltime.co.uk", category: "medication" },
-  // Bloodwork suppliers
+  { name: "Zava", url: "https://www.zavamed.com/uk", category: "medication", scrapePaths: ["/weight-loss.html"] },
+  { name: "Treated.com", url: "https://www.treated.com", category: "medication", scrapePaths: ["/weight-loss"] },
+  { name: "Juniper", url: "https://www.juniper.clinic", category: "medication" },
+  { name: "UK Meds", url: "https://www.ukmedication.co.uk", category: "medication", scrapePaths: ["/weight-loss/weight-loss-medications"] },
+  { name: "Pharmacy2U", url: "https://www.pharmacy2u.co.uk", category: "medication" },
+  { name: "Hey Pharmacist", url: "https://www.heypharmacist.co.uk", category: "medication" },
+  { name: "HealthExpress", url: "https://www.healthexpress.co.uk", category: "medication", scrapePaths: ["/weight-loss"] },
+  { name: "Pharmica", url: "https://www.pharmica.co.uk", category: "medication", scrapePaths: ["/weight-loss"] },
+  // UK Bloodwork suppliers
   { name: "Medichecks", url: "https://www.medichecks.com", category: "bloodwork", scrapePaths: ["/blood-tests"] },
   { name: "Forth", url: "https://www.forthwithlife.co.uk", category: "bloodwork", scrapePaths: ["/health-tests"] },
   { name: "Thriva", url: "https://thriva.co", category: "bloodwork" },
   { name: "Blue Crest Wellness", url: "https://www.bluecrestwellness.com", category: "bloodwork" },
   { name: "Randox Health", url: "https://www.randox.com", category: "bloodwork" },
-  { name: "Numan", url: "https://www.numan.com", category: "bloodwork" },
+  { name: "Numan", url: "https://www.numan.com", category: "bloodwork", scrapePaths: ["/diagnostics"] },
   { name: "Manual", url: "https://www.manual.co", category: "bloodwork" },
   { name: "LetsGetChecked", url: "https://www.letsgetchecked.com", category: "bloodwork" },
   { name: "London Medical Laboratory", url: "https://www.londonmedicallaboratory.com", category: "bloodwork" },
   { name: "Monitor My Health", url: "https://www.monitormyhealth.org.uk", category: "bloodwork" },
+  { name: "Blue Horizon", url: "https://bluehorizonbloodtests.co.uk", category: "bloodwork" },
+  { name: "Home2Lab", url: "https://home2lab.co.uk", category: "bloodwork" },
+  { name: "Vitall", url: "https://www.vitall.co.uk", category: "bloodwork" },
+  { name: "Melio", url: "https://www.melio.co.uk", category: "bloodwork" },
 ];
 
 async function scrapeSupplier(supplier: SupplierConfig, firecrawlKey: string): Promise<string | null> {
