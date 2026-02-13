@@ -10,14 +10,20 @@ import ProductCards from "@/components/suppliers/ProductCards";
 import EligibilityIndicator from "@/components/suppliers/EligibilityIndicator";
 import { useSupplierPrices } from "@/hooks/use-supplier-prices";
 import { formatDistanceToNow } from "date-fns";
+import { useQueryClient } from "@tanstack/react-query";
 
 const Suppliers = () => {
   const [search, setSearch] = useState("");
   const [sortAsc, setSortAsc] = useState(true);
   const [tab, setTab] = useState<"medications" | "bloodwork">("medications");
 
+  const queryClient = useQueryClient();
   const category = tab === "medications" ? "medication" : "bloodwork";
-  const { products: activeProducts, lastUpdated, isLive } = useSupplierPrices(category as "medication" | "bloodwork");
+  const { products: activeProducts, lastUpdated, isLive, isLoading } = useSupplierPrices(category as "medication" | "bloodwork");
+
+  const handleForceRefresh = () => {
+    queryClient.invalidateQueries({ queryKey: ["supplier-prices"] });
+  };
 
   const filtered = useMemo(() => {
     const q = search.toLowerCase();
@@ -84,16 +90,22 @@ const Suppliers = () => {
       {/* Last Updated Indicator */}
       <section className="py-3 border-b border-border">
         <div className="container mx-auto px-6">
-          <div className="flex items-center gap-2 text-xs text-muted-foreground">
-            <RefreshCw className="h-3 w-3" />
-            {lastUpdated ? (
-              <>
-                <span>Prices last updated {formatDistanceToNow(new Date(lastUpdated), { addSuffix: true })}</span>
-                {isLive && <span className="px-1.5 py-0.5 rounded bg-success/10 text-success text-[10px] font-medium">Live</span>}
-              </>
-            ) : (
-              <span>No pricing data has been added yet. All prices are sourced from the database.</span>
-            )}
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2 text-xs text-muted-foreground">
+              <RefreshCw className={`h-3 w-3 ${isLoading ? "animate-spin" : ""}`} />
+              {lastUpdated ? (
+                <>
+                  <span>Prices last updated {formatDistanceToNow(new Date(lastUpdated), { addSuffix: true })}</span>
+                  {isLive && <span className="px-1.5 py-0.5 rounded bg-success/10 text-success text-[10px] font-medium">Live</span>}
+                </>
+              ) : (
+                <span>No pricing data has been added yet.</span>
+              )}
+            </div>
+            <Button variant="ghost" size="sm" onClick={handleForceRefresh} disabled={isLoading} className="gap-1.5 text-xs text-muted-foreground hover:text-foreground">
+              <RefreshCw className={`h-3 w-3 ${isLoading ? "animate-spin" : ""}`} />
+              Refresh
+            </Button>
           </div>
         </div>
       </section>
