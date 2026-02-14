@@ -112,4 +112,12 @@ export const blogPosts: BlogPost[] = [
     readTime: "7 min read",
     date: "February 2026",
   },
+  {
+    slug: "mt1-vs-mt2",
+    title: "Melanotan I vs Melanotan II: More Than Just Tanning Peptides",
+    category: "Comparison",
+    excerpt: "Compare MT-I and MT-II — receptor selectivity, research beyond tanning, and critical side effects including unwanted pigmentation and mole changes.",
+    readTime: "9 min read",
+    date: "February 2026",
+  },
 ];
