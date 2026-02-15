@@ -256,23 +256,25 @@ const ProfileBiometrics = ({ onUpdate }: { onUpdate?: (bio: Biometrics) => void 
           <div className="flex items-center gap-2">
             <MessageCircle className="h-3.5 w-3.5 text-muted-foreground" />
             <span className="text-sm text-foreground">WhatsApp reminders</span>
-            <span className="text-[10px] bg-muted px-1.5 py-0.5 rounded text-muted-foreground">Coming soon</span>
           </div>
           <Switch
             checked={notifPrefs.notify_whatsapp}
             onCheckedChange={(v) => setNotifPrefs({ ...notifPrefs, notify_whatsapp: v })}
-            disabled
           />
         </div>
 
         {notifPrefs.notify_whatsapp && (
-          <input
-            type="tel"
-            value={notifPrefs.whatsapp_number ?? ""}
-            onChange={(e) => setNotifPrefs({ ...notifPrefs, whatsapp_number: e.target.value || null })}
-            placeholder="+44 7XXX XXXXXX"
-            className="w-full px-3 py-2 rounded-xl bg-background border border-border text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-primary/40"
-          />
+          <div>
+            <label className="text-xs font-medium text-muted-foreground mb-1 block">WhatsApp number (with country code)</label>
+            <input
+              type="tel"
+              value={notifPrefs.whatsapp_number ?? ""}
+              onChange={(e) => setNotifPrefs({ ...notifPrefs, whatsapp_number: e.target.value || null })}
+              placeholder="+447XXXXXXXXX"
+              className="w-full px-3 py-2 rounded-xl bg-background border border-border text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-primary/40"
+            />
+            <p className="text-[10px] text-muted-foreground mt-1">Include country code, no spaces (e.g. +447700900000)</p>
+          </div>
         )}
 
         <div className="grid grid-cols-2 gap-3">
