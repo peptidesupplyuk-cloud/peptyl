@@ -12,6 +12,7 @@ import FeedbackBanner from "@/components/FeedbackBanner";
 import ScrollToTop from "@/components/ScrollToTop";
 import Index from "./pages/Index";
 import Auth from "./pages/Auth";
+const ResetPassword = lazy(() => import("./pages/ResetPassword"));
 import Peptides from "./pages/Peptides";
 import Calculators from "./pages/Calculators";
 import Education from "./pages/Education";
@@ -55,6 +56,7 @@ const App = () => (
               <Route path="/" element={<Index />} />
               <Route path="/home" element={<Index />} />
               <Route path="/auth" element={<Auth />} />
+              <Route path="/reset-password" element={<ResetPassword />} />
               <Route path="/peptides" element={<Peptides />} />
               <Route path="/calculators" element={<ProtectedRoute><Calculators /></ProtectedRoute>} />
               <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
