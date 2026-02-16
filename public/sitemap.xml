@@ -21,6 +21,43 @@
     <priority>0.9</priority>
   </url>
   <url>
+    <loc>https://peptyl.co.uk/dashboard</loc>
+    <changefreq>daily</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://peptyl.co.uk/suppliers</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://peptyl.co.uk/shop</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://peptyl.co.uk/about</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://peptyl.co.uk/auth</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.5</priority>
+  </url>
+  <url>
+    <loc>https://peptyl.co.uk/privacy-policy</loc>
+    <changefreq>yearly</changefreq>
+    <priority>0.3</priority>
+  </url>
+  <url>
+    <loc>https://peptyl.co.uk/terms-of-service</loc>
+    <changefreq>yearly</changefreq>
+    <priority>0.3</priority>
+  </url>
+
+  <!-- Education Articles -->
+  <url>
     <loc>https://peptyl.co.uk/education/beginners-guide-peptides</loc>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
@@ -56,45 +93,42 @@
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://peptyl.co.uk/about</loc>
-    <changefreq>monthly</changefreq>
-    <priority>0.7</priority>
-  </url>
-  <url>
-    <loc>https://peptyl.co.uk/shop</loc>
-    <changefreq>weekly</changefreq>
-    <priority>0.7</priority>
-  </url>
-  <url>
-    <loc>https://peptyl.co.uk/suppliers</loc>
-    <changefreq>weekly</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
     <loc>https://peptyl.co.uk/education/russia-cognitive-peptides</loc>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
-  </url>
-  <url>
-    <loc>https://peptyl.co.uk/auth</loc>
-    <changefreq>monthly</changefreq>
-    <priority>0.5</priority>
-  </url>
-  <url>
-    <loc>https://peptyl.co.uk/privacy-policy</loc>
-    <changefreq>yearly</changefreq>
-    <priority>0.3</priority>
-  </url>
-  <url>
-    <loc>https://peptyl.co.uk/terms-of-service</loc>
-    <changefreq>yearly</changefreq>
-    <priority>0.3</priority>
   </url>
   <url>
     <loc>https://peptyl.co.uk/education/what-is-peptyl</loc>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
+  <url>
+    <loc>https://peptyl.co.uk/education/bp-supplement-stack</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://peptyl.co.uk/education/longevity-supplement-stack</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://peptyl.co.uk/education/recovery-supplement-stack</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://peptyl.co.uk/education/cognitive-supplement-stack</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://peptyl.co.uk/education/mt1-vs-mt2</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+
+  <!-- Campaign Landing Pages -->
   <url>
     <loc>https://peptyl.co.uk/start/peptide-cheat-sheet</loc>
     <changefreq>monthly</changefreq>
