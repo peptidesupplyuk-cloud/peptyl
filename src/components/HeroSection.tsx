@@ -5,6 +5,7 @@ import { useRef, useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import heroBg from "@/assets/hero-bg.jpg";
+import OnboardingModal from "@/components/OnboardingModal";
 
 const useVideoViews = (videoName: string) => {
   const [views, setViews] = useState<number | null>(null);
@@ -25,8 +26,11 @@ const useVideoViews = (videoName: string) => {
 
 const HeroSection = () => {
   const { views, trackView } = useVideoViews("meet-peptyl");
+  const [onboardingOpen, setOnboardingOpen] = useState(false);
 
   return (
+  <>
+  <OnboardingModal open={onboardingOpen} onOpenChange={setOnboardingOpen} />
   <section className="relative min-h-screen flex items-center overflow-hidden">
     {/* BG image */}
     <div className="absolute inset-0">
@@ -53,7 +57,7 @@ const HeroSection = () => {
         >
           <span className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-primary-foreground/10 backdrop-blur-sm border border-primary-foreground/10 text-primary text-sm font-medium mb-6 mt-12">
             <FlaskConical className="h-3.5 w-3.5" />
-            Learn more about peptide research and their clinical status
+            5 questions → personalised research protocol
           </span>
         </motion.div>
 
@@ -63,9 +67,9 @@ const HeroSection = () => {
           transition={{ duration: 0.8, delay: 0.1 }}
           className="text-4xl sm:text-5xl lg:text-7xl font-heading font-bold text-primary-foreground leading-[1.1] mb-6"
         >
-          Optimise Your Biology
+          Your Protocol,
           <br />
-          <span className="text-gradient-teal">With Data.</span>
+          <span className="text-gradient-teal">Backed by Data.</span>
         </motion.h1>
 
         <motion.p
@@ -74,7 +78,7 @@ const HeroSection = () => {
           transition={{ duration: 0.8, delay: 0.2 }}
           className="text-lg sm:text-xl text-primary-foreground/60 max-w-xl mb-10 leading-relaxed"
         >
-          Upload bloodwork. Get personalised peptide and supplement protocols. Track what's working. The first platform connecting your biomarkers to research-backed compounds and targeted supplementation — for longevity, performance, and metabolic health.
+          Answer 5 questions. Get a compound protocol matched to your goal and biomarkers. Track outcomes. Adjust doses. Improve every cycle.
         </motion.p>
 
         <motion.div
@@ -83,15 +87,13 @@ const HeroSection = () => {
           transition={{ duration: 0.8, delay: 0.3 }}
           className="flex flex-wrap gap-4"
         >
+          <Button size="lg" className="shadow-brand text-base px-8" onClick={() => setOnboardingOpen(true)}>
+            Start My Protocol
+            <ArrowRight className="ml-2 h-4 w-4" />
+          </Button>
           <Link to="/peptides">
-            <Button size="lg" className="shadow-brand text-base px-8">
-              Explore Database
-              <ArrowRight className="ml-2 h-4 w-4" />
-            </Button>
-          </Link>
-          <Link to="/calculators">
             <Button size="lg" variant="outline" className="border-primary-foreground/20 text-primary-foreground hover:bg-primary-foreground/10 text-base px-8 bg-primary-foreground/5">
-              Try Calculators
+              Browse Database
             </Button>
           </Link>
         </motion.div>
@@ -151,6 +153,7 @@ const HeroSection = () => {
       </motion.div>
     </div>
   </section>
+  </>
   );
 };
 

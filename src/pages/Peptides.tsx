@@ -6,6 +6,7 @@ import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import PeptideCard from "@/components/PeptideCard";
 import StackBuilder from "@/components/StackBuilder";
+import PeptideActionBlock from "@/components/PeptideActionBlock";
 import { peptides, categories } from "@/data/peptides";
 import SEO from "@/components/SEO";
 
@@ -131,6 +132,8 @@ const PeptidesPage = () => {
                   </div>
                 )}
               </div>
+
+              <PeptideActionBlock />
             </>
           )}
 

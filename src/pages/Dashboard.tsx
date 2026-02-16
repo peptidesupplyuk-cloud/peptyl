@@ -25,6 +25,7 @@ import ExperienceChat from "@/components/dashboard/ExperienceChat";
 import ProtocolNudges from "@/components/dashboard/ProtocolNudges";
 import CollaborativeRecommendations from "@/components/dashboard/CollaborativeRecommendations";
 import MobileTabNav from "@/components/dashboard/MobileTabNav";
+import OptimizationScore from "@/components/dashboard/OptimizationScore";
 import { useIsMobile } from "@/hooks/use-mobile";
 
 const Dashboard = () => {
@@ -163,6 +164,7 @@ const Dashboard = () => {
 
             {/* OVERVIEW TAB */}
             <TabsContent value="overview" className="space-y-6">
+              <OptimizationScore />
               <ProtocolNudges onNavigate={setActiveTab} />
               <TodaysPlan />
               <BiomarkerTrendChart panels={panels} />
