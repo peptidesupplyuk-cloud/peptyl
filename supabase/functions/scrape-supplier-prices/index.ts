@@ -44,10 +44,11 @@ type SupplierConfig = {
   url: string;
   category: "medication" | "bloodwork";
   scrapePaths?: string[];
+  /** Shopify stores expose /products/{handle}.json — use this for deterministic variant pricing */
+  shopifyProductHandles?: string[];
 };
 
 const SUPPLIERS: SupplierConfig[] = [
-  // UK Medication suppliers
   { name: "Simple Online Pharmacy", url: "https://www.simpleonlinepharmacy.co.uk", category: "medication", scrapePaths: ["/weight-loss"] },
   { name: "Boots Online Doctor", url: "https://onlinedoctor.boots.com", category: "medication", scrapePaths: ["/weight-loss"] },
   { name: "LloydsDirect", url: "https://onlinedoctor.lloydspharmacy.com", category: "medication", scrapePaths: ["/uk/weight-loss/mounjaro", "/uk/weight-loss/wegovy"] },
@@ -60,7 +61,7 @@ const SUPPLIERS: SupplierConfig[] = [
   { name: "Asda Online Doctor", url: "https://onlinedoctor.asda.com", category: "medication" },
   { name: "Oxford Online Pharmacy", url: "https://www.oxfordonlinepharmacy.co.uk", category: "medication" },
   { name: "MedicSpot", url: "https://www.medicspot.co.uk", category: "medication" },
-  { name: "Lotus Weight Loss", url: "https://lotusweightloss.co.uk", category: "medication" },
+  { name: "Lotus Weight Loss", url: "https://www.lotusweightloss.co.uk", category: "medication", shopifyProductHandles: ["wegovy", "mounjaro"] },
   { name: "Manual", url: "https://www.manual.co", category: "medication", scrapePaths: ["/weight-loss"] },
   { name: "Numan", url: "https://www.numan.com", category: "medication", scrapePaths: ["/weight-loss"] },
   { name: "PillTime", url: "https://www.pilltime.co.uk", category: "medication" },
@@ -72,7 +73,6 @@ const SUPPLIERS: SupplierConfig[] = [
   { name: "Hey Pharmacist", url: "https://www.heypharmacist.co.uk", category: "medication" },
   { name: "HealthExpress", url: "https://www.healthexpress.co.uk", category: "medication", scrapePaths: ["/weight-loss"] },
   { name: "Pharmica", url: "https://www.pharmica.co.uk", category: "medication", scrapePaths: ["/weight-loss"] },
-  // UK Bloodwork suppliers
   { name: "Medichecks", url: "https://www.medichecks.com", category: "bloodwork", scrapePaths: ["/blood-tests"] },
   { name: "Forth", url: "https://www.forthwithlife.co.uk", category: "bloodwork", scrapePaths: ["/health-tests"] },
   { name: "Thriva", url: "https://thriva.co", category: "bloodwork" },
@@ -88,6 +88,91 @@ const SUPPLIERS: SupplierConfig[] = [
   { name: "Vitall", url: "https://www.vitall.co.uk", category: "bloodwork" },
   { name: "Melio", url: "https://www.melio.co.uk", category: "bloodwork" },
 ];
+
+// Maximum allowed price change ratio before flagging
+const MAX_PRICE_CHANGE_RATIO = 0.40;
+
+/* ── Shopify variant → canonical product mapping ──
+   Maps Shopify option values to our canonical product names.
+   Only matches "1 Month (1 Pen)" supply variants (lowest unit). */
+
+const SHOPIFY_VARIANT_MAP: Record<string, Record<string, string>> = {
+  wegovy: {
+    "0.25mg": "Semaglutide (Wegovy) – 0.25mg/week starter",
+    "0.5mg": "Semaglutide (Wegovy) – 0.5mg/week",
+    "1mg": "Semaglutide (Wegovy) – 1mg/week",
+    "1.7mg": "Semaglutide (Wegovy) – 1.7mg/week",
+    "2.4mg": "Semaglutide (Wegovy) – 2.4mg/week maintenance",
+  },
+  mounjaro: {
+    "2.5mg": "Tirzepatide (Mounjaro) – 2.5mg/week starter",
+    "5mg": "Tirzepatide (Mounjaro) – 5mg/week",
+    "7.5mg": "Tirzepatide (Mounjaro) – 7.5mg/week",
+    "10mg": "Tirzepatide (Mounjaro) – 10mg/week",
+    "12.5mg": "Tirzepatide (Mounjaro) – 12.5mg/week",
+    "15mg": "Tirzepatide (Mounjaro) – 15mg/week",
+  },
+};
+
+/** Deterministic extraction from Shopify product JSON API — no AI needed */
+async function extractShopifyPrices(
+  supplier: SupplierConfig
+): Promise<ExtractedPrice[]> {
+  if (!supplier.shopifyProductHandles) return [];
+
+  const results: ExtractedPrice[] = [];
+
+  for (const handle of supplier.shopifyProductHandles) {
+    const jsonUrl = `${supplier.url}/products/${handle}.json`;
+    try {
+      const res = await fetch(jsonUrl, {
+        headers: { Accept: "application/json" },
+      });
+
+      if (!res.ok) {
+        console.error(`Shopify JSON error for ${jsonUrl}: ${res.status}`);
+        await res.text(); // consume body
+        continue;
+      }
+
+      const data = await res.json();
+      const product = data?.product;
+      if (!product?.variants) continue;
+
+      const doseMap = SHOPIFY_VARIANT_MAP[handle] || {};
+      const productUrl = `${supplier.url}/products/${handle}`;
+
+      for (const variant of product.variants) {
+        // Only match "1 Month (1 Pen)" supply option (lowest unit price)
+        const option1 = (variant.option1 || "").toLowerCase();
+        if (!option1.includes("1 month") && !option1.includes("1 pen")) continue;
+
+        const dose = variant.option2 || "";
+        const canonicalName = doseMap[dose];
+        if (!canonicalName) continue;
+
+        const price = parseFloat(variant.price);
+        if (isNaN(price) || price <= 0) continue;
+
+        results.push({
+          product_name: canonicalName,
+          variant_matched: `${variant.option1} / ${dose} (Shopify variant ID: ${variant.id})`,
+          price,
+          url: productUrl,
+          in_stock: variant.available !== false,
+          confidence: "high",
+          extraction_note: `Deterministic extraction from Shopify product JSON API: ${jsonUrl}`,
+        });
+      }
+
+      console.log(`  → Shopify API: ${results.length} variants matched from ${handle}`);
+    } catch (err) {
+      console.error(`Shopify JSON fetch error for ${jsonUrl}:`, err);
+    }
+  }
+
+  return results;
+}
 
 async function scrapeSupplier(supplier: SupplierConfig, firecrawlKey: string): Promise<string | null> {
   const urls = supplier.scrapePaths
@@ -108,7 +193,7 @@ async function scrapeSupplier(supplier: SupplierConfig, firecrawlKey: string): P
           url,
           formats: ["markdown"],
           onlyMainContent: true,
-          waitFor: 3000,
+          waitFor: 5000,
         }),
       });
 
@@ -119,7 +204,7 @@ async function scrapeSupplier(supplier: SupplierConfig, firecrawlKey: string): P
 
       const data = await res.json();
       const md = data?.data?.markdown || data?.markdown || "";
-      if (md) allMarkdown.push(md);
+      if (md) allMarkdown.push(`[SOURCE URL: ${url}]\n\n${md}`);
     } catch (err) {
       console.error(`Scrape failed for ${url}:`, err);
     }
@@ -130,9 +215,12 @@ async function scrapeSupplier(supplier: SupplierConfig, firecrawlKey: string): P
 
 type ExtractedPrice = {
   product_name: string;
+  variant_matched: string;
   price: number;
   url: string;
   in_stock: boolean;
+  confidence: "high" | "low";
+  extraction_note: string;
 };
 
 async function extractPrices(
@@ -143,23 +231,42 @@ async function extractPrices(
   const products =
     supplier.category === "medication" ? MEDICATION_PRODUCTS : BLOODWORK_PRODUCTS;
 
-  const systemPrompt = `You are a price extraction assistant. You will be given scraped website content from "${supplier.name}" (${supplier.url}).
+  const systemPrompt = `You are a variant-aware price extraction engine. You will receive scraped content from "${supplier.name}" (${supplier.url}).
 
-Your task: Find prices for ONLY these exact products and map them precisely:
+TASK: Extract prices for ONLY these exact products:
 
 ${products.map((p, i) => `${i + 1}. ${p}`).join("\n")}
 
-CRITICAL RULES:
-- Only return products from the list above that you can confidently match
-- Match by active ingredient AND dosage/strength precisely
-- Wegovy = semaglutide injection, Mounjaro = tirzepatide injection, Saxenda = liraglutide injection
-- Prices must be in GBP (£)
-- If a product is listed but marked as "out of stock", "unavailable", or "coming soon", set in_stock to false
-- If you cannot confidently match a product, DO NOT include it
-- Return the direct URL to the product page if visible, otherwise use the supplier base URL
+CRITICAL VARIANT MATCHING RULES:
+1. Many supplier pages list ONE product with MULTIPLE variants (dose strengths, pack sizes, supply lengths).
+2. You MUST identify ALL variant selectors on the page (dose dropdowns, pack size options, starter/maintenance labels, supply length choices).
+3. Build a mental map of {variant → price} BEFORE matching to our product list.
+4. Match each canonical product to the SPECIFIC variant by dose/strength:
+   - "0.25mg/week starter" → match ONLY the 0.25mg dose variant, typically 1-month/1-pen supply
+   - "0.5mg/week" → match ONLY the 0.5mg dose variant
+   - "1mg/week" → match ONLY the 1mg dose variant
+   - etc.
+5. NEVER use the default/first visible price on the page — it often corresponds to a different variant.
+6. If a page shows a single price without clear variant breakdown, set confidence to "low".
+7. If you can clearly match dose AND the price is explicitly tied to that dose, set confidence to "high".
 
-Return a JSON array of objects with these exact fields:
-{ "product_name": "exact name from list above", "price": number, "url": "string", "in_stock": boolean }
+PRICE RULES:
+- Prices MUST be in GBP (£)
+- Use the LOWEST supply option price (1 month / 1 pen) unless the canonical name specifies otherwise
+- "starter" products = initial/lowest dose, 1-month supply
+- If marked "out of stock", "unavailable", or "coming soon", set in_stock to false
+- If you cannot confidently match a product to a specific variant price, DO NOT include it
+
+OUTPUT FORMAT — return a JSON array:
+[{
+  "product_name": "exact canonical name from list",
+  "variant_matched": "description of which variant/option you matched, e.g. '0.25mg dose, 1 month supply'",
+  "price": 104.99,
+  "url": "direct product page URL",
+  "in_stock": true,
+  "confidence": "high",
+  "extraction_note": "brief note on how you identified this price"
+}]
 
 Return ONLY the JSON array, no other text.`;
 
@@ -176,10 +283,10 @@ Return ONLY the JSON array, no other text.`;
           { role: "system", content: systemPrompt },
           {
             role: "user",
-            content: `Here is the scraped content from ${supplier.name}:\n\n${markdown.slice(0, 15000)}`,
+            content: `Here is the scraped content from ${supplier.name}:\n\n${markdown.slice(0, 20000)}`,
           },
         ],
-        temperature: 0.1,
+        temperature: 0.05,
       }),
     });
 
@@ -191,7 +298,6 @@ Return ONLY the JSON array, no other text.`;
     const data = await res.json();
     const content = data?.choices?.[0]?.message?.content || "";
 
-    // Parse JSON from response (handle markdown code blocks)
     const jsonMatch = content.match(/\[[\s\S]*\]/);
     if (!jsonMatch) {
       console.error(`No JSON array found in AI response for ${supplier.name}`);
@@ -207,12 +313,37 @@ Return ONLY the JSON array, no other text.`;
         validProducts.has(p.product_name) &&
         typeof p.price === "number" &&
         p.price > 0 &&
-        p.price < 10000
+        p.price < 10000 &&
+        (p.confidence === "high" || p.confidence === "low")
     );
   } catch (err) {
     console.error(`AI extraction error for ${supplier.name}:`, err);
     return [];
   }
+}
+
+// Fetch most recent stored prices for a supplier to compare against
+async function getExistingPrices(
+  supabase: ReturnType<typeof createClient>,
+  supplierName: string
+): Promise<Map<string, number>> {
+  const { data } = await supabase
+    .from("supplier_prices")
+    .select("product_name, price, scraped_at")
+    .eq("supplier_name", supplierName)
+    .order("scraped_at", { ascending: false })
+    .limit(50);
+
+  const priceMap = new Map<string, number>();
+  if (data) {
+    for (const row of data) {
+      // Only keep the most recent price per product
+      if (!priceMap.has(row.product_name)) {
+        priceMap.set(row.product_name, row.price);
+      }
+    }
+  }
+  return priceMap;
 }
 
 Deno.serve(async (req) => {
@@ -238,11 +369,12 @@ Deno.serve(async (req) => {
 
   const supabase = createClient(supabaseUrl, serviceRoleKey);
 
-  // Accept batch parameter: { batch: 0 } processes suppliers 0-4, { batch: 1 } processes 5-9, etc.
   let batch = 0;
+  let dryRun = false;
   try {
     const body = await req.json();
     batch = body?.batch ?? 0;
+    dryRun = body?.dry_run === true;
   } catch {
     // default batch 0
   }
@@ -259,41 +391,113 @@ Deno.serve(async (req) => {
 
   const scrapedAt = new Date().toISOString();
   const errors: { supplier: string; error: string }[] = [];
+  const warnings: { supplier: string; product: string; old_price: number; new_price: number; change_pct: string }[] = [];
+  const dryRunResults: ExtractedPrice[] = [];
   let totalSuppliers = 0;
   let totalProducts = 0;
 
   for (const supplier of batchSuppliers) {
     try {
       console.log(`[Batch ${batch}] Scraping ${supplier.name}...`);
-      const markdown = await scrapeSupplier(supplier, firecrawlKey);
 
-      if (!markdown) {
-        errors.push({ supplier: supplier.name, error: "No content scraped" });
+      let prices: ExtractedPrice[];
+
+      // Use deterministic Shopify API extraction when available
+      if (supplier.shopifyProductHandles && supplier.shopifyProductHandles.length > 0) {
+        console.log(`  → Using Shopify product JSON API for ${supplier.name}`);
+        prices = await extractShopifyPrices(supplier);
+        totalSuppliers++;
+      } else {
+        // Fallback to Firecrawl + AI extraction
+        const markdown = await scrapeSupplier(supplier, firecrawlKey);
+
+        if (!markdown) {
+          errors.push({ supplier: supplier.name, error: "No content scraped" });
+          continue;
+        }
+
+        totalSuppliers++;
+        prices = await extractPrices(markdown, supplier, lovableApiKey);
+      }
+      console.log(`  → Extracted ${prices.length} prices from ${supplier.name}`);
+
+      // Log all extractions with their confidence and variant info
+      for (const p of prices) {
+        console.log(`    [${p.confidence}] ${p.product_name} → £${p.price} (variant: ${p.variant_matched})`);
+      }
+
+      if (dryRun) {
+        dryRunResults.push(...prices.map(p => ({ ...p, url: p.url || supplier.url })));
         continue;
       }
 
-      totalSuppliers++;
-      const prices = await extractPrices(markdown, supplier, lovableApiKey);
-      console.log(`  → Extracted ${prices.length} prices from ${supplier.name}`);
+      // Filter to high-confidence only for DB writes
+      const highConfidence = prices.filter(p => p.confidence === "high");
+      const lowConfidence = prices.filter(p => p.confidence === "low");
 
-      // Insert immediately per supplier
-      if (prices.length > 0) {
-        const rows = prices.map((p) => ({
-          category: supplier.category,
-          product_name: p.product_name,
-          supplier_name: supplier.name,
-          price: p.price,
-          url: p.url,
-          in_stock: p.in_stock,
-          scraped_at: scrapedAt,
-        }));
+      if (lowConfidence.length > 0) {
+        console.log(`  ⚠ Skipping ${lowConfidence.length} low-confidence prices from ${supplier.name}`);
+        for (const lc of lowConfidence) {
+          console.log(`    SKIPPED: ${lc.product_name} → £${lc.price} (${lc.extraction_note})`);
+        }
+      }
 
-        const { error: insertErr } = await supabase.from("supplier_prices").insert(rows);
-        if (insertErr) {
-          console.error(`Insert error for ${supplier.name}:`, insertErr);
-          errors.push({ supplier: supplier.name, error: insertErr.message });
-        } else {
-          totalProducts += prices.length;
+      if (highConfidence.length > 0) {
+        // Get existing prices for guardrail comparison
+        const existingPrices = await getExistingPrices(supabase, supplier.name);
+
+        const rowsToInsert: {
+          category: string;
+          product_name: string;
+          supplier_name: string;
+          price: number;
+          url: string;
+          in_stock: boolean;
+          scraped_at: string;
+        }[] = [];
+
+        for (const p of highConfidence) {
+          const oldPrice = existingPrices.get(p.product_name);
+
+          // Price change guardrail: reject if >40% change from last known price
+          if (oldPrice !== undefined && oldPrice > 0) {
+            const changeRatio = Math.abs(p.price - oldPrice) / oldPrice;
+            if (changeRatio > MAX_PRICE_CHANGE_RATIO) {
+              const changePct = (changeRatio * 100).toFixed(1);
+              console.warn(
+                `  🚫 REJECTED ${supplier.name} / ${p.product_name}: ` +
+                `£${oldPrice} → £${p.price} (${changePct}% change exceeds ${MAX_PRICE_CHANGE_RATIO * 100}% threshold)`
+              );
+              warnings.push({
+                supplier: supplier.name,
+                product: p.product_name,
+                old_price: oldPrice,
+                new_price: p.price,
+                change_pct: `${changePct}%`,
+              });
+              continue;
+            }
+          }
+
+          rowsToInsert.push({
+            category: supplier.category,
+            product_name: p.product_name,
+            supplier_name: supplier.name,
+            price: p.price,
+            url: p.url || supplier.url,
+            in_stock: p.in_stock,
+            scraped_at: scrapedAt,
+          });
+        }
+
+        if (rowsToInsert.length > 0) {
+          const { error: insertErr } = await supabase.from("supplier_prices").insert(rowsToInsert);
+          if (insertErr) {
+            console.error(`Insert error for ${supplier.name}:`, insertErr);
+            errors.push({ supplier: supplier.name, error: insertErr.message });
+          } else {
+            totalProducts += rowsToInsert.length;
+          }
         }
       }
 
@@ -304,6 +508,21 @@ Deno.serve(async (req) => {
       errors.push({ supplier: supplier.name, error: msg });
       console.error(`Error with ${supplier.name}:`, msg);
     }
+  }
+
+  // In dry-run mode, return results without writing to DB
+  if (dryRun) {
+    return new Response(
+      JSON.stringify({
+        success: true,
+        dry_run: true,
+        batch,
+        suppliers_scraped: totalSuppliers,
+        extractions: dryRunResults,
+        errors,
+      }),
+      { headers: { ...corsHeaders, "Content-Type": "application/json" } }
+    );
   }
 
   // Log this batch result
@@ -318,7 +537,6 @@ Deno.serve(async (req) => {
   // If there are more suppliers, trigger next batch
   const nextBatchStart = (batch + 1) * BATCH_SIZE;
   if (nextBatchStart < SUPPLIERS.length) {
-    // Fire-and-forget next batch
     const anonKey = Deno.env.get("SUPABASE_ANON_KEY")!;
     fetch(`${supabaseUrl}/functions/v1/scrape-supplier-prices`, {
       method: "POST",
@@ -337,6 +555,8 @@ Deno.serve(async (req) => {
       suppliers_scraped: totalSuppliers,
       products_matched: totalProducts,
       errors_count: errors.length,
+      warnings_count: warnings.length,
+      price_change_warnings: warnings,
       has_next_batch: nextBatchStart < SUPPLIERS.length,
     }),
     { headers: { ...corsHeaders, "Content-Type": "application/json" } }
