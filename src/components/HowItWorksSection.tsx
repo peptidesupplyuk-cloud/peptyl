@@ -5,7 +5,7 @@ const steps = [
   {
     icon: Activity,
     label: "Track",
-    description: "Log biomarkers, protocols, and injections in one place.",
+    description: "Log biomarkers, protocols, and doses in one place.",
   },
   {
     icon: Brain,
