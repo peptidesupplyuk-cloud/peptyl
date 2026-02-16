@@ -157,7 +157,7 @@ export function useAllInjections() {
         .from("injection_logs")
         .select("*")
         .order("scheduled_time", { ascending: false })
-        .limit(100);
+        .limit(500);
       if (error) throw error;
       return (data ?? []) as InjectionLog[];
     },

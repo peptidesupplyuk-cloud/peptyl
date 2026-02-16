@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Navigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import { Mail, Lock, AlertCircle, ArrowRight, Loader2, Globe, Target } from "lucide-react";
 import { z } from "zod";
@@ -45,8 +45,7 @@ const Auth = () => {
   const navigate = useNavigate();
 
   if (user) {
-    navigate("/peptides", { replace: true });
-    return null;
+    return <Navigate to="/peptides" replace />;
   }
 
   const handleForgotPassword = async (e: React.FormEvent) => {
