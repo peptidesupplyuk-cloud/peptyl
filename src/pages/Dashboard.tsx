@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { useSearchParams } from "react-router-dom";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Carousel, CarouselContent, CarouselItem, CarouselPrevious, CarouselNext } from "@/components/ui/carousel";
-import { Activity, FlaskConical, LayoutDashboard, AlertTriangle, User, BookOpen, CalendarDays } from "lucide-react";
+import { Activity, FlaskConical, LayoutDashboard, AlertTriangle, User, BookOpen, CalendarDays, BarChart3 } from "lucide-react";
 import { addWeeks, format } from "date-fns";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
@@ -16,7 +16,9 @@ import CreateProtocolForm from "@/components/dashboard/CreateProtocolForm";
 import ProfileBiometrics from "@/components/dashboard/ProfileBiometrics";
 import { useBloodworkPanels } from "@/hooks/use-bloodwork";
 import { useCreateProtocol } from "@/hooks/use-protocols";
-import { useLogInjection } from "@/hooks/use-injections";
+import { useLogInjection, useUpdateInjectionStatus } from "@/hooks/use-injections";
+import AdherenceTracker from "@/components/dashboard/AdherenceTracker";
+import { useProtocolNotifications, useNotificationActions } from "@/hooks/use-notifications";
 import { getRecommendations, getBiometricRecommendations, type Recommendation, type BiometricRecommendation } from "@/data/recommendation-rules";
 import PopularProtocols from "@/components/dashboard/PopularProtocols";
 import { useToast } from "@/hooks/use-toast";
@@ -33,6 +35,7 @@ const Dashboard = () => {
   const { data: panels = [], refetch: refetchPanels } = useBloodworkPanels();
   const createProtocol = useCreateProtocol();
   const logInjection = useLogInjection();
+  const updateInjectionStatus = useUpdateInjectionStatus();
   const { toast } = useToast();
   const [disclaimerAccepted, setDisclaimerAccepted] = useState(false);
   const [activeTab, setActiveTab] = useState("overview");
@@ -41,6 +44,15 @@ const Dashboard = () => {
   const [initialPeptide, setInitialPeptide] = useState<string | null>(null);
   const isMobile = useIsMobile();
   const [searchParams, setSearchParams] = useSearchParams();
+
+  // Schedule local notifications for protocol doses
+  useProtocolNotifications();
+
+  // Handle notification action buttons (Done / Skip)
+  useNotificationActions(
+    (injectionId) => updateInjectionStatus.mutate({ id: injectionId, status: "completed" }),
+    (injectionId) => updateInjectionStatus.mutate({ id: injectionId, status: "skipped" })
+  );
 
   useEffect(() => {
     const tab = searchParams.get("tab");
@@ -167,6 +179,9 @@ const Dashboard = () => {
               </TabsTrigger>
               <TabsTrigger value="injections" className="text-xs sm:text-sm">
                 <CalendarDays className="h-4 w-4 mr-1.5" />Tracker
+              </TabsTrigger>
+              <TabsTrigger value="adherence" className="text-xs sm:text-sm">
+                <BarChart3 className="h-4 w-4 mr-1.5" />Adherence
               </TabsTrigger>
             </TabsList>
 
@@ -352,6 +367,11 @@ const Dashboard = () => {
             <TabsContent value="injections" className="space-y-6">
               <TodaysPlan />
               <ActiveProtocols />
+            </TabsContent>
+
+            {/* ADHERENCE TAB */}
+            <TabsContent value="adherence" className="space-y-6">
+              <AdherenceTracker />
             </TabsContent>
           </Tabs>
           <MobileTabNav activeTab={activeTab} onTabChange={setActiveTab} />
