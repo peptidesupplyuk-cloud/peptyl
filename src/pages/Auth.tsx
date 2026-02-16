@@ -4,6 +4,7 @@ import { motion } from "framer-motion";
 import { Mail, Lock, AlertCircle, ArrowRight, Loader2, Globe, Target } from "lucide-react";
 import { z } from "zod";
 import { useAuth } from "@/contexts/AuthContext";
+import { supabase } from "@/integrations/supabase/client";
 import Logo from "@/components/Logo";
 import SEO from "@/components/SEO";
 
@@ -36,6 +37,8 @@ const Auth = () => {
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
   const [loading, setLoading] = useState(false);
+  const [forgotMode, setForgotMode] = useState(false);
+  const [forgotSuccess, setForgotSuccess] = useState("");
   const { signIn, signUp, user } = useAuth();
   const navigate = useNavigate();
 
@@ -43,6 +46,31 @@ const Auth = () => {
     navigate("/peptides", { replace: true });
     return null;
   }
+
+  const handleForgotPassword = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setError("");
+    const emailResult = emailSchema.safeParse(email);
+    if (!emailResult.success) {
+      setError(emailResult.error.errors[0].message);
+      return;
+    }
+    setLoading(true);
+    try {
+      const { error } = await supabase.auth.resetPasswordForEmail(emailResult.data, {
+        redirectTo: `${window.location.origin}/reset-password`,
+      });
+      if (error) {
+        setError(error.message);
+      } else {
+        setForgotSuccess("Check your email for a password reset link.");
+      }
+    } catch {
+      setError("Something went wrong. Please try again.");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -129,6 +157,55 @@ const Auth = () => {
         </div>
 
         <div className="bg-card rounded-2xl border border-border p-6 shadow-sm">
+          {forgotMode ? (
+            <form onSubmit={handleForgotPassword} className="space-y-4">
+              <div>
+                <label className="text-xs font-medium text-foreground mb-1.5 block">Email</label>
+                <div className="relative">
+                  <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                  <input
+                    type="email"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    placeholder="you@example.com"
+                    className="w-full pl-10 pr-4 py-2.5 rounded-xl bg-background border border-border text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-primary/40 transition-colors"
+                    required
+                  />
+                </div>
+              </div>
+
+              {error && (
+                <div className="flex items-start gap-2 p-3 rounded-xl bg-destructive/10 border border-destructive/20">
+                  <AlertCircle className="h-4 w-4 text-destructive mt-0.5 flex-shrink-0" />
+                  <p className="text-xs text-destructive">{error}</p>
+                </div>
+              )}
+
+              {forgotSuccess && (
+                <div className="p-3 rounded-xl bg-success/10 border border-success/20">
+                  <p className="text-xs text-success">{forgotSuccess}</p>
+                </div>
+              )}
+
+              <button
+                type="submit"
+                disabled={loading}
+                className="w-full flex items-center justify-center gap-2 py-2.5 rounded-xl bg-primary text-primary-foreground text-sm font-medium shadow-brand hover:opacity-90 transition-opacity disabled:opacity-50"
+              >
+                {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : <>Send Reset Link <ArrowRight className="h-4 w-4" /></>}
+              </button>
+
+              <div className="text-center">
+                <button
+                  type="button"
+                  onClick={() => { setForgotMode(false); setError(""); setForgotSuccess(""); }}
+                  className="text-xs text-muted-foreground hover:text-primary transition-colors"
+                >
+                  Back to Sign In
+                </button>
+              </div>
+            </form>
+          ) : (
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
               <label className="text-xs font-medium text-foreground mb-1.5 block">Email</label>
@@ -225,7 +302,20 @@ const Auth = () => {
                 </>
               )}
             </button>
+
+            {!isSignUp && (
+              <div className="text-center">
+                <button
+                  type="button"
+                  onClick={() => { setForgotMode(true); setError(""); setSuccess(""); }}
+                  className="text-xs text-muted-foreground hover:text-primary transition-colors"
+                >
+                  Forgot your password?
+                </button>
+              </div>
+            )}
           </form>
+          )}
 
           <div className="mt-4 text-center">
             <button
@@ -233,6 +323,8 @@ const Auth = () => {
                 setIsSignUp(!isSignUp);
                 setError("");
                 setSuccess("");
+                setForgotMode(false);
+                setForgotSuccess("");
               }}
               className="text-xs text-muted-foreground hover:text-primary transition-colors"
             >
