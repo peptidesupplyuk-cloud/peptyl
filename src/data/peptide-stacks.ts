@@ -83,7 +83,7 @@ export const recommendedStacks: RecommendedStack[] = [
     peptides: ["BPC-157", "TB-500", "KPV", "GHK-Cu"],
     description:
       "Multi-pathway healing stack. BPC-157 and TB-500 handle structural repair, KPV suppresses NF-κB inflammatory pathways, and GHK-Cu promotes collagen remodelling and tissue regeneration.",
-    protocol: "BPC-157 500 mcg/day + TB-500 500 mcg/day (1:1 ratio) + KPV 200-500 mcg/day + GHK-Cu 200 mcg/day",
+    protocol: "BPC-157 500 mcg/day + TB-500 500 mcg/day (1:1 ratio) + KPV 200-500 mcg/day + GHK-Cu 1-2 mg/day",
     evidence: "emerging",
   },
   {
