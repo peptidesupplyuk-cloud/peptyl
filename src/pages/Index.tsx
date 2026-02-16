@@ -8,6 +8,7 @@ import FeaturesSection from "@/components/FeaturesSection";
 import LatestArticlesSection from "@/components/LatestArticlesSection";
 import CommunitySection from "@/components/CommunitySection";
 import SignupBenefits from "@/components/SignupBenefits";
+import HowItWorksSection from "@/components/HowItWorksSection";
 import SEO from "@/components/SEO";
 
 const Index = () => {
@@ -34,6 +35,7 @@ const Index = () => {
 
       <HeroSection />
       <SignupBenefits />
+      <HowItWorksSection />
       <MissionSection />
       <FeaturesSection />
       <LatestArticlesSection />
