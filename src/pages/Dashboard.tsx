@@ -377,7 +377,7 @@ const Dashboard = () => {
           <MobileTabNav activeTab={activeTab} onTabChange={setActiveTab} />
         </div>
       </main>
-      <Footer />
+      {!isMobile && <Footer />}
     </div>
   );
 };
