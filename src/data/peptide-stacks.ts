@@ -38,7 +38,7 @@ export const recommendedStacks: RecommendedStack[] = [
     peptides: ["BPC-157", "TB-500"],
     description:
       "The most widely used healing stack. BPC-157 provides localised tissue repair via angiogenesis and growth factor upregulation, while TB-500 promotes systemic cell migration and tissue remodelling. Together they address both local and systemic healing pathways.",
-    protocol: "BPC-157 250-500 mcg 2x/day + TB-500 2-5 mg 2x/week for 4-8 weeks",
+    protocol: "BPC-157 500 mcg/day + TB-500 500 mcg/day (1:1 blend ratio) for 4-8 weeks",
     evidence: "established",
   },
   {
@@ -56,7 +56,7 @@ export const recommendedStacks: RecommendedStack[] = [
     peptides: ["BPC-157", "TB-500", "CJC-1295 (no DAC)", "Ipamorelin"],
     description:
       "Combines the Wolverine Stack with the GH Optimiser. Healing peptides address acute tissue damage while GH peptides support overnight recovery and IGF-1 elevation. Timing is split: healing peptides AM, GH peptides PM.",
-    protocol: "BPC-157 + TB-500 morning; CJC-1295 + Ipamorelin 30-60 min before bed",
+    protocol: "BPC-157 500 mcg + TB-500 500 mcg daily (1:1 blend); CJC-1295 + Ipamorelin 30-60 min before bed",
     evidence: "established",
   },
   {
@@ -83,7 +83,7 @@ export const recommendedStacks: RecommendedStack[] = [
     peptides: ["BPC-157", "TB-500", "KPV", "GHK-Cu"],
     description:
       "Multi-pathway healing stack. BPC-157 and TB-500 handle structural repair, KPV suppresses NF-κB inflammatory pathways, and GHK-Cu promotes collagen remodelling and tissue regeneration.",
-    protocol: "BPC-157 500 mcg/day + TB-500 2 mg 2x/week + KPV 200-500 mcg/day + GHK-Cu 200 mcg/day",
+    protocol: "BPC-157 500 mcg/day + TB-500 500 mcg/day (1:1 ratio) + KPV 200-500 mcg/day + GHK-Cu 200 mcg/day",
     evidence: "emerging",
   },
   {
