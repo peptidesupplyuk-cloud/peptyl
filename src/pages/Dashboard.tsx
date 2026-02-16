@@ -1,4 +1,5 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useSearchParams } from "react-router-dom";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Carousel, CarouselContent, CarouselItem, CarouselPrevious, CarouselNext } from "@/components/ui/carousel";
 import { Activity, FlaskConical, LayoutDashboard, AlertTriangle, User, BookOpen, CalendarDays } from "lucide-react";
@@ -37,7 +38,24 @@ const Dashboard = () => {
   const [activeTab, setActiveTab] = useState("overview");
   const [activatingProtocol, setActivatingProtocol] = useState(false);
   const [bioRecs, setBioRecs] = useState<BiometricRecommendation[]>([]);
+  const [initialPeptide, setInitialPeptide] = useState<string | null>(null);
   const isMobile = useIsMobile();
+  const [searchParams, setSearchParams] = useSearchParams();
+
+  useEffect(() => {
+    const tab = searchParams.get("tab");
+    const peptide = searchParams.get("peptide") || sessionStorage.getItem("pending_peptide");
+    if (tab) {
+      setActiveTab(tab);
+    }
+    if (peptide) {
+      setInitialPeptide(peptide);
+      sessionStorage.removeItem("pending_peptide");
+    }
+    if (tab || peptide) {
+      setSearchParams({}, { replace: true });
+    }
+  }, []);
 
   // Get recommendations from latest panel
   const latestPanel = panels[0];
@@ -325,7 +343,7 @@ const Dashboard = () => {
                 disclaimerAccepted={disclaimerAccepted}
               />
 
-              <CreateProtocolForm disclaimerAccepted={disclaimerAccepted} />
+              <CreateProtocolForm disclaimerAccepted={disclaimerAccepted} initialPeptide={initialPeptide} onInitialPeptideConsumed={() => setInitialPeptide(null)} />
 
               <ActiveProtocols />
             </TabsContent>

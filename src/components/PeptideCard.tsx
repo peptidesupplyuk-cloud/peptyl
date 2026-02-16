@@ -40,8 +40,9 @@ const PeptideCard = ({ peptide, index, userVotes, onVote }: PeptideCardProps) =>
 
   const handleAddToProtocol = () => {
     if (user) {
-      navigate("/dashboard");
+      navigate("/dashboard?tab=protocols&peptide=" + encodeURIComponent(peptide.name));
     } else {
+      sessionStorage.setItem("pending_peptide", peptide.name);
       setOnboardingOpen(true);
     }
   };
