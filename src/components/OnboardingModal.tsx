@@ -72,9 +72,11 @@ const OnboardingModal = ({ open, onOpenChange }: OnboardingModalProps) => {
   const canProceed = !!answers[current.id] || current.type === "text";
 
   const handleFinish = () => {
+    // Store answers in sessionStorage so they can be used after signup
+    sessionStorage.setItem("onboarding_answers", JSON.stringify(answers));
     onOpenChange(false);
     setStep(0);
-    navigate("/dashboard");
+    navigate("/auth");
   };
 
   return (

@@ -8,9 +8,9 @@ export interface PeptideExperience {
 }
 
 export type ApprovalStatus =
-  | { status: "approved"; label: string } // e.g. "Approved (Ozempic/Wegovy)"
-  | { status: "trial"; phase: string }    // e.g. "Phase III"
-  | { status: "none" };                   // not pursued / no data
+  | { status: "approved"; label: string }
+  | { status: "trial"; phase: string }
+  | { status: "none" };
 
 export interface RegulatoryStatus {
   us?: ApprovalStatus;
@@ -30,6 +30,7 @@ export interface PeptideData {
   cycleDuration?: string;
   notes?: string;
   isNew?: boolean;
+  benefits: string[];
   regulatoryStatus?: RegulatoryStatus;
   experiences: PeptideExperience[];
 }
@@ -62,6 +63,7 @@ export const peptides: PeptideData[] = [
     frequency: "Daily",
     doseRange: "250-500 mcg/day",
     cycleDuration: "12 weeks",
+    benefits: ["Fat metabolism", "No blood sugar impact", "Body composition"],
     regulatoryStatus: {
       us: { status: "none" },
       eu: { status: "none" },
@@ -83,6 +85,7 @@ export const peptides: PeptideData[] = [
     doseRange: "200-500 mcg/day",
     cycleDuration: "4-6 weeks",
     notes: "Typically split into 2 doses, morning and evening",
+    benefits: ["Tissue repair", "Gut healing", "Anti-inflammatory"],
     regulatoryStatus: {
       us: { status: "none" },
     },
@@ -102,6 +105,7 @@ export const peptides: PeptideData[] = [
     frequency: "Once weekly",
     doseRange: "1-4.5 mg/week",
     isNew: true,
+    benefits: ["Appetite suppression", "Satiety", "Weight loss"],
     regulatoryStatus: {
       us: { status: "trial", phase: "Phase III" },
       eu: { status: "trial", phase: "Phase III" },
@@ -121,6 +125,7 @@ export const peptides: PeptideData[] = [
     frequency: "Daily/alternate",
     doseRange: "5-10 ml/day",
     cycleDuration: "10-20 days",
+    benefits: ["Neuroprotection", "Stroke recovery", "Brain repair"],
     regulatoryStatus: {
       eu: { status: "approved", label: "Approved in select EU countries" },
     },
@@ -139,6 +144,7 @@ export const peptides: PeptideData[] = [
     frequency: "2-3x weekly",
     doseRange: "100-300 mcg/dose",
     cycleDuration: "8-12 weeks",
+    benefits: ["GH release", "IGF-1 boost", "Recovery"],
     regulatoryStatus: {
       us: { status: "none" },
     },
@@ -157,6 +163,7 @@ export const peptides: PeptideData[] = [
     frequency: "Daily",
     doseRange: "10-40 mg/day (oral)",
     isNew: true,
+    benefits: ["Neurogenesis", "Synapse formation", "Cognitive boost"],
     regulatoryStatus: {
       us: { status: "none" },
     },
@@ -174,6 +181,7 @@ export const peptides: PeptideData[] = [
     administration: "SubQ/Nasal",
     frequency: "Before bed",
     doseRange: "100-300 mcg/night",
+    benefits: ["Deep sleep", "Circadian rhythm", "Recovery"],
     regulatoryStatus: {
       us: { status: "none" },
     },
@@ -193,6 +201,7 @@ export const peptides: PeptideData[] = [
     doseRange: "5-10 mg/day",
     cycleDuration: "10-20 day cycles",
     isNew: true,
+    benefits: ["Telomere support", "Anti-aging", "Immune function"],
     regulatoryStatus: {
       us: { status: "none" },
     },
@@ -212,6 +221,7 @@ export const peptides: PeptideData[] = [
     doseRange: "1-3 mg/day (topical); 100-500 mcg/day (SubQ)",
     cycleDuration: "8-12 weeks",
     isNew: true,
+    benefits: ["Collagen production", "Skin elasticity", "Wound healing"],
     regulatoryStatus: {
       us: { status: "approved", label: "Cosmetic ingredient" },
       eu: { status: "approved", label: "Cosmetic ingredient (CosIng listed)" },
@@ -233,6 +243,7 @@ export const peptides: PeptideData[] = [
     frequency: "Daily",
     doseRange: "1-2 mg/day",
     cycleDuration: "8-12 weeks",
+    benefits: ["Collagen synthesis", "Tissue remodelling", "Hair growth"],
     regulatoryStatus: {
       us: { status: "approved", label: "OTC cosmetic ingredient" },
       eu: { status: "approved", label: "Cosmetic ingredient (CosIng listed)" },
@@ -252,6 +263,7 @@ export const peptides: PeptideData[] = [
     administration: "SubQ injection",
     frequency: "2-3x daily",
     doseRange: "100-300 mcg/dose",
+    benefits: ["GH release", "Fat loss", "Recovery"],
     regulatoryStatus: {
       us: { status: "none" },
     },
@@ -269,6 +281,7 @@ export const peptides: PeptideData[] = [
     administration: "SubQ injection",
     frequency: "2-3x daily",
     doseRange: "100-300 mcg/dose",
+    benefits: ["GH release", "Appetite increase", "Muscle growth"],
     regulatoryStatus: {
       us: { status: "none" },
     },
@@ -286,6 +299,7 @@ export const peptides: PeptideData[] = [
     administration: "SubQ injection",
     frequency: "2-3x weekly",
     doseRange: "100-500 mcg/dose",
+    benefits: ["Testosterone support", "Fertility", "LH/FSH release"],
     regulatoryStatus: {
       us: { status: "approved", label: "Approved (Factrel — diagnostic)" },
       eu: { status: "approved", label: "Approved (diagnostic)" },
@@ -305,6 +319,7 @@ export const peptides: PeptideData[] = [
     administration: "SubQ injection",
     frequency: "1-2x daily",
     doseRange: "100-200 mcg/dose",
+    benefits: ["Peak GH release", "Cardioprotection", "Recovery"],
     regulatoryStatus: {
       us: { status: "none" },
     },
@@ -324,6 +339,7 @@ export const peptides: PeptideData[] = [
     doseRange: "20-80 mcg/day",
     cycleDuration: "4-6 weeks",
     isNew: true,
+    benefits: ["Muscle hyperplasia", "Recovery", "Cell growth"],
     regulatoryStatus: {
       us: { status: "none" },
     },
@@ -343,6 +359,7 @@ export const peptides: PeptideData[] = [
     doseRange: "100-300 mcg/dose",
     cycleDuration: "8-12 weeks",
     notes: "Best taken before bed on an empty stomach",
+    benefits: ["Clean GH release", "Sleep quality", "Anti-aging"],
     regulatoryStatus: {
       us: { status: "none" },
     },
@@ -360,6 +377,7 @@ export const peptides: PeptideData[] = [
     administration: "SubQ injection",
     frequency: "2-3x weekly",
     doseRange: "100-500 mcg/dose",
+    benefits: ["Hormone regulation", "Fertility", "Testosterone"],
     regulatoryStatus: {
       us: { status: "trial", phase: "Phase II" },
     },
@@ -377,6 +395,7 @@ export const peptides: PeptideData[] = [
     administration: "SubQ/IM/Oral",
     frequency: "1-2x daily",
     doseRange: "200-500 mcg/day",
+    benefits: ["Anti-inflammatory", "Gut health", "Immune modulation"],
     regulatoryStatus: {
       us: { status: "none" },
     },
@@ -394,6 +413,7 @@ export const peptides: PeptideData[] = [
     administration: "SubQ/Topical",
     frequency: "Daily/EOD",
     doseRange: "50-100 mcg/day",
+    benefits: ["Antimicrobial", "Wound healing", "Immune defence"],
     regulatoryStatus: {
       us: { status: "none" },
     },
@@ -411,6 +431,7 @@ export const peptides: PeptideData[] = [
     administration: "SubQ injection",
     frequency: "Daily/EOD",
     doseRange: "250-500 mcg/dose",
+    benefits: ["Tanning", "Appetite suppression", "Libido"],
     regulatoryStatus: {
       us: { status: "none" },
     },
@@ -429,6 +450,7 @@ export const peptides: PeptideData[] = [
     administration: "SubQ/IM",
     frequency: "2-3x weekly",
     doseRange: "5-10 mg/week",
+    benefits: ["Metabolic function", "Exercise capacity", "Insulin sensitivity"],
     regulatoryStatus: {
       us: { status: "none" },
     },
@@ -446,6 +468,7 @@ export const peptides: PeptideData[] = [
     administration: "SubQ/IM/IV",
     frequency: "1-3x weekly",
     doseRange: "50-200 mg/dose",
+    benefits: ["Cellular energy", "DNA repair", "Anti-aging"],
     regulatoryStatus: {
       us: { status: "none" },
     },
@@ -463,6 +486,7 @@ export const peptides: PeptideData[] = [
     administration: "Nasal/SubQ",
     frequency: "As needed",
     doseRange: "10-40 IU/dose",
+    benefits: ["Social bonding", "Stress relief", "Emotional connection"],
     regulatoryStatus: {
       us: { status: "approved", label: "Approved (Pitocin)" },
       eu: { status: "approved", label: "Approved (Syntocinon)" },
@@ -482,6 +506,7 @@ export const peptides: PeptideData[] = [
     administration: "SubQ injection",
     frequency: "As needed",
     doseRange: "1-2 mg/dose",
+    benefits: ["Sexual desire", "CNS activation", "FDA-approved"],
     regulatoryStatus: {
       us: { status: "approved", label: "Approved (Vyleesi)" },
     },
@@ -501,6 +526,7 @@ export const peptides: PeptideData[] = [
     doseRange: "4-12 mg/week",
     cycleDuration: "12+ weeks",
     isNew: true,
+    benefits: ["Weight loss (up to 24%)", "Triple-action", "Metabolic health"],
     regulatoryStatus: {
       us: { status: "trial", phase: "Phase III" },
       eu: { status: "trial", phase: "Phase III" },
@@ -519,6 +545,7 @@ export const peptides: PeptideData[] = [
     administration: "Nasal/SubQ",
     frequency: "1-3x daily",
     doseRange: "250-500 mcg/dose",
+    benefits: ["Anxiety relief", "Calm focus", "Non-sedating"],
     regulatoryStatus: {
       us: { status: "none" },
     },
@@ -538,6 +565,7 @@ export const peptides: PeptideData[] = [
     doseRange: "0.25-2.4 mg/week",
     cycleDuration: "Ongoing",
     notes: "Start at lowest dose. Increase every 4 weeks as tolerated",
+    benefits: ["Weight loss (15%)", "Appetite control", "Blood sugar"],
     regulatoryStatus: {
       us: { status: "approved", label: "Approved (Ozempic/Wegovy)" },
       eu: { status: "approved", label: "Approved (Ozempic/Wegovy)" },
@@ -557,6 +585,7 @@ export const peptides: PeptideData[] = [
     administration: "Nasal/SubQ",
     frequency: "1-3x daily",
     doseRange: "200-600 mcg/dose",
+    benefits: ["Focus", "Memory", "Neuroplasticity"],
     regulatoryStatus: {
       us: { status: "none" },
     },
@@ -575,6 +604,7 @@ export const peptides: PeptideData[] = [
     frequency: "Daily",
     doseRange: "200-500 mcg/day",
     cycleDuration: "3-6 months",
+    benefits: ["Natural GH boost", "Anti-aging", "Sleep quality"],
     regulatoryStatus: {
       us: { status: "approved", label: "Previously approved (Geref — discontinued)" },
     },
@@ -592,6 +622,7 @@ export const peptides: PeptideData[] = [
     administration: "SubQ/IV",
     frequency: "Daily/3-5x weekly",
     doseRange: "5-50 mg/day",
+    benefits: ["Mitochondrial support", "Cardioprotection", "Energy"],
     regulatoryStatus: {
       us: { status: "trial", phase: "Phase III" },
     },
@@ -610,6 +641,7 @@ export const peptides: PeptideData[] = [
     frequency: "Once weekly",
     doseRange: "2.4-6 mg/week",
     isNew: true,
+    benefits: ["Weight loss", "Liver fat reduction", "Energy expenditure"],
     regulatoryStatus: {
       us: { status: "trial", phase: "Phase III" },
       eu: { status: "trial", phase: "Phase III" },
@@ -629,6 +661,7 @@ export const peptides: PeptideData[] = [
     frequency: "2-3x weekly",
     doseRange: "2-5 mg, 2x/week",
     cycleDuration: "4-8 weeks loading, then maintenance",
+    benefits: ["Tissue repair", "Angiogenesis", "Cell migration"],
     regulatoryStatus: {
       us: { status: "none" },
     },
@@ -646,6 +679,7 @@ export const peptides: PeptideData[] = [
     administration: "SubQ injection",
     frequency: "Daily",
     doseRange: "1-2 mg/day",
+    benefits: ["Visceral fat loss", "FDA-approved", "GH release"],
     regulatoryStatus: {
       us: { status: "approved", label: "Approved (Egrifta)" },
     },
@@ -663,6 +697,7 @@ export const peptides: PeptideData[] = [
     administration: "SubQ injection",
     frequency: "2-3x weekly",
     doseRange: "1.6 mg/dose",
+    benefits: ["Immune modulation", "Antiviral", "Well-tolerated"],
     regulatoryStatus: {
       eu: { status: "approved", label: "Approved in select countries (Zadaxin)" },
     },
@@ -681,6 +716,7 @@ export const peptides: PeptideData[] = [
     frequency: "Once weekly",
     doseRange: "2.5-15 mg/week",
     cycleDuration: "Ongoing",
+    benefits: ["Weight loss (up to 21%)", "Dual-action", "Blood sugar"],
     regulatoryStatus: {
       us: { status: "approved", label: "Approved (Mounjaro/Zepbound)" },
       eu: { status: "approved", label: "Approved (Mounjaro)" },
@@ -701,6 +737,7 @@ export const peptides: PeptideData[] = [
     frequency: "2-3x weekly",
     doseRange: "200-600 mg/dose",
     cycleDuration: "8-12 weeks",
+    benefits: ["Antioxidant", "Detoxification", "Skin brightening"],
     regulatoryStatus: {
       us: { status: "none" },
     },
@@ -719,6 +756,7 @@ export const peptides: PeptideData[] = [
     frequency: "Daily",
     doseRange: "10-25 mg/day",
     cycleDuration: "8-16 weeks",
+    benefits: ["Oral dosing", "IGF-1 boost", "Sleep quality"],
     regulatoryStatus: {
       us: { status: "trial", phase: "Phase II completed" },
     },
@@ -738,6 +776,7 @@ export const peptides: PeptideData[] = [
     frequency: "Once weekly",
     doseRange: "1-2 mg/week",
     cycleDuration: "8-12 weeks",
+    benefits: ["Sustained GH elevation", "Weekly dosing", "IGF-1 boost"],
     regulatoryStatus: {
       us: { status: "none" },
     },
@@ -756,6 +795,7 @@ export const peptides: PeptideData[] = [
     frequency: "Daily",
     doseRange: "0.6-3 mg/day",
     cycleDuration: "Ongoing",
+    benefits: ["Weight management", "Blood sugar control", "FDA-approved"],
     regulatoryStatus: {
       us: { status: "approved", label: "Approved (Saxenda/Victoza)" },
       eu: { status: "approved", label: "Approved (Saxenda/Victoza)" },
@@ -776,6 +816,7 @@ export const peptides: PeptideData[] = [
     frequency: "Daily",
     doseRange: "50-150 mg/day",
     isNew: true,
+    benefits: ["NAD+ boost", "Fat loss", "Metabolic health"],
     regulatoryStatus: {
       us: { status: "none" },
     },
@@ -794,6 +835,7 @@ export const peptides: PeptideData[] = [
     frequency: "Daily for 10-30 days",
     doseRange: "100-300 mcg/day",
     cycleDuration: "10-30 day cycles",
+    benefits: ["Myostatin inhibition", "Muscle growth", "Strength"],
     regulatoryStatus: {
       us: { status: "none" },
     },
@@ -812,6 +854,7 @@ export const peptides: PeptideData[] = [
     frequency: "Post-workout",
     doseRange: "100-200 mcg/dose",
     cycleDuration: "4-6 weeks",
+    benefits: ["Muscle repair", "Satellite cell activation", "Recovery"],
     regulatoryStatus: {
       us: { status: "none" },
     },
@@ -830,6 +873,7 @@ export const peptides: PeptideData[] = [
     frequency: "2-3x weekly",
     doseRange: "100-200 mcg/dose",
     cycleDuration: "4-6 weeks",
+    benefits: ["Extended muscle repair", "Systemic recovery", "Convenient dosing"],
     regulatoryStatus: {
       us: { status: "none" },
     },
@@ -848,6 +892,7 @@ export const peptides: PeptideData[] = [
     frequency: "Daily/3x weekly",
     doseRange: "1-5 mg/dose",
     isNew: true,
+    benefits: ["Cytoprotection", "Neuroprotection", "Anti-aging"],
     regulatoryStatus: {
       us: { status: "none" },
     },
@@ -865,6 +910,7 @@ export const peptides: PeptideData[] = [
     administration: "Nasal/SubQ",
     frequency: "1-2x daily",
     doseRange: "50-100 mcg/dose (nasal)",
+    benefits: ["CIRS treatment", "Immune regulation", "Neuroprotection"],
     regulatoryStatus: {
       us: { status: "trial", phase: "Phase II" },
     },
@@ -883,6 +929,7 @@ export const peptides: PeptideData[] = [
     frequency: "Daily for 5-10 days",
     doseRange: "10-20 mg/day",
     cycleDuration: "5-10 day cycles, 2-3x/year",
+    benefits: ["Thymic restoration", "Immune modulation", "Seasonal use"],
     regulatoryStatus: {
       us: { status: "none" },
     },
@@ -901,6 +948,7 @@ export const peptides: PeptideData[] = [
     frequency: "Pulsed protocols",
     doseRange: "Variable — research protocols",
     isNew: true,
+    benefits: ["Senescent cell clearance", "Anti-aging", "Cellular renewal"],
     regulatoryStatus: {
       us: { status: "none" },
     },
@@ -919,6 +967,7 @@ export const peptides: PeptideData[] = [
     frequency: "Daily",
     doseRange: "200-500 mcg/day",
     isNew: true,
+    benefits: ["Rapid mood lift", "Cognitive enhancement", "TREK-1 blockade"],
     regulatoryStatus: {
       us: { status: "none" },
     },
@@ -936,6 +985,7 @@ export const peptides: PeptideData[] = [
     administration: "Topical",
     frequency: "1-2x daily",
     doseRange: "3-10% concentration",
+    benefits: ["Wrinkle reduction", "Non-invasive", "Topical use"],
     regulatoryStatus: {
       us: { status: "none" },
     },
@@ -953,6 +1003,7 @@ export const peptides: PeptideData[] = [
     administration: "Nasal/SubQ",
     frequency: "1-2x daily",
     doseRange: "250-750 mcg/dose",
+    benefits: ["Enhanced stability", "Anxiety relief", "Longer duration"],
     regulatoryStatus: {
       us: { status: "none" },
     },
@@ -970,6 +1021,7 @@ export const peptides: PeptideData[] = [
     administration: "Nasal/SubQ",
     frequency: "1-2x daily",
     doseRange: "200-600 mcg/dose",
+    benefits: ["BDNF boost", "Cognitive enhancement", "Longer-lasting"],
     regulatoryStatus: {
       us: { status: "none" },
     },
@@ -987,6 +1039,7 @@ export const peptides: PeptideData[] = [
     administration: "Topical",
     frequency: "1-2x daily",
     doseRange: "2-5% concentration",
+    benefits: ["Collagen production", "Anti-wrinkle", "Clinically validated"],
     regulatoryStatus: {
       us: { status: "none" },
     },
@@ -1004,6 +1057,7 @@ export const peptides: PeptideData[] = [
     administration: "SubQ/IM/Oral",
     frequency: "Weekly/Twice weekly",
     doseRange: "2 mg/kg SubQ or 100 mg oral 3x/day",
+    benefits: ["Joint protection", "Anti-inflammatory", "FDA-approved"],
     regulatoryStatus: {
       us: { status: "approved", label: "Approved (Elmiron)" },
     },
@@ -1022,6 +1076,7 @@ export const peptides: PeptideData[] = [
     frequency: "Daily or weekly (ER)",
     doseRange: "5-10 mcg twice daily or 2 mg weekly (ER)",
     cycleDuration: "Ongoing",
+    benefits: ["Blood sugar control", "FDA-approved", "Weight management"],
     regulatoryStatus: {
       us: { status: "approved", label: "Approved (Byetta/Bydureon)" },
       eu: { status: "approved", label: "Approved (Byetta/Bydureon)" },
