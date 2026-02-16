@@ -309,7 +309,7 @@ export const POPULAR_PROTOCOLS: PopularProtocol[] = [
     peptides: [
       { name: "BPC-157", dose_mcg: 500, frequency: "daily", timing: "AM", route: "SubQ" },
       { name: "TB-500", dose_mcg: 500, frequency: "daily", timing: "AM", route: "SubQ" },
-      { name: "GHK-Cu", dose_mcg: 200, frequency: "daily", timing: "AM", route: "SubQ" },
+      { name: "GHK-Cu", dose_mcg: 1000, frequency: "daily", timing: "AM", route: "SubQ" },
     ],
     supplements: [
       { name: "Vitamin C", dose: "1000mg", frequency: "Daily" },
@@ -444,7 +444,7 @@ export const POPULAR_PROTOCOLS: PopularProtocol[] = [
     goal: "Cellular repair, mitochondrial health & anti-aging",
     description: "Multi-targeted anti-aging approach combining skin repair, immune modulation, and metabolic optimisation peptides.",
     peptides: [
-      { name: "GHK-Cu", dose_mcg: 200, frequency: "daily", timing: "PM", route: "SubQ" },
+      { name: "GHK-Cu", dose_mcg: 1000, frequency: "daily", timing: "PM", route: "SubQ" },
       { name: "Thymosin Alpha-1", dose_mcg: 1600, frequency: "2x/week", timing: "AM", route: "SubQ" },
       { name: "MOTS-c", dose_mcg: 5000, frequency: "3x/week", timing: "AM", route: "SubQ" },
     ],
