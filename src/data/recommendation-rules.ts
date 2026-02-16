@@ -136,8 +136,8 @@ export const RECOMMENDATION_RULES: Rule[] = [
       goal: "Reduce hsCRP below 1.0 mg/L with healing support",
       triggerDescription: "hsCRP mildly elevated (1.0-2.0 mg/L)",
       peptides: [
-        { name: "BPC-157", dose_mcg: 250, frequency: "daily", timing: "AM", route: "SubQ" },
-        { name: "TB-500", dose_mcg: 2500, frequency: "2x/week", timing: "AM", route: "SubQ" },
+        { name: "BPC-157", dose_mcg: 500, frequency: "daily", timing: "AM", route: "SubQ" },
+        { name: "TB-500", dose_mcg: 500, frequency: "daily", timing: "AM", route: "SubQ" },
       ],
       supplements: [
         { name: "Omega-3 Fish Oil", dose: "1000mg EPA/DHA", frequency: "Daily" },
@@ -307,9 +307,9 @@ export const POPULAR_PROTOCOLS: PopularProtocol[] = [
     goal: "Skin rejuvenation, collagen synthesis & tissue repair",
     description: "The viral GLOW stack combines three synergistic peptides for skin, hair, and healing. Popular on social media for visible results.",
     peptides: [
-      { name: "BPC-157", dose_mcg: 250, frequency: "daily", timing: "AM", route: "SubQ" },
-      { name: "TB-500", dose_mcg: 2500, frequency: "2x/week", timing: "AM", route: "SubQ" },
-      { name: "GHK-Cu", dose_mcg: 200, frequency: "daily", timing: "PM", route: "SubQ" },
+      { name: "BPC-157", dose_mcg: 500, frequency: "daily", timing: "AM", route: "SubQ" },
+      { name: "TB-500", dose_mcg: 500, frequency: "daily", timing: "AM", route: "SubQ" },
+      { name: "GHK-Cu", dose_mcg: 200, frequency: "daily", timing: "AM", route: "SubQ" },
     ],
     supplements: [
       { name: "Vitamin C", dose: "1000mg", frequency: "Daily" },
@@ -327,8 +327,8 @@ export const POPULAR_PROTOCOLS: PopularProtocol[] = [
     goal: "Accelerated injury recovery & tissue regeneration",
     description: "The most popular healing stack. BPC-157 + TB-500 work synergistically for gut, tendon, ligament, and muscle repair.",
     peptides: [
-      { name: "BPC-157", dose_mcg: 250, frequency: "daily", timing: "AM+PM", route: "SubQ" },
-      { name: "TB-500", dose_mcg: 2500, frequency: "2x/week", timing: "AM", route: "SubQ" },
+      { name: "BPC-157", dose_mcg: 500, frequency: "daily", timing: "AM", route: "SubQ" },
+      { name: "TB-500", dose_mcg: 500, frequency: "daily", timing: "AM", route: "SubQ" },
     ],
     supplements: [
       { name: "Collagen Peptides", dose: "10g", frequency: "Daily" },
