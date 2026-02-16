@@ -144,13 +144,16 @@ const AnalyticsTab = () => {
         <div className="bg-card border border-border rounded-xl p-5">
           <h3 className="font-heading font-semibold text-foreground text-sm mb-4">Recent Signups</h3>
           <div className="space-y-2 max-h-[200px] overflow-y-auto">
+            <div className="flex items-center justify-between text-[10px] text-muted-foreground font-semibold uppercase tracking-wider pb-1 border-b border-border">
+              <span className="flex-1">Name</span>
+              <span className="flex-1">Email</span>
+              <span className="w-20 text-right">Date</span>
+            </div>
             {(stats.recent_signups || []).map((u: any, i: number) => (
               <div key={i} className="flex items-center justify-between text-xs border-b border-border/50 pb-1.5 last:border-0">
-                <div>
-                  <span className="text-foreground font-medium">{u.username || "No username"}</span>
-                  <span className="text-muted-foreground ml-2">{u.country || "—"}</span>
-                </div>
-                <span className="text-muted-foreground">{new Date(u.created_at).toLocaleDateString()}</span>
+                <span className="flex-1 text-foreground font-medium truncate">{u.username || "—"}</span>
+                <span className="flex-1 text-muted-foreground truncate">{u.email || "—"}</span>
+                <span className="w-20 text-right text-muted-foreground">{new Date(u.created_at).toLocaleDateString()}</span>
               </div>
             ))}
             {(stats.recent_signups || []).length === 0 && <p className="text-xs text-muted-foreground">No signups yet.</p>}
