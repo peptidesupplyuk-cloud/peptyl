@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Plus, Trash2, FlaskConical } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -26,7 +26,7 @@ const emptyPeptide: PeptideRow = {
   route: "SubQ",
 };
 
-const CreateProtocolForm = ({ disclaimerAccepted }: { disclaimerAccepted: boolean }) => {
+const CreateProtocolForm = ({ disclaimerAccepted, initialPeptide, onInitialPeptideConsumed }: { disclaimerAccepted: boolean; initialPeptide?: string | null; onInitialPeptideConsumed?: () => void }) => {
   const [name, setName] = useState("");
   const [goal, setGoal] = useState("");
   const [durationWeeks, setDurationWeeks] = useState(8);
@@ -36,6 +36,17 @@ const CreateProtocolForm = ({ disclaimerAccepted }: { disclaimerAccepted: boolea
   const createProtocol = useCreateProtocol();
   const { data: existingProtocols = [] } = useProtocols();
   const { toast } = useToast();
+  const formRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (initialPeptide) {
+      setPeptideRows([{ ...emptyPeptide, peptide_name: initialPeptide }]);
+      setName(`${initialPeptide} Protocol`);
+      onInitialPeptideConsumed?.();
+      // Scroll to form
+      setTimeout(() => formRef.current?.scrollIntoView({ behavior: "smooth", block: "start" }), 100);
+    }
+  }, [initialPeptide]);
 
   // Get all compounds currently in active/paused protocols
   const activeCompounds = new Set(
@@ -122,7 +133,7 @@ const CreateProtocolForm = ({ disclaimerAccepted }: { disclaimerAccepted: boolea
   const peptideNames = peptideDatabase.map((p) => p.name).sort();
 
   return (
-    <div className="bg-card rounded-2xl border border-border p-5 space-y-5">
+    <div ref={formRef} className="bg-card rounded-2xl border border-border p-5 space-y-5">
       <div className="flex items-center gap-2">
         <FlaskConical className="h-5 w-5 text-primary" />
         <h2 className="font-heading font-semibold text-foreground">Create Custom Protocol</h2>
