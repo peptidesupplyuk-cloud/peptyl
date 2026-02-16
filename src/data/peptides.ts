@@ -231,7 +231,7 @@ export const peptides: PeptideData[] = [
     icon: Heart,
     administration: "SubQ/Topical",
     frequency: "Daily",
-    doseRange: "100-600 mcg/day",
+    doseRange: "1-2 mg/day",
     cycleDuration: "8-12 weeks",
     regulatoryStatus: {
       us: { status: "approved", label: "OTC cosmetic ingredient" },
