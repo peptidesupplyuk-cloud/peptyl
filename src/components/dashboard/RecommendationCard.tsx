@@ -4,7 +4,10 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import type { Recommendation } from "@/data/recommendation-rules";
+import { checkDoseEscalation, type EscalationWarning } from "@/data/titration-rules";
+import { useProtocols } from "@/hooks/use-protocols";
 import PeptideInfoTooltip from "./PeptideInfoTooltip";
+import DoseEscalationWarning from "./DoseEscalationWarning";
 
 interface Props {
   recommendation: Recommendation;
@@ -20,6 +23,9 @@ const ROUTES = ["SubQ", "IM", "Oral", "Nasal"];
 const RecommendationCard = ({ recommendation: initialRec, onActivate, isActivating, badge }: Props) => {
   const [editing, setEditing] = useState(false);
   const [rec, setRec] = useState<Recommendation>(initialRec);
+  const [escalationWarnings, setEscalationWarnings] = useState<EscalationWarning[]>([]);
+  const [showEscalationWarning, setShowEscalationWarning] = useState(false);
+  const { data: existingProtocols = [] } = useProtocols();
 
   const updatePeptide = (index: number, field: string, value: string | number) => {
     setRec((prev) => ({
@@ -154,7 +160,29 @@ const RecommendationCard = ({ recommendation: initialRec, onActivate, isActivati
       </div>
 
       <div className="flex items-center gap-2">
-        <Button size="sm" onClick={() => { setEditing(false); onActivate(rec); }} disabled={isActivating} className="shadow-brand">
+        <Button size="sm" onClick={() => {
+          setEditing(false);
+          // Check dose escalation before activating
+          const allExistingPeptides = existingProtocols
+            .filter((p) => p.status === "active" || p.status === "paused")
+            .flatMap((p) => p.peptides.map((pp) => ({
+              peptide_name: pp.peptide_name,
+              dose_mcg: pp.dose_mcg,
+              frequency: pp.frequency,
+            })));
+          const proposed = rec.peptides.map((p) => ({
+            peptide_name: p.name,
+            dose_mcg: p.dose_mcg,
+            frequency: p.frequency,
+          }));
+          const warnings = checkDoseEscalation(proposed, allExistingPeptides);
+          if (warnings.length > 0) {
+            setEscalationWarnings(warnings);
+            setShowEscalationWarning(true);
+          } else {
+            onActivate(rec);
+          }
+        }} disabled={isActivating} className="shadow-brand">
           <Play className="h-3 w-3 mr-1" /> {isActivating ? "Starting…" : "Start Protocol"}
         </Button>
         {!editing && (
@@ -167,6 +195,16 @@ const RecommendationCard = ({ recommendation: initialRec, onActivate, isActivati
       <p className="text-[10px] text-muted-foreground italic">
         ⚠️ Educational purposes only — not medical advice. Consult your physician before starting any protocol.
       </p>
+
+      <DoseEscalationWarning
+        warnings={escalationWarnings}
+        open={showEscalationWarning}
+        onCancel={() => setShowEscalationWarning(false)}
+        onConfirm={() => {
+          setShowEscalationWarning(false);
+          onActivate(rec);
+        }}
+      />
     </div>
   );
 };

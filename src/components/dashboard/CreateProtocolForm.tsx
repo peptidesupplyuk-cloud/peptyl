@@ -7,6 +7,8 @@ import { peptides as peptideDatabase } from "@/data/peptides";
 import { useCreateProtocol, useProtocols } from "@/hooks/use-protocols";
 import { useToast } from "@/hooks/use-toast";
 import { format, addWeeks } from "date-fns";
+import { checkDoseEscalation, type EscalationWarning } from "@/data/titration-rules";
+import DoseEscalationWarning from "./DoseEscalationWarning";
 
 interface PeptideRow {
   peptide_name: string;
@@ -29,6 +31,8 @@ const CreateProtocolForm = ({ disclaimerAccepted }: { disclaimerAccepted: boolea
   const [goal, setGoal] = useState("");
   const [durationWeeks, setDurationWeeks] = useState(8);
   const [peptideRows, setPeptideRows] = useState<PeptideRow[]>([{ ...emptyPeptide }]);
+  const [escalationWarnings, setEscalationWarnings] = useState<EscalationWarning[]>([]);
+  const [showEscalationWarning, setShowEscalationWarning] = useState(false);
   const createProtocol = useCreateProtocol();
   const { data: existingProtocols = [] } = useProtocols();
   const { toast } = useToast();
@@ -74,6 +78,30 @@ const CreateProtocolForm = ({ disclaimerAccepted }: { disclaimerAccepted: boolea
       return;
     }
 
+    // Check dose escalation for flagged compounds
+    const allExistingPeptides = existingProtocols
+      .filter((p) => p.status === "active" || p.status === "paused")
+      .flatMap((p) => p.peptides.map((pp) => ({
+        peptide_name: pp.peptide_name,
+        dose_mcg: pp.dose_mcg,
+        frequency: pp.frequency,
+      })));
+
+    const warnings = checkDoseEscalation(
+      validPeptides.map((p) => ({ peptide_name: p.peptide_name, dose_mcg: p.dose_mcg, frequency: p.frequency })),
+      allExistingPeptides,
+    );
+
+    if (warnings.length > 0) {
+      setEscalationWarnings(warnings);
+      setShowEscalationWarning(true);
+      return;
+    }
+
+    await executeCreate(validPeptides);
+  };
+
+  const executeCreate = async (validPeptides: PeptideRow[]) => {
     try {
       await createProtocol.mutateAsync({
         name: name.trim(),
@@ -166,6 +194,17 @@ const CreateProtocolForm = ({ disclaimerAccepted }: { disclaimerAccepted: boolea
       <Button onClick={handleSubmit} disabled={createProtocol.isPending} className="shadow-brand">
         {createProtocol.isPending ? "Creating…" : "Create Protocol"}
       </Button>
+
+      <DoseEscalationWarning
+        warnings={escalationWarnings}
+        open={showEscalationWarning}
+        onCancel={() => setShowEscalationWarning(false)}
+        onConfirm={() => {
+          setShowEscalationWarning(false);
+          const validPeptides = peptideRows.filter((p) => p.peptide_name && p.dose_mcg > 0);
+          executeCreate(validPeptides);
+        }}
+      />
     </div>
   );
 };
