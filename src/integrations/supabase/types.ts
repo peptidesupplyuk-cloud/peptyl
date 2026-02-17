@@ -533,10 +533,13 @@ export type Database = {
       profiles: {
         Row: {
           age: number | null
+          biomarker_availability: string | null
           bp_diastolic: number | null
           bp_systolic: number | null
           country: string | null
           created_at: string
+          current_compounds: string | null
+          experience_level: string | null
           gender: string | null
           height_cm: number | null
           id: string
@@ -545,6 +548,7 @@ export type Database = {
           notify_pm_time: string
           notify_whatsapp: boolean
           research_goal: string | null
+          risk_tolerance: string | null
           updated_at: string
           user_id: string
           username: string | null
@@ -553,10 +557,13 @@ export type Database = {
         }
         Insert: {
           age?: number | null
+          biomarker_availability?: string | null
           bp_diastolic?: number | null
           bp_systolic?: number | null
           country?: string | null
           created_at?: string
+          current_compounds?: string | null
+          experience_level?: string | null
           gender?: string | null
           height_cm?: number | null
           id?: string
@@ -565,6 +572,7 @@ export type Database = {
           notify_pm_time?: string
           notify_whatsapp?: boolean
           research_goal?: string | null
+          risk_tolerance?: string | null
           updated_at?: string
           user_id: string
           username?: string | null
@@ -573,10 +581,13 @@ export type Database = {
         }
         Update: {
           age?: number | null
+          biomarker_availability?: string | null
           bp_diastolic?: number | null
           bp_systolic?: number | null
           country?: string | null
           created_at?: string
+          current_compounds?: string | null
+          experience_level?: string | null
           gender?: string | null
           height_cm?: number | null
           id?: string
@@ -585,6 +596,7 @@ export type Database = {
           notify_pm_time?: string
           notify_whatsapp?: boolean
           research_goal?: string | null
+          risk_tolerance?: string | null
           updated_at?: string
           user_id?: string
           username?: string | null

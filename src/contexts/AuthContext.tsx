@@ -5,6 +5,10 @@ import type { User, Session } from "@supabase/supabase-js";
 interface SignUpMeta {
   country?: string;
   research_goal?: string;
+  experience_level?: string;
+  current_compounds?: string;
+  biomarker_availability?: string;
+  risk_tolerance?: string;
 }
 
 interface AuthContextType {
@@ -60,6 +64,10 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       await supabase.from("profiles").update({
         country: meta.country || null,
         research_goal: meta.research_goal || null,
+        experience_level: meta.experience_level || null,
+        current_compounds: meta.current_compounds || null,
+        biomarker_availability: meta.biomarker_availability || null,
+        risk_tolerance: meta.risk_tolerance || null,
       }).eq("user_id", data.user.id);
     }
     return { error: error ? new Error(error.message) : null };

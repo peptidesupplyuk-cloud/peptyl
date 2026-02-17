@@ -577,3 +577,66 @@ export function getRecommendations(markers: Record<string, number>): Recommendat
 
   return results;
 }
+
+// --- ONBOARDING-BASED RECOMMENDATIONS ---
+
+// Maps onboarding goal to relevant popular protocol categories
+const GOAL_TO_CATEGORIES: Record<string, PopularProtocol["category"][]> = {
+  fat_loss: ["fat-loss", "performance"],
+  weight_loss: ["fat-loss", "performance"],
+  healing: ["healing", "immune"],
+  longevity: ["anti-aging", "immune"],
+  cognitive: ["cognitive", "anti-aging"],
+  muscle: ["performance", "healing"],
+  hormone: ["anti-aging", "performance"],
+  performance: ["performance", "healing"],
+  general: ["healing", "anti-aging", "cognitive"],
+};
+
+// Risk tolerance affects which protocols are shown
+const RISK_PEPTIDE_LIMIT: Record<string, number> = {
+  conservative: 2,
+  moderate: 3,
+  aggressive: 5,
+};
+
+export interface OnboardingProfile {
+  research_goal?: string | null;
+  experience_level?: string | null;
+  current_compounds?: string | null;
+  biomarker_availability?: string | null;
+  risk_tolerance?: string | null;
+}
+
+export function getOnboardingRecommendations(profile: OnboardingProfile): PopularProtocol[] {
+  const goal = profile.research_goal || "general";
+  const risk = profile.risk_tolerance || "moderate";
+  const experience = profile.experience_level || "beginner";
+  const currentCompounds = (profile.current_compounds || "").toLowerCase().split(",").map(s => s.trim()).filter(Boolean);
+
+  const categories = GOAL_TO_CATEGORIES[goal] || GOAL_TO_CATEGORIES["general"];
+  const maxPeptides = RISK_PEPTIDE_LIMIT[risk] || 3;
+
+  // Filter protocols by matching categories
+  let matched = POPULAR_PROTOCOLS.filter(p => categories.includes(p.category));
+
+  // For beginners/none, prefer simpler protocols (fewer peptides)
+  if (experience === "none" || experience === "beginner") {
+    matched = matched.filter(p => p.peptides.length <= 2);
+  }
+
+  // For conservative risk, only show protocols with ≤ maxPeptides
+  matched = matched.filter(p => p.peptides.length <= maxPeptides);
+
+  // Exclude protocols that overlap with compounds user is already taking
+  if (currentCompounds.length > 0) {
+    matched = matched.filter(p => 
+      !p.peptides.every(pep => 
+        currentCompounds.some(c => pep.name.toLowerCase().includes(c))
+      )
+    );
+  }
+
+  // Sort by popularity, take top 3
+  return matched.sort((a, b) => b.popularity - a.popularity).slice(0, 3);
+}
