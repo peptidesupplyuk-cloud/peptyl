@@ -1051,11 +1051,13 @@ export type Database = {
           date: string
           hrv: number | null
           id: string
+          raw_json: Json | null
           recovery_score: number | null
           respiratory_rate: number | null
-          rhr: number | null
-          sleep_duration: number | null
+          resting_heart_rate: number | null
+          sleep_duration_seconds: number | null
           sleep_efficiency: number | null
+          sleep_performance: number | null
           sleep_score: number | null
           strain: number | null
           user_id: string
@@ -1065,11 +1067,13 @@ export type Database = {
           date: string
           hrv?: number | null
           id?: string
+          raw_json?: Json | null
           recovery_score?: number | null
           respiratory_rate?: number | null
-          rhr?: number | null
-          sleep_duration?: number | null
+          resting_heart_rate?: number | null
+          sleep_duration_seconds?: number | null
           sleep_efficiency?: number | null
+          sleep_performance?: number | null
           sleep_score?: number | null
           strain?: number | null
           user_id: string
@@ -1079,11 +1083,13 @@ export type Database = {
           date?: string
           hrv?: number | null
           id?: string
+          raw_json?: Json | null
           recovery_score?: number | null
           respiratory_rate?: number | null
-          rhr?: number | null
-          sleep_duration?: number | null
+          resting_heart_rate?: number | null
+          sleep_duration_seconds?: number | null
           sleep_efficiency?: number | null
+          sleep_performance?: number | null
           sleep_score?: number | null
           strain?: number | null
           user_id?: string
