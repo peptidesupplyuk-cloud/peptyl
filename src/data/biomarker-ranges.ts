@@ -38,6 +38,16 @@ export const BIOMARKERS: BiomarkerDef[] = [
   { name: "Free T4", key: "free_t4", unit: "ng/dL", optimalMin: 1.0, optimalMax: 1.5, refMin: 0.8, refMax: 1.8, panel: "advanced", category: "Thyroid" },
   { name: "Fasting Insulin", key: "fasting_insulin", unit: "µIU/mL", optimalMin: 3, optimalMax: 8, refMin: 2, refMax: 20, panel: "advanced", category: "Metabolic" },
   { name: "Homocysteine", key: "homocysteine", unit: "µmol/L", optimalMin: 5, optimalMax: 9, refMin: 4, refMax: 15, panel: "advanced", category: "Inflammation" },
+
+  // Body Metrics
+  { name: "Weight", key: "weight_kg", unit: "kg", optimalMin: 55, optimalMax: 90, refMin: 40, refMax: 150, panel: "basic", category: "Body Composition" },
+  { name: "Waist Circumference", key: "waist_cm", unit: "cm", optimalMin: 60, optimalMax: 89, refMin: 50, refMax: 120, panel: "basic", category: "Body Composition" },
+  { name: "Body Fat", key: "body_fat_pct", unit: "%", optimalMin: 10, optimalMax: 22, refMin: 5, refMax: 40, panel: "basic", category: "Body Composition" },
+
+  // Cardiovascular
+  { name: "BP Systolic", key: "bp_systolic", unit: "mmHg", optimalMin: 100, optimalMax: 120, refMin: 80, refMax: 140, panel: "basic", category: "Cardiovascular" },
+  { name: "BP Diastolic", key: "bp_diastolic", unit: "mmHg", optimalMin: 60, optimalMax: 80, refMin: 50, refMax: 90, panel: "basic", category: "Cardiovascular" },
+  { name: "Resting Heart Rate", key: "resting_hr", unit: "bpm", optimalMin: 50, optimalMax: 70, refMin: 40, refMax: 100, panel: "basic", category: "Cardiovascular" },
 ];
 
 export function getMarkerStatus(marker: BiomarkerDef, value: number): MarkerStatus {
