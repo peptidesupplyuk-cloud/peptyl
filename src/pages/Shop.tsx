@@ -46,6 +46,14 @@ const CATEGORY_BENEFITS: Record<string, { fits: string[]; benefit: string }> = {
     fits: ["Cardiovascular", "Longevity"],
     benefit: "Fibrinolytic enzyme that supports healthy circulation and blood flow.",
   },
+  "L-Glutamine": {
+    fits: ["Gut Health", "Recovery"],
+    benefit: "Supports intestinal lining integrity and post-exercise muscle recovery.",
+  },
+  Zinc: {
+    fits: ["Immune", "Hormonal"],
+    benefit: "Essential mineral for immune function, testosterone support, and wound healing.",
+  },
 };
 
 const Shop = () => {
