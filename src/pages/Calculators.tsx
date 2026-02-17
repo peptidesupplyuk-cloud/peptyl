@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import ReconstitutionCalculator from "@/components/calculators/ReconstitutionCalculator";
@@ -6,6 +7,8 @@ import CycleOrderCalculator from "@/components/calculators/CycleOrderCalculator"
 import SEO from "@/components/SEO";
 
 const CalculatorsPage = () => {
+  const { t } = useTranslation();
+
   return (
     <div className="min-h-screen bg-background">
       <SEO
@@ -18,10 +21,10 @@ const CalculatorsPage = () => {
         <div className="container mx-auto px-6">
           <div className="max-w-2xl mb-12">
             <h1 className="text-3xl sm:text-4xl font-heading font-bold text-foreground mb-3">
-              Precision <span className="text-gradient-teal">Calculators</span>
+              {t("calculatorsPage.title")} <span className="text-gradient-teal">{t("calculatorsPage.titleHighlight")}</span>
             </h1>
             <p className="text-muted-foreground text-lg">
-              Essential tools for accurate peptide preparation, dosing, and cycle planning.
+              {t("calculatorsPage.subtitle")}
             </p>
           </div>
 
@@ -32,7 +35,7 @@ const CalculatorsPage = () => {
           </div>
 
           <p className="text-xs text-muted-foreground text-center mt-8 max-w-lg mx-auto">
-            These calculators are for research and educational purposes only. Always consult qualified healthcare professionals before any research protocol.
+            {t("calculatorsPage.disclaimer")}
           </p>
         </div>
       </main>

@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { Send, MessageCircle } from "lucide-react";
@@ -14,6 +15,7 @@ const contactSchema = z.object({
 const WHATSAPP_NUMBER = "447887298661";
 
 const ContactForm = () => {
+  const { t } = useTranslation();
   const [form, setForm] = useState({ name: "", email: "", message: "" });
   const [loading, setLoading] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
@@ -62,16 +64,16 @@ const ContactForm = () => {
             viewport={{ once: true }}
           >
             <h2 className="text-3xl font-heading font-bold text-foreground mb-2">
-              Get in Touch
+              {t("aboutPage.contactTitle")}
             </h2>
             <p className="text-muted-foreground mb-8">
-              Have a question? Fill out the form and we'll respond within 24 hours.
+              {t("aboutPage.contactSubtitle")}
             </p>
 
             <form onSubmit={handleSubmit} className="space-y-5">
               <div>
                 <label htmlFor="name" className="text-sm font-medium text-foreground block mb-1.5">
-                  Name
+                  {t("aboutPage.contactName")}
                 </label>
                 <input
                   id="name"
@@ -79,14 +81,14 @@ const ContactForm = () => {
                   value={form.name}
                   onChange={(e) => setForm({ ...form, name: e.target.value })}
                   className="w-full rounded-xl border border-border bg-card px-4 py-3 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring"
-                  placeholder="Your name"
+                  placeholder={t("aboutPage.contactNamePlaceholder")}
                 />
                 {errors.name && <p className="text-xs text-destructive mt-1">{errors.name}</p>}
               </div>
 
               <div>
                 <label htmlFor="email" className="text-sm font-medium text-foreground block mb-1.5">
-                  Email
+                  {t("aboutPage.contactEmail")}
                 </label>
                 <input
                   id="email"
@@ -101,7 +103,7 @@ const ContactForm = () => {
 
               <div>
                 <label htmlFor="message" className="text-sm font-medium text-foreground block mb-1.5">
-                  Message
+                  {t("aboutPage.contactMessage")}
                 </label>
                 <textarea
                   id="message"
@@ -109,7 +111,7 @@ const ContactForm = () => {
                   value={form.message}
                   onChange={(e) => setForm({ ...form, message: e.target.value })}
                   className="w-full rounded-xl border border-border bg-card px-4 py-3 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring resize-none"
-                  placeholder="How can we help?"
+                  placeholder={t("aboutPage.contactMessagePlaceholder")}
                 />
                 {errors.message && <p className="text-xs text-destructive mt-1">{errors.message}</p>}
               </div>
@@ -120,7 +122,7 @@ const ContactForm = () => {
                 className="w-full flex items-center justify-center gap-2 px-6 py-3 rounded-xl bg-primary text-primary-foreground font-medium shadow-brand hover:opacity-90 transition-opacity disabled:opacity-50"
               >
                 <Send className="h-4 w-4" />
-                {loading ? "Sending..." : "Send Message"}
+                {loading ? t("aboutPage.contactSending") : t("aboutPage.contactSend")}
               </button>
             </form>
           </motion.div>
@@ -135,10 +137,10 @@ const ContactForm = () => {
           >
             <div className="bg-card rounded-2xl border border-border p-8 space-y-6">
               <h3 className="font-heading font-semibold text-foreground text-lg">
-                Prefer instant messaging?
+                {t("aboutPage.contactWhatsappTitle")}
               </h3>
               <p className="text-sm text-muted-foreground leading-relaxed">
-                Reach us directly on WhatsApp for quick questions about peptides, orders, or anything else.
+                {t("aboutPage.contactWhatsappDesc")}
               </p>
               <a
                 href={whatsappUrl}
@@ -147,19 +149,19 @@ const ContactForm = () => {
                 className="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-[hsl(142,70%,40%)] text-white font-medium hover:opacity-90 transition-opacity"
               >
                 <MessageCircle className="h-5 w-5" />
-                Chat on WhatsApp
+                {t("aboutPage.contactWhatsappBtn")}
               </a>
 
               <div className="pt-4 border-t border-border space-y-3">
                 <div>
-                  <p className="text-xs text-muted-foreground">Email</p>
+                  <p className="text-xs text-muted-foreground">{t("aboutPage.contactEmailLabel")}</p>
                   <a href="mailto:hello@peptyl.co.uk" className="text-sm text-foreground hover:text-primary transition-colors">
                     hello@peptyl.co.uk
                   </a>
                 </div>
                 <div>
-                  <p className="text-xs text-muted-foreground">Response Time</p>
-                  <p className="text-sm text-foreground">Usually within 24 hours</p>
+                  <p className="text-xs text-muted-foreground">{t("aboutPage.contactResponseTime")}</p>
+                  <p className="text-sm text-foreground">{t("aboutPage.contactResponseTimeValue")}</p>
                 </div>
               </div>
             </div>

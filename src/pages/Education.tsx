@@ -2,18 +2,20 @@ import { useState, useMemo } from "react";
 import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
 import { Clock, ArrowRight } from "lucide-react";
+import { useTranslation } from "react-i18next";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { blogPosts } from "@/data/blog-posts";
 import SEO from "@/components/SEO";
 
-const ALL = "All";
-
 const EducationPage = () => {
+  const { t } = useTranslation();
+  const ALL = t("educationPage.all");
+
   const categories = useMemo(() => {
     const cats = Array.from(new Set(blogPosts.map((p) => p.category)));
     return [ALL, ...cats];
-  }, []);
+  }, [ALL]);
 
   const [active, setActive] = useState(ALL);
 
@@ -42,10 +44,10 @@ const EducationPage = () => {
         <div className="container mx-auto px-6">
           <div className="max-w-2xl mb-10">
             <h1 className="text-3xl sm:text-4xl font-heading font-bold text-foreground mb-3">
-              Education <span className="text-gradient-teal">Hub</span>
+              {t("educationPage.title")} <span className="text-gradient-teal">{t("educationPage.titleHighlight")}</span>
             </h1>
             <p className="text-muted-foreground text-lg">
-              Simple, science-backed guides to understanding peptides and supplements.
+              {t("educationPage.subtitle")}
             </p>
           </div>
 
@@ -93,7 +95,7 @@ const EducationPage = () => {
                       <span>{post.date}</span>
                     </div>
                     <span className="flex items-center gap-1 text-xs font-medium text-primary group-hover:gap-2 transition-all">
-                      Read <ArrowRight className="h-3 w-3" />
+                      {t("educationPage.read")} <ArrowRight className="h-3 w-3" />
                     </span>
                   </div>
                 </Link>

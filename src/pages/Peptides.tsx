@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { Search, Database, Layers } from "lucide-react";
+import { useTranslation } from "react-i18next";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import Header from "@/components/Header";
@@ -13,6 +14,7 @@ import SEO from "@/components/SEO";
 type Tab = "database" | "stacks";
 
 const PeptidesPage = () => {
+  const { t } = useTranslation();
   const [tab, setTab] = useState<Tab>("database");
   const [search, setSearch] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("All");
@@ -49,12 +51,12 @@ const PeptidesPage = () => {
         <div className="container mx-auto px-6">
           <div className="max-w-2xl mb-8">
             <h1 className="text-3xl sm:text-4xl font-heading font-bold text-foreground mb-3">
-              Peptide <span className="text-gradient-teal">Database</span>
+              {t("peptidesPage.title")} <span className="text-gradient-teal">{t("peptidesPage.titleHighlight")}</span>
             </h1>
             <p className="text-muted-foreground text-lg">
               {tab === "database"
-                ? `${filtered.length} peptides. Community-curated profiles with voting on experiences.`
-                : "Build and verify peptide stacks with compatibility checking."}
+                ? t("peptidesPage.subtitleDb", { count: filtered.length })
+                : t("peptidesPage.subtitleStacks")}
             </p>
           </div>
 
@@ -69,7 +71,7 @@ const PeptidesPage = () => {
               }`}
             >
               <Database className="h-4 w-4" />
-              Database
+              {t("peptidesPage.database")}
             </button>
             <button
               onClick={() => setTab("stacks")}
@@ -80,7 +82,7 @@ const PeptidesPage = () => {
               }`}
             >
               <Layers className="h-4 w-4" />
-              Stack Builder
+              {t("peptidesPage.stackBuilder")}
             </button>
           </div>
 
@@ -91,7 +93,7 @@ const PeptidesPage = () => {
                 <div className="relative flex-1 max-w-md">
                   <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                   <Input
-                    placeholder="Search peptides..."
+                    placeholder={t("peptidesPage.searchPlaceholder")}
                     value={search}
                     onChange={(e) => setSearch(e.target.value)}
                     className="pl-10"
@@ -128,7 +130,7 @@ const PeptidesPage = () => {
                 ))}
                 {filtered.length === 0 && (
                   <div className="text-center py-16 text-muted-foreground">
-                    <p className="text-lg">No peptides found matching your search.</p>
+                    <p className="text-lg">{t("peptidesPage.noResults")}</p>
                   </div>
                 )}
               </div>
