@@ -52,8 +52,8 @@ serve(async (req) => {
 
     const { content, content_type = "text", source_url, source_name } = await req.json();
 
-    if (!content || typeof content !== "string" || content.trim().length < 50) {
-      return new Response(JSON.stringify({ error: "Content must be at least 50 characters" }), {
+    if (!content || typeof content !== "string" || content.trim().length < 10) {
+      return new Response(JSON.stringify({ error: "Content must be at least 10 characters" }), {
         status: 400,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
