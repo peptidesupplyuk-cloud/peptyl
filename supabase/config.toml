@@ -26,3 +26,6 @@ verify_jwt = false
 
 [functions.site-help]
 verify_jwt = false
+
+[functions.whoop-sync]
+verify_jwt = false
