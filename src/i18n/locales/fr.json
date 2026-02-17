@@ -1,0 +1,126 @@
+{
+  "nav": {
+    "dashboard": "Tableau de bord",
+    "peptides": "Peptides",
+    "calculators": "Calculateurs",
+    "education": "Éducation",
+    "suppliers": "Fournisseurs",
+    "shop": "Boutique",
+    "about": "À propos",
+    "admin": "Admin",
+    "signIn": "Connexion",
+    "signOut": "Déconnexion"
+  },
+  "hero": {
+    "banner": "📱 Application Android bientôt disponible — Peptyl en déplacement !",
+    "badge": "5 questions → protocole de recherche personnalisé",
+    "title1": "Votre Protocole,",
+    "title2": "appuyé par les données.",
+    "subtitle": "Répondez à 5 questions. Obtenez un protocole adapté à vos objectifs et biomarqueurs. Suivez les résultats. Ajustez les doses. Améliorez chaque cycle.",
+    "startProtocol": "Commencer mon protocole",
+    "browseDatabase": "Parcourir la base de données",
+    "meetPeptyl": "Découvrir Peptyl",
+    "views": "vues",
+    "stats": {
+      "peptidesInDb": "Peptides dans la base",
+      "precisionCalc": "Calculateurs de précision",
+      "educationalGuides": "Guides éducatifs",
+      "communityDriven": "Communautaire",
+      "free": "Gratuit"
+    }
+  },
+  "mission": {
+    "title": "Pourquoi <1>Peptyl</1> ?",
+    "subtitle": "Nous avons créé Peptyl parce qu'il manquait un centre de recherche de confiance dans l'espace des peptides — un qui relie vos biomarqueurs à des données réelles, des informations communautaires et les outils dont les chercheurs ont vraiment besoin.",
+    "communityFirst": "Communauté d'abord",
+    "communityFirstDesc": "Construit pour la communauté de recherche mondiale — avec des données transparentes et participatives et des conseils honnêtes.",
+    "biomarkerDriven": "Guidé par les biomarqueurs",
+    "biomarkerDrivenDesc": "Téléchargez vos analyses sanguines et obtenez des informations personnalisées sur les peptides et compléments basées sur votre biologie.",
+    "researchVerified": "Vérifié par la recherche",
+    "researchVerifiedDesc": "Chaque composé dans notre base est appuyé par des recherches citées. Nous priorisons les preuves cliniques sur les anecdotes.",
+    "educationTools": "Éducation & Outils",
+    "educationToolsDesc": "Calculateurs gratuits, guides de dosage et une base de connaissances en croissance — car les chercheurs informés obtiennent de meilleurs résultats."
+  },
+  "features": {
+    "title": "Tout ce dont vous avez besoin, <1>une seule plateforme</1>",
+    "subtitle": "Outils, données et communauté — conçus pour la communauté mondiale de recherche sur les peptides.",
+    "peptideDb": "Base de données peptides",
+    "peptideDbDesc": "Profils de peptides complets, organisés par la communauté avec des expériences réelles et des votes.",
+    "precisionCalc": "Calculateurs de précision",
+    "precisionCalcDesc": "Calculateurs de reconstitution et de dosage conçus pour la précision. Ne doutez plus jamais de vos ratios.",
+    "communityFeedback": "Retours communautaires",
+    "communityFeedbackDesc": "Votez sur les expériences peptidiques. Aidez à construire le plus grand ensemble de données participatif au monde.",
+    "educationHub": "Centre éducatif",
+    "educationHubDesc": "Des guides débutants aux protocoles avancés — apprenez la science des peptides correctement.",
+    "learnMore": "En savoir plus"
+  },
+  "signup": {
+    "badge": "100% gratuit — Aucune carte de crédit requise",
+    "title": "Débloquez la plateforme complète",
+    "subtitle": "Créez un compte gratuit pour accéder aux calculateurs, votes communautaires, stacks sauvegardés et plus. Sans frais, pour toujours.",
+    "dosingCalc": "Calculateurs de dosage",
+    "dosingCalcDesc": "Outils de reconstitution et de dosage adaptés à votre type de peptide et de seringue.",
+    "communityFeedback": "Retours communautaires",
+    "communityFeedbackDesc": "Votez sur les stacks, partagez vos expériences et voyez ce que pense la communauté.",
+    "saveStacks": "Sauvegarder vos stacks",
+    "saveStacksDesc": "Créez et sauvegardez des stacks de peptides personnalisés pour un accès rapide.",
+    "aiAssistant": "Assistant IA de recherche",
+    "aiAssistantDesc": "Demandez à BioBot — dosage, stacks, effets secondaires et plus encore.",
+    "createAccount": "Créer un compte gratuit",
+    "noPayment": "Aucun paiement requis",
+    "fullAccess": "Accès complet pour toujours",
+    "researchOnly": "Recherche uniquement"
+  },
+  "howItWorks": {
+    "label": "La Méthode Peptyl",
+    "title": "Recherche avec <1>objectif</1>",
+    "track": "Suivre",
+    "trackDesc": "Enregistrez biomarqueurs, protocoles et doses en un seul endroit.",
+    "decide": "Décider",
+    "decideDesc": "Obtenez des informations basées sur les données, adaptées à votre biologie.",
+    "adjust": "Ajuster",
+    "adjustDesc": "Affinez le dosage, le timing et les stacks en fonction de résultats réels.",
+    "improve": "Améliorer",
+    "improveDesc": "Constatez des progrès mesurables à chaque cycle.",
+    "loop": "Cycle continu — chaque tour s'affine"
+  },
+  "community": {
+    "title": "<1>Intelligence</1> communautaire",
+    "subtitle": "Expériences réelles de vrais chercheurs. Votez sur les effets des peptides pour améliorer notre base.",
+    "votes": "votes",
+    "exploreDb": "Explorer toute la base"
+  },
+  "articles": {
+    "title": "Dernières <1>recherches</1>",
+    "subtitle": "Articles approfondis, guides et comparaisons rédigés pour la communauté de recherche mondiale.",
+    "read": "Lire",
+    "viewAll": "Voir tous les articles"
+  },
+  "cta": {
+    "title": "Créez votre protocole maintenant",
+    "subtitle": "Répondez à 5 questions. Obtenez un plan adapté à vos biomarqueurs et objectifs.",
+    "startProtocol": "Commencer mon protocole",
+    "browseDatabase": "Parcourir la base de données"
+  },
+  "disclaimer": {
+    "title": "Usage recherche uniquement — Pas pour la consommation humaine",
+    "text": "Tous les peptides, composés et produits référencés sur cette plateforme sont destinés strictement à la recherche in-vitro et à l'usage en laboratoire uniquement, conformément aux Human Medicines Regulations 2012 (UK). Rien sur ce site ne constitue un avis médical, un diagnostic ou un traitement. Peptyl n'approuve ni n'encourage l'utilisation de composés pour la consommation humaine. En utilisant cette plateforme, vous acceptez nos",
+    "terms": "Conditions d'utilisation"
+  },
+  "footer": {
+    "tagline": "Votre source de confiance pour l'éducation, les outils et les informations communautaires sur les peptides.",
+    "platform": "Plateforme",
+    "peptideDb": "Base de données peptides",
+    "tools": "Outils",
+    "reconCalc": "Calculateur de reconstitution",
+    "doseCalc": "Calculateur de dosage",
+    "communityFeedback": "Retours communautaires",
+    "legal": "Mentions légales",
+    "researchOnly": "Pour la recherche uniquement",
+    "aboutUs": "À propos",
+    "privacyPolicy": "Politique de confidentialité",
+    "termsOfService": "Conditions d'utilisation",
+    "copyright": "© 2026 Peptyl. Tous droits réservés.",
+    "legalDisclaimer": "Tous les produits et composés référencés sont destinés à la recherche in-vitro et à l'usage en laboratoire uniquement — pas pour la consommation humaine. Cette plateforme ne fournit pas de conseils médicaux. L'utilisation de ce site est soumise à nos Conditions d'utilisation et aux réglementations britanniques, y compris les Human Medicines Regulations 2012."
+  }
+}

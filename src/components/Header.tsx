@@ -2,21 +2,23 @@ import { useState, useEffect } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { Menu, X, ShoppingBag, LogOut, User } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
+import { useTranslation } from "react-i18next";
 import Logo from "./Logo";
 import { Button } from "./ui/button";
 import { useAuth } from "@/contexts/AuthContext";
+import LanguageToggle from "./LanguageToggle";
 
 const ADMIN_EMAIL = "peptidesupplyuk@gmail.com";
 
 const navItems = [
-  { label: "Dashboard", href: "/dashboard" },
-  { label: "Peptides", href: "/peptides" },
-  { label: "Calculators", href: "/calculators" },
-  { label: "Education", href: "/education" },
-  { label: "Suppliers", href: "/suppliers" },
-  { label: "Shop", href: "/shop" },
-  { label: "About", href: "/about" },
-  { label: "Admin", href: "/admin/dashboard", adminOnly: true },
+  { labelKey: "nav.dashboard", href: "/dashboard" },
+  { labelKey: "nav.peptides", href: "/peptides" },
+  { labelKey: "nav.calculators", href: "/calculators" },
+  { labelKey: "nav.education", href: "/education" },
+  { labelKey: "nav.suppliers", href: "/suppliers" },
+  { labelKey: "nav.shop", href: "/shop" },
+  { labelKey: "nav.about", href: "/about" },
+  { labelKey: "nav.admin", href: "/admin/dashboard", adminOnly: true },
 ];
 
 const Header = () => {
@@ -25,6 +27,7 @@ const Header = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const { user, signOut } = useAuth();
+  const { t } = useTranslation();
 
   useEffect(() => {
     const handleScroll = () => setScrolled(window.scrollY > 20);
@@ -68,12 +71,13 @@ const Header = () => {
                   : "text-primary-foreground/70 hover:text-primary-foreground hover:bg-primary-foreground/10"
               }`}
             >
-              {item.label}
+              {t(item.labelKey)}
             </Link>
           ))}
         </nav>
 
         <div className="hidden md:flex items-center gap-3">
+          <LanguageToggle className={!scrolled && isHeroPage ? "text-primary-foreground/70 hover:text-primary-foreground" : ""} />
           <Button variant="ghost" size="icon" className={!scrolled && isHeroPage ? "text-primary-foreground/70 hover:text-primary-foreground" : ""}>
             <ShoppingBag className="h-5 w-5" />
           </Button>
@@ -94,7 +98,7 @@ const Header = () => {
           ) : (
             <Link to="/auth">
               <Button variant="default" size="sm" className="shadow-brand">
-                Sign In
+                {t("nav.signIn")}
               </Button>
             </Link>
           )}
@@ -126,19 +130,22 @@ const Header = () => {
                   onClick={() => setIsOpen(false)}
                   className="px-4 py-3 rounded-lg text-sm font-medium text-foreground hover:bg-muted transition-colors"
                 >
-                  {item.label}
+                  {t(item.labelKey)}
                 </Link>
               ))}
+              <div className="px-4 py-2">
+                <LanguageToggle />
+              </div>
               {user ? (
                 <button
                   onClick={() => { handleSignOut(); setIsOpen(false); }}
                   className="px-4 py-3 rounded-lg text-sm font-medium text-foreground hover:bg-muted transition-colors text-left flex items-center gap-2"
                 >
-                  <LogOut className="h-4 w-4" /> Sign Out
+                  <LogOut className="h-4 w-4" /> {t("nav.signOut")}
                 </button>
               ) : (
                 <Link to="/auth" onClick={() => setIsOpen(false)}>
-                  <Button className="mt-3 shadow-brand w-full">Sign In</Button>
+                  <Button className="mt-3 shadow-brand w-full">{t("nav.signIn")}</Button>
                 </Link>
               )}
             </nav>
