@@ -799,6 +799,33 @@ export type Database = {
         }
         Relationships: []
       }
+      supplement_logs: {
+        Row: {
+          completed: boolean
+          created_at: string
+          date: string
+          id: string
+          item: string
+          user_id: string
+        }
+        Insert: {
+          completed?: boolean
+          created_at?: string
+          date?: string
+          id?: string
+          item: string
+          user_id: string
+        }
+        Update: {
+          completed?: boolean
+          created_at?: string
+          date?: string
+          id?: string
+          item?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       supplier_prices: {
         Row: {
           category: string
