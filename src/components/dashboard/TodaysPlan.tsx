@@ -1,12 +1,38 @@
-import { Check, SkipForward, Clock, FlaskConical } from "lucide-react";
+import { Check, SkipForward, Clock, FlaskConical, ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useTodayInjections, useUpdateInjectionStatus } from "@/hooks/use-injections";
+import { useProtocols } from "@/hooks/use-protocols";
+import { useBloodworkPanels } from "@/hooks/use-bloodwork";
+import { BIOMARKERS, getMarkerStatus } from "@/data/biomarker-ranges";
 import { format } from "date-fns";
 import DoseCalendar from "./InjectionCalendar";
 
-const TodaysPlan = () => {
+interface TodaysPlanProps {
+  onActivate?: () => void;
+}
+
+const TodaysPlan = ({ onActivate }: TodaysPlanProps) => {
   const { data: injections = [], isLoading } = useTodayInjections();
   const updateStatus = useUpdateInjectionStatus();
+  const { data: protocols = [] } = useProtocols();
+  const { data: panels = [] } = useBloodworkPanels();
+  const hasActiveProtocol = protocols.some((p) => p.status === "active");
+
+  // Detect issues from bloodwork
+  const latestPanel = panels[0];
+  const detectedIssues: string[] = [];
+  if (latestPanel) {
+    const markerMap = Object.fromEntries(latestPanel.markers.map((m) => [m.marker_name, m.value]));
+    for (const biomarker of BIOMARKERS) {
+      const val = markerMap[biomarker.key];
+      if (val !== undefined) {
+        const status = getMarkerStatus(biomarker, val);
+        if (status !== "optimal") {
+          detectedIssues.push(`${biomarker.name} (${status === "out_of_range" ? "out of range" : "suboptimal"})`);
+        }
+      }
+    }
+  }
 
   const scheduled = injections.filter((i) => i.status === "scheduled");
   const completed = injections.filter((i) => i.status === "completed");
@@ -21,12 +47,50 @@ const TodaysPlan = () => {
     );
   }
 
+  // No active protocol → activation CTA
+  if (!hasActiveProtocol) {
+    return (
+      <div className="bg-card rounded-2xl border border-border p-5 space-y-4">
+        <div className="flex items-center gap-2">
+          <FlaskConical className="h-5 w-5 text-primary" />
+          <h2 className="font-heading font-semibold text-foreground">What To Do Today</h2>
+        </div>
+        {detectedIssues.length > 0 ? (
+          <div className="space-y-3">
+            <p className="text-sm text-muted-foreground">
+              We detected {detectedIssues.length} marker{detectedIssues.length > 1 ? "s" : ""} outside optimal range:
+            </p>
+            <div className="flex flex-wrap gap-1.5">
+              {detectedIssues.slice(0, 5).map((issue) => (
+                <span key={issue} className="text-xs px-2.5 py-1 rounded-full bg-yellow-500/10 text-yellow-600 font-medium">
+                  {issue}
+                </span>
+              ))}
+              {detectedIssues.length > 5 && (
+                <span className="text-xs px-2.5 py-1 rounded-full bg-muted text-muted-foreground">
+                  +{detectedIssues.length - 5} more
+                </span>
+              )}
+            </div>
+          </div>
+        ) : (
+          <p className="text-sm text-muted-foreground">
+            Upload bloodwork or activate a protocol to get your personalised daily plan.
+          </p>
+        )}
+        <Button className="w-full shadow-brand" onClick={onActivate}>
+          Activate My Plan <ArrowRight className="h-4 w-4 ml-1" />
+        </Button>
+      </div>
+    );
+  }
+
   return (
     <div className="bg-card rounded-2xl border border-border p-5 space-y-4">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
           <FlaskConical className="h-5 w-5 text-primary" />
-          <h2 className="font-heading font-semibold text-foreground">Today's Protocol</h2>
+          <h2 className="font-heading font-semibold text-foreground">What To Do Today</h2>
         </div>
         <div className="flex items-center gap-3">
           <DoseCalendar />
@@ -35,8 +99,8 @@ const TodaysPlan = () => {
       </div>
 
       {injections.length === 0 ? (
-        <p className="text-sm text-muted-foreground py-4 text-center">
-          No doses scheduled for today. Activate a protocol to get started.
+        <p className="text-sm text-muted-foreground py-2 text-center">
+          All doses completed or none scheduled today. Check your active plan below.
         </p>
       ) : (
         <div className="space-y-2">

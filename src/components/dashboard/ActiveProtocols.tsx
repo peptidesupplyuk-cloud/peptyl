@@ -127,7 +127,7 @@ const ActiveProtocols = () => {
     <div className="bg-card rounded-2xl border border-border p-5 space-y-4">
       <div className="flex items-center gap-2">
         <FlaskConical className="h-5 w-5 text-primary" />
-        <h2 className="font-heading font-semibold text-foreground">My Protocols</h2>
+        <h2 className="font-heading font-semibold text-foreground">Your Active Plan</h2>
       </div>
 
       {active.length === 0 && paused.length === 0 && completed.length === 0 ? (

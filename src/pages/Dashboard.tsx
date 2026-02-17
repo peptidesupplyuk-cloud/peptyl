@@ -145,8 +145,8 @@ const Dashboard = () => {
   return (
     <div className="min-h-screen bg-background">
       <SEO
-        title="Dashboard — Biomarker Tracking & Protocol Management"
-        description="Track bloodwork, manage peptide protocols, and monitor daily doses with smart recommendations powered by your biomarker data."
+        title="My Plan — Daily Actions & Protocol Management"
+        description="See what to do today, track biomarkers, and manage your active peptide protocols."
         path="/dashboard"
       />
       <Header />
@@ -154,10 +154,10 @@ const Dashboard = () => {
         <div className="container mx-auto px-4 sm:px-6">
           <div className="mb-8">
             <h1 className="text-2xl sm:text-3xl font-heading font-bold text-foreground">
-              My <span className="text-gradient-teal">Dashboard</span>
+              My <span className="text-gradient-teal">Plan</span>
             </h1>
             <p className="text-muted-foreground text-sm mt-1">
-              Track bloodwork, protocols, and daily doses in one place.
+              Your daily actions, biomarkers, and active protocols.
             </p>
           </div>
 
@@ -198,13 +198,23 @@ const Dashboard = () => {
 
             {/* OVERVIEW TAB */}
             <TabsContent value="overview" className="space-y-6">
-              <OptimizationScore />
+              {/* 1. Action card — today's doses or activation CTA */}
+              <TodaysPlan onActivate={() => setActiveTab("protocols")} />
+
+              {/* 2. Protocol nudges */}
               <ProtocolNudges onNavigate={setActiveTab} />
-              <OnboardingRecommendations onNavigateToProtocols={() => setActiveTab("protocols")} />
-              <TodaysPlan />
-              <BiomarkerTrendChart panels={panels} />
+
+              {/* 3. Biomarker grid — "What We're Fixing" */}
               <BiomarkerSummary panels={panels} />
+
+              {/* 4. Active plan */}
               <ActiveProtocols />
+
+              {/* 5. Health Direction Score */}
+              <OptimizationScore />
+
+              {/* 6. Onboarding recommendations */}
+              <OnboardingRecommendations onNavigateToProtocols={() => setActiveTab("protocols")} />
 
               {recommendations.length > 0 && (
                 <div className="space-y-3">
@@ -250,9 +260,10 @@ const Dashboard = () => {
                 </div>
               )}
 
-              
-
               <CollaborativeRecommendations />
+
+              {/* 7. Biomarker Trends — bottom */}
+              <BiomarkerTrendChart panels={panels} />
 
               {panels.length === 0 && (
                 <div className="bg-card rounded-2xl border border-border p-8 text-center">
