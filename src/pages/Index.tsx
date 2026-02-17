@@ -1,5 +1,6 @@
 import { AlertTriangle } from "lucide-react";
 import { Link } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import HeroSection from "@/components/HeroSection";
@@ -12,6 +13,8 @@ import HowItWorksSection from "@/components/HowItWorksSection";
 import SEO from "@/components/SEO";
 
 const Index = () => {
+  const { t } = useTranslation();
+
   return (
     <div className="min-h-screen bg-background">
       <SEO
@@ -46,20 +49,20 @@ const Index = () => {
         <div className="absolute top-0 left-1/3 w-96 h-96 rounded-full bg-teal/5 blur-3xl" />
         <div className="container mx-auto px-6 relative z-10 text-center">
           <h2 className="text-3xl sm:text-4xl font-heading font-bold text-primary-foreground mb-4">
-            Build Your Protocol Now
+            {t("cta.title")}
           </h2>
           <p className="text-primary-foreground/60 text-lg max-w-md mx-auto mb-8">
-            Answer 5 questions. Get a compound plan matched to your biomarkers and goals.
+            {t("cta.subtitle")}
           </p>
           <div className="flex justify-center gap-4 flex-wrap">
             <a href="/peptides">
               <button className="px-8 py-3 rounded-xl bg-primary text-primary-foreground font-medium shadow-brand hover:opacity-90 transition-opacity">
-                Start My Protocol
+                {t("cta.startProtocol")}
               </button>
             </a>
             <a href="/peptides">
               <button className="px-8 py-3 rounded-xl border border-primary-foreground/20 text-primary-foreground font-medium hover:bg-primary-foreground/10 transition-colors">
-                Browse Database
+                {t("cta.browseDatabase")}
               </button>
             </a>
           </div>
@@ -72,10 +75,10 @@ const Index = () => {
           <div className="flex items-start gap-3 bg-muted/50 rounded-xl p-5 border border-border">
             <AlertTriangle className="h-5 w-5 text-destructive mt-0.5 shrink-0" />
             <div>
-              <p className="text-sm font-medium text-foreground mb-1">Research Use Only — Not for Human Consumption</p>
+              <p className="text-sm font-medium text-foreground mb-1">{t("disclaimer.title")}</p>
               <p className="text-xs text-muted-foreground leading-relaxed">
-                All peptides, compounds, and products referenced on this platform are intended strictly for in-vitro research and laboratory use only, in accordance with the Human Medicines Regulations 2012 (UK). Nothing on this website constitutes medical advice, diagnosis, or treatment. Peptyl does not endorse or encourage the use of any compound for human consumption. By using this platform you agree to our{" "}
-                <Link to="/terms-of-service" className="text-primary underline hover:text-primary/80">Terms of Service</Link>.
+                {t("disclaimer.text")}{" "}
+                <Link to="/terms-of-service" className="text-primary underline hover:text-primary/80">{t("disclaimer.terms")}</Link>.
               </p>
             </div>
           </div>

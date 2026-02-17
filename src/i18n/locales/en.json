@@ -1,0 +1,126 @@
+{
+  "nav": {
+    "dashboard": "Dashboard",
+    "peptides": "Peptides",
+    "calculators": "Calculators",
+    "education": "Education",
+    "suppliers": "Suppliers",
+    "shop": "Shop",
+    "about": "About",
+    "admin": "Admin",
+    "signIn": "Sign In",
+    "signOut": "Sign Out"
+  },
+  "hero": {
+    "banner": "📱 Android App Coming Soon — Get Peptyl on the Go!",
+    "badge": "5 questions → personalised research protocol",
+    "title1": "Your Protocol,",
+    "title2": "Backed by Data.",
+    "subtitle": "Answer 5 questions. Get a compound protocol matched to your goal and biomarkers. Track outcomes. Adjust doses. Improve every cycle.",
+    "startProtocol": "Start My Protocol",
+    "browseDatabase": "Browse Database",
+    "meetPeptyl": "Meet Peptyl",
+    "views": "views",
+    "stats": {
+      "peptidesInDb": "Peptides in Database",
+      "precisionCalc": "Precision Calculators",
+      "educationalGuides": "Educational Guides",
+      "communityDriven": "Community Driven",
+      "free": "Free"
+    }
+  },
+  "mission": {
+    "title": "Why <1>Peptyl</1>?",
+    "subtitle": "We built Peptyl because the UK peptide space lacked a single trusted research hub — one that connects your biomarkers to real data, community insights, and the tools researchers actually need.",
+    "communityFirst": "Community First",
+    "communityFirstDesc": "Built for the global research community — with transparent, crowd-sourced data and honest guidance.",
+    "biomarkerDriven": "Biomarker Driven",
+    "biomarkerDrivenDesc": "Upload your bloodwork and get personalised peptide and supplement insights based on your actual biology.",
+    "researchVerified": "Research Verified",
+    "researchVerifiedDesc": "Every compound in our database is backed by cited research. We prioritise clinical evidence over anecdote.",
+    "educationTools": "Education & Tools",
+    "educationToolsDesc": "Free calculators, dosing guides, and an ever-growing knowledge base — because informed researchers get better results."
+  },
+  "features": {
+    "title": "Everything You Need, <1>One Platform</1>",
+    "subtitle": "Tools, data, and community — designed for the global peptide research community.",
+    "peptideDb": "Peptide Database",
+    "peptideDbDesc": "Comprehensive, community-curated peptide profiles with real user experiences and voting.",
+    "precisionCalc": "Precision Calculators",
+    "precisionCalcDesc": "Reconstitution & dose calculators built for accuracy. Never second-guess your mixing ratios.",
+    "communityFeedback": "Community Feedback",
+    "communityFeedbackDesc": "Vote on peptide experiences. Help build the world's largest crowd-sourced peptide dataset.",
+    "educationHub": "Education Hub",
+    "educationHubDesc": "From beginner guides to advanced protocols — learn peptide science the right way.",
+    "learnMore": "Learn more"
+  },
+  "signup": {
+    "badge": "100% Free — No Credit Card Required",
+    "title": "Unlock the Full Platform",
+    "subtitle": "Create a free account to access calculators, community voting, saved stacks, and more. No cost, ever.",
+    "dosingCalc": "Dosing Calculators",
+    "dosingCalcDesc": "Reconstitution & dosing tools tailored to your peptide and syringe type.",
+    "communityFeedback": "Community Feedback",
+    "communityFeedbackDesc": "Vote on stacks, report experiences, and see what the community thinks.",
+    "saveStacks": "Save Custom Stacks",
+    "saveStacksDesc": "Build and save personalised peptide stacks for quick reference.",
+    "aiAssistant": "AI Research Assistant",
+    "aiAssistantDesc": "Ask BioBot anything — dosing, stacks, side effects, and more.",
+    "createAccount": "Create Free Account",
+    "noPayment": "No payment needed",
+    "fullAccess": "Full access forever",
+    "researchOnly": "Research only"
+  },
+  "howItWorks": {
+    "label": "The Peptyl Method",
+    "title": "Research With <1>Purpose</1>",
+    "track": "Track",
+    "trackDesc": "Log biomarkers, protocols, and doses in one place.",
+    "decide": "Decide",
+    "decideDesc": "Get data-driven insights tailored to your biology.",
+    "adjust": "Adjust",
+    "adjustDesc": "Fine-tune dosing, timing, and stacks based on real results.",
+    "improve": "Improve",
+    "improveDesc": "See measurable progress across every cycle.",
+    "loop": "Continuous cycle — every round gets sharper"
+  },
+  "community": {
+    "title": "Community <1>Intelligence</1>",
+    "subtitle": "Real experiences from real researchers. Vote on peptide effects to help improve our database.",
+    "votes": "votes",
+    "exploreDb": "Explore Full Database"
+  },
+  "articles": {
+    "title": "Latest <1>Research</1>",
+    "subtitle": "In-depth articles, guides, and comparisons written for the global research community.",
+    "read": "Read",
+    "viewAll": "View All Articles"
+  },
+  "cta": {
+    "title": "Build Your Protocol Now",
+    "subtitle": "Answer 5 questions. Get a compound plan matched to your biomarkers and goals.",
+    "startProtocol": "Start My Protocol",
+    "browseDatabase": "Browse Database"
+  },
+  "disclaimer": {
+    "title": "Research Use Only — Not for Human Consumption",
+    "text": "All peptides, compounds, and products referenced on this platform are intended strictly for in-vitro research and laboratory use only, in accordance with the Human Medicines Regulations 2012 (UK). Nothing on this website constitutes medical advice, diagnosis, or treatment. Peptyl does not endorse or encourage the use of any compound for human consumption. By using this platform you agree to our",
+    "terms": "Terms of Service"
+  },
+  "footer": {
+    "tagline": "Your trusted source for peptide education, tools, and community-driven insights.",
+    "platform": "Platform",
+    "peptideDb": "Peptide Database",
+    "tools": "Tools",
+    "reconCalc": "Reconstitution Calculator",
+    "doseCalc": "Dose Calculator",
+    "communityFeedback": "Community Feedback",
+    "legal": "Legal",
+    "researchOnly": "For research purposes only",
+    "aboutUs": "About Us",
+    "privacyPolicy": "Privacy Policy",
+    "termsOfService": "Terms of Service",
+    "copyright": "© 2026 Peptyl. All rights reserved.",
+    "legalDisclaimer": "All products and compounds referenced are for in-vitro research and laboratory use only — not for human consumption. This platform does not provide medical advice. Use of this site is subject to our Terms of Service and UK regulations including the Human Medicines Regulations 2012."
+  }
+}

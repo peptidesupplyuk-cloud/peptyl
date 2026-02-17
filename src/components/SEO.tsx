@@ -12,6 +12,13 @@ const SITE_NAME = "Peptyl";
 const BASE_URL = "https://peptyl.co.uk";
 const OG_IMAGE = `${BASE_URL}/og-image.png`;
 
+const HREFLANG_DOMAINS = [
+  { lang: "en", url: "https://peptyl.co.uk" },
+  { lang: "de", url: "https://peptyl.de" },
+  { lang: "fr", url: "https://peptyl.fr" },
+  { lang: "x-default", url: "https://peptyl.co.uk" },
+];
+
 const SEO = ({ title, description, path, type = "website", jsonLd }: SEOProps) => {
   const fullTitle = path === "/" ? title : `${title} | ${SITE_NAME}`;
   const url = `${BASE_URL}${path}`;
@@ -21,6 +28,11 @@ const SEO = ({ title, description, path, type = "website", jsonLd }: SEOProps) =
       <title>{fullTitle}</title>
       <meta name="description" content={description} />
       <link rel="canonical" href={url} />
+
+      {/* hreflang alternate links */}
+      {HREFLANG_DOMAINS.map(({ lang, url: domainUrl }) => (
+        <link key={lang} rel="alternate" hrefLang={lang} href={`${domainUrl}${path}`} />
+      ))}
 
       <meta property="og:title" content={fullTitle} />
       <meta property="og:description" content={description} />
