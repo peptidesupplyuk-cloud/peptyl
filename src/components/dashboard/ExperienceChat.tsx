@@ -139,14 +139,18 @@ const ExperienceChat = () => {
 
       const result = await resp.json();
       const ex = result.extracted || {};
-      const peptides: string[] = ex.peptides || [];
+      const peptides: string[] = (ex.peptides || []).filter(
+        (p: string) => p && p.trim().length > 0
+      );
 
-      // Check if any recognized peptide was found
-      const hasKnownPeptide = peptides.some(
-        (p: string) =>
-          p.toLowerCase() !== "unknown peptide" &&
-          p.toLowerCase() !== "unknown" &&
-          p.trim().length > 0
+      // Check if any recognized peptide was found — must match a known name from our data
+      const hasKnownPeptide = peptides.some((p: string) =>
+        KNOWN_NAMES.some(
+          (known) =>
+            known === p.toLowerCase() ||
+            p.toLowerCase().includes(known) ||
+            known.includes(p.toLowerCase())
+        )
       );
 
       if (!hasKnownPeptide) {
