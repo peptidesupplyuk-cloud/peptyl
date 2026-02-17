@@ -3,6 +3,7 @@ import { useNavigate, Navigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import { Mail, Lock, AlertCircle, ArrowRight, Loader2, Globe, Target } from "lucide-react";
 import { z } from "zod";
+import { useTranslation } from "react-i18next";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { lovable } from "@/integrations/lovable/index";
@@ -20,16 +21,8 @@ const COUNTRIES = [
   "India", "Brazil", "Mexico", "South Africa", "United Arab Emirates", "Other",
 ];
 
-const RESEARCH_GOALS = [
-  { value: "weight_loss", label: "Weight Loss / Metabolic Health" },
-  { value: "longevity", label: "Longevity / Anti-Ageing" },
-  { value: "healing", label: "Healing / Recovery" },
-  { value: "performance", label: "Performance / Muscle" },
-  { value: "cognitive", label: "Cognitive / Nootropic" },
-  { value: "general", label: "General Research" },
-];
-
 const Auth = () => {
+  const { t } = useTranslation();
   const [isSignUp, setIsSignUp] = useState(false);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -43,6 +36,15 @@ const Auth = () => {
   const [googleLoading, setGoogleLoading] = useState(false);
   const { signIn, signUp, user } = useAuth();
   const navigate = useNavigate();
+
+  const RESEARCH_GOALS = [
+    { value: "weight_loss", label: t("authPage.goalWeightLoss") },
+    { value: "longevity", label: t("authPage.goalLongevity") },
+    { value: "healing", label: t("authPage.goalHealing") },
+    { value: "performance", label: t("authPage.goalPerformance") },
+    { value: "cognitive", label: t("authPage.goalCognitive") },
+    { value: "general", label: t("authPage.goalGeneral") },
+  ];
 
   if (user) {
     return <Navigate to="/peptides" replace />;
@@ -64,7 +66,7 @@ const Auth = () => {
       if (error) {
         setError(error.message);
       } else {
-        setForgotSuccess("Check your email for a password reset link.");
+        setForgotSuccess(t("authPage.checkEmailReset"));
       }
     } catch {
       setError("Something went wrong. Please try again.");
@@ -108,7 +110,7 @@ const Auth = () => {
             setError(error.message);
           }
         } else {
-          setSuccess("Check your email for a confirmation link, then sign in.");
+          setSuccess(t("authPage.checkEmailConfirm"));
         }
       } else {
         const { error } = await signIn(emailResult.data, password);
@@ -160,12 +162,10 @@ const Auth = () => {
             <Logo size="md" />
           </div>
           <h1 className="text-2xl font-heading font-bold text-foreground mb-2">
-            {isSignUp ? "Create your account" : "Welcome back"}
+            {isSignUp ? t("authPage.createAccount") : t("authPage.welcomeBack")}
           </h1>
           <p className="text-sm text-muted-foreground">
-            {isSignUp
-              ? "Join the community to save stacks and share feedback."
-              : "Sign in to access the peptide database and stack builder."}
+            {isSignUp ? t("authPage.signUpSubtitle") : t("authPage.signInSubtitle")}
           </p>
         </div>
 
@@ -186,21 +186,21 @@ const Auth = () => {
                   <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/>
                   <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
                 </svg>
-                Continue with Google
+                {t("authPage.continueGoogle")}
               </>
             )}
           </button>
 
           <div className="flex items-center gap-3 mb-4">
             <div className="flex-1 h-px bg-border" />
-            <span className="text-xs text-muted-foreground">or</span>
+            <span className="text-xs text-muted-foreground">{t("authPage.or")}</span>
             <div className="flex-1 h-px bg-border" />
           </div>
 
           {forgotMode ? (
             <form onSubmit={handleForgotPassword} className="space-y-4">
               <div>
-                <label className="text-xs font-medium text-foreground mb-1.5 block">Email</label>
+                <label className="text-xs font-medium text-foreground mb-1.5 block">{t("authPage.email")}</label>
                 <div className="relative">
                   <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                   <input
@@ -232,7 +232,7 @@ const Auth = () => {
                 disabled={loading}
                 className="w-full flex items-center justify-center gap-2 py-2.5 rounded-xl bg-primary text-primary-foreground text-sm font-medium shadow-brand hover:opacity-90 transition-opacity disabled:opacity-50"
               >
-                {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : <>Send Reset Link <ArrowRight className="h-4 w-4" /></>}
+                {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : <>{t("authPage.sendResetLink")} <ArrowRight className="h-4 w-4" /></>}
               </button>
 
               <div className="text-center">
@@ -241,14 +241,14 @@ const Auth = () => {
                   onClick={() => { setForgotMode(false); setError(""); setForgotSuccess(""); }}
                   className="text-xs text-muted-foreground hover:text-primary transition-colors"
                 >
-                  Back to Sign In
+                  {t("authPage.backToSignIn")}
                 </button>
               </div>
             </form>
           ) : (
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
-              <label className="text-xs font-medium text-foreground mb-1.5 block">Email</label>
+              <label className="text-xs font-medium text-foreground mb-1.5 block">{t("authPage.email")}</label>
               <div className="relative">
                 <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                 <input
@@ -263,7 +263,7 @@ const Auth = () => {
             </div>
 
             <div>
-              <label className="text-xs font-medium text-foreground mb-1.5 block">Password</label>
+              <label className="text-xs font-medium text-foreground mb-1.5 block">{t("authPage.password")}</label>
               <div className="relative">
                 <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                 <input
@@ -280,7 +280,7 @@ const Auth = () => {
             {isSignUp && (
               <>
                 <div>
-                  <label className="text-xs font-medium text-foreground mb-1.5 block">Country <span className="text-destructive">*</span></label>
+                  <label className="text-xs font-medium text-foreground mb-1.5 block">{t("authPage.country")} <span className="text-destructive">*</span></label>
                   <div className="relative">
                     <Globe className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                     <select
@@ -288,7 +288,7 @@ const Auth = () => {
                       onChange={(e) => setCountry(e.target.value)}
                       className={selectClass}
                     >
-                      <option value="">Select your country</option>
+                      <option value="">{t("authPage.countryPlaceholder")}</option>
                       {COUNTRIES.map((c) => (
                         <option key={c} value={c}>{c}</option>
                       ))}
@@ -297,7 +297,7 @@ const Auth = () => {
                 </div>
 
                 <div>
-                  <label className="text-xs font-medium text-foreground mb-1.5 block">Research Interest <span className="text-muted-foreground">(optional)</span></label>
+                  <label className="text-xs font-medium text-foreground mb-1.5 block">{t("authPage.researchInterest")} <span className="text-muted-foreground">{t("authPage.researchInterestOptional")}</span></label>
                   <div className="relative">
                     <Target className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                     <select
@@ -305,7 +305,7 @@ const Auth = () => {
                       onChange={(e) => setResearchGoal(e.target.value)}
                       className={selectClass}
                     >
-                      <option value="">Select a research interest</option>
+                      <option value="">{t("authPage.researchInterestPlaceholder")}</option>
                       {RESEARCH_GOALS.map((g) => (
                         <option key={g.value} value={g.value}>{g.label}</option>
                       ))}
@@ -337,7 +337,7 @@ const Auth = () => {
                 <Loader2 className="h-4 w-4 animate-spin" />
               ) : (
                 <>
-                  {isSignUp ? "Create Account" : "Sign In"}
+                  {isSignUp ? t("authPage.createAccountBtn") : t("authPage.signInBtn")}
                   <ArrowRight className="h-4 w-4" />
                 </>
               )}
@@ -350,7 +350,7 @@ const Auth = () => {
                   onClick={() => { setForgotMode(true); setError(""); setSuccess(""); }}
                   className="text-xs text-muted-foreground hover:text-primary transition-colors"
                 >
-                  Forgot your password?
+                  {t("authPage.forgotPassword")}
                 </button>
               </div>
             )}
@@ -368,15 +368,13 @@ const Auth = () => {
               }}
               className="text-xs text-muted-foreground hover:text-primary transition-colors"
             >
-              {isSignUp
-                ? "Already have an account? Sign in"
-                : "Don't have an account? Sign up"}
+              {isSignUp ? t("authPage.alreadyAccount") : t("authPage.noAccount")}
             </button>
           </div>
         </div>
 
         <p className="text-center text-[11px] text-muted-foreground/60 mt-6">
-          By continuing, you agree to our terms of service and privacy policy.
+          {t("authPage.termsAgreement")}
         </p>
       </motion.div>
     </div>
