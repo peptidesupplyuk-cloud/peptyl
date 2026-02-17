@@ -2,7 +2,7 @@ import { Check, SkipForward, Clock, FlaskConical } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useTodayInjections, useUpdateInjectionStatus } from "@/hooks/use-injections";
 import { format } from "date-fns";
-import InjectionCalendar from "./InjectionCalendar";
+import DoseCalendar from "./InjectionCalendar";
 
 const TodaysPlan = () => {
   const { data: injections = [], isLoading } = useTodayInjections();
@@ -29,7 +29,7 @@ const TodaysPlan = () => {
           <h2 className="font-heading font-semibold text-foreground">Today's Protocol</h2>
         </div>
         <div className="flex items-center gap-3">
-          <InjectionCalendar />
+          <DoseCalendar />
           <span className="text-xs text-muted-foreground">{format(new Date(), "EEEE, MMM d")}</span>
         </div>
       </div>

@@ -105,7 +105,7 @@ const CycleOrderCalculator = () => {
           </div>
 
           <div>
-            <Label className="text-sm font-medium">Dose per Injection (mcg)</Label>
+            <Label className="text-sm font-medium">Dose per Administration (mcg)</Label>
             <Input type="number" value={dosePerInjection} onChange={(e) => setDosePerInjection(e.target.value)} className="mt-1.5" min="0" step="10" />
           </div>
 
@@ -187,7 +187,7 @@ const CycleOrderCalculator = () => {
                   <span className="text-sm font-medium text-foreground">{freq.label === "Custom" ? `${customDaysPerWeek}x/week` : freq.label}</span>
                 </div>
                 <div className="flex justify-between items-center py-2 border-b border-border">
-                  <span className="text-xs text-muted-foreground">Dose per injection</span>
+                  <span className="text-xs text-muted-foreground">Dose per administration</span>
                   <span className="text-sm font-medium text-foreground">{dosePerInjection} mcg</span>
                 </div>
                 <div className="flex justify-between items-center py-2 border-b border-border">

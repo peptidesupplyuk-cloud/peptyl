@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 
 const sampleFeedback = [
   { peptide: "BPC-157", votes: 1243, insight: "Significant improvement in tendon recovery reported within 2-4 weeks", sentiment: "positive", icon: ThumbsUp },
-  { peptide: "GHK-Cu", votes: 496, insight: "Mild skin breakouts or stinging at injection site in first few weeks", sentiment: "caution", icon: AlertTriangle },
+  { peptide: "GHK-Cu", votes: 496, insight: "Mild skin breakouts or stinging at administration site in first few weeks", sentiment: "caution", icon: AlertTriangle },
   { peptide: "TB-500", votes: 892, insight: "Best results observed when combined with BPC-157 for joint recovery", sentiment: "positive", icon: TrendingUp },
   { peptide: "Ipamorelin", votes: 634, insight: "Improved sleep quality noticed within the first week of use", sentiment: "positive", icon: Clock },
 ];

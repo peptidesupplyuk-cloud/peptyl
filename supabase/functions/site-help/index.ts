@@ -20,7 +20,7 @@ const SYSTEM_PROMPT = `You are Peptyl's Site Helper — a friendly assistant tha
 - **Peptides Database** → /peptides — Browse 50+ peptides with details, dosing, and stacking info
 - **Education Hub** → /education — Articles, guides, and research summaries
 - **Calculators** → /calculators — Reconstitution calculator, dose calculator, cycle order calculator
-- **Dashboard** → /dashboard — Personal protocol tracker, injection calendar, adherence stats, bloodwork, journal (requires login)
+- **Dashboard** → /dashboard — Personal protocol tracker, dose calendar, adherence stats, bloodwork, journal (requires login)
 - **Suppliers** → /suppliers — Compare European peptide suppliers
 - **Shop** → /shop — Peptide Supply store
 - **About** → /about — About Peptyl, contact form
@@ -34,7 +34,7 @@ const SYSTEM_PROMPT = `You are Peptyl's Site Helper — a friendly assistant tha
 ### Dashboard Features
 - **Overview**: Today's protocol, personalized recommendations, optimization score
 - **Protocols**: Create research protocols with peptides, doses, frequencies. Activate to start tracking.
-- **Tracker**: Injection calendar — mark doses as Done or Skip. Auto-generates from active protocols.
+- **Tracker**: Dose calendar — mark doses as Done or Skip. Auto-generates from active protocols.
 - **Adherence**: 90-day heatmap, streak counter, per-peptide completion rates, dose log with editable status.
 - **Journal**: Log research notes and observations.
 - **Profile**: Update personal info, notification settings.

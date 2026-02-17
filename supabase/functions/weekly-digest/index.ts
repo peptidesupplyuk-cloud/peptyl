@@ -9,8 +9,8 @@ const corsHeaders = {
 interface UserDigest {
   email: string;
   username: string | null;
-  injections_completed: number;
-  injections_scheduled: number;
+  doses_completed: number;
+  doses_scheduled: number;
   active_protocols: number;
   ending_soon: string[];
   new_articles: number;
@@ -69,15 +69,15 @@ Deno.serve(async (req) => {
       const email = emailMap.get(profile.user_id);
       if (!email) continue;
 
-      // Get injection stats for the week
-      const { data: injections } = await supabase
+      // Get dose stats for the week
+      const { data: doses } = await supabase
         .from("injection_logs")
         .select("status")
         .eq("user_id", profile.user_id)
         .gte("scheduled_time", weekAgoISO);
 
-      const completed = (injections ?? []).filter((i) => i.status === "completed").length;
-      const scheduled = (injections ?? []).length;
+      const completed = (doses ?? []).filter((i) => i.status === "completed").length;
+      const scheduled = (doses ?? []).length;
 
       // Get active protocols + ending soon
       const { data: protocols } = await supabase
@@ -121,7 +121,7 @@ Deno.serve(async (req) => {
   <div style="display: flex; gap: 12px; margin-bottom: 16px;">
     <div style="flex: 1; background: #171717; border: 1px solid #262626; border-radius: 12px; padding: 16px; text-align: center;">
       <div style="font-size: 28px; font-weight: bold; color: #14b8a6;">${completed}</div>
-      <div style="font-size: 11px; color: #737373; margin-top: 4px;">Injections Completed</div>
+      <div style="font-size: 11px; color: #737373; margin-top: 4px;">Doses Completed</div>
     </div>
     <div style="flex: 1; background: #171717; border: 1px solid #262626; border-radius: 12px; padding: 16px; text-align: center;">
       <div style="font-size: 28px; font-weight: bold; color: #14b8a6;">${completionRate}%</div>
@@ -167,7 +167,7 @@ Deno.serve(async (req) => {
         body: JSON.stringify({
           from: "Peptyl <digest@peptyl.co.uk>",
           to: [email],
-          subject: `Your Week: ${completed} injections, ${completionRate}% adherence`,
+          subject: `Your Week: ${completed} doses, ${completionRate}% adherence`,
           html: htmlBody,
         }),
       });
