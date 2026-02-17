@@ -23,3 +23,6 @@ verify_jwt = false
 
 [functions.send-reminders]
 verify_jwt = false
+
+[functions.site-help]
+verify_jwt = false

@@ -1,27 +1,44 @@
 import { useState, useRef, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { MessageCircle, X, Send, Loader2, Bot, User } from "lucide-react";
+import { MessageCircle, X, Send, Loader2, Bot, User, HelpCircle } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import ReactMarkdown from "react-markdown";
 
 type Msg = { role: "user" | "assistant"; content: string };
+type TabKey = "biobot" | "sitehelp";
 
-const CHAT_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/peptide-chat`;
+const BIOBOT_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/peptide-chat`;
+const SITEHELP_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/site-help`;
 
 const PeptideChat = () => {
   const [open, setOpen] = useState(false);
-  const [messages, setMessages] = useState<Msg[]>([]);
+  const [activeTab, setActiveTab] = useState<TabKey>("biobot");
+  const [biobotMessages, setBiobotMessages] = useState<Msg[]>([]);
+  const [sitehelpMessages, setSitehelpMessages] = useState<Msg[]>([]);
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
   const { t } = useTranslation();
 
-  const SUGGESTIONS = [
+  const messages = activeTab === "biobot" ? biobotMessages : sitehelpMessages;
+  const setMessages = activeTab === "biobot" ? setBiobotMessages : setSitehelpMessages;
+  const chatUrl = activeTab === "biobot" ? BIOBOT_URL : SITEHELP_URL;
+
+  const BIOBOT_SUGGESTIONS = [
     t("chat.suggestion1"),
     t("chat.suggestion2"),
     t("chat.suggestion3"),
     t("chat.suggestion4"),
   ];
+
+  const SITEHELP_SUGGESTIONS = [
+    "How do I create a protocol?",
+    "How do I sign up?",
+    "Where are the calculators?",
+    "How does the tracker work?",
+  ];
+
+  const suggestions = activeTab === "biobot" ? BIOBOT_SUGGESTIONS : SITEHELP_SUGGESTIONS;
 
   useEffect(() => {
     if (scrollRef.current) {
@@ -41,7 +58,7 @@ const PeptideChat = () => {
     let assistantSoFar = "";
 
     try {
-      const resp = await fetch(CHAT_URL, {
+      const resp = await fetch(chatUrl, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -52,7 +69,7 @@ const PeptideChat = () => {
 
       if (!resp.ok || !resp.body) {
         const errData = await resp.json().catch(() => null);
-        throw new Error(errData?.error || "Failed to connect to BioBot");
+        throw new Error(errData?.error || "Failed to connect");
       }
 
       const reader = resp.body.getReader();
@@ -87,10 +104,7 @@ const PeptideChat = () => {
           if (!line.startsWith("data: ")) continue;
 
           const jsonStr = line.slice(6).trim();
-          if (jsonStr === "[DONE]") {
-            streamDone = true;
-            break;
-          }
+          if (jsonStr === "[DONE]") { streamDone = true; break; }
 
           try {
             const parsed = JSON.parse(jsonStr);
@@ -115,24 +129,23 @@ const PeptideChat = () => {
             const parsed = JSON.parse(jsonStr);
             const content = parsed.choices?.[0]?.delta?.content as string | undefined;
             if (content) upsert(content);
-          } catch {
-            /* ignore */
-          }
+          } catch { /* ignore */ }
         }
       }
     } catch (e) {
       console.error("Chat error:", e);
       setMessages((prev) => [
         ...prev,
-        {
-          role: "assistant",
-          content: `${t("chat.errorMessage")} ${e instanceof Error ? e.message : ""}`,
-        },
+        { role: "assistant", content: `${t("chat.errorMessage")} ${e instanceof Error ? e.message : ""}` },
       ]);
     } finally {
       setIsLoading(false);
     }
   };
+
+  const greetingText = activeTab === "biobot"
+    ? t("chat.greeting")
+    : "👋 Hi! I can help you navigate Peptyl, set up your account, or explain any feature. What do you need?";
 
   return (
     <>
@@ -144,7 +157,7 @@ const PeptideChat = () => {
             exit={{ scale: 0, opacity: 0 }}
             onClick={() => setOpen(true)}
             className="fixed bottom-6 right-6 z-50 h-14 w-14 rounded-full bg-primary text-primary-foreground shadow-brand flex items-center justify-center hover:opacity-90 transition-opacity"
-            aria-label="Open BioBot chat"
+            aria-label="Open chat"
           >
             <MessageCircle className="h-6 w-6" />
           </motion.button>
@@ -160,39 +173,72 @@ const PeptideChat = () => {
             transition={{ duration: 0.2 }}
             className="fixed bottom-6 right-6 z-50 w-[380px] max-w-[calc(100vw-2rem)] h-[560px] max-h-[calc(100vh-3rem)] flex flex-col bg-card border border-border rounded-2xl shadow-xl overflow-hidden"
           >
-            <div className="flex items-center justify-between px-4 py-3 border-b border-border bg-muted/30">
+            {/* Header */}
+            <div className="flex items-center justify-between px-4 py-2 border-b border-border bg-muted/30">
               <div className="flex items-center gap-2">
-                <div className="h-8 w-8 rounded-full bg-primary/10 flex items-center justify-center">
-                  <Bot className="h-4 w-4 text-primary" />
+                <div className="h-7 w-7 rounded-full bg-primary/10 flex items-center justify-center">
+                  {activeTab === "biobot" ? (
+                    <Bot className="h-3.5 w-3.5 text-primary" />
+                  ) : (
+                    <HelpCircle className="h-3.5 w-3.5 text-primary" />
+                  )}
                 </div>
-                <div>
-                  <p className="text-sm font-heading font-semibold text-foreground">{t("chat.biobot")}</p>
-                  <p className="text-[10px] text-muted-foreground">{t("chat.aiAssistant")}</p>
-                </div>
+                <p className="text-sm font-heading font-semibold text-foreground">
+                  {activeTab === "biobot" ? t("chat.biobot") : "Site Help"}
+                </p>
               </div>
               <button
                 onClick={() => setOpen(false)}
-                className="h-8 w-8 rounded-lg flex items-center justify-center hover:bg-muted transition-colors"
+                className="h-7 w-7 rounded-lg flex items-center justify-center hover:bg-muted transition-colors"
               >
                 <X className="h-4 w-4 text-muted-foreground" />
               </button>
             </div>
 
+            {/* Tabs */}
+            <div className="flex border-b border-border">
+              <button
+                onClick={() => setActiveTab("biobot")}
+                className={`flex-1 py-2 text-xs font-medium transition-colors flex items-center justify-center gap-1.5 ${
+                  activeTab === "biobot"
+                    ? "text-primary border-b-2 border-primary bg-primary/5"
+                    : "text-muted-foreground hover:text-foreground"
+                }`}
+              >
+                <Bot className="h-3.5 w-3.5" />
+                BioBot
+              </button>
+              <button
+                onClick={() => setActiveTab("sitehelp")}
+                className={`flex-1 py-2 text-xs font-medium transition-colors flex items-center justify-center gap-1.5 ${
+                  activeTab === "sitehelp"
+                    ? "text-primary border-b-2 border-primary bg-primary/5"
+                    : "text-muted-foreground hover:text-foreground"
+                }`}
+              >
+                <HelpCircle className="h-3.5 w-3.5" />
+                Site Help
+              </button>
+            </div>
+
+            {/* Messages */}
             <div ref={scrollRef} className="flex-1 overflow-y-auto px-4 py-3 space-y-3">
               {messages.length === 0 && (
                 <div className="space-y-3">
                   <div className="flex items-start gap-2">
                     <div className="h-6 w-6 rounded-full bg-primary/10 flex-shrink-0 flex items-center justify-center mt-0.5">
-                      <Bot className="h-3 w-3 text-primary" />
+                      {activeTab === "biobot" ? (
+                        <Bot className="h-3 w-3 text-primary" />
+                      ) : (
+                        <HelpCircle className="h-3 w-3 text-primary" />
+                      )}
                     </div>
                     <div className="bg-muted/50 rounded-xl rounded-tl-sm px-3 py-2">
-                      <p className="text-sm text-foreground">
-                        {t("chat.greeting")}
-                      </p>
+                      <p className="text-sm text-foreground">{greetingText}</p>
                     </div>
                   </div>
                   <div className="flex flex-wrap gap-1.5 pl-8">
-                    {SUGGESTIONS.map((s) => (
+                    {suggestions.map((s) => (
                       <button
                         key={s}
                         onClick={() => sendMessage(s)}
@@ -206,30 +252,17 @@ const PeptideChat = () => {
               )}
 
               {messages.map((msg, i) => (
-                <div
-                  key={i}
-                  className={`flex items-start gap-2 ${msg.role === "user" ? "flex-row-reverse" : ""}`}
-                >
-                  <div
-                    className={`h-6 w-6 rounded-full flex-shrink-0 flex items-center justify-center mt-0.5 ${
-                      msg.role === "user"
-                        ? "bg-primary text-primary-foreground"
-                        : "bg-primary/10"
-                    }`}
-                  >
-                    {msg.role === "user" ? (
-                      <User className="h-3 w-3" />
-                    ) : (
-                      <Bot className="h-3 w-3 text-primary" />
-                    )}
+                <div key={i} className={`flex items-start gap-2 ${msg.role === "user" ? "flex-row-reverse" : ""}`}>
+                  <div className={`h-6 w-6 rounded-full flex-shrink-0 flex items-center justify-center mt-0.5 ${
+                    msg.role === "user" ? "bg-primary text-primary-foreground" : "bg-primary/10"
+                  }`}>
+                    {msg.role === "user" ? <User className="h-3 w-3" /> : activeTab === "biobot" ? <Bot className="h-3 w-3 text-primary" /> : <HelpCircle className="h-3 w-3 text-primary" />}
                   </div>
-                  <div
-                    className={`max-w-[85%] rounded-xl px-3 py-2 ${
-                      msg.role === "user"
-                        ? "bg-primary text-primary-foreground rounded-tr-sm"
-                        : "bg-muted/50 text-foreground rounded-tl-sm"
-                    }`}
-                  >
+                  <div className={`max-w-[85%] rounded-xl px-3 py-2 ${
+                    msg.role === "user"
+                      ? "bg-primary text-primary-foreground rounded-tr-sm"
+                      : "bg-muted/50 text-foreground rounded-tl-sm"
+                  }`}>
                     {msg.role === "assistant" ? (
                       <div className="text-sm prose prose-sm max-w-none text-foreground [&>*:first-child]:mt-0 [&>*:last-child]:mb-0 [&_p]:my-1 [&_ul]:my-1 [&_li]:my-0.5 [&_strong]:text-foreground [&_a]:text-primary [&_a]:underline [&_h1]:text-foreground [&_h2]:text-foreground [&_h3]:text-foreground [&_li]:text-foreground">
                         <ReactMarkdown>{msg.content}</ReactMarkdown>
@@ -253,17 +286,15 @@ const PeptideChat = () => {
               )}
             </div>
 
+            {/* Input */}
             <form
-              onSubmit={(e) => {
-                e.preventDefault();
-                sendMessage(input);
-              }}
+              onSubmit={(e) => { e.preventDefault(); sendMessage(input); }}
               className="px-3 py-2 border-t border-border flex items-center gap-2"
             >
               <input
                 value={input}
                 onChange={(e) => setInput(e.target.value)}
-                placeholder={t("chat.placeholder")}
+                placeholder={activeTab === "biobot" ? t("chat.placeholder") : "Ask about features, navigation..."}
                 disabled={isLoading}
                 className="flex-1 bg-background border border-border rounded-xl px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-primary/40 transition-colors disabled:opacity-50"
               />
