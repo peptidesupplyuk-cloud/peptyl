@@ -18,6 +18,16 @@ const TodaysPlan = ({ onActivate }: TodaysPlanProps) => {
   const { data: panels = [] } = useBloodworkPanels();
   const hasActiveProtocol = protocols.some((p) => p.status === "active");
 
+  // Build a map from peptide name → protocol goal for active protocols
+  const peptideGoalMap = new Map<string, string>();
+  for (const protocol of protocols.filter((p) => p.status === "active")) {
+    for (const pep of protocol.peptides) {
+      if (protocol.goal && !peptideGoalMap.has(pep.peptide_name.toLowerCase())) {
+        peptideGoalMap.set(pep.peptide_name.toLowerCase(), protocol.goal);
+      }
+    }
+  }
+
   // Detect issues from bloodwork
   const latestPanel = panels[0];
   const detectedIssues: string[] = [];
@@ -114,6 +124,9 @@ const TodaysPlan = ({ onActivate }: TodaysPlanProps) => {
                 </div>
                 <p className="text-xs text-muted-foreground ml-5.5 mt-0.5">
                   {format(new Date(inj.scheduled_time), "h:mm a")}
+                  {peptideGoalMap.get(inj.peptide_name.toLowerCase()) && (
+                    <span className="ml-1.5 text-primary/70">· {peptideGoalMap.get(inj.peptide_name.toLowerCase())}</span>
+                  )}
                 </p>
               </div>
               <div className="flex gap-1.5">
@@ -138,10 +151,17 @@ const TodaysPlan = ({ onActivate }: TodaysPlanProps) => {
 
           {completed.map((inj) => (
             <div key={inj.id} className="flex items-center justify-between bg-green-500/5 border border-green-500/10 rounded-xl px-4 py-3">
-              <div className="flex items-center gap-2">
-                <Check className="h-3.5 w-3.5 text-green-500" />
-                <span className="text-sm font-medium text-foreground line-through opacity-60">{inj.peptide_name}</span>
-                <span className="text-xs text-muted-foreground">{inj.dose_mcg}mcg</span>
+              <div>
+                <div className="flex items-center gap-2">
+                  <Check className="h-3.5 w-3.5 text-green-500" />
+                  <span className="text-sm font-medium text-foreground line-through opacity-60">{inj.peptide_name}</span>
+                  <span className="text-xs text-muted-foreground">{inj.dose_mcg}mcg</span>
+                </div>
+                {peptideGoalMap.get(inj.peptide_name.toLowerCase()) && (
+                  <p className="text-[11px] text-muted-foreground ml-5.5 mt-0.5">
+                    {peptideGoalMap.get(inj.peptide_name.toLowerCase())}
+                  </p>
+                )}
               </div>
               <span className="text-xs text-green-500">Completed</span>
             </div>
@@ -149,9 +169,16 @@ const TodaysPlan = ({ onActivate }: TodaysPlanProps) => {
 
           {skipped.map((inj) => (
             <div key={inj.id} className="flex items-center justify-between bg-muted/30 rounded-xl px-4 py-3 opacity-50">
-              <div className="flex items-center gap-2">
-                <SkipForward className="h-3.5 w-3.5 text-muted-foreground" />
-                <span className="text-sm font-medium text-foreground line-through">{inj.peptide_name}</span>
+              <div>
+                <div className="flex items-center gap-2">
+                  <SkipForward className="h-3.5 w-3.5 text-muted-foreground" />
+                  <span className="text-sm font-medium text-foreground line-through">{inj.peptide_name}</span>
+                </div>
+                {peptideGoalMap.get(inj.peptide_name.toLowerCase()) && (
+                  <p className="text-[11px] text-muted-foreground ml-5.5 mt-0.5">
+                    {peptideGoalMap.get(inj.peptide_name.toLowerCase())}
+                  </p>
+                )}
               </div>
               <span className="text-xs text-muted-foreground">Skipped</span>
             </div>

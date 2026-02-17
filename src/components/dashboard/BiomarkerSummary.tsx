@@ -2,7 +2,10 @@ import { BIOMARKERS, getMarkerStatus, getStatusColor, getStatusBg } from "@/data
 import { cn } from "@/lib/utils";
 import type { BloodworkPanel } from "@/hooks/use-bloodwork";
 
-const KEY_MARKERS = ["igf1", "total_testosterone", "hscrp", "hba1c", "vitamin_d", "fasting_glucose"];
+const KEY_MARKERS = [
+  "igf1", "total_testosterone", "hscrp", "hba1c", "vitamin_d", "fasting_glucose",
+  "weight_kg", "bp_systolic", "bp_diastolic", "resting_hr", "waist_cm", "body_fat_pct",
+];
 
 // Group display names for categories
 const CATEGORY_GROUP: Record<string, string> = {
@@ -14,6 +17,8 @@ const CATEGORY_GROUP: Record<string, string> = {
   Kidney: "Metabolic",
   Vitamins: "Recovery",
   Thyroid: "Metabolic",
+  "Body Composition": "Body Composition",
+  Cardiovascular: "Cardiovascular",
 };
 
 const BiomarkerSummary = ({ panels }: { panels: BloodworkPanel[] }) => {
