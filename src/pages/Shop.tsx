@@ -1,45 +1,56 @@
-import { useState } from "react";
-import { ExternalLink, Star, Search } from "lucide-react";
+import { ExternalLink, Star, FlaskConical, ShoppingBag } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { motion } from "framer-motion";
 import SEO from "@/components/SEO";
 import { useSupportProducts } from "@/hooks/use-support-products";
-import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
-const CATEGORY_ICONS: Record<string, string> = {
-  NAC: "🛡️",
-  "Magnesium Glycinate": "🌙",
-  "Collagen Peptides": "✨",
-  Glycine: "😴",
-  "Omega-3": "🐟",
-  Creatine: "💪",
-  Berberine: "🍃",
-  CoQ10: "⚡",
-  Nattokinase: "❤️",
+const CATEGORY_BENEFITS: Record<string, { fits: string[]; benefit: string }> = {
+  NAC: {
+    fits: ["Recovery", "Longevity"],
+    benefit: "Powerful antioxidant that supports liver detox and glutathione production.",
+  },
+  "Magnesium Glycinate": {
+    fits: ["Recovery", "Sleep"],
+    benefit: "Highly bioavailable form that promotes deep sleep and muscle relaxation.",
+  },
+  "Collagen Peptides": {
+    fits: ["Recovery", "Skin & Joints"],
+    benefit: "Supports connective tissue repair, skin elasticity, and joint health.",
+  },
+  Glycine: {
+    fits: ["Sleep", "Longevity"],
+    benefit: "Calming amino acid that improves sleep quality and supports collagen synthesis.",
+  },
+  "Omega-3": {
+    fits: ["Heart", "Anti-Inflammatory"],
+    benefit: "High EPA/DHA for cardiovascular support and systemic inflammation control.",
+  },
+  Creatine: {
+    fits: ["Performance", "Cognitive"],
+    benefit: "Boosts muscular energy output and supports brain function under stress.",
+  },
+  Berberine: {
+    fits: ["Metabolic", "GLP-1 Support"],
+    benefit: "Activates AMPK to support healthy blood sugar and metabolic function.",
+  },
+  CoQ10: {
+    fits: ["Energy", "Heart"],
+    benefit: "Essential cofactor for cellular energy production and cardiovascular health.",
+  },
+  Nattokinase: {
+    fits: ["Cardiovascular", "Longevity"],
+    benefit: "Fibrinolytic enzyme that supports healthy circulation and blood flow.",
+  },
 };
 
 const Shop = () => {
   const { t } = useTranslation();
   const { data: products, isLoading } = useSupportProducts();
-  const [activeCategory, setActiveCategory] = useState<string | null>(null);
-  const [search, setSearch] = useState("");
-
-  const categories = products
-    ? [...new Set(products.map((p) => p.category))]
-    : [];
-
-  const filtered = products?.filter((p) => {
-    const matchesCat = !activeCategory || p.category === activeCategory;
-    const matchesSearch =
-      !search ||
-      p.name.toLowerCase().includes(search.toLowerCase()) ||
-      p.category.toLowerCase().includes(search.toLowerCase());
-    return matchesCat && matchesSearch;
-  });
 
   return (
     <div className="min-h-screen bg-background">
@@ -55,114 +66,130 @@ const Shop = () => {
           {/* Header */}
           <div className="mb-8">
             <h1 className="text-2xl sm:text-3xl font-heading font-bold text-foreground">
-              Support <span className="text-gradient-teal">Layer</span>
+              Shop
             </h1>
             <p className="text-muted-foreground text-sm mt-1">
-              Curated supplements that complement your protocols. We earn a small commission on purchases — it helps keep Peptyl free.
+              Curated products and supplements to support your protocols.
             </p>
           </div>
 
-          {/* Search */}
-          <div className="relative mb-6 max-w-md">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-            <Input
-              placeholder="Search supplements…"
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              className="pl-9"
-            />
-          </div>
+          <Tabs defaultValue="support" className="w-full">
+            <TabsList className="mb-6">
+              <TabsTrigger value="coming-soon" className="gap-2">
+                <ShoppingBag className="h-4 w-4" />
+                Coming Soon
+              </TabsTrigger>
+              <TabsTrigger value="support" className="gap-2">
+                <FlaskConical className="h-4 w-4" />
+                Support Layer
+              </TabsTrigger>
+            </TabsList>
 
-          {/* Category pills */}
-          <div className="flex flex-wrap gap-2 mb-8">
-            <button
-              onClick={() => setActiveCategory(null)}
-              className={`text-xs font-medium px-3 py-1.5 rounded-full border transition-colors ${
-                !activeCategory
-                  ? "bg-primary text-primary-foreground border-primary"
-                  : "bg-card text-muted-foreground border-border hover:border-primary/40"
-              }`}
-            >
-              All
-            </button>
-            {categories.map((cat) => (
-              <button
-                key={cat}
-                onClick={() => setActiveCategory(activeCategory === cat ? null : cat)}
-                className={`text-xs font-medium px-3 py-1.5 rounded-full border transition-colors ${
-                  activeCategory === cat
-                    ? "bg-primary text-primary-foreground border-primary"
-                    : "bg-card text-muted-foreground border-border hover:border-primary/40"
-                }`}
-              >
-                {CATEGORY_ICONS[cat] || "💊"} {cat}
-              </button>
-            ))}
-          </div>
+            {/* Coming Soon Tab */}
+            <TabsContent value="coming-soon">
+              <div className="text-center py-20 space-y-3">
+                <ShoppingBag className="h-10 w-10 text-muted-foreground mx-auto" />
+                <h2 className="text-lg font-heading font-semibold text-foreground">
+                  Peptyl Store — Coming Soon
+                </h2>
+                <p className="text-sm text-muted-foreground max-w-md mx-auto">
+                  Supplies, kits, and research accessories curated for the community. Stay tuned.
+                </p>
+              </div>
+            </TabsContent>
 
-          {/* Product grid */}
-          {isLoading ? (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-              {Array.from({ length: 6 }).map((_, i) => (
-                <Skeleton key={i} className="h-48 rounded-2xl" />
-              ))}
-            </div>
-          ) : filtered && filtered.length > 0 ? (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-              {filtered.map((product, i) => (
-                <motion.a
-                  key={product.id}
-                  href={product.affiliate_url}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  initial={{ opacity: 0, y: 12 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: i * 0.04 }}
-                  className="group bg-card rounded-2xl border border-border p-5 hover:border-primary/30 transition-all hover:shadow-md"
-                >
-                  <div className="flex items-start justify-between mb-3">
-                    <Badge variant="secondary" className="text-[10px]">
-                      {CATEGORY_ICONS[product.category] || "💊"} {product.category}
-                    </Badge>
-                    <ExternalLink className="h-3.5 w-3.5 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity" />
-                  </div>
+            {/* Support Layer Tab */}
+            <TabsContent value="support">
+              <p className="text-sm text-muted-foreground mb-6">
+                Supplements that complement your research protocols. We earn a small commission on purchases — it helps keep Peptyl free.
+              </p>
 
-                  <h3 className="font-heading font-semibold text-foreground text-sm leading-snug mb-2">
-                    {product.name}
-                  </h3>
+              {isLoading ? (
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                  {Array.from({ length: 6 }).map((_, i) => (
+                    <Skeleton key={i} className="h-56 rounded-2xl" />
+                  ))}
+                </div>
+              ) : products && products.length > 0 ? (
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                  {products.map((product, i) => {
+                    const meta = CATEGORY_BENEFITS[product.category];
+                    return (
+                      <motion.a
+                        key={product.id}
+                        href={product.affiliate_url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        initial={{ opacity: 0, y: 12 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ delay: i * 0.04 }}
+                        className="group bg-card rounded-2xl border border-border p-5 hover:border-primary/30 transition-all hover:shadow-md flex flex-col"
+                      >
+                        {/* Category + link icon */}
+                        <div className="flex items-start justify-between mb-2">
+                          <span className="text-xs font-medium text-muted-foreground">
+                            {product.category}
+                          </span>
+                          <ExternalLink className="h-3.5 w-3.5 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity" />
+                        </div>
 
-                  {product.description && (
-                    <p className="text-xs text-muted-foreground mb-3 line-clamp-2">
-                      {product.description}
-                    </p>
-                  )}
+                        {/* Name */}
+                        <h3 className="font-heading font-semibold text-foreground text-sm leading-snug mb-2">
+                          {product.name}
+                        </h3>
 
-                  <div className="flex items-center gap-3 mt-auto">
-                    {product.rating && (
-                      <span className="flex items-center gap-1 text-xs text-foreground">
-                        <Star className="h-3 w-3 fill-yellow-500 text-yellow-500" />
-                        {product.rating}
-                      </span>
-                    )}
-                    {product.review_count && (
-                      <span className="text-[10px] text-muted-foreground">
-                        {product.review_count} reviews
-                      </span>
-                    )}
-                  </div>
-                </motion.a>
-              ))}
-            </div>
-          ) : (
-            <div className="text-center py-16">
-              <p className="text-muted-foreground">No products match your search.</p>
-            </div>
-          )}
+                        {/* Benefit */}
+                        {meta?.benefit && (
+                          <p className="text-xs text-muted-foreground mb-3 leading-relaxed">
+                            {meta.benefit}
+                          </p>
+                        )}
 
-          {/* Disclaimer */}
-          <div className="mt-10 bg-muted/30 rounded-2xl border border-border p-5 text-xs text-muted-foreground leading-relaxed">
-            <strong className="text-foreground">Disclosure:</strong> Links on this page are affiliate links. Peptyl earns a small commission at no extra cost to you. All products are independently selected based on community feedback and research relevance. This is not medical advice.
-          </div>
+                        {/* Fits badges */}
+                        {meta?.fits && meta.fits.length > 0 && (
+                          <div className="flex flex-wrap gap-1.5 mb-3">
+                            {meta.fits.map((fit) => (
+                              <Badge
+                                key={fit}
+                                variant="secondary"
+                                className="text-[10px] font-medium"
+                              >
+                                {fit}
+                              </Badge>
+                            ))}
+                          </div>
+                        )}
+
+                        {/* Rating */}
+                        <div className="flex items-center gap-3 mt-auto pt-2 border-t border-border">
+                          {product.rating && (
+                            <span className="flex items-center gap-1 text-xs text-foreground">
+                              <Star className="h-3 w-3 fill-yellow-500 text-yellow-500" />
+                              {product.rating}
+                            </span>
+                          )}
+                          {product.review_count && (
+                            <span className="text-[10px] text-muted-foreground">
+                              {product.review_count} reviews
+                            </span>
+                          )}
+                        </div>
+                      </motion.a>
+                    );
+                  })}
+                </div>
+              ) : (
+                <div className="text-center py-16">
+                  <p className="text-muted-foreground">No products available yet.</p>
+                </div>
+              )}
+
+              {/* Disclaimer */}
+              <div className="mt-10 bg-muted/30 rounded-2xl border border-border p-5 text-xs text-muted-foreground leading-relaxed">
+                <strong className="text-foreground">Disclosure:</strong> Links on this page are affiliate links. Peptyl earns a small commission at no extra cost to you. All products are independently selected based on community feedback and research relevance. This is not medical advice.
+              </div>
+            </TabsContent>
+          </Tabs>
         </div>
       </main>
 
