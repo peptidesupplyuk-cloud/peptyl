@@ -129,15 +129,25 @@ const TodaysPlan = ({ onActivate }: TodaysPlanProps) => {
         </div>
       </div>
 
-      {/* Active goal summary */}
-      {activeGoals.length > 0 && (
+      {/* Active goal summary + detected issues */}
+      {(activeGoals.length > 0 || detectedIssues.length > 0) && (
         <div className="flex flex-wrap items-center gap-1.5">
-          <Target className="h-3.5 w-3.5 text-primary/60" />
+          {activeGoals.length > 0 && <Target className="h-3.5 w-3.5 text-primary/60" />}
           {activeGoals.map((goal) => (
             <span key={goal} className="text-xs px-2.5 py-1 rounded-full bg-primary/10 text-primary font-medium">
               {goal}
             </span>
           ))}
+          {detectedIssues.slice(0, 3).map((issue) => (
+            <span key={issue} className="text-xs px-2.5 py-1 rounded-full bg-accent text-accent-foreground font-medium">
+              {issue}
+            </span>
+          ))}
+          {detectedIssues.length > 3 && (
+            <span className="text-xs px-2.5 py-1 rounded-full bg-muted text-muted-foreground">
+              +{detectedIssues.length - 3} more
+            </span>
+          )}
         </div>
       )}
 
