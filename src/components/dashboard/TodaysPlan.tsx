@@ -1,10 +1,11 @@
-import { Check, SkipForward, Clock, FlaskConical, ArrowRight, Target } from "lucide-react";
+import { Check, SkipForward, Clock, FlaskConical, ArrowRight, Target, Pill, CheckCheck } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useTodayInjections, useUpdateInjectionStatus } from "@/hooks/use-injections";
-import { useProtocols } from "@/hooks/use-protocols";
+import { useProtocols, type ProtocolSupplement } from "@/hooks/use-protocols";
 import { useBloodworkPanels } from "@/hooks/use-bloodwork";
 import { BIOMARKERS, getMarkerStatus } from "@/data/biomarker-ranges";
 import { format } from "date-fns";
+import { useState } from "react";
 import DoseCalendar from "./InjectionCalendar";
 
 interface TodaysPlanProps {
@@ -22,8 +23,15 @@ function formatGoalLabel(goal: string): string {
   if (lower.includes("sleep") || lower.includes("cognitive") || lower.includes("brain") || lower.includes("neuro")) return "Cognitive & Sleep";
   if (lower.includes("immune") || lower.includes("gut")) return "Immune & Gut Health";
   if (lower.includes("inflammation")) return "Inflammation Control";
-  // Fallback: capitalize the goal as-is
   return goal.charAt(0).toUpperCase() + goal.slice(1);
+}
+
+interface SupplementItem {
+  name: string;
+  dose: string;
+  frequency: string;
+  protocolName: string;
+  goal: string;
 }
 
 const TodaysPlan = ({ onActivate }: TodaysPlanProps) => {
@@ -32,6 +40,10 @@ const TodaysPlan = ({ onActivate }: TodaysPlanProps) => {
   const { data: protocols = [] } = useProtocols();
   const { data: panels = [] } = useBloodworkPanels();
   const hasActiveProtocol = protocols.some((p) => p.status === "active");
+
+  // Track completed supplements locally (no DB table for supplements yet)
+  const [completedSupplements, setCompletedSupplements] = useState<Set<string>>(new Set());
+  const [skippedSupplements, setSkippedSupplements] = useState<Set<string>>(new Set());
 
   // Build a map from peptide name → formatted protocol goal for active protocols
   const peptideGoalMap = new Map<string, string>();
@@ -42,6 +54,40 @@ const TodaysPlan = ({ onActivate }: TodaysPlanProps) => {
       }
     }
   }
+
+  // Collect supplements from active protocols
+  const supplements: SupplementItem[] = [];
+  for (const protocol of protocols.filter((p) => p.status === "active")) {
+    if (protocol.supplements && protocol.supplements.length > 0) {
+      for (const supp of protocol.supplements) {
+        // Avoid duplicates by name
+        if (!supplements.find((s) => s.name === supp.name)) {
+          supplements.push({
+            name: supp.name,
+            dose: supp.dose,
+            frequency: supp.frequency,
+            protocolName: protocol.name,
+            goal: protocol.goal ? formatGoalLabel(protocol.goal) : "",
+          });
+        }
+      }
+    }
+  }
+
+  // Filter supplements that are due today based on frequency
+  const todaySupplements = supplements.filter((s) => {
+    const freq = s.frequency.toLowerCase();
+    if (freq.includes("daily") || freq.includes("day")) return true;
+    if (freq.includes("2x") || freq.includes("twice")) return true;
+    // Default: show it
+    return true;
+  });
+
+  const pendingSupplements = todaySupplements.filter(
+    (s) => !completedSupplements.has(s.name) && !skippedSupplements.has(s.name)
+  );
+  const doneSupplements = todaySupplements.filter((s) => completedSupplements.has(s.name));
+  const skippedSuppList = todaySupplements.filter((s) => skippedSupplements.has(s.name));
 
   // Collect unique active goals for summary display
   const activeGoals = [...new Set(
@@ -69,6 +115,25 @@ const TodaysPlan = ({ onActivate }: TodaysPlanProps) => {
   const scheduled = injections.filter((i) => i.status === "scheduled");
   const completed = injections.filter((i) => i.status === "completed");
   const skipped = injections.filter((i) => i.status === "skipped");
+
+  // Total counts for progress
+  const totalItems = injections.length + todaySupplements.length;
+  const completedItems = completed.length + doneSupplements.length;
+  const remainingScheduled = scheduled.length + pendingSupplements.length;
+
+  // Complete All handler
+  const handleCompleteAll = () => {
+    // Complete all scheduled injections
+    for (const inj of scheduled) {
+      updateStatus.mutate({ id: inj.id, status: "completed" });
+    }
+    // Complete all pending supplements
+    setCompletedSupplements((prev) => {
+      const next = new Set(prev);
+      for (const s of pendingSupplements) next.add(s.name);
+      return next;
+    });
+  };
 
   if (isLoading) {
     return (
@@ -116,6 +181,8 @@ const TodaysPlan = ({ onActivate }: TodaysPlanProps) => {
     );
   }
 
+  const hasAnyItems = injections.length > 0 || todaySupplements.length > 0;
+
   return (
     <div className="bg-card rounded-2xl border border-border p-5 space-y-4">
       <div className="flex items-center justify-between">
@@ -151,12 +218,26 @@ const TodaysPlan = ({ onActivate }: TodaysPlanProps) => {
         </div>
       )}
 
-      {injections.length === 0 ? (
+      {/* Complete All button */}
+      {remainingScheduled > 1 && (
+        <Button
+          variant="outline"
+          size="sm"
+          className="w-full text-xs h-8 border-primary/20 text-primary hover:bg-primary/5"
+          onClick={handleCompleteAll}
+        >
+          <CheckCheck className="h-3.5 w-3.5 mr-1.5" />
+          Complete All ({remainingScheduled} remaining)
+        </Button>
+      )}
+
+      {!hasAnyItems ? (
         <p className="text-sm text-muted-foreground py-2 text-center">
           All doses completed or none scheduled today. Check your active plan below.
         </p>
       ) : (
         <div className="space-y-2">
+          {/* Scheduled peptide doses */}
           {scheduled.map((inj) => {
             const goal = peptideGoalMap.get(inj.peptide_name.toLowerCase());
             return (
@@ -195,13 +276,50 @@ const TodaysPlan = ({ onActivate }: TodaysPlanProps) => {
             );
           })}
 
+          {/* Pending supplements */}
+          {pendingSupplements.map((supp) => (
+            <div key={`supp-${supp.name}`} className="flex items-center justify-between bg-muted/50 rounded-xl px-4 py-3">
+              <div>
+                <div className="flex items-center gap-2">
+                  <Pill className="h-3.5 w-3.5 text-accent-foreground/70" />
+                  <span className="text-sm font-medium text-foreground">{supp.name}</span>
+                  <span className="text-xs text-muted-foreground">{supp.dose}</span>
+                </div>
+                <p className="text-xs text-muted-foreground ml-5.5 mt-0.5">
+                  {supp.frequency}
+                  {supp.goal && (
+                    <span className="ml-1.5 text-primary/70">· {supp.goal}</span>
+                  )}
+                </p>
+              </div>
+              <div className="flex gap-1.5">
+                <Button
+                  size="sm"
+                  variant="outline"
+                  className="h-8 text-xs"
+                  onClick={() => setSkippedSupplements((prev) => new Set(prev).add(supp.name))}
+                >
+                  <SkipForward className="h-3 w-3 mr-1" /> Skip
+                </Button>
+                <Button
+                  size="sm"
+                  className="h-8 text-xs shadow-brand"
+                  onClick={() => setCompletedSupplements((prev) => new Set(prev).add(supp.name))}
+                >
+                  <Check className="h-3 w-3 mr-1" /> Done
+                </Button>
+              </div>
+            </div>
+          ))}
+
+          {/* Completed peptide doses */}
           {completed.map((inj) => {
             const goal = peptideGoalMap.get(inj.peptide_name.toLowerCase());
             return (
-              <div key={inj.id} className="flex items-center justify-between bg-green-500/5 border border-green-500/10 rounded-xl px-4 py-3">
+              <div key={inj.id} className="flex items-center justify-between bg-primary/5 border border-primary/10 rounded-xl px-4 py-3">
                 <div>
                   <div className="flex items-center gap-2">
-                    <Check className="h-3.5 w-3.5 text-green-500" />
+                    <Check className="h-3.5 w-3.5 text-primary" />
                     <span className="text-sm font-medium text-foreground line-through opacity-60">{inj.peptide_name}</span>
                     <span className="text-xs text-muted-foreground">{inj.dose_mcg}mcg</span>
                   </div>
@@ -209,11 +327,29 @@ const TodaysPlan = ({ onActivate }: TodaysPlanProps) => {
                     <p className="text-[11px] text-muted-foreground ml-5.5 mt-0.5">{goal}</p>
                   )}
                 </div>
-                <span className="text-xs text-green-500">Completed</span>
+                <span className="text-xs text-primary">Completed</span>
               </div>
             );
           })}
 
+          {/* Completed supplements */}
+          {doneSupplements.map((supp) => (
+            <div key={`supp-done-${supp.name}`} className="flex items-center justify-between bg-primary/5 border border-primary/10 rounded-xl px-4 py-3">
+              <div>
+                <div className="flex items-center gap-2">
+                  <Check className="h-3.5 w-3.5 text-primary" />
+                  <span className="text-sm font-medium text-foreground line-through opacity-60">{supp.name}</span>
+                  <span className="text-xs text-muted-foreground">{supp.dose}</span>
+                </div>
+                {supp.goal && (
+                  <p className="text-[11px] text-muted-foreground ml-5.5 mt-0.5">{supp.goal}</p>
+                )}
+              </div>
+              <span className="text-xs text-primary">Completed</span>
+            </div>
+          ))}
+
+          {/* Skipped peptide doses */}
           {skipped.map((inj) => {
             const goal = peptideGoalMap.get(inj.peptide_name.toLowerCase());
             return (
@@ -231,13 +367,26 @@ const TodaysPlan = ({ onActivate }: TodaysPlanProps) => {
               </div>
             );
           })}
+
+          {/* Skipped supplements */}
+          {skippedSuppList.map((supp) => (
+            <div key={`supp-skip-${supp.name}`} className="flex items-center justify-between bg-muted/30 rounded-xl px-4 py-3 opacity-50">
+              <div>
+                <div className="flex items-center gap-2">
+                  <SkipForward className="h-3.5 w-3.5 text-muted-foreground" />
+                  <span className="text-sm font-medium text-foreground line-through">{supp.name}</span>
+                </div>
+              </div>
+              <span className="text-xs text-muted-foreground">Skipped</span>
+            </div>
+          ))}
         </div>
       )}
 
-      {injections.length > 0 && (
+      {totalItems > 0 && (
         <div className="flex items-center gap-4 text-xs text-muted-foreground pt-1">
-          <span>{completed.length}/{injections.length} completed</span>
-          {scheduled.length > 0 && <span>{scheduled.length} remaining</span>}
+          <span>{completedItems}/{totalItems} completed</span>
+          {remainingScheduled > 0 && <span>{remainingScheduled} remaining</span>}
         </div>
       )}
     </div>

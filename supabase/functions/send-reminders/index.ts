@@ -13,6 +13,13 @@ interface PeptideReminder {
   protocol_name: string;
 }
 
+interface SupplementReminder {
+  name: string;
+  dose: string;
+  frequency: string;
+  protocol_name: string;
+}
+
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
@@ -43,7 +50,7 @@ Deno.serve(async (req) => {
 
     const { data: protocols, error: protErr } = await supabase
       .from("protocols")
-      .select("id, user_id, name, status")
+      .select("id, user_id, name, status, supplements")
       .eq("status", "active");
 
     if (protErr) throw protErr;
@@ -60,7 +67,7 @@ Deno.serve(async (req) => {
       userProtocols[p.user_id].push(p);
     }
 
-    const results: Array<{ user_id: string; email_sent: boolean; whatsapp_sent: boolean; peptides_count: number }> = [];
+    const results: Array<{ user_id: string; email_sent: boolean; whatsapp_sent: boolean; peptides_count: number; supplements_count: number }> = [];
 
     for (const [userId, userProts] of Object.entries(userProtocols)) {
       const { data: profile } = await supabase
@@ -76,6 +83,8 @@ Deno.serve(async (req) => {
       if (!authUser?.user?.email && profile.notify_email) continue;
 
       const reminders: PeptideReminder[] = [];
+      const supplementReminders: SupplementReminder[] = [];
+      const seenSupplements = new Set<string>();
 
       for (const prot of userProts) {
         const { data: peptides } = await supabase
@@ -83,21 +92,36 @@ Deno.serve(async (req) => {
           .select("peptide_name, dose_mcg, timing, frequency")
           .eq("protocol_id", prot.id);
 
-        if (!peptides) continue;
+        if (peptides) {
+          for (const pep of peptides) {
+            const timing = (pep.timing || "AM").toUpperCase();
+            const matchesWindow =
+              (window === "AM" && timing.includes("AM")) ||
+              (window === "PM" && (timing.includes("PM") || timing.includes("BED")));
 
-        for (const pep of peptides) {
-          const timing = (pep.timing || "AM").toUpperCase();
-          const matchesWindow =
-            (window === "AM" && timing.includes("AM")) ||
-            (window === "PM" && (timing.includes("PM") || timing.includes("BED")));
+            if (matchesWindow) {
+              const isDue = checkFrequencyDue(pep.frequency, today);
+              if (isDue) {
+                reminders.push({
+                  peptide_name: pep.peptide_name,
+                  dose_mcg: pep.dose_mcg,
+                  timing: pep.timing || "AM",
+                  protocol_name: prot.name,
+                });
+              }
+            }
+          }
+        }
 
-          if (matchesWindow) {
-            const isDue = checkFrequencyDue(pep.frequency, today);
-            if (isDue) {
-              reminders.push({
-                peptide_name: pep.peptide_name,
-                dose_mcg: pep.dose_mcg,
-                timing: pep.timing || "AM",
+        // Collect supplements (show in AM window only to avoid double reminders)
+        if (window === "AM" && Array.isArray(prot.supplements)) {
+          for (const supp of prot.supplements as Array<{ name: string; dose: string; frequency: string }>) {
+            if (supp.name && !seenSupplements.has(supp.name)) {
+              seenSupplements.add(supp.name);
+              supplementReminders.push({
+                name: supp.name,
+                dose: supp.dose || "",
+                frequency: supp.frequency || "daily",
                 protocol_name: prot.name,
               });
             }
@@ -105,14 +129,15 @@ Deno.serve(async (req) => {
         }
       }
 
-      if (reminders.length === 0) continue;
+      if (reminders.length === 0 && supplementReminders.length === 0) continue;
 
       let emailSent = false;
       let whatsappSent = false;
 
       // Send email via Resend
       if (profile.notify_email && resendApiKey && authUser?.user?.email) {
-        const emailHtml = buildReminderEmail(reminders, window, today);
+        const emailHtml = buildReminderEmail(reminders, supplementReminders, window, today);
+        const totalCount = reminders.length + supplementReminders.length;
         const emailRes = await fetch("https://api.resend.com/emails", {
           method: "POST",
           headers: {
@@ -122,7 +147,7 @@ Deno.serve(async (req) => {
           body: JSON.stringify({
             from: "Peptyl <reminders@peptyl.co.uk>",
             to: [authUser.user.email],
-            subject: `⏰ ${window} Reminder: ${reminders.length} peptide${reminders.length > 1 ? "s" : ""} due`,
+            subject: `⏰ ${window} Reminder: ${totalCount} item${totalCount > 1 ? "s" : ""} due`,
             html: emailHtml,
           }),
         });
@@ -132,7 +157,7 @@ Deno.serve(async (req) => {
 
       // Send WhatsApp via Meta Cloud API
       if (profile.notify_whatsapp && whatsappToken && whatsappPhoneNumberId && profile.whatsapp_number) {
-        const waMessage = buildWhatsAppMessage(reminders, window);
+        const waMessage = buildWhatsAppMessage(reminders, supplementReminders, window);
         try {
           const waRes = await fetch(
             `https://graph.facebook.com/v21.0/${whatsappPhoneNumberId}/messages`,
@@ -163,6 +188,7 @@ Deno.serve(async (req) => {
         email_sent: emailSent,
         whatsapp_sent: whatsappSent,
         peptides_count: reminders.length,
+        supplements_count: supplementReminders.length,
       });
     }
 
@@ -192,16 +218,27 @@ function checkFrequencyDue(frequency: string, todayStr: string): boolean {
   }
 }
 
-function buildWhatsAppMessage(reminders: PeptideReminder[], window: string): string {
+function buildWhatsAppMessage(reminders: PeptideReminder[], supplements: SupplementReminder[], window: string): string {
+  const totalCount = reminders.length + supplements.length;
   const lines = [
     `🧬 *Your Daily reminder from BioBot*`,
     `━━━━━━━━━━━━━━━━`,
-    `⏰ *${window} Window* — ${reminders.length} peptide${reminders.length > 1 ? "s" : ""} due\n`,
+    `⏰ *${window} Window* — ${totalCount} item${totalCount > 1 ? "s" : ""} due\n`,
   ];
 
-  for (const r of reminders) {
-    lines.push(`💉 *${r.peptide_name}* — ${r.dose_mcg} mcg`);
-    lines.push(`   📋 Protocol: ${r.protocol_name}\n`);
+  if (reminders.length > 0) {
+    for (const r of reminders) {
+      lines.push(`💉 *${r.peptide_name}* — ${r.dose_mcg} mcg`);
+      lines.push(`   📋 Protocol: ${r.protocol_name}\n`);
+    }
+  }
+
+  if (supplements.length > 0) {
+    lines.push(`💊 *Supplements*`);
+    for (const s of supplements) {
+      lines.push(`   • ${s.name} — ${s.dose}`);
+    }
+    lines.push("");
   }
 
   lines.push(`━━━━━━━━━━━━━━━━`);
@@ -213,16 +250,30 @@ function buildWhatsAppMessage(reminders: PeptideReminder[], window: string): str
 
 function buildReminderEmail(
   reminders: PeptideReminder[],
+  supplements: SupplementReminder[],
   window: string,
   date: string
 ): string {
+  const totalCount = reminders.length + supplements.length;
+
   const peptideRows = reminders
     .map(
       (r) =>
         `<tr>
-          <td style="padding:8px 12px;border-bottom:1px solid #eee;font-weight:600">${r.peptide_name}</td>
+          <td style="padding:8px 12px;border-bottom:1px solid #eee;font-weight:600">💉 ${r.peptide_name}</td>
           <td style="padding:8px 12px;border-bottom:1px solid #eee">${r.dose_mcg} mcg</td>
           <td style="padding:8px 12px;border-bottom:1px solid #eee;color:#666">${r.protocol_name}</td>
+        </tr>`
+    )
+    .join("");
+
+  const supplementRows = supplements
+    .map(
+      (s) =>
+        `<tr>
+          <td style="padding:8px 12px;border-bottom:1px solid #eee;font-weight:600">💊 ${s.name}</td>
+          <td style="padding:8px 12px;border-bottom:1px solid #eee">${s.dose}</td>
+          <td style="padding:8px 12px;border-bottom:1px solid #eee;color:#666">${s.protocol_name}</td>
         </tr>`
     )
     .join("");
@@ -235,18 +286,18 @@ function buildReminderEmail(
       </div>
       <div style="background:#f8fffe;border:1px solid #d1fae5;border-radius:12px;padding:20px;margin-bottom:16px">
         <p style="margin:0 0 12px;font-size:14px;color:#333">
-          You have <strong>${reminders.length} peptide${reminders.length > 1 ? "s" : ""}</strong> 
+          You have <strong>${totalCount} item${totalCount > 1 ? "s" : ""}</strong> 
           scheduled for your <strong>${window}</strong> window today.
         </p>
         <table style="width:100%;border-collapse:collapse;font-size:13px">
           <thead>
             <tr style="background:#e6f7f5">
-              <th style="padding:8px 12px;text-align:left;font-weight:600;color:#0d9488">Peptide</th>
+              <th style="padding:8px 12px;text-align:left;font-weight:600;color:#0d9488">Item</th>
               <th style="padding:8px 12px;text-align:left;font-weight:600;color:#0d9488">Dose</th>
               <th style="padding:8px 12px;text-align:left;font-weight:600;color:#0d9488">Protocol</th>
             </tr>
           </thead>
-          <tbody>${peptideRows}</tbody>
+          <tbody>${peptideRows}${supplementRows}</tbody>
         </table>
       </div>
       <p style="font-size:12px;color:#999;text-align:center;margin-top:24px">
