@@ -47,7 +47,7 @@ const RetatrutideReview = () => (
       <li>Nausea (especially during dose escalation)</li>
       <li>Reduced appetite (this is also the intended effect)</li>
       <li>Occasional diarrhoea or constipation</li>
-      <li>Injection site reactions</li>
+      <li>Administration site reactions</li>
     </ul>
     <p>Some researchers on X have noted that Retatrutide's glucagon component may cause slightly more nausea in the titration phase, though this tends to settle. As @PeterAttiaMD has discussed, slow dose escalation remains the most practical way to manage these effects across all GLP-1 agonists.</p>
 

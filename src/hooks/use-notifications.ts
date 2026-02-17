@@ -59,7 +59,7 @@ export function useProtocolNotifications() {
         if (afterTime > now) {
           notifications.push({
             id: hashId(`after-${inj.id}`),
-            title: "💉 Did you complete your dose?",
+            title: "💊 Did you complete your dose?",
             body: `${inj.peptide_name} (${inj.dose_mcg}mcg) was due 15 minutes ago. Tap to log.`,
             schedule: { at: afterTime },
             actionTypeId: "DOSE_ACTIONS",

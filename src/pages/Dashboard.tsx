@@ -116,7 +116,7 @@ const Dashboard = () => {
           : undefined,
       });
 
-      // Generate today's injection logs for the new protocol
+      // Generate today's dose logs for the new protocol
       for (const p of rec.peptides) {
         const timing = p.timing.includes("AM") ? "09:00" : "21:00";
         await logInjection.mutateAsync({
@@ -134,7 +134,7 @@ const Dashboard = () => {
         }
       }
 
-      toast({ title: "Protocol activated", description: `${rec.protocolName} is now active. Today's injections have been scheduled.` });
+      toast({ title: "Protocol activated", description: `${rec.protocolName} is now active. Today's doses have been scheduled.` });
     } catch (err: any) {
       toast({ title: "Error", description: err?.message || "Failed to activate protocol.", variant: "destructive" });
     } finally {
@@ -146,7 +146,7 @@ const Dashboard = () => {
     <div className="min-h-screen bg-background">
       <SEO
         title="Dashboard — Biomarker Tracking & Protocol Management"
-        description="Track bloodwork, manage peptide protocols, and monitor daily injections with smart recommendations powered by your biomarker data."
+        description="Track bloodwork, manage peptide protocols, and monitor daily doses with smart recommendations powered by your biomarker data."
         path="/dashboard"
       />
       <Header />
@@ -157,7 +157,7 @@ const Dashboard = () => {
               My <span className="text-gradient-teal">Dashboard</span>
             </h1>
             <p className="text-muted-foreground text-sm mt-1">
-              Track bloodwork, protocols, and daily injections in one place.
+              Track bloodwork, protocols, and daily doses in one place.
             </p>
           </div>
 
@@ -365,7 +365,7 @@ const Dashboard = () => {
               <ActiveProtocols />
             </TabsContent>
 
-            {/* INJECTIONS TAB */}
+            {/* TRACKER TAB */}
             <TabsContent value="injections" className="space-y-6">
               <TodaysPlan />
               <ActiveProtocols />

@@ -65,7 +65,7 @@ const Glp1Guide = () => (
       <li>Gastrointestinal effects (most common)</li>
       <li>Nausea (especially during titration)</li>
       <li>Reduced appetite</li>
-      <li>Potential injection site reactions</li>
+      <li>Potential site reactions</li>
     </ul>
     <p><strong>📊 Titration is Critical:</strong> All GLP-1 agonists require gradual dose escalation in research protocols. Starting at maximum doses significantly increases adverse reactions.</p>
 

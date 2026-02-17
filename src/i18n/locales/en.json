@@ -256,7 +256,7 @@
   "dashboardPage": {
     "title": "My",
     "titleHighlight": "Dashboard",
-    "subtitle": "Track bloodwork, protocols, and daily injections in one place.",
+    "subtitle": "Track bloodwork, protocols, and daily doses in one place.",
     "overview": "Overview",
     "journal": "Journal",
     "profile": "Profile",
@@ -282,7 +282,7 @@
     "noRecsYet": "No Personalised Recommendations Yet",
     "noRecsYetDesc": "Upload bloodwork to get personalised protocol recommendations based on your biomarkers.",
     "protocolActivated": "Protocol activated",
-    "protocolActivatedDesc": "{{name}} is now active. Today's injections have been scheduled."
+    "protocolActivatedDesc": "{{name}} is now active. Today's doses have been scheduled."
   },
   "feedbackBanner": {
     "launched": "We just launched!",

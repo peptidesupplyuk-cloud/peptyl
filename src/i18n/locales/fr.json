@@ -256,7 +256,7 @@
   "dashboardPage": {
     "title": "Mon",
     "titleHighlight": "Tableau de bord",
-    "subtitle": "Suivez vos analyses, protocoles et injections quotidiennes en un seul endroit.",
+    "subtitle": "Suivez vos analyses, protocoles et doses quotidiennes en un seul endroit.",
     "overview": "Aperçu",
     "journal": "Journal",
     "profile": "Profil",
@@ -282,7 +282,7 @@
     "noRecsYet": "Pas encore de recommandations personnalisées",
     "noRecsYetDesc": "Téléchargez vos analyses pour obtenir des recommandations de protocoles personnalisées basées sur vos biomarqueurs.",
     "protocolActivated": "Protocole activé",
-    "protocolActivatedDesc": "{{name}} est maintenant actif. Les injections d'aujourd'hui ont été planifiées."
+    "protocolActivatedDesc": "{{name}} est maintenant actif. Les doses d'aujourd'hui ont été planifiées."
   },
   "feedbackBanner": {
     "launched": "Nous venons de lancer !",

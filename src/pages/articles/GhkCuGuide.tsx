@@ -56,7 +56,7 @@ const GhkCuGuide = () => (
     <h2>Side Effects</h2>
     <p>GHK-Cu is generally well-tolerated. The most commonly reported side effects are minor:</p>
     <ul>
-      <li>Mild redness at injection site (subcutaneous)</li>
+      <li>Mild redness at administration site (subcutaneous)</li>
       <li>Temporary skin irritation with topical use (rare)</li>
       <li>Slight bruising with microneedling protocols</li>
     </ul>

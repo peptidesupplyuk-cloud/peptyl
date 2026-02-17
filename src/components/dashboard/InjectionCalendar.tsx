@@ -24,14 +24,14 @@ function isDueOnDate(frequency: string, protocolStartDate: string, date: Date): 
   }
 }
 
-interface DayInjection {
+interface DayDose {
   peptide_name: string;
   dose_mcg: number;
   timing: string;
   protocolName: string;
 }
 
-const InjectionCalendar = () => {
+const DoseCalendar = () => {
   const [open, setOpen] = useState(false);
   const [weekOffset, setWeekOffset] = useState(0);
   const { data: protocols = [] } = useProtocols();
@@ -43,12 +43,12 @@ const InjectionCalendar = () => {
   const weekStart = addDays(today, weekOffset * 7);
   const days = Array.from({ length: 7 }, (_, i) => addDays(weekStart, i));
 
-  const injectionsByDay = useMemo(() => {
-    const map = new Map<string, DayInjection[]>();
+  const dosesByDay = useMemo(() => {
+    const map = new Map<string, DayDose[]>();
 
     for (const day of days) {
       const key = format(day, "yyyy-MM-dd");
-      const dayInjections: DayInjection[] = [];
+      const dayDoses: DayDose[] = [];
 
       for (const protocol of activeProtocols) {
         if (protocol.status === "paused") continue;
@@ -58,7 +58,7 @@ const InjectionCalendar = () => {
 
         for (const pep of protocol.peptides) {
           if (isDueOnDate(pep.frequency, protocol.start_date, day)) {
-            dayInjections.push({
+            dayDoses.push({
               peptide_name: pep.peptide_name,
               dose_mcg: pep.dose_mcg,
               timing: pep.timing || "PM",
@@ -69,15 +69,15 @@ const InjectionCalendar = () => {
       }
 
       // Merge same compound + timing
-      const merged = new Map<string, DayInjection>();
-      for (const inj of dayInjections) {
-        const mk = `${inj.peptide_name}||${inj.timing}`;
+      const merged = new Map<string, DayDose>();
+      for (const dose of dayDoses) {
+        const mk = `${dose.peptide_name}||${dose.timing}`;
         const existing = merged.get(mk);
         if (existing) {
-          existing.dose_mcg += inj.dose_mcg;
-          existing.protocolName += `, ${inj.protocolName}`;
+          existing.dose_mcg += dose.dose_mcg;
+          existing.protocolName += `, ${dose.protocolName}`;
         } else {
-          merged.set(mk, { ...inj });
+          merged.set(mk, { ...dose });
         }
       }
 
@@ -125,7 +125,7 @@ const InjectionCalendar = () => {
       <div className="grid grid-cols-7 gap-1.5">
         {days.map((day) => {
           const key = format(day, "yyyy-MM-dd");
-          const injections = injectionsByDay.get(key) || [];
+          const doses = dosesByDay.get(key) || [];
           const isToday = isSameDay(day, today);
 
           return (
@@ -140,17 +140,17 @@ const InjectionCalendar = () => {
                 <span className="block text-xs font-semibold text-foreground">{format(day, "d")}</span>
               </div>
               <div className="space-y-1">
-                {injections.map((inj, idx) => (
+                {doses.map((d, idx) => (
                   <div
                     key={idx}
                     className="bg-primary/10 rounded px-1.5 py-1 text-[9px] leading-tight"
-                    title={`${inj.protocolName}: ${inj.dose_mcg}mcg ${inj.timing}`}
+                    title={`${d.protocolName}: ${d.dose_mcg}mcg ${d.timing}`}
                   >
-                    <span className="font-medium text-foreground block truncate">{inj.peptide_name}</span>
-                    <span className="text-muted-foreground">{inj.dose_mcg}mcg · {inj.timing}</span>
+                    <span className="font-medium text-foreground block truncate">{d.peptide_name}</span>
+                    <span className="text-muted-foreground">{d.dose_mcg}mcg · {d.timing}</span>
                   </div>
                 ))}
-                {injections.length === 0 && (
+                {doses.length === 0 && (
                   <span className="text-[9px] text-muted-foreground/50">—</span>
                 )}
               </div>
@@ -173,4 +173,4 @@ const InjectionCalendar = () => {
   );
 };
 
-export default InjectionCalendar;
+export default DoseCalendar;
