@@ -283,6 +283,36 @@ export type Database = {
           },
         ]
       }
+      derived_biomarkers: {
+        Row: {
+          created_at: string
+          date: string
+          id: string
+          metadata: Json | null
+          metric_name: string
+          user_id: string
+          value: number | null
+        }
+        Insert: {
+          created_at?: string
+          date: string
+          id?: string
+          metadata?: Json | null
+          metric_name: string
+          user_id: string
+          value?: number | null
+        }
+        Update: {
+          created_at?: string
+          date?: string
+          id?: string
+          metadata?: Json | null
+          metric_name?: string
+          user_id?: string
+          value?: number | null
+        }
+        Relationships: []
+      }
       feed_posts: {
         Row: {
           content: string
@@ -976,6 +1006,87 @@ export type Database = {
           id?: string
           user_id?: string | null
           video_name?: string
+        }
+        Relationships: []
+      }
+      whoop_connections: {
+        Row: {
+          access_token: string | null
+          created_at: string
+          expires_at: string | null
+          id: string
+          last_sync_at: string | null
+          refresh_token: string | null
+          updated_at: string
+          user_id: string
+          whoop_user_id: string | null
+        }
+        Insert: {
+          access_token?: string | null
+          created_at?: string
+          expires_at?: string | null
+          id?: string
+          last_sync_at?: string | null
+          refresh_token?: string | null
+          updated_at?: string
+          user_id: string
+          whoop_user_id?: string | null
+        }
+        Update: {
+          access_token?: string | null
+          created_at?: string
+          expires_at?: string | null
+          id?: string
+          last_sync_at?: string | null
+          refresh_token?: string | null
+          updated_at?: string
+          user_id?: string
+          whoop_user_id?: string | null
+        }
+        Relationships: []
+      }
+      whoop_daily_metrics: {
+        Row: {
+          created_at: string
+          date: string
+          hrv: number | null
+          id: string
+          recovery_score: number | null
+          respiratory_rate: number | null
+          rhr: number | null
+          sleep_duration: number | null
+          sleep_efficiency: number | null
+          sleep_score: number | null
+          strain: number | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          date: string
+          hrv?: number | null
+          id?: string
+          recovery_score?: number | null
+          respiratory_rate?: number | null
+          rhr?: number | null
+          sleep_duration?: number | null
+          sleep_efficiency?: number | null
+          sleep_score?: number | null
+          strain?: number | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          date?: string
+          hrv?: number | null
+          id?: string
+          recovery_score?: number | null
+          respiratory_rate?: number | null
+          rhr?: number | null
+          sleep_duration?: number | null
+          sleep_efficiency?: number | null
+          sleep_score?: number | null
+          strain?: number | null
+          user_id?: string
         }
         Relationships: []
       }
