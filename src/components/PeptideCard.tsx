@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import { motion } from "framer-motion";
 import { ThumbsUp, ThumbsDown, TrendingUp, AlertTriangle, Clock, Filter, ChevronDown, ChevronUp, Syringe, CalendarDays, Sparkles, CheckCircle2, FlaskConical, Plus, ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -37,6 +38,7 @@ const PeptideCard = ({ peptide, index, userVotes, onVote }: PeptideCardProps) =>
   const [onboardingOpen, setOnboardingOpen] = useState(false);
   const { user } = useAuth();
   const navigate = useNavigate();
+  const { t } = useTranslation();
 
   const handleAddToProtocol = () => {
     if (user) {
@@ -67,7 +69,7 @@ const PeptideCard = ({ peptide, index, userVotes, onVote }: PeptideCardProps) =>
               </span>
               {peptide.isNew && (
                 <span className="text-xs font-medium px-2.5 py-0.5 rounded-full bg-primary text-primary-foreground flex items-center gap-1">
-                  <Sparkles className="h-3 w-3" /> New
+                  <Sparkles className="h-3 w-3" /> {t("peptideCard.new")}
                 </span>
               )}
             </div>
@@ -76,7 +78,6 @@ const PeptideCard = ({ peptide, index, userVotes, onVote }: PeptideCardProps) =>
           </div>
         </div>
 
-        {/* Benefits */}
         {peptide.benefits.length > 0 && (
           <div className="flex flex-wrap gap-1.5 mb-4">
             {peptide.benefits.map((benefit) => (
@@ -91,7 +92,6 @@ const PeptideCard = ({ peptide, index, userVotes, onVote }: PeptideCardProps) =>
           </div>
         )}
 
-        {/* Protocol info */}
         <div className="flex flex-wrap gap-3 mb-4 text-xs text-muted-foreground">
           <span className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-muted/50">
             <Syringe className="h-3 w-3" /> {peptide.administration}
@@ -106,7 +106,6 @@ const PeptideCard = ({ peptide, index, userVotes, onVote }: PeptideCardProps) =>
           )}
         </div>
 
-        {/* Regulatory status */}
         {peptide.regulatoryStatus && (
           (() => {
             const rs = peptide.regulatoryStatus;
@@ -121,14 +120,13 @@ const PeptideCard = ({ peptide, index, userVotes, onVote }: PeptideCardProps) =>
           })()
         )}
 
-        {/* Actions row */}
         <div className="flex items-center justify-between mb-3">
           <button
             onClick={() => setExpanded(!expanded)}
             className="flex items-center gap-2 text-xs font-medium text-primary hover:text-primary/80 transition-colors"
           >
             {expanded ? <ChevronUp className="h-3.5 w-3.5" /> : <ChevronDown className="h-3.5 w-3.5" />}
-            {expanded ? "Hide" : "Show"} Community Experiences
+            {expanded ? t("peptideCard.hideExperiences") : t("peptideCard.showExperiences")}
           </button>
 
           <Button
@@ -137,7 +135,7 @@ const PeptideCard = ({ peptide, index, userVotes, onVote }: PeptideCardProps) =>
             className="shadow-brand text-xs gap-1.5"
           >
             <Plus className="h-3.5 w-3.5" />
-            Add to My Protocol
+            {t("peptideCard.addToProtocol")}
             <ArrowRight className="h-3 w-3" />
           </Button>
         </div>
@@ -150,7 +148,7 @@ const PeptideCard = ({ peptide, index, userVotes, onVote }: PeptideCardProps) =>
           >
             <h3 className="text-sm font-heading font-semibold text-foreground flex items-center gap-2">
               <Filter className="h-3.5 w-3.5" />
-              Community Experiences
+              {t("peptideCard.communityExperiences")}
             </h3>
             {peptide.experiences.map((exp, ei) => {
               const vote = userVotes?.[ei];
@@ -169,7 +167,7 @@ const PeptideCard = ({ peptide, index, userVotes, onVote }: PeptideCardProps) =>
                   <div className="flex-1">
                     <p className="text-sm text-foreground/80 leading-relaxed">{exp.text}</p>
                     {(exp as any).source && (
-                      <p className="text-[10px] text-muted-foreground mt-0.5 italic">Source: {(exp as any).source}</p>
+                      <p className="text-[10px] text-muted-foreground mt-0.5 italic">{t("peptideCard.source")}: {(exp as any).source}</p>
                     )}
                   </div>
                   <div className="flex items-center gap-1 flex-shrink-0">

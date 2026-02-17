@@ -283,5 +283,83 @@
     "noRecsYetDesc": "Téléchargez vos analyses pour obtenir des recommandations de protocoles personnalisées basées sur vos biomarqueurs.",
     "protocolActivated": "Protocole activé",
     "protocolActivatedDesc": "{{name}} est maintenant actif. Les injections d'aujourd'hui ont été planifiées."
+  },
+  "feedbackBanner": {
+    "launched": "Nous venons de lancer !",
+    "got30sec": "Vous avez 30 secondes ?",
+    "giveFeedback": "Donner un avis",
+    "quickFeedback": "Avis rapide",
+    "feedbackPrompt": "Que pourrions-nous améliorer ? Rapports de bugs, idées de fonctionnalités, tout est bienvenu.",
+    "placeholder": "Tapez votre avis…",
+    "cancel": "Annuler",
+    "submit": "Envoyer",
+    "sending": "Envoi en cours…",
+    "thanks": "Merci pour votre avis ! 🙏",
+    "errorTitle": "Envoi impossible",
+    "errorDesc": "Veuillez réessayer."
+  },
+  "signupBanner": {
+    "text": "Créez un compte gratuit pour débloquer les calculateurs, le suivi de protocoles et les outils communautaires.",
+    "cta": "S'inscrire gratuitement"
+  },
+  "onboarding": {
+    "title": "Créez votre plan de départ",
+    "step": "Étape {{current}} sur {{total}}",
+    "back": "Retour",
+    "next": "Suivant",
+    "generatePlan": "Générer le plan",
+    "goalQuestion": "Quel est votre objectif de recherche principal ?",
+    "goalFatLoss": "Perte de graisse / santé métabolique",
+    "goalHealing": "Guérison et récupération",
+    "goalLongevity": "Longévité et anti-âge",
+    "goalCognitive": "Performance cognitive",
+    "goalMuscle": "Croissance musculaire et performance",
+    "goalHormone": "Optimisation hormonale",
+    "experienceQuestion": "Quel est votre niveau d'expérience avec les peptides ?",
+    "expNone": "Aucune expérience préalable",
+    "expBeginner": "1–3 composés utilisés",
+    "expIntermediate": "4–10 composés utilisés",
+    "expAdvanced": "10+ composés utilisés",
+    "compoundsQuestion": "Utilisez-vous actuellement des composés ?",
+    "compoundsPlaceholder": "ex. BPC-157, Sémaglutide — ou laissez vide",
+    "biomarkersQuestion": "Quels biomarqueurs avez-vous disponibles ?",
+    "bioNone": "Aucun pour le moment",
+    "bioBasic": "Panel de base (NFS, CMP)",
+    "bioHormones": "Hormones (Testostérone, Thyroïde)",
+    "bioComprehensive": "Complet (tout ci-dessus + lipides, inflammation)",
+    "riskQuestion": "Quelle est votre tolérance au risque pour les composés de recherche ?",
+    "riskConservative": "Conservateur — composés bien établis uniquement",
+    "riskModerate": "Modéré — certains composés plus récents acceptables",
+    "riskAggressive": "Ouvert — prêt à explorer la recherche émergente"
+  },
+  "peptideCard": {
+    "new": "Nouveau",
+    "showExperiences": "Afficher les expériences communautaires",
+    "hideExperiences": "Masquer les expériences communautaires",
+    "addToProtocol": "Ajouter à mon protocole",
+    "communityExperiences": "Expériences communautaires",
+    "source": "Source",
+    "purity": "pureté"
+  },
+  "chat": {
+    "biobot": "BioBot",
+    "aiAssistant": "Assistant IA de recherche",
+    "greeting": "Salut ! Je suis BioBot 👋 Posez-moi des questions sur les peptides, les stacks, les protocoles de dosage ou les expériences communautaires.",
+    "placeholder": "Posez une question sur les peptides...",
+    "errorMessage": "Désolé, je n'ai pas pu traiter cette demande.",
+    "suggestion1": "Qu'est-ce que le Wolverine Stack ?",
+    "suggestion2": "Meilleur peptide pour le sommeil ?",
+    "suggestion3": "BPC-157 vs TB-500 ?",
+    "suggestion4": "Effets secondaires du sémaglutide ?"
+  },
+  "coa": {
+    "title": "Certificat d'",
+    "titleHighlight": "Analyse",
+    "subtitle": "Voici des exemples de COA fournis par nos fournisseurs. Nous recommandons fortement à tous les chercheurs de réaliser leurs propres tests indépendants — chaque lot n'inclut pas forcément un COA.",
+    "thirdPartyTitle": "Testé par des tiers",
+    "thirdPartyDesc": "Analyse HPLC et spectrométrie de masse indépendante sur chaque lot — jamais auto-testé.",
+    "purityTitle": "Pureté 98%+ garantie",
+    "purityDesc": "Nous ne stockons que des peptides qui répondent à nos seuils de pureté stricts.",
+    "exampleCOAs": "Exemples de COA"
   }
 }

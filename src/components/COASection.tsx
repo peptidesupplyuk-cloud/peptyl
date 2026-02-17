@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { FileCheck, ShieldCheck, FlaskConical, X } from "lucide-react";
+import { FileCheck, ShieldCheck, X } from "lucide-react";
+import { useTranslation } from "react-i18next";
 
 import coaKpv from "@/assets/coa-kpv.jpg";
 import coaTa1 from "@/assets/coa-ta1.jpg";
@@ -22,6 +23,12 @@ const coas = [
 
 const COASection = () => {
   const [selected, setSelected] = useState<typeof coas[0] | null>(null);
+  const { t } = useTranslation();
+
+  const infoCards = [
+    { icon: FileCheck, title: t("coa.thirdPartyTitle"), text: t("coa.thirdPartyDesc") },
+    { icon: ShieldCheck, title: t("coa.purityTitle"), text: t("coa.purityDesc") },
+  ];
 
   return (
     <section className="py-24 bg-muted/50">
@@ -33,7 +40,7 @@ const COASection = () => {
             viewport={{ once: true }}
             className="text-3xl sm:text-4xl font-heading font-bold text-foreground mb-4"
           >
-            Certificate of <span className="text-gradient-teal">Analysis</span>
+            {t("coa.title")} <span className="text-gradient-teal">{t("coa.titleHighlight")}</span>
           </motion.h2>
           <motion.p
             initial={{ opacity: 0, y: 20 }}
@@ -42,16 +49,12 @@ const COASection = () => {
             transition={{ delay: 0.1 }}
             className="text-muted-foreground text-lg"
           >
-            Below are example COAs provided by our suppliers. We strongly recommend all researchers conduct their own independent testing — not every batch is guaranteed to include a COA.
+            {t("coa.subtitle")}
           </motion.p>
         </div>
 
-        {/* Info cards */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-12 max-w-3xl mx-auto">
-          {[
-            { icon: FileCheck, title: "Third-Party Tested", text: "Independent HPLC & Mass Spec analysis on every batch — never self-tested." },
-            { icon: ShieldCheck, title: "98%+ Purity Guaranteed", text: "We only stock peptides that meet our strict purity thresholds." },
-          ].map((card, i) => (
+          {infoCards.map((card, i) => (
             <motion.div
               key={i}
               initial={{ opacity: 0, y: 20 }}
@@ -69,7 +72,6 @@ const COASection = () => {
           ))}
         </div>
 
-        {/* COA gallery */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
@@ -77,7 +79,7 @@ const COASection = () => {
           className="max-w-5xl mx-auto"
         >
           <h3 className="font-heading font-semibold text-foreground text-center mb-6">
-            Example COAs
+            {t("coa.exampleCOAs")}
           </h3>
           <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
             {coas.map((coa, i) => (
@@ -98,7 +100,7 @@ const COASection = () => {
                 />
                 <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-background/90 to-transparent p-3 pt-8">
                   <p className="text-xs font-medium text-foreground">{coa.name}</p>
-                  <p className="text-xs text-primary">{coa.purity} purity</p>
+                  <p className="text-xs text-primary">{coa.purity} {t("peptideCard.purity")}</p>
                 </div>
               </motion.button>
             ))}
@@ -106,7 +108,6 @@ const COASection = () => {
         </motion.div>
       </div>
 
-      {/* Lightbox */}
       <AnimatePresence>
         {selected && (
           <motion.div

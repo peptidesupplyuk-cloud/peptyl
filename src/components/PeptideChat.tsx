@@ -1,19 +1,12 @@
 import { useState, useRef, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { MessageCircle, X, Send, Loader2, Bot, User } from "lucide-react";
+import { useTranslation } from "react-i18next";
 import ReactMarkdown from "react-markdown";
 
 type Msg = { role: "user" | "assistant"; content: string };
 
 const CHAT_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/peptide-chat`;
-
-const SUGGESTIONS = [
-  "What's the Wolverine Stack?",
-  "Best peptide for sleep?",
-  "BPC-157 vs TB-500?",
-  "Side effects of semaglutide?",
-];
-
 
 const PeptideChat = () => {
   const [open, setOpen] = useState(false);
@@ -21,6 +14,14 @@ const PeptideChat = () => {
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
+  const { t } = useTranslation();
+
+  const SUGGESTIONS = [
+    t("chat.suggestion1"),
+    t("chat.suggestion2"),
+    t("chat.suggestion3"),
+    t("chat.suggestion4"),
+  ];
 
   useEffect(() => {
     if (scrollRef.current) {
@@ -102,7 +103,6 @@ const PeptideChat = () => {
         }
       }
 
-      // Final flush
       if (textBuffer.trim()) {
         for (let raw of textBuffer.split("\n")) {
           if (!raw) continue;
@@ -126,7 +126,7 @@ const PeptideChat = () => {
         ...prev,
         {
           role: "assistant",
-          content: `Sorry, I couldn't process that request. ${e instanceof Error ? e.message : "Please try again."}`,
+          content: `${t("chat.errorMessage")} ${e instanceof Error ? e.message : ""}`,
         },
       ]);
     } finally {
@@ -136,7 +136,6 @@ const PeptideChat = () => {
 
   return (
     <>
-      {/* Floating button */}
       <AnimatePresence>
         {!open && (
           <motion.button
@@ -152,7 +151,6 @@ const PeptideChat = () => {
         )}
       </AnimatePresence>
 
-      {/* Chat panel */}
       <AnimatePresence>
         {open && (
           <motion.div
@@ -162,15 +160,14 @@ const PeptideChat = () => {
             transition={{ duration: 0.2 }}
             className="fixed bottom-6 right-6 z-50 w-[380px] max-w-[calc(100vw-2rem)] h-[560px] max-h-[calc(100vh-3rem)] flex flex-col bg-card border border-border rounded-2xl shadow-xl overflow-hidden"
           >
-            {/* Header */}
             <div className="flex items-center justify-between px-4 py-3 border-b border-border bg-muted/30">
               <div className="flex items-center gap-2">
                 <div className="h-8 w-8 rounded-full bg-primary/10 flex items-center justify-center">
                   <Bot className="h-4 w-4 text-primary" />
                 </div>
                 <div>
-                  <p className="text-sm font-heading font-semibold text-foreground">BioBot</p>
-                  <p className="text-[10px] text-muted-foreground">AI research assistant</p>
+                  <p className="text-sm font-heading font-semibold text-foreground">{t("chat.biobot")}</p>
+                  <p className="text-[10px] text-muted-foreground">{t("chat.aiAssistant")}</p>
                 </div>
               </div>
               <button
@@ -181,7 +178,6 @@ const PeptideChat = () => {
               </button>
             </div>
 
-            {/* Messages */}
             <div ref={scrollRef} className="flex-1 overflow-y-auto px-4 py-3 space-y-3">
               {messages.length === 0 && (
                 <div className="space-y-3">
@@ -191,7 +187,7 @@ const PeptideChat = () => {
                     </div>
                     <div className="bg-muted/50 rounded-xl rounded-tl-sm px-3 py-2">
                       <p className="text-sm text-foreground">
-                        Hi! I'm BioBot 👋 Ask me about peptides, stacks, dosing protocols, or community experiences.
+                        {t("chat.greeting")}
                       </p>
                     </div>
                   </div>
@@ -257,7 +253,6 @@ const PeptideChat = () => {
               )}
             </div>
 
-            {/* Input */}
             <form
               onSubmit={(e) => {
                 e.preventDefault();
@@ -268,7 +263,7 @@ const PeptideChat = () => {
               <input
                 value={input}
                 onChange={(e) => setInput(e.target.value)}
-                placeholder="Ask about peptides..."
+                placeholder={t("chat.placeholder")}
                 disabled={isLoading}
                 className="flex-1 bg-background border border-border rounded-xl px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-primary/40 transition-colors disabled:opacity-50"
               />
