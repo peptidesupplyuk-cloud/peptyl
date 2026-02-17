@@ -31,7 +31,7 @@ const OptimizationScore = () => {
       <div className="flex-1 min-w-0">
         <div className="flex items-center gap-2 mb-0.5">
           <Activity className={`h-4 w-4 ${color}`} />
-          <h3 className="text-sm font-heading font-semibold text-foreground">Optimization Score</h3>
+          <h3 className="text-sm font-heading font-semibold text-foreground">Health Direction Score</h3>
         </div>
         <p className="text-xs text-muted-foreground leading-relaxed">
           {score < 30
