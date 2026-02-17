@@ -868,6 +868,48 @@ export type Database = {
         }
         Relationships: []
       }
+      support_products: {
+        Row: {
+          affiliate_url: string
+          category: string
+          created_at: string
+          description: string | null
+          id: string
+          is_active: boolean | null
+          name: string
+          rating: number | null
+          review_count: string | null
+          sort_order: number | null
+          tags: string[] | null
+        }
+        Insert: {
+          affiliate_url: string
+          category: string
+          created_at?: string
+          description?: string | null
+          id?: string
+          is_active?: boolean | null
+          name: string
+          rating?: number | null
+          review_count?: string | null
+          sort_order?: number | null
+          tags?: string[] | null
+        }
+        Update: {
+          affiliate_url?: string
+          category?: string
+          created_at?: string
+          description?: string | null
+          id?: string
+          is_active?: boolean | null
+          name?: string
+          rating?: number | null
+          review_count?: string | null
+          sort_order?: number | null
+          tags?: string[] | null
+        }
+        Relationships: []
+      }
       user_roles: {
         Row: {
           created_at: string
