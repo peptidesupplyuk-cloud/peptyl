@@ -283,5 +283,83 @@
     "noRecsYetDesc": "Upload bloodwork to get personalised protocol recommendations based on your biomarkers.",
     "protocolActivated": "Protocol activated",
     "protocolActivatedDesc": "{{name}} is now active. Today's injections have been scheduled."
+  },
+  "feedbackBanner": {
+    "launched": "We just launched!",
+    "got30sec": "Got 30 seconds?",
+    "giveFeedback": "Give Feedback",
+    "quickFeedback": "Quick Feedback",
+    "feedbackPrompt": "What could we do better? Bug reports, feature ideas, anything goes.",
+    "placeholder": "Type your feedback…",
+    "cancel": "Cancel",
+    "submit": "Submit",
+    "sending": "Sending…",
+    "thanks": "Thanks for your feedback! 🙏",
+    "errorTitle": "Couldn't submit",
+    "errorDesc": "Please try again."
+  },
+  "signupBanner": {
+    "text": "Create a free account to unlock calculators, protocol tracking, and community tools.",
+    "cta": "Sign Up Free"
+  },
+  "onboarding": {
+    "title": "Build Your Starting Plan",
+    "step": "Step {{current}} of {{total}}",
+    "back": "Back",
+    "next": "Next",
+    "generatePlan": "Generate Plan",
+    "goalQuestion": "What is your primary research goal?",
+    "goalFatLoss": "Fat loss / metabolic health",
+    "goalHealing": "Healing & injury recovery",
+    "goalLongevity": "Longevity & anti-aging",
+    "goalCognitive": "Cognitive performance",
+    "goalMuscle": "Muscle growth & performance",
+    "goalHormone": "Hormone optimisation",
+    "experienceQuestion": "What is your experience level with peptides?",
+    "expNone": "No prior experience",
+    "expBeginner": "1–3 compounds used",
+    "expIntermediate": "4–10 compounds used",
+    "expAdvanced": "10+ compounds used",
+    "compoundsQuestion": "Are you currently using any compounds?",
+    "compoundsPlaceholder": "e.g. BPC-157, Semaglutide — or leave blank",
+    "biomarkersQuestion": "Which biomarkers do you have available?",
+    "bioNone": "None yet",
+    "bioBasic": "Basic panel (CBC, CMP)",
+    "bioHormones": "Hormones (Testosterone, Thyroid)",
+    "bioComprehensive": "Comprehensive (all of the above + lipids, inflammation)",
+    "riskQuestion": "What is your risk tolerance for research compounds?",
+    "riskConservative": "Conservative — well-established compounds only",
+    "riskModerate": "Moderate — some newer compounds acceptable",
+    "riskAggressive": "Open — willing to explore emerging research"
+  },
+  "peptideCard": {
+    "new": "New",
+    "showExperiences": "Show Community Experiences",
+    "hideExperiences": "Hide Community Experiences",
+    "addToProtocol": "Add to My Protocol",
+    "communityExperiences": "Community Experiences",
+    "source": "Source",
+    "purity": "purity"
+  },
+  "chat": {
+    "biobot": "BioBot",
+    "aiAssistant": "AI research assistant",
+    "greeting": "Hi! I'm BioBot 👋 Ask me about peptides, stacks, dosing protocols, or community experiences.",
+    "placeholder": "Ask about peptides...",
+    "errorMessage": "Sorry, I couldn't process that request.",
+    "suggestion1": "What's the Wolverine Stack?",
+    "suggestion2": "Best peptide for sleep?",
+    "suggestion3": "BPC-157 vs TB-500?",
+    "suggestion4": "Side effects of semaglutide?"
+  },
+  "coa": {
+    "title": "Certificate of",
+    "titleHighlight": "Analysis",
+    "subtitle": "Below are example COAs provided by our suppliers. We strongly recommend all researchers conduct their own independent testing — not every batch is guaranteed to include a COA.",
+    "thirdPartyTitle": "Third-Party Tested",
+    "thirdPartyDesc": "Independent HPLC & Mass Spec analysis on every batch — never self-tested.",
+    "purityTitle": "98%+ Purity Guaranteed",
+    "purityDesc": "We only stock peptides that meet our strict purity thresholds.",
+    "exampleCOAs": "Example COAs"
   }
 }

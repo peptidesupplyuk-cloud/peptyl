@@ -283,5 +283,83 @@
     "noRecsYetDesc": "Lade Blutwerte hoch, um personalisierte Protokollempfehlungen basierend auf deinen Biomarkern zu erhalten.",
     "protocolActivated": "Protokoll aktiviert",
     "protocolActivatedDesc": "{{name}} ist jetzt aktiv. Die heutigen Injektionen wurden geplant."
+  },
+  "feedbackBanner": {
+    "launched": "Frisch gestartet!",
+    "got30sec": "Hast du 30 Sekunden?",
+    "giveFeedback": "Feedback geben",
+    "quickFeedback": "Schnelles Feedback",
+    "feedbackPrompt": "Was könnten wir besser machen? Fehlerberichte, Feature-Ideen, alles ist willkommen.",
+    "placeholder": "Dein Feedback eingeben…",
+    "cancel": "Abbrechen",
+    "submit": "Absenden",
+    "sending": "Wird gesendet…",
+    "thanks": "Danke für dein Feedback! 🙏",
+    "errorTitle": "Konnte nicht gesendet werden",
+    "errorDesc": "Bitte versuche es erneut."
+  },
+  "signupBanner": {
+    "text": "Erstelle ein kostenloses Konto, um Rechner, Protokollverfolgung und Community-Tools freizuschalten.",
+    "cta": "Kostenlos registrieren"
+  },
+  "onboarding": {
+    "title": "Erstelle deinen Startplan",
+    "step": "Schritt {{current}} von {{total}}",
+    "back": "Zurück",
+    "next": "Weiter",
+    "generatePlan": "Plan erstellen",
+    "goalQuestion": "Was ist dein primäres Forschungsziel?",
+    "goalFatLoss": "Fettabbau / Stoffwechselgesundheit",
+    "goalHealing": "Heilung & Verletzungserholung",
+    "goalLongevity": "Langlebigkeit & Anti-Aging",
+    "goalCognitive": "Kognitive Leistung",
+    "goalMuscle": "Muskelaufbau & Leistung",
+    "goalHormone": "Hormonoptimierung",
+    "experienceQuestion": "Welche Erfahrung hast du mit Peptiden?",
+    "expNone": "Keine Vorerfahrung",
+    "expBeginner": "1–3 Verbindungen verwendet",
+    "expIntermediate": "4–10 Verbindungen verwendet",
+    "expAdvanced": "10+ Verbindungen verwendet",
+    "compoundsQuestion": "Verwendest du derzeit Verbindungen?",
+    "compoundsPlaceholder": "z.B. BPC-157, Semaglutid — oder leer lassen",
+    "biomarkersQuestion": "Welche Biomarker hast du verfügbar?",
+    "bioNone": "Noch keine",
+    "bioBasic": "Basispanel (Blutbild, CMP)",
+    "bioHormones": "Hormone (Testosteron, Schilddrüse)",
+    "bioComprehensive": "Umfassend (alles oben + Lipide, Entzündung)",
+    "riskQuestion": "Wie ist deine Risikotoleranz für Forschungsverbindungen?",
+    "riskConservative": "Konservativ — nur etablierte Verbindungen",
+    "riskModerate": "Moderat — einige neuere Verbindungen akzeptabel",
+    "riskAggressive": "Offen — bereit, neue Forschung zu erkunden"
+  },
+  "peptideCard": {
+    "new": "Neu",
+    "showExperiences": "Community-Erfahrungen anzeigen",
+    "hideExperiences": "Community-Erfahrungen ausblenden",
+    "addToProtocol": "Zu meinem Protokoll hinzufügen",
+    "communityExperiences": "Community-Erfahrungen",
+    "source": "Quelle",
+    "purity": "Reinheit"
+  },
+  "chat": {
+    "biobot": "BioBot",
+    "aiAssistant": "KI-Forschungsassistent",
+    "greeting": "Hallo! Ich bin BioBot 👋 Frag mich zu Peptiden, Stacks, Dosierungsprotokollen oder Community-Erfahrungen.",
+    "placeholder": "Frag etwas über Peptide...",
+    "errorMessage": "Entschuldigung, ich konnte die Anfrage nicht verarbeiten.",
+    "suggestion1": "Was ist der Wolverine Stack?",
+    "suggestion2": "Bestes Peptid für Schlaf?",
+    "suggestion3": "BPC-157 vs TB-500?",
+    "suggestion4": "Nebenwirkungen von Semaglutid?"
+  },
+  "coa": {
+    "title": "Analysezertifikat",
+    "titleHighlight": "(COA)",
+    "subtitle": "Nachfolgend finden Sie Beispiel-COAs unserer Lieferanten. Wir empfehlen allen Forschern dringend, eigene unabhängige Tests durchzuführen — nicht jede Charge enthält garantiert ein COA.",
+    "thirdPartyTitle": "Drittanbieter-geprüft",
+    "thirdPartyDesc": "Unabhängige HPLC- und Massenspektrometrie-Analyse bei jeder Charge — nie selbst getestet.",
+    "purityTitle": "98%+ Reinheit garantiert",
+    "purityDesc": "Wir führen nur Peptide, die unsere strengen Reinheitsschwellen erfüllen.",
+    "exampleCOAs": "Beispiel-COAs"
   }
 }

@@ -1,9 +1,9 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { ArrowRight, ArrowLeft, CheckCircle2 } from "lucide-react";
 
@@ -12,67 +12,67 @@ interface OnboardingModalProps {
   onOpenChange: (open: boolean) => void;
 }
 
-const steps = [
-  {
-    id: "goal",
-    question: "What is your primary research goal?",
-    options: [
-      { value: "fat_loss", label: "Fat loss / metabolic health" },
-      { value: "healing", label: "Healing & injury recovery" },
-      { value: "longevity", label: "Longevity & anti-aging" },
-      { value: "cognitive", label: "Cognitive performance" },
-      { value: "muscle", label: "Muscle growth & performance" },
-      { value: "hormone", label: "Hormone optimisation" },
-    ],
-  },
-  {
-    id: "experience",
-    question: "What is your experience level with peptides?",
-    options: [
-      { value: "none", label: "No prior experience" },
-      { value: "beginner", label: "1–3 compounds used" },
-      { value: "intermediate", label: "4–10 compounds used" },
-      { value: "advanced", label: "10+ compounds used" },
-    ],
-  },
-  {
-    id: "compounds",
-    question: "Are you currently using any compounds?",
-    type: "text" as const,
-    placeholder: "e.g. BPC-157, Semaglutide — or leave blank",
-  },
-  {
-    id: "biomarkers",
-    question: "Which biomarkers do you have available?",
-    options: [
-      { value: "none", label: "None yet" },
-      { value: "basic", label: "Basic panel (CBC, CMP)" },
-      { value: "hormones", label: "Hormones (Testosterone, Thyroid)" },
-      { value: "comprehensive", label: "Comprehensive (all of the above + lipids, inflammation)" },
-    ],
-  },
-  {
-    id: "risk",
-    question: "What is your risk tolerance for research compounds?",
-    options: [
-      { value: "conservative", label: "Conservative — well-established compounds only" },
-      { value: "moderate", label: "Moderate — some newer compounds acceptable" },
-      { value: "aggressive", label: "Open — willing to explore emerging research" },
-    ],
-  },
-];
-
 const OnboardingModal = ({ open, onOpenChange }: OnboardingModalProps) => {
   const [step, setStep] = useState(0);
   const [answers, setAnswers] = useState<Record<string, string>>({});
   const navigate = useNavigate();
+  const { t } = useTranslation();
+
+  const steps = [
+    {
+      id: "goal",
+      question: t("onboarding.goalQuestion"),
+      options: [
+        { value: "fat_loss", label: t("onboarding.goalFatLoss") },
+        { value: "healing", label: t("onboarding.goalHealing") },
+        { value: "longevity", label: t("onboarding.goalLongevity") },
+        { value: "cognitive", label: t("onboarding.goalCognitive") },
+        { value: "muscle", label: t("onboarding.goalMuscle") },
+        { value: "hormone", label: t("onboarding.goalHormone") },
+      ],
+    },
+    {
+      id: "experience",
+      question: t("onboarding.experienceQuestion"),
+      options: [
+        { value: "none", label: t("onboarding.expNone") },
+        { value: "beginner", label: t("onboarding.expBeginner") },
+        { value: "intermediate", label: t("onboarding.expIntermediate") },
+        { value: "advanced", label: t("onboarding.expAdvanced") },
+      ],
+    },
+    {
+      id: "compounds",
+      question: t("onboarding.compoundsQuestion"),
+      type: "text" as const,
+      placeholder: t("onboarding.compoundsPlaceholder"),
+    },
+    {
+      id: "biomarkers",
+      question: t("onboarding.biomarkersQuestion"),
+      options: [
+        { value: "none", label: t("onboarding.bioNone") },
+        { value: "basic", label: t("onboarding.bioBasic") },
+        { value: "hormones", label: t("onboarding.bioHormones") },
+        { value: "comprehensive", label: t("onboarding.bioComprehensive") },
+      ],
+    },
+    {
+      id: "risk",
+      question: t("onboarding.riskQuestion"),
+      options: [
+        { value: "conservative", label: t("onboarding.riskConservative") },
+        { value: "moderate", label: t("onboarding.riskModerate") },
+        { value: "aggressive", label: t("onboarding.riskAggressive") },
+      ],
+    },
+  ];
 
   const current = steps[step];
   const isLast = step === steps.length - 1;
   const canProceed = !!answers[current.id] || current.type === "text";
 
   const handleFinish = () => {
-    // Store answers in sessionStorage so they can be used after signup
     sessionStorage.setItem("onboarding_answers", JSON.stringify(answers));
     onOpenChange(false);
     setStep(0);
@@ -84,14 +84,13 @@ const OnboardingModal = ({ open, onOpenChange }: OnboardingModalProps) => {
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
           <DialogTitle className="text-lg font-heading">
-            Build Your Starting Plan
+            {t("onboarding.title")}
           </DialogTitle>
           <DialogDescription className="text-sm text-muted-foreground">
-            Step {step + 1} of {steps.length}
+            {t("onboarding.step", { current: step + 1, total: steps.length })}
           </DialogDescription>
         </DialogHeader>
 
-        {/* Progress bar */}
         <div className="w-full h-1 rounded-full bg-muted overflow-hidden">
           <div
             className="h-full bg-primary transition-all duration-300"
@@ -137,13 +136,13 @@ const OnboardingModal = ({ open, onOpenChange }: OnboardingModalProps) => {
             className="text-muted-foreground"
           >
             <ArrowLeft className="h-4 w-4 mr-1" />
-            Back
+            {t("onboarding.back")}
           </Button>
 
           {isLast ? (
             <Button size="sm" onClick={handleFinish} disabled={!canProceed}>
               <CheckCircle2 className="h-4 w-4 mr-1" />
-              Generate Plan
+              {t("onboarding.generatePlan")}
             </Button>
           ) : (
             <Button
@@ -151,7 +150,7 @@ const OnboardingModal = ({ open, onOpenChange }: OnboardingModalProps) => {
               onClick={() => setStep((s) => s + 1)}
               disabled={!canProceed}
             >
-              Next
+              {t("onboarding.next")}
               <ArrowRight className="h-4 w-4 ml-1" />
             </Button>
           )}
