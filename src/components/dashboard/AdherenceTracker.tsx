@@ -1,13 +1,28 @@
 import { useMemo, useState } from "react";
-import { useAllInjections } from "@/hooks/use-injections";
+import { useAllInjections, useUpdateInjectionStatus } from "@/hooks/use-injections";
 import { format, subDays, isSameDay, startOfDay } from "date-fns";
+import { toast } from "sonner";
 import { CalendarDays, TrendingUp, TrendingDown, CheckCircle2, XCircle, SkipForward, ChevronLeft, ChevronRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
+const STATUS_OPTIONS = ["completed", "skipped", "missed"] as const;
+
 const AdherenceTracker = () => {
   const { data: injections = [], isLoading } = useAllInjections();
+  const updateStatus = useUpdateInjectionStatus();
   const [logPage, setLogPage] = useState(0);
+  const [editingId, setEditingId] = useState<string | null>(null);
   const LOG_PAGE_SIZE = 15;
+
+  const handleStatusChange = (id: string, newStatus: string) => {
+    updateStatus.mutate({ id, status: newStatus }, {
+      onSuccess: () => {
+        toast.success("Status updated");
+        setEditingId(null);
+      },
+      onError: () => toast.error("Failed to update status"),
+    });
+  };
 
   // === Stats ===
   const stats = useMemo(() => {
@@ -185,17 +200,47 @@ const AdherenceTracker = () => {
             <span className="text-right">Status</span>
           </div>
           {pagedLog.map((inj) => (
-            <div key={inj.id} className="grid grid-cols-[1fr_80px_70px_60px] text-xs py-1.5 border-b border-border/50 last:border-0">
+            <div key={inj.id} className="grid grid-cols-[1fr_80px_70px_72px] text-xs py-1.5 border-b border-border/50 last:border-0">
               <span className="text-foreground font-medium truncate">{inj.peptide_name}</span>
               <span className="text-muted-foreground">{inj.dose_mcg}mcg</span>
               <span className="text-muted-foreground">{format(new Date(inj.scheduled_time), "MMM d")}</span>
-              <span className={`text-right font-medium ${
-                inj.status === "completed" ? "text-green-500" :
-                inj.status === "skipped" ? "text-muted-foreground" :
-                "text-red-500"
-              }`}>
-                {inj.status === "completed" ? "✓" : inj.status === "skipped" ? "Skip" : "Missed"}
-              </span>
+              <div className="text-right">
+                {editingId === inj.id ? (
+                  <div className="flex flex-col gap-0.5 items-end">
+                    {STATUS_OPTIONS.map((s) => (
+                      <button
+                        key={s}
+                        onClick={() => handleStatusChange(inj.id, s)}
+                        className={`text-[10px] px-1.5 py-0.5 rounded transition-colors ${
+                          inj.status === s
+                            ? "bg-primary text-primary-foreground"
+                            : "bg-muted hover:bg-muted/80 text-foreground"
+                        }`}
+                      >
+                        {s === "completed" ? "✓ Done" : s === "skipped" ? "Skip" : "Missed"}
+                      </button>
+                    ))}
+                    <button
+                      onClick={() => setEditingId(null)}
+                      className="text-[9px] text-muted-foreground hover:text-foreground"
+                    >
+                      cancel
+                    </button>
+                  </div>
+                ) : (
+                  <button
+                    onClick={() => setEditingId(inj.id)}
+                    className={`font-medium cursor-pointer hover:underline ${
+                      inj.status === "completed" ? "text-green-500" :
+                      inj.status === "skipped" ? "text-muted-foreground" :
+                      "text-red-500"
+                    }`}
+                    title="Click to change status"
+                  >
+                    {inj.status === "completed" ? "✓" : inj.status === "skipped" ? "Skip" : "Missed"}
+                  </button>
+                )}
+              </div>
             </div>
           ))}
         </div>
