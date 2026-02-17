@@ -27,6 +27,7 @@ import SEO from "@/components/SEO";
 import ExperienceChat from "@/components/dashboard/ExperienceChat";
 import ProtocolNudges from "@/components/dashboard/ProtocolNudges";
 import CollaborativeRecommendations from "@/components/dashboard/CollaborativeRecommendations";
+import OnboardingRecommendations from "@/components/dashboard/OnboardingRecommendations";
 import MobileTabNav from "@/components/dashboard/MobileTabNav";
 import OptimizationScore from "@/components/dashboard/OptimizationScore";
 import { useIsMobile } from "@/hooks/use-mobile";
@@ -199,6 +200,7 @@ const Dashboard = () => {
             <TabsContent value="overview" className="space-y-6">
               <OptimizationScore />
               <ProtocolNudges onNavigate={setActiveTab} />
+              <OnboardingRecommendations onNavigateToProtocols={() => setActiveTab("protocols")} />
               <TodaysPlan />
               <BiomarkerTrendChart panels={panels} />
               <BiomarkerSummary panels={panels} />

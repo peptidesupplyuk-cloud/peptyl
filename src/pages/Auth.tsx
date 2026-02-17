@@ -99,10 +99,21 @@ const Auth = () => {
     setLoading(true);
     try {
       if (isSignUp) {
+        // Merge onboarding answers from sessionStorage if available
+        const onboardingRaw = sessionStorage.getItem("onboarding_answers");
+        const onboarding = onboardingRaw ? JSON.parse(onboardingRaw) : {};
+        
         const { error } = await signUp(emailResult.data, password, {
           country,
-          research_goal: researchGoal || undefined,
+          research_goal: researchGoal || onboarding.goal || undefined,
+          experience_level: onboarding.experience || undefined,
+          current_compounds: onboarding.compounds || undefined,
+          biomarker_availability: onboarding.biomarkers || undefined,
+          risk_tolerance: onboarding.risk || undefined,
         });
+        
+        // Clear onboarding answers after saving
+        sessionStorage.removeItem("onboarding_answers");
         if (error) {
           if (error.message.includes("already registered")) {
             setError("This email is already registered. Try signing in instead.");
