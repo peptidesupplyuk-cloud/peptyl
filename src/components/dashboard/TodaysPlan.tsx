@@ -3,9 +3,9 @@ import { Button } from "@/components/ui/button";
 import { useTodayInjections, useUpdateInjectionStatus } from "@/hooks/use-injections";
 import { useProtocols, type ProtocolSupplement } from "@/hooks/use-protocols";
 import { useBloodworkPanels } from "@/hooks/use-bloodwork";
+import { useTodaySupplementLogs, useToggleSupplement, useBatchCompleteSupplement } from "@/hooks/use-supplement-logs";
 import { BIOMARKERS, getMarkerStatus } from "@/data/biomarker-ranges";
 import { format } from "date-fns";
-import { useState } from "react";
 import DoseCalendar from "./InjectionCalendar";
 
 interface TodaysPlanProps {
@@ -41,9 +41,12 @@ const TodaysPlan = ({ onActivate }: TodaysPlanProps) => {
   const { data: panels = [] } = useBloodworkPanels();
   const hasActiveProtocol = protocols.some((p) => p.status === "active");
 
-  // Track completed supplements locally (no DB table for supplements yet)
-  const [completedSupplements, setCompletedSupplements] = useState<Set<string>>(new Set());
-  const [skippedSupplements, setSkippedSupplements] = useState<Set<string>>(new Set());
+  // Persist supplement completion to DB
+  const { data: supplementLogs = [] } = useTodaySupplementLogs();
+  const toggleSupplement = useToggleSupplement();
+  const batchComplete = useBatchCompleteSupplement();
+  const completedSupplements = new Set(supplementLogs.filter((l) => l.completed).map((l) => l.item));
+  const skippedSupplements = new Set(supplementLogs.filter((l) => !l.completed).map((l) => l.item));
 
   // Build a map from peptide name → formatted protocol goal for active protocols
   const peptideGoalMap = new Map<string, string>();
@@ -127,12 +130,11 @@ const TodaysPlan = ({ onActivate }: TodaysPlanProps) => {
     for (const inj of scheduled) {
       updateStatus.mutate({ id: inj.id, status: "completed" });
     }
-    // Complete all pending supplements
-    setCompletedSupplements((prev) => {
-      const next = new Set(prev);
-      for (const s of pendingSupplements) next.add(s.name);
-      return next;
-    });
+    // Complete all pending supplements in DB
+    const pendingNames = pendingSupplements.map((s) => s.name);
+    if (pendingNames.length > 0) {
+      batchComplete.mutate(pendingNames);
+    }
   };
 
   if (isLoading) {
@@ -297,14 +299,14 @@ const TodaysPlan = ({ onActivate }: TodaysPlanProps) => {
                   size="sm"
                   variant="outline"
                   className="h-8 text-xs"
-                  onClick={() => setSkippedSupplements((prev) => new Set(prev).add(supp.name))}
+                  onClick={() => toggleSupplement.mutate({ item: supp.name, completed: false })}
                 >
                   <SkipForward className="h-3 w-3 mr-1" /> Skip
                 </Button>
                 <Button
                   size="sm"
                   className="h-8 text-xs shadow-brand"
-                  onClick={() => setCompletedSupplements((prev) => new Set(prev).add(supp.name))}
+                  onClick={() => toggleSupplement.mutate({ item: supp.name, completed: true })}
                 >
                   <Check className="h-3 w-3 mr-1" /> Done
                 </Button>
