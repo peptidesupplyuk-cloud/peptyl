@@ -25,12 +25,38 @@ const ADMIN_EMAIL = "peptidesupplyuk@gmail.com";
 /* ========== ANALYTICS TAB ========== */
 
 const GOAL_LABELS: Record<string, string> = {
+  fat_loss: "Fat Loss",
   weight_loss: "Weight Loss / Metabolic",
   longevity: "Longevity / Anti-Ageing",
   healing: "Healing / Recovery",
   performance: "Performance / Muscle",
   cognitive: "Cognitive / Nootropic",
+  muscle: "Muscle / Growth",
+  hormone: "Hormone Optimisation",
   general: "General Research",
+  "Not specified": "Not specified",
+};
+
+const EXPERIENCE_LABELS: Record<string, string> = {
+  none: "No Experience",
+  beginner: "Beginner (< 6 months)",
+  intermediate: "Intermediate (6–24 months)",
+  advanced: "Advanced (2+ years)",
+  "Not specified": "Not specified",
+};
+
+const RISK_LABELS: Record<string, string> = {
+  conservative: "Conservative",
+  moderate: "Moderate",
+  aggressive: "Aggressive",
+  "Not specified": "Not specified",
+};
+
+const BIOMARKER_LABELS: Record<string, string> = {
+  none: "No Bloodwork",
+  basic: "Basic Panel",
+  hormones: "Hormones Panel",
+  comprehensive: "Comprehensive",
   "Not specified": "Not specified",
 };
 
@@ -77,6 +103,12 @@ const AnalyticsTab = () => {
     .sort(([, a], [, b]) => b - a).slice(0, 10).map(([name, value]) => ({ name, value }));
   const goalData = Object.entries(stats.by_goal as Record<string, number>)
     .sort(([, a], [, b]) => b - a).map(([name, value]) => ({ name: GOAL_LABELS[name] || name, value }));
+  const experienceData = Object.entries((stats.by_experience || {}) as Record<string, number>)
+    .sort(([, a], [, b]) => b - a).map(([name, value]) => ({ name: EXPERIENCE_LABELS[name] || name, value }));
+  const riskData = Object.entries((stats.by_risk || {}) as Record<string, number>)
+    .sort(([, a], [, b]) => b - a).map(([name, value]) => ({ name: RISK_LABELS[name] || name, value }));
+  const biomarkerData = Object.entries((stats.by_biomarker || {}) as Record<string, number>)
+    .sort(([, a], [, b]) => b - a).map(([name, value]) => ({ name: BIOMARKER_LABELS[name] || name, value }));
   const signupData = Object.entries(stats.signups_by_day as Record<string, number>)
     .sort(([a], [b]) => a.localeCompare(b)).map(([date, count]) => ({ date: date.slice(5), count }));
 
@@ -158,6 +190,46 @@ const AnalyticsTab = () => {
             ))}
             {(stats.recent_signups || []).length === 0 && <p className="text-xs text-muted-foreground">No signups yet.</p>}
           </div>
+        </div>
+      </div>
+
+      {/* Onboarding Responses Pie Charts */}
+      <div className="bg-card border border-border rounded-xl p-5">
+        <h3 className="font-heading font-semibold text-foreground text-sm mb-4 flex items-center gap-2">
+          <Target className="h-4 w-4 text-primary" /> Onboarding Responses
+        </h3>
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+          {[
+            { title: "Experience Level", data: experienceData },
+            { title: "Risk Tolerance", data: riskData },
+            { title: "Biomarker Availability", data: biomarkerData },
+          ].map(({ title, data }) => (
+            <div key={title}>
+              <p className="text-xs font-medium text-muted-foreground mb-2">{title}</p>
+              {data.length > 0 ? (
+                <>
+                  <ResponsiveContainer width="100%" height={160}>
+                    <PieChart>
+                      <Pie data={data} dataKey="value" cx="50%" cy="50%" outerRadius={55} stroke="none">
+                        {data.map((_, i) => <Cell key={i} fill={COLORS[i % COLORS.length]} />)}
+                      </Pie>
+                      <Tooltip contentStyle={{ backgroundColor: "hsl(var(--card))", border: "1px solid hsl(var(--border))", borderRadius: "8px", fontSize: "12px" }} />
+                    </PieChart>
+                  </ResponsiveContainer>
+                  <div className="flex flex-col gap-1 mt-2">
+                    {data.map((g, i) => (
+                      <div key={g.name} className="flex items-center gap-2 text-xs">
+                        <div className="w-2.5 h-2.5 rounded-full flex-shrink-0" style={{ backgroundColor: COLORS[i % COLORS.length] }} />
+                        <span className="text-muted-foreground">{g.name} ({g.value})</span>
+                      </div>
+                    ))}
+                  </div>
+                </>
+              ) : (
+                <p className="text-xs text-muted-foreground">No data yet.</p>
+              )}
+            </div>
+          ))}
         </div>
       </div>
 

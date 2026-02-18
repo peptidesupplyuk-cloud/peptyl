@@ -49,7 +49,7 @@ Deno.serve(async (req) => {
       recentSignupsRes,
       authUsersRes,
     ] = await Promise.all([
-      admin.from("profiles").select("country, research_goal, created_at"),
+      admin.from("profiles").select("country, research_goal, experience_level, risk_tolerance, biomarker_availability, current_compounds, created_at"),
       admin.from("contact_submissions").select("id, name, email, message, created_at").order("created_at", { ascending: false }).limit(50),
       admin.from("protocols").select("id, user_id, name, goal, status, created_at"),
       admin.from("bloodwork_panels").select("id, user_id, panel_type, test_date, created_at"),
@@ -87,6 +87,27 @@ Deno.serve(async (req) => {
       byGoal[g] = (byGoal[g] || 0) + 1;
     }
 
+    // Aggregate: users by experience level
+    const byExperience: Record<string, number> = {};
+    for (const p of profiles) {
+      const e = p.experience_level || "Not specified";
+      byExperience[e] = (byExperience[e] || 0) + 1;
+    }
+
+    // Aggregate: users by risk tolerance
+    const byRisk: Record<string, number> = {};
+    for (const p of profiles) {
+      const r = p.risk_tolerance || "Not specified";
+      byRisk[r] = (byRisk[r] || 0) + 1;
+    }
+
+    // Aggregate: users by biomarker availability
+    const byBiomarker: Record<string, number> = {};
+    for (const p of profiles) {
+      const b = p.biomarker_availability || "Not specified";
+      byBiomarker[b] = (byBiomarker[b] || 0) + 1;
+    }
+
     // Signups over time (last 30 days)
     const thirtyDaysAgo = new Date();
     thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
@@ -111,6 +132,9 @@ Deno.serve(async (req) => {
       total_contact_submissions: contacts.length,
       by_country: byCountry,
       by_goal: byGoal,
+      by_experience: byExperience,
+      by_risk: byRisk,
+      by_biomarker: byBiomarker,
       signups_by_day: signupsByDay,
       recent_signups: recentSignups,
       recent_contacts: contacts.slice(0, 20),
