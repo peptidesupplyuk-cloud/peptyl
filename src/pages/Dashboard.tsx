@@ -169,12 +169,6 @@ const Dashboard = () => {
               <TabsTrigger value="overview" className="text-xs sm:text-sm">
                 <LayoutDashboard className="h-4 w-4 mr-1.5" />Overview
               </TabsTrigger>
-              <TabsTrigger value="journal" className="text-xs sm:text-sm">
-                <BookOpen className="h-4 w-4 mr-1.5" />Journal
-              </TabsTrigger>
-              <TabsTrigger value="profile" className="text-xs sm:text-sm">
-                <User className="h-4 w-4 mr-1.5" />Profile
-              </TabsTrigger>
               <TabsTrigger value="biomarkers" className="text-xs sm:text-sm">
                 <Activity className="h-4 w-4 mr-1.5" />Biomarkers
               </TabsTrigger>
@@ -186,6 +180,12 @@ const Dashboard = () => {
               </TabsTrigger>
               <TabsTrigger value="adherence" className="text-xs sm:text-sm">
                 <BarChart3 className="h-4 w-4 mr-1.5" />Adherence
+              </TabsTrigger>
+              <TabsTrigger value="journal" className="text-xs sm:text-sm">
+                <BookOpen className="h-4 w-4 mr-1.5" />Journal
+              </TabsTrigger>
+              <TabsTrigger value="profile" className="text-xs sm:text-sm">
+                <User className="h-4 w-4 mr-1.5" />Profile
               </TabsTrigger>
             </TabsList>
 
