@@ -11,22 +11,27 @@ import { BIOMARKERS, getMarkerStatus, getStatusBg, getStatusColor, type Biomarke
 import { useSaveBloodwork } from "@/hooks/use-bloodwork";
 import { useToast } from "@/hooks/use-toast";
 
-const BloodworkForm = ({ onSaved }: { onSaved?: () => void }) => {
+const BloodworkForm = ({ onSaved, filterCategories }: { onSaved?: () => void; filterCategories?: string[] }) => {
   const [testDate, setTestDate] = useState<Date>(new Date());
   const [showAdvanced, setShowAdvanced] = useState(false);
   const [values, setValues] = useState<Record<string, string>>({});
   const saveBloodwork = useSaveBloodwork();
   const { toast } = useToast();
 
-  const basicMarkers = BIOMARKERS.filter((m) => m.panel === "basic");
-  const advancedMarkers = BIOMARKERS.filter((m) => m.panel === "advanced");
+  const allBasic = BIOMARKERS.filter((m) => m.panel === "basic");
+  const allAdvanced = BIOMARKERS.filter((m) => m.panel === "advanced");
+  const basicMarkers = filterCategories ? allBasic.filter((m) => filterCategories.includes(m.category)) : allBasic;
+  const advancedMarkers = filterCategories ? allAdvanced.filter((m) => filterCategories.includes(m.category)) : allAdvanced;
 
   const setValue = (key: string, val: string) => {
     setValues((prev) => ({ ...prev, [key]: val }));
   };
 
   const handleSubmit = async () => {
-    const markers = BIOMARKERS
+    const relevantMarkers = filterCategories
+      ? BIOMARKERS.filter((m) => filterCategories.includes(m.category))
+      : BIOMARKERS;
+    const markers = relevantMarkers
       .filter((m) => values[m.key] && !isNaN(parseFloat(values[m.key])))
       .map((m) => ({
         marker_name: m.key,
@@ -42,7 +47,7 @@ const BloodworkForm = ({ onSaved }: { onSaved?: () => void }) => {
     try {
       await saveBloodwork.mutateAsync({
         testDate: format(testDate, "yyyy-MM-dd"),
-        panelType: showAdvanced ? "advanced" : "basic",
+        panelType: filterCategories ? filterCategories[0].toLowerCase().replace(" ", "_") : (showAdvanced ? "advanced" : "basic"),
         markers,
       });
       toast({ title: "Bloodwork saved", description: `${markers.length} markers recorded.` });
@@ -125,29 +130,37 @@ const BloodworkForm = ({ onSaved }: { onSaved?: () => void }) => {
       </div>
 
       {/* Basic Panel */}
-      <div>
-        <div className="flex items-center gap-2 mb-4">
-          <FlaskConical className="h-5 w-5 text-primary" />
-          <h3 className="text-lg font-heading font-semibold text-foreground">Basic Panel</h3>
+      {basicMarkers.length > 0 && (
+        <div>
+          {!filterCategories && (
+            <div className="flex items-center gap-2 mb-4">
+              <FlaskConical className="h-5 w-5 text-primary" />
+              <h3 className="text-lg font-heading font-semibold text-foreground">Basic Panel</h3>
+            </div>
+          )}
+          <div className="space-y-6">{renderMarkerGroup(basicMarkers)}</div>
         </div>
-        <div className="space-y-6">{renderMarkerGroup(basicMarkers)}</div>
-      </div>
+      )}
 
       {/* Advanced Panel Toggle */}
-      <Button
-        variant="outline"
-        onClick={() => setShowAdvanced(!showAdvanced)}
-        className="w-full justify-between"
-      >
-        <span className="flex items-center gap-2">
-          <FlaskConical className="h-4 w-4 text-primary" />
-          Advanced Panel (Hormone Optimisation)
-        </span>
-        {showAdvanced ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
-      </Button>
+      {advancedMarkers.length > 0 && (
+        <>
+          <Button
+            variant="outline"
+            onClick={() => setShowAdvanced(!showAdvanced)}
+            className="w-full justify-between"
+          >
+            <span className="flex items-center gap-2">
+              <FlaskConical className="h-4 w-4 text-primary" />
+              Advanced Panel (Hormone Optimisation)
+            </span>
+            {showAdvanced ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
+          </Button>
 
-      {showAdvanced && (
-        <div className="space-y-6">{renderMarkerGroup(advancedMarkers)}</div>
+          {showAdvanced && (
+            <div className="space-y-6">{renderMarkerGroup(advancedMarkers)}</div>
+          )}
+        </>
       )}
 
       <div className="flex gap-3 pt-2">

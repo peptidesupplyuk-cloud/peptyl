@@ -8,12 +8,14 @@ import { TrendingUp } from "lucide-react";
 
 interface Props {
   panels: BloodworkPanel[];
+  filterCategories?: string[];
 }
 
-const BiomarkerTrendChart = ({ panels }: Props) => {
-  const availableMarkers = BIOMARKERS.filter((b) =>
-    panels.some((p) => p.markers.some((m) => m.marker_name === b.key))
-  );
+const BiomarkerTrendChart = ({ panels, filterCategories }: Props) => {
+  const availableMarkers = BIOMARKERS.filter((b) => {
+    if (filterCategories && !filterCategories.includes(b.category)) return false;
+    return panels.some((p) => p.markers.some((m) => m.marker_name === b.key));
+  });
   const [selectedKey, setSelectedKey] = useState(availableMarkers[0]?.key || "");
 
   if (availableMarkers.length === 0 || panels.length === 0) return null;
