@@ -7,6 +7,7 @@ import { ArrowUp, ArrowDown, Minus, Clock } from "lucide-react";
 const KEY_MARKERS = [
   "igf1", "total_testosterone", "hscrp", "hba1c", "vitamin_d", "fasting_glucose",
   "weight_kg", "bp_systolic", "bp_diastolic", "resting_hr", "waist_cm", "body_fat_pct",
+  "age", "height_cm",
 ];
 
 const CATEGORY_GROUP: Record<string, string> = {
