@@ -40,6 +40,8 @@ export const BIOMARKERS: BiomarkerDef[] = [
   { name: "Homocysteine", key: "homocysteine", unit: "µmol/L", optimalMin: 5, optimalMax: 9, refMin: 4, refMax: 15, panel: "advanced", category: "Inflammation" },
 
   // Body Metrics
+  { name: "Age", key: "age", unit: "yrs", optimalMin: 18, optimalMax: 100, refMin: 0, refMax: 120, panel: "basic", category: "Body Composition" },
+  { name: "Height", key: "height_cm", unit: "cm", optimalMin: 150, optimalMax: 200, refMin: 100, refMax: 250, panel: "basic", category: "Body Composition" },
   { name: "Weight", key: "weight_kg", unit: "kg", optimalMin: 55, optimalMax: 90, refMin: 40, refMax: 150, panel: "basic", category: "Body Composition" },
   { name: "Waist Circumference", key: "waist_cm", unit: "cm", optimalMin: 60, optimalMax: 89, refMin: 50, refMax: 120, panel: "basic", category: "Body Composition" },
   { name: "Body Fat", key: "body_fat_pct", unit: "%", optimalMin: 10, optimalMax: 22, refMin: 5, refMax: 40, panel: "basic", category: "Body Composition" },
