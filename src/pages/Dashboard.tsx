@@ -30,6 +30,7 @@ import CollaborativeRecommendations from "@/components/dashboard/CollaborativeRe
 import OnboardingRecommendations from "@/components/dashboard/OnboardingRecommendations";
 import MobileTabNav from "@/components/dashboard/MobileTabNav";
 import OptimizationScore from "@/components/dashboard/OptimizationScore";
+import AdherenceSummary from "@/components/dashboard/AdherenceSummary";
 import { useIsMobile } from "@/hooks/use-mobile";
 
 const Dashboard = () => {
@@ -200,6 +201,9 @@ const Dashboard = () => {
             <TabsContent value="overview" className="space-y-6">
               {/* 1. Action card — today's doses or activation CTA */}
               <TodaysPlan onActivate={() => setActiveTab("protocols")} />
+
+              {/* 1b. Adherence snapshot */}
+              <AdherenceSummary onNavigate={() => setActiveTab("adherence")} />
 
               {/* 2. Protocol nudges */}
               <ProtocolNudges onNavigate={setActiveTab} />
