@@ -103,6 +103,14 @@ const Auth = () => {
         const onboardingRaw = sessionStorage.getItem("onboarding_answers");
         const onboarding = onboardingRaw ? JSON.parse(onboardingRaw) : {};
         
+        // Store country/goal in sessionStorage too so the catch-up hook can use them
+        const mergedAnswers = {
+          ...onboarding,
+          ...(country ? { country } : {}),
+          ...(researchGoal ? { goal: researchGoal } : {}),
+        };
+        sessionStorage.setItem("onboarding_answers", JSON.stringify(mergedAnswers));
+        
         const { error } = await signUp(emailResult.data, password, {
           country,
           research_goal: researchGoal || onboarding.goal || undefined,
@@ -112,8 +120,7 @@ const Auth = () => {
           risk_tolerance: onboarding.risk || undefined,
         });
         
-        // Clear onboarding answers after saving
-        sessionStorage.removeItem("onboarding_answers");
+        // Don't clear sessionStorage here — the useSaveOnboarding hook handles it reliably
         if (error) {
           if (error.message.includes("already registered")) {
             setError("This email is already registered. Try signing in instead.");
@@ -146,6 +153,17 @@ const Auth = () => {
   const handleGoogleSignIn = async () => {
     setGoogleLoading(true);
     setError("");
+    // Persist form fields to sessionStorage so they survive the OAuth redirect
+    const onboardingRaw = sessionStorage.getItem("onboarding_answers");
+    const existing = onboardingRaw ? JSON.parse(onboardingRaw) : {};
+    const merged = {
+      ...existing,
+      ...(country ? { country } : {}),
+      ...(researchGoal ? { goal: researchGoal } : {}),
+    };
+    if (Object.keys(merged).length > 0) {
+      sessionStorage.setItem("onboarding_answers", JSON.stringify(merged));
+    }
     const { error } = await lovable.auth.signInWithOAuth("google", {
       redirect_uri: window.location.origin,
     });

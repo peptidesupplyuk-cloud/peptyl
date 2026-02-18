@@ -32,6 +32,7 @@ import MobileTabNav from "@/components/dashboard/MobileTabNav";
 import OptimizationScore from "@/components/dashboard/OptimizationScore";
 import AdherenceSummary from "@/components/dashboard/AdherenceSummary";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { useSaveOnboarding } from "@/hooks/use-save-onboarding";
 
 const Dashboard = () => {
   const { data: panels = [], refetch: refetchPanels } = useBloodworkPanels();
@@ -46,6 +47,7 @@ const Dashboard = () => {
   const [initialPeptide, setInitialPeptide] = useState<string | null>(null);
   const isMobile = useIsMobile();
   const [searchParams, setSearchParams] = useSearchParams();
+  useSaveOnboarding();
 
   // Schedule local notifications for protocol doses
   useProtocolNotifications();
