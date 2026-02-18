@@ -11,8 +11,10 @@ import CommunitySection from "@/components/CommunitySection";
 import SignupBenefits from "@/components/SignupBenefits";
 import HowItWorksSection from "@/components/HowItWorksSection";
 import SEO from "@/components/SEO";
+import { useSaveOnboarding } from "@/hooks/use-save-onboarding";
 
 const Index = () => {
+  useSaveOnboarding();
   const { t } = useTranslation();
 
   return (
