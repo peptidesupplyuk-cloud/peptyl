@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { useSearchParams } from "react-router-dom";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Carousel, CarouselContent, CarouselItem, CarouselPrevious, CarouselNext } from "@/components/ui/carousel";
-import { Activity, FlaskConical, LayoutDashboard, AlertTriangle, User, BookOpen, CalendarDays, BarChart3 } from "lucide-react";
+import { Activity, FlaskConical, LayoutDashboard, AlertTriangle, User, BookOpen, CalendarDays, BarChart3, Heart, Weight, Droplets } from "lucide-react";
 import { addWeeks, format } from "date-fns";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
@@ -175,8 +175,8 @@ const Dashboard = () => {
               <TabsTrigger value="profile" className="text-xs sm:text-sm">
                 <User className="h-4 w-4 mr-1.5" />Profile
               </TabsTrigger>
-              <TabsTrigger value="bloodwork" className="text-xs sm:text-sm">
-                <Activity className="h-4 w-4 mr-1.5" />Bloodwork
+              <TabsTrigger value="biomarkers" className="text-xs sm:text-sm">
+                <Activity className="h-4 w-4 mr-1.5" />Biomarkers
               </TabsTrigger>
               <TabsTrigger value="protocols" className="text-xs sm:text-sm">
                 <FlaskConical className="h-4 w-4 mr-1.5" />Protocols
@@ -278,40 +278,77 @@ const Dashboard = () => {
                   <p className="text-sm text-muted-foreground mb-4">
                     Upload your bloodwork to receive personalised peptide and supplement recommendations.
                   </p>
-                  <button onClick={() => setActiveTab("bloodwork")} className="text-sm text-primary font-medium hover:underline">
+                  <button onClick={() => setActiveTab("biomarkers")} className="text-sm text-primary font-medium hover:underline">
                     Upload Bloodwork →
                   </button>
                 </div>
               )}
             </TabsContent>
 
-            {/* BLOODWORK TAB */}
-            <TabsContent value="bloodwork" className="space-y-6">
-              <div className="bg-card rounded-2xl border border-border p-5 sm:p-6">
-                <h2 className="font-heading font-semibold text-foreground mb-4">Enter Bloodwork Results</h2>
-                <BloodworkForm onSaved={() => { refetchPanels(); setActiveTab("protocols"); }} />
-              </div>
+            {/* BIOMARKERS TAB */}
+            <TabsContent value="biomarkers" className="space-y-6">
+              <Tabs defaultValue="bloodwork" className="space-y-4">
+                <TabsList className="w-full grid grid-cols-3">
+                  <TabsTrigger value="bloodwork" className="text-xs sm:text-sm gap-1.5">
+                    <Droplets className="h-3.5 w-3.5" />Bloodwork
+                  </TabsTrigger>
+                  <TabsTrigger value="body" className="text-xs sm:text-sm gap-1.5">
+                    <Weight className="h-3.5 w-3.5" />Body
+                  </TabsTrigger>
+                  <TabsTrigger value="cardio" className="text-xs sm:text-sm gap-1.5">
+                    <Heart className="h-3.5 w-3.5" />Cardiovascular
+                  </TabsTrigger>
+                </TabsList>
 
-              <BiomarkerTrendChart panels={panels} />
-
-              {panels.length > 0 && (
-                <div className="bg-card rounded-2xl border border-border p-5">
-                  <h3 className="font-heading font-semibold text-foreground mb-3">Previous Tests</h3>
-                  <div className="space-y-2">
-                    {panels.map((p) => (
-                      <div key={p.id} className="flex items-center justify-between bg-muted/50 rounded-lg px-4 py-2.5">
-                        <div>
-                          <span className="text-sm font-medium text-foreground">
-                            {new Date(p.test_date).toLocaleDateString()}
-                          </span>
-                          <span className="text-xs text-muted-foreground ml-2 capitalize">{p.panel_type} panel</span>
-                        </div>
-                        <span className="text-xs text-muted-foreground">{p.markers.length} markers</span>
-                      </div>
-                    ))}
+                {/* BLOODWORK SUB-TAB */}
+                <TabsContent value="bloodwork" className="space-y-6">
+                  <div className="bg-card rounded-2xl border border-border p-5 sm:p-6">
+                    <h2 className="font-heading font-semibold text-foreground mb-4">Enter Bloodwork Results</h2>
+                    <BloodworkForm onSaved={() => { refetchPanels(); setActiveTab("protocols"); }} filterCategories={["Metabolic", "Lipids", "Liver", "Kidney", "Inflammation", "Vitamins", "Hormones", "Thyroid"]} />
                   </div>
-                </div>
-              )}
+
+                  <BiomarkerTrendChart panels={panels} filterCategories={["Metabolic", "Lipids", "Liver", "Kidney", "Inflammation", "Vitamins", "Hormones", "Thyroid"]} />
+
+                  {panels.length > 0 && (
+                    <div className="bg-card rounded-2xl border border-border p-5">
+                      <h3 className="font-heading font-semibold text-foreground mb-3">Previous Tests</h3>
+                      <div className="space-y-2">
+                        {panels.map((p) => (
+                          <div key={p.id} className="flex items-center justify-between bg-muted/50 rounded-lg px-4 py-2.5">
+                            <div>
+                              <span className="text-sm font-medium text-foreground">
+                                {new Date(p.test_date).toLocaleDateString()}
+                              </span>
+                              <span className="text-xs text-muted-foreground ml-2 capitalize">{p.panel_type} panel</span>
+                            </div>
+                            <span className="text-xs text-muted-foreground">{p.markers.length} markers</span>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </TabsContent>
+
+                {/* BODY COMPOSITION SUB-TAB */}
+                <TabsContent value="body" className="space-y-6">
+                  <div className="bg-card rounded-2xl border border-border p-5 sm:p-6">
+                    <h2 className="font-heading font-semibold text-foreground mb-4">Body Composition</h2>
+                    <BloodworkForm onSaved={() => refetchPanels()} filterCategories={["Body Composition"]} />
+                  </div>
+
+                  <BiomarkerTrendChart panels={panels} filterCategories={["Body Composition"]} />
+                </TabsContent>
+
+                {/* CARDIOVASCULAR SUB-TAB */}
+                <TabsContent value="cardio" className="space-y-6">
+                  <div className="bg-card rounded-2xl border border-border p-5 sm:p-6">
+                    <h2 className="font-heading font-semibold text-foreground mb-4">Cardiovascular</h2>
+                    <BloodworkForm onSaved={() => refetchPanels()} filterCategories={["Cardiovascular"]} />
+                  </div>
+
+                  <BiomarkerTrendChart panels={panels} filterCategories={["Cardiovascular"]} />
+                </TabsContent>
+              </Tabs>
             </TabsContent>
 
             {/* PROTOCOLS TAB */}

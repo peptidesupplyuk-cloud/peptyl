@@ -8,9 +8,9 @@ interface Props {
 
 const tabs = [
   { value: "overview", label: "Home", icon: LayoutDashboard },
+  { value: "biomarkers", label: "Biomarkers", icon: Activity },
   { value: "protocols", label: "Protocols", icon: FlaskConical },
   { value: "injections", label: "Tracker", icon: CalendarDays },
-  { value: "adherence", label: "Adherence", icon: BarChart3 },
   { value: "journal", label: "Journal", icon: BookOpen },
   { value: "profile", label: "Profile", icon: User },
 ];
