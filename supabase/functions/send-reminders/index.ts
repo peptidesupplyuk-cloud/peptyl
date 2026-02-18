@@ -32,6 +32,12 @@ Deno.serve(async (req) => {
     const whatsappToken = Deno.env.get("WHATSAPP_TOKEN");
     const whatsappPhoneNumberId = Deno.env.get("WHATSAPP_PHONE_NUMBER_ID");
 
+    console.log("Environment check:", {
+      hasResendKey: !!resendApiKey,
+      hasWhatsappToken: !!whatsappToken,
+      hasWhatsappPhoneId: !!whatsappPhoneNumberId,
+    });
+
     const supabase = createClient(supabaseUrl, serviceRoleKey);
 
     const today = new Date().toISOString().split("T")[0];
@@ -40,6 +46,8 @@ Deno.serve(async (req) => {
     const isAM = currentHour >= 6 && currentHour < 12;
     const isPM = currentHour >= 17 && currentHour < 23;
     const window = isAM ? "AM" : isPM ? "PM" : null;
+
+    console.log(`Current UTC hour: ${currentHour}, window: ${window}`);
 
     if (!window) {
       return new Response(
@@ -67,7 +75,7 @@ Deno.serve(async (req) => {
       userProtocols[p.user_id].push(p);
     }
 
-    const results: Array<{ user_id: string; email_sent: boolean; whatsapp_sent: boolean; peptides_count: number; supplements_count: number }> = [];
+    const results: Array<{ user_id: string; email_sent: boolean; whatsapp_sent: boolean; peptides_count: number; supplements_count: number; error?: string }> = [];
 
     for (const [userId, userProts] of Object.entries(userProtocols)) {
       const { data: profile } = await supabase
@@ -80,7 +88,12 @@ Deno.serve(async (req) => {
       if (!profile.notify_email && !profile.notify_whatsapp) continue;
 
       const { data: authUser } = await supabase.auth.admin.getUserById(userId);
-      if (!authUser?.user?.email && profile.notify_email) continue;
+      const userEmail = authUser?.user?.email;
+
+      if (!userEmail && profile.notify_email) {
+        console.log(`User ${userId}: notify_email=true but no email found, skipping`);
+        continue;
+      }
 
       const reminders: PeptideReminder[] = [];
       const supplementReminders: SupplementReminder[] = [];
@@ -113,7 +126,6 @@ Deno.serve(async (req) => {
           }
         }
 
-        // Collect supplements (show in AM window only to avoid double reminders)
         if (window === "AM" && Array.isArray(prot.supplements)) {
           for (const supp of prot.supplements as Array<{ name: string; dose: string; frequency: string }>) {
             if (supp.name && !seenSupplements.has(supp.name)) {
@@ -133,26 +145,47 @@ Deno.serve(async (req) => {
 
       let emailSent = false;
       let whatsappSent = false;
+      let errorMsg: string | undefined;
 
       // Send email via Resend
-      if (profile.notify_email && resendApiKey && authUser?.user?.email) {
-        const emailHtml = buildReminderEmail(reminders, supplementReminders, window, today);
-        const totalCount = reminders.length + supplementReminders.length;
-        const emailRes = await fetch("https://api.resend.com/emails", {
-          method: "POST",
-          headers: {
-            Authorization: `Bearer ${resendApiKey}`,
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
+      if (profile.notify_email && resendApiKey && userEmail) {
+        try {
+          const emailHtml = buildReminderEmail(reminders, supplementReminders, window, today);
+          const totalCount = reminders.length + supplementReminders.length;
+
+          const emailPayload = {
             from: "Peptyl <reminders@peptyl.co.uk>",
-            to: [authUser.user.email],
-            subject: `⏰ ${window} Reminder: ${totalCount} item${totalCount > 1 ? "s" : ""} due`,
+            to: [userEmail],
+            subject: `⏰ Action Required: ${totalCount} item${totalCount > 1 ? "s" : ""} to complete on your dashboard`,
             html: emailHtml,
-          }),
-        });
-        emailSent = emailRes.ok;
-        console.log(`Email to ${authUser.user.email}: ${emailRes.ok ? "sent" : "failed"}`);
+          };
+
+          console.log(`Sending email to ${userEmail} with ${totalCount} items...`);
+
+          const emailRes = await fetch("https://api.resend.com/emails", {
+            method: "POST",
+            headers: {
+              Authorization: `Bearer ${resendApiKey}`,
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify(emailPayload),
+          });
+
+          const emailResBody = await emailRes.text();
+          emailSent = emailRes.ok;
+
+          if (!emailRes.ok) {
+            console.error(`Resend API error (${emailRes.status}): ${emailResBody}`);
+            errorMsg = `Resend ${emailRes.status}: ${emailResBody}`;
+          } else {
+            console.log(`Email sent to ${userEmail}: ${emailResBody}`);
+          }
+        } catch (emailErr) {
+          console.error(`Email send exception for ${userEmail}:`, emailErr);
+          errorMsg = emailErr instanceof Error ? emailErr.message : "Email send failed";
+        }
+      } else {
+        console.log(`Email skipped for ${userId}: notify=${profile.notify_email}, hasKey=${!!resendApiKey}, email=${userEmail}`);
       }
 
       // Send WhatsApp via Meta Cloud API
@@ -189,6 +222,7 @@ Deno.serve(async (req) => {
         whatsapp_sent: whatsappSent,
         peptides_count: reminders.length,
         supplements_count: supplementReminders.length,
+        ...(errorMsg ? { error: errorMsg } : {}),
       });
     }
 
@@ -221,9 +255,9 @@ function checkFrequencyDue(frequency: string, todayStr: string): boolean {
 function buildWhatsAppMessage(reminders: PeptideReminder[], supplements: SupplementReminder[], window: string): string {
   const totalCount = reminders.length + supplements.length;
   const lines = [
-    `🧬 *Your Daily reminder from BioBot*`,
+    `🧬 *Action Required — Your ${window} Protocol*`,
     `━━━━━━━━━━━━━━━━`,
-    `⏰ *${window} Window* — ${totalCount} item${totalCount > 1 ? "s" : ""} due\n`,
+    `You have *${totalCount} item${totalCount > 1 ? "s" : ""}* to complete.\n`,
   ];
 
   if (reminders.length > 0) {
@@ -242,8 +276,8 @@ function buildWhatsAppMessage(reminders: PeptideReminder[], supplements: Supplem
   }
 
   lines.push(`━━━━━━━━━━━━━━━━`);
-  lines.push(`_For research purposes only._`);
-  lines.push(`_Manage at peptyl.lovable.app/dashboard_`);
+  lines.push(`✅ *Log your doses on your dashboard:*`);
+  lines.push(`peptyl.lovable.app/dashboard`);
 
   return lines.join("\n");
 }
@@ -260,9 +294,12 @@ function buildReminderEmail(
     .map(
       (r) =>
         `<tr>
-          <td style="padding:8px 12px;border-bottom:1px solid #eee;font-weight:600">💉 ${r.peptide_name}</td>
-          <td style="padding:8px 12px;border-bottom:1px solid #eee">${r.dose_mcg} mcg</td>
-          <td style="padding:8px 12px;border-bottom:1px solid #eee;color:#666">${r.protocol_name}</td>
+          <td style="padding:12px 16px;border-bottom:1px solid #e5e7eb">
+            <span style="font-size:18px">💉</span>
+            <strong style="color:#111827;margin-left:6px">${r.peptide_name}</strong>
+          </td>
+          <td style="padding:12px 16px;border-bottom:1px solid #e5e7eb;color:#374151;font-weight:500">${r.dose_mcg} mcg</td>
+          <td style="padding:12px 16px;border-bottom:1px solid #e5e7eb;color:#6b7280">${r.protocol_name}</td>
         </tr>`
     )
     .join("");
@@ -271,39 +308,63 @@ function buildReminderEmail(
     .map(
       (s) =>
         `<tr>
-          <td style="padding:8px 12px;border-bottom:1px solid #eee;font-weight:600">💊 ${s.name}</td>
-          <td style="padding:8px 12px;border-bottom:1px solid #eee">${s.dose}</td>
-          <td style="padding:8px 12px;border-bottom:1px solid #eee;color:#666">${s.protocol_name}</td>
+          <td style="padding:12px 16px;border-bottom:1px solid #e5e7eb">
+            <span style="font-size:18px">💊</span>
+            <strong style="color:#111827;margin-left:6px">${s.name}</strong>
+          </td>
+          <td style="padding:12px 16px;border-bottom:1px solid #e5e7eb;color:#374151;font-weight:500">${s.dose}</td>
+          <td style="padding:12px 16px;border-bottom:1px solid #e5e7eb;color:#6b7280">${s.protocol_name}</td>
         </tr>`
     )
     .join("");
 
   return `
-    <div style="font-family:system-ui,-apple-system,sans-serif;max-width:500px;margin:0 auto;padding:24px">
-      <div style="text-align:center;margin-bottom:24px">
-        <h1 style="color:#0d9488;font-size:24px;margin:0">Peptyl</h1>
-        <p style="color:#888;font-size:13px;margin:4px 0 0">Your ${window} Research Reminder</p>
-      </div>
-      <div style="background:#f8fffe;border:1px solid #d1fae5;border-radius:12px;padding:20px;margin-bottom:16px">
-        <p style="margin:0 0 12px;font-size:14px;color:#333">
-          You have <strong>${totalCount} item${totalCount > 1 ? "s" : ""}</strong> 
-          scheduled for your <strong>${window}</strong> window today.
+    <div style="font-family:system-ui,-apple-system,sans-serif;max-width:520px;margin:0 auto;padding:0;background:#ffffff">
+      <!-- Header -->
+      <div style="background:linear-gradient(135deg,#0d9488,#0f766e);padding:28px 24px;text-align:center;border-radius:12px 12px 0 0">
+        <h1 style="color:#ffffff;font-size:22px;margin:0;font-weight:700">⏰ Action Required</h1>
+        <p style="color:#d1fae5;font-size:14px;margin:8px 0 0;font-weight:400">
+          You have <strong style="color:#ffffff">${totalCount} item${totalCount > 1 ? "s" : ""}</strong> to complete in your <strong style="color:#ffffff">${window}</strong> window
         </p>
-        <table style="width:100%;border-collapse:collapse;font-size:13px">
+      </div>
+
+      <!-- Body -->
+      <div style="padding:24px;border:1px solid #e5e7eb;border-top:none;border-radius:0 0 12px 12px">
+        <p style="margin:0 0 16px;font-size:15px;color:#374151;line-height:1.5">
+          Hi there 👋 — here's what's due today. Please log in to your dashboard to mark each item as complete.
+        </p>
+
+        <!-- Items table -->
+        <table style="width:100%;border-collapse:collapse;font-size:14px;margin-bottom:20px;border:1px solid #e5e7eb;border-radius:8px;overflow:hidden">
           <thead>
-            <tr style="background:#e6f7f5">
-              <th style="padding:8px 12px;text-align:left;font-weight:600;color:#0d9488">Item</th>
-              <th style="padding:8px 12px;text-align:left;font-weight:600;color:#0d9488">Dose</th>
-              <th style="padding:8px 12px;text-align:left;font-weight:600;color:#0d9488">Protocol</th>
+            <tr style="background:#f0fdfa">
+              <th style="padding:10px 16px;text-align:left;font-weight:600;color:#0d9488;font-size:12px;text-transform:uppercase;letter-spacing:0.5px">Item</th>
+              <th style="padding:10px 16px;text-align:left;font-weight:600;color:#0d9488;font-size:12px;text-transform:uppercase;letter-spacing:0.5px">Dose</th>
+              <th style="padding:10px 16px;text-align:left;font-weight:600;color:#0d9488;font-size:12px;text-transform:uppercase;letter-spacing:0.5px">Protocol</th>
             </tr>
           </thead>
           <tbody>${peptideRows}${supplementRows}</tbody>
         </table>
+
+        <!-- CTA Button -->
+        <div style="text-align:center;margin:24px 0 8px">
+          <a href="https://peptyl.lovable.app/dashboard" 
+             style="display:inline-block;background:#0d9488;color:#ffffff;text-decoration:none;padding:14px 32px;border-radius:8px;font-weight:600;font-size:15px;letter-spacing:0.3px">
+            ✅ Go to Dashboard & Complete
+          </a>
+        </div>
+        <p style="text-align:center;font-size:12px;color:#9ca3af;margin:8px 0 0">
+          Log your doses to keep your streak going!
+        </p>
       </div>
-      <p style="font-size:12px;color:#999;text-align:center;margin-top:24px">
-        This is an automated reminder from Peptyl. For educational and research purposes only.
-        <br/>Manage your preferences in your <a href="https://peptyl.lovable.app/dashboard" style="color:#0d9488">dashboard</a>.
-      </p>
+
+      <!-- Footer -->
+      <div style="padding:20px 24px;text-align:center">
+        <p style="font-size:11px;color:#9ca3af;margin:0;line-height:1.6">
+          This is an automated reminder from Peptyl. For educational and research purposes only.
+          <br/>Manage notification preferences in your <a href="https://peptyl.lovable.app/dashboard" style="color:#0d9488;text-decoration:underline">dashboard settings</a>.
+        </p>
+      </div>
     </div>
   `;
 }
