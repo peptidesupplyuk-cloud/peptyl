@@ -121,7 +121,8 @@ const Auth = () => {
             setError(error.message);
           }
         } else {
-          setSuccess(t("authPage.checkEmailConfirm"));
+          // Auto-confirm is enabled, user is immediately signed in
+          navigate("/peptides", { replace: true });
         }
       } else {
         const { error } = await signIn(emailResult.data, password);
