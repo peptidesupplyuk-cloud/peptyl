@@ -18,7 +18,6 @@ const PeptidesPage = () => {
   const [tab, setTab] = useState<Tab>("database");
   const [search, setSearch] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("All");
-  const [userVotes, setUserVotes] = useState<Record<string, Record<number, "up" | "down">>>({});
 
   const filtered = peptides.filter((p) => {
     const matchesSearch =
@@ -28,16 +27,6 @@ const PeptidesPage = () => {
     const matchesCat = selectedCategory === "All" || p.category === selectedCategory;
     return matchesSearch && matchesCat;
   });
-
-  const handleVote = (peptideName: string, expIndex: number, direction: "up" | "down") => {
-    setUserVotes((prev) => ({
-      ...prev,
-      [peptideName]: {
-        ...prev[peptideName],
-        [expIndex]: prev[peptideName]?.[expIndex] === direction ? undefined! : direction,
-      },
-    }));
-  };
 
   return (
     <div className="min-h-screen bg-background">
@@ -124,8 +113,8 @@ const PeptidesPage = () => {
                     key={peptide.name}
                     peptide={peptide}
                     index={pi}
-                    userVotes={userVotes[peptide.name] || {}}
-                    onVote={(ei, dir) => handleVote(peptide.name, ei, dir)}
+                    userVotes={{}}
+                    onVote={() => {}}
                   />
                 ))}
                 {filtered.length === 0 && (

@@ -560,6 +560,33 @@ export type Database = {
         }
         Relationships: []
       }
+      peptide_experience_votes: {
+        Row: {
+          created_at: string
+          experience_key: string
+          id: string
+          peptide_name: string
+          user_id: string
+          vote_type: string
+        }
+        Insert: {
+          created_at?: string
+          experience_key: string
+          id?: string
+          peptide_name: string
+          user_id: string
+          vote_type: string
+        }
+        Update: {
+          created_at?: string
+          experience_key?: string
+          id?: string
+          peptide_name?: string
+          user_id?: string
+          vote_type?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           age: number | null
@@ -1103,6 +1130,25 @@ export type Database = {
           benefit: string | null
           downvotes: number | null
           stack_name: string | null
+          upvotes: number | null
+        }
+        Relationships: []
+      }
+      community_experiences: {
+        Row: {
+          created_at: string | null
+          evidence_quality: string | null
+          journal_id: string | null
+          peptide_name: string | null
+          summary: string | null
+        }
+        Relationships: []
+      }
+      experience_vote_counts: {
+        Row: {
+          downvotes: number | null
+          experience_key: string | null
+          peptide_name: string | null
           upvotes: number | null
         }
         Relationships: []
