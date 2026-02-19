@@ -91,6 +91,35 @@
     --border: 220 25% 16%;
     --input: 220 25% 16%;
     --ring: 175 85% 40%;
+
+    --navy: 220 40% 6%;
+    --navy-light: 220 30% 12%;
+    --teal: 175 85% 40%;
+    --teal-glow: 175 90% 55%;
+    --teal-soft: 175 40% 15%;
+    --warm: 35 90% 55%;
+    --success: 155 70% 45%;
+    --info: 210 80% 60%;
+
+    --gradient-hero: linear-gradient(135deg, hsl(220 40% 4%) 0%, hsl(220 30% 8%) 50%, hsl(200 35% 10%) 100%);
+    --gradient-teal: linear-gradient(135deg, hsl(175 85% 40%), hsl(175 90% 55%));
+    --gradient-card: linear-gradient(145deg, hsl(220 35% 10%) 0%, hsl(200 30% 12%) 100%);
+    --gradient-glass: linear-gradient(135deg, rgba(255,255,255,0.06), rgba(255,255,255,0.02));
+
+    --shadow-sm: 0 2px 8px -2px hsl(0 0% 0% / 0.3);
+    --shadow-md: 0 8px 24px -8px hsl(0 0% 0% / 0.4);
+    --shadow-lg: 0 16px 48px -12px hsl(0 0% 0% / 0.5);
+    --shadow-teal: 0 8px 32px -8px hsl(175 85% 40% / 0.25);
+    --shadow-glow: 0 0 40px hsl(175 85% 40% / 0.1);
+
+    --sidebar-background: 220 35% 8%;
+    --sidebar-foreground: 210 20% 92%;
+    --sidebar-primary: 175 85% 40%;
+    --sidebar-primary-foreground: 220 40% 8%;
+    --sidebar-accent: 220 30% 14%;
+    --sidebar-accent-foreground: 210 20% 92%;
+    --sidebar-border: 220 25% 16%;
+    --sidebar-ring: 175 85% 40%;
   }
 }
 
@@ -141,4 +170,9 @@
   .no-scrollbar::-webkit-scrollbar {
     display: none;
   }
+}
+
+/* Force light-on-dark text for sections that are always dark (hero, footer) */
+.dark-section {
+  --primary-foreground: 0 0% 100%;
 }

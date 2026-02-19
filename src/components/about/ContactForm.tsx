@@ -146,7 +146,7 @@ const ContactForm = () => {
                 href={whatsappUrl}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-[hsl(142,70%,40%)] text-white font-medium hover:opacity-90 transition-opacity"
+                className="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-success text-primary-foreground font-medium hover:opacity-90 transition-opacity"
               >
                 <MessageCircle className="h-5 w-5" />
                 {t("aboutPage.contactWhatsappBtn")}

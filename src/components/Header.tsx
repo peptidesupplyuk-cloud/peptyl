@@ -7,6 +7,7 @@ import Logo from "./Logo";
 import { Button } from "./ui/button";
 import { useAuth } from "@/contexts/AuthContext";
 import LanguageToggle from "./LanguageToggle";
+import ThemeToggle from "./ThemeToggle";
 
 const ADMIN_EMAIL = "peptidesupplyuk@gmail.com";
 
@@ -45,6 +46,8 @@ const Header = () => {
   return (
     <header
       className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
+        !scrolled && isHeroPage ? "dark-section" : ""
+      } ${
         scrolled
           ? "bg-card/90 backdrop-blur-xl border-b border-border shadow-sm"
           : isHeroPage
@@ -78,6 +81,7 @@ const Header = () => {
 
         <div className="hidden md:flex items-center gap-3">
           <LanguageToggle className={!scrolled && isHeroPage ? "text-primary-foreground/70 hover:text-primary-foreground" : ""} />
+          <ThemeToggle className={!scrolled && isHeroPage ? "text-primary-foreground/70 hover:text-primary-foreground" : ""} />
           <Button variant="ghost" size="icon" className={!scrolled && isHeroPage ? "text-primary-foreground/70 hover:text-primary-foreground" : ""}>
             <ShoppingBag className="h-5 w-5" />
           </Button>
@@ -133,8 +137,9 @@ const Header = () => {
                   {t(item.labelKey)}
                 </Link>
               ))}
-              <div className="px-4 py-2">
+              <div className="px-4 py-2 flex items-center gap-2">
                 <LanguageToggle />
+                <ThemeToggle />
               </div>
               {user ? (
                 <button

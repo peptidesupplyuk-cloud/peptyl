@@ -24,7 +24,7 @@ const CampaignPage = () => {
       />
 
       {/* Hero — no nav, pure conversion */}
-      <section className="relative min-h-[85vh] flex items-center overflow-hidden">
+      <section className="dark-section relative min-h-[85vh] flex items-center overflow-hidden">
         <div className="absolute inset-0">
           <img src={heroBg} alt="" className="w-full h-full object-cover" />
           <div className="absolute inset-0 bg-gradient-to-b from-navy/70 via-navy/85 to-navy" />
@@ -136,7 +136,7 @@ const CampaignPage = () => {
       </section>
 
       {/* Bottom CTA */}
-      <section className="py-16 bg-hero">
+      <section className="dark-section py-16 bg-hero">
         <div className="container mx-auto px-6 text-center">
           <h2 className="text-2xl sm:text-3xl font-heading font-bold text-primary-foreground mb-4">
             Ready to Start?

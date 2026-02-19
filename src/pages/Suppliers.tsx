@@ -47,7 +47,7 @@ const Suppliers = () => {
       <Header />
 
       {/* Hero */}
-      <section className="pt-28 pb-16 bg-hero relative overflow-hidden">
+      <section className="dark-section pt-28 pb-16 bg-hero relative overflow-hidden">
         <div className="absolute top-1/4 right-0 w-[400px] h-[400px] rounded-full bg-teal/5 blur-3xl" />
         <div className="container mx-auto px-6 relative z-10">
           <motion.span
