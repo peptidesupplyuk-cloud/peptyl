@@ -74,11 +74,14 @@ const Dashboard = () => {
   const handleConnectWhoop = async () => {
     if (!user) return;
     try {
-      const { data, error } = await supabase.functions.invoke("whoop-authorize");
-      if (error) throw error;
-      if (data?.url) {
-        window.location.href = data.url;
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session?.access_token) {
+        toast({ title: "WHOOP Error", description: "You must be logged in to connect WHOOP", variant: "destructive" });
+        return;
       }
+      // Full browser redirect — the edge function returns a 302 to WHOOP's login
+      const functionUrl = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/whoop-authorize?token=${encodeURIComponent(session.access_token)}`;
+      window.location.href = functionUrl;
     } catch (err: any) {
       toast({ title: "WHOOP Error", description: err?.message || "Failed to start WHOOP connect", variant: "destructive" });
     }
