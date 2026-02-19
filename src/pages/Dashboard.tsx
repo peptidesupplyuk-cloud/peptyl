@@ -219,6 +219,18 @@ const Dashboard = () => {
               {/* 5. Health Direction Score */}
               <OptimizationScore />
 
+              {/* WHOOP Integration teaser */}
+              <div className="bg-card rounded-2xl border border-border p-5 flex items-center gap-4">
+                <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0">
+                  <Activity className="h-5 w-5 text-primary" />
+                </div>
+                <div className="flex-1">
+                  <h3 className="font-heading font-semibold text-foreground text-sm">WHOOP Integration</h3>
+                  <p className="text-xs text-muted-foreground">Auto-sync HRV, recovery, strain &amp; sleep data from your WHOOP band.</p>
+                </div>
+                <span className="text-[10px] font-medium text-primary bg-primary/10 rounded-full px-2.5 py-1 whitespace-nowrap">Coming Soon</span>
+              </div>
+
               {/* 6. Onboarding recommendations */}
               <OnboardingRecommendations onNavigateToProtocols={() => setActiveTab("protocols")} />
 
