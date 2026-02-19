@@ -43,8 +43,7 @@ Deno.serve(async (req) => {
       });
     }
 
-    const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
-    const redirectUri = `${supabaseUrl}/functions/v1/whoop-oauth-callback`;
+    const redirectUri = "https://wmudidfprbtojkmtczaq.supabase.co/functions/v1/whoop-oauth-callback";
 
     const authorizeUrl =
       `https://api.prod.whoop.com/oauth/oauth2/auth` +
