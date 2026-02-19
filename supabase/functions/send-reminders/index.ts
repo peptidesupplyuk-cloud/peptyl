@@ -277,7 +277,7 @@ function buildWhatsAppMessage(reminders: PeptideReminder[], supplements: Supplem
 
   lines.push(`━━━━━━━━━━━━━━━━`);
   lines.push(`✅ *Log your doses on your dashboard:*`);
-  lines.push(`peptyl.lovable.app/dashboard`);
+  lines.push(`peptyl.co.uk/dashboard`);
 
   return lines.join("\n");
 }
@@ -348,7 +348,7 @@ function buildReminderEmail(
 
         <!-- CTA Button -->
         <div style="text-align:center;margin:24px 0 8px">
-          <a href="https://peptyl.lovable.app/dashboard" 
+          <a href="https://peptyl.co.uk/dashboard" 
              style="display:inline-block;background:#0d9488;color:#ffffff;text-decoration:none;padding:14px 32px;border-radius:8px;font-weight:600;font-size:15px;letter-spacing:0.3px">
             ✅ Go to Dashboard & Complete
           </a>
@@ -362,7 +362,7 @@ function buildReminderEmail(
       <div style="padding:20px 24px;text-align:center">
         <p style="font-size:11px;color:#9ca3af;margin:0;line-height:1.6">
           This is an automated reminder from Peptyl. For educational and research purposes only.
-          <br/>Manage notification preferences in your <a href="https://peptyl.lovable.app/dashboard" style="color:#0d9488;text-decoration:underline">dashboard settings</a>.
+          <br/>Manage notification preferences in your <a href="https://peptyl.co.uk/dashboard" style="color:#0d9488;text-decoration:underline">dashboard settings</a>.
         </p>
       </div>
     </div>
