@@ -148,7 +148,7 @@ Deno.serve(async (req) => {
   ` : ""}
 
   <div style="text-align: center; margin-top: 24px;">
-    <a href="https://peptyl.lovable.app/dashboard" style="display: inline-block; background: #14b8a6; color: #0a0a0a; font-weight: 600; padding: 10px 28px; border-radius: 8px; text-decoration: none; font-size: 14px;">View Dashboard</a>
+    <a href="https://peptyl.co.uk/dashboard" style="display: inline-block; background: #14b8a6; color: #0a0a0a; font-weight: 600; padding: 10px 28px; border-radius: 8px; text-decoration: none; font-size: 14px;">View Dashboard</a>
   </div>
 
   <p style="text-align: center; font-size: 11px; color: #525252; margin-top: 32px;">
