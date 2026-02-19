@@ -1,5 +1,5 @@
 import { motion } from "framer-motion";
-import { ThumbsUp, AlertTriangle, Clock, TrendingUp } from "lucide-react";
+import { ThumbsUp, AlertTriangle, Clock, TrendingUp, Instagram } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { Button } from "@/components/ui/button";
@@ -46,10 +46,19 @@ const CommunitySection = () => {
           ))}
         </div>
 
-        <div className="text-center mt-12">
+        <div className="text-center mt-12 space-y-5">
           <Link to="/peptides">
             <Button size="lg" className="shadow-brand">{t("community.exploreDb")}</Button>
           </Link>
+          <div className="flex items-center justify-center gap-3">
+            <span className="text-sm text-muted-foreground">Follow us</span>
+            <a href="https://www.instagram.com/peptyl.uk" target="_blank" rel="noopener noreferrer" className="p-2 rounded-lg bg-muted hover:bg-accent text-muted-foreground hover:text-primary transition-colors" aria-label="Instagram">
+              <Instagram className="h-4 w-4" />
+            </a>
+            <a href="https://www.tiktok.com/@peptyluk" target="_blank" rel="noopener noreferrer" className="p-2 rounded-lg bg-muted hover:bg-accent text-muted-foreground hover:text-primary transition-colors" aria-label="TikTok">
+              <svg className="h-4 w-4" viewBox="0 0 24 24" fill="currentColor"><path d="M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 0 1-2.88 2.5 2.89 2.89 0 0 1-2.88-2.88 2.89 2.89 0 0 1 2.88-2.88c.28 0 .56.04.82.11v-3.5a6.37 6.37 0 0 0-.82-.05A6.34 6.34 0 0 0 3.15 15.2a6.34 6.34 0 0 0 6.34 6.34 6.34 6.34 0 0 0 6.34-6.34V9.19a8.16 8.16 0 0 0 4.76 1.51v-3.4a4.85 4.85 0 0 1-1-.61z"/></svg>
+            </a>
+          </div>
         </div>
       </div>
     </section>
