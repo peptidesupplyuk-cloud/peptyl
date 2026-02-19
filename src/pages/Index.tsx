@@ -47,7 +47,7 @@ const Index = () => {
       <CommunitySection />
 
       {/* CTA Section */}
-      <section className="py-24 bg-hero relative overflow-hidden">
+      <section className="dark-section py-24 bg-hero relative overflow-hidden">
         <div className="absolute top-0 left-1/3 w-96 h-96 rounded-full bg-teal/5 blur-3xl" />
         <div className="container mx-auto px-6 relative z-10 text-center">
           <h2 className="text-3xl sm:text-4xl font-heading font-bold text-primary-foreground mb-4">

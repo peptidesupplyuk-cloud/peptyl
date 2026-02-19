@@ -33,7 +33,7 @@ const HeroSection = () => {
   return (
   <>
   <OnboardingModal open={onboardingOpen} onOpenChange={setOnboardingOpen} />
-  <section className="relative min-h-screen flex items-center overflow-hidden">
+  <section className="dark-section relative min-h-screen flex items-center overflow-hidden">
     <div className="absolute inset-0">
       <img src={heroBg} alt="" className="w-full h-full object-cover" />
       <div className="absolute inset-0 bg-gradient-to-b from-navy/60 via-navy/80 to-navy" />
