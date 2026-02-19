@@ -155,8 +155,8 @@ const ContactForm = () => {
               <div className="pt-4 border-t border-border space-y-3">
                 <div>
                   <p className="text-xs text-muted-foreground">{t("aboutPage.contactEmailLabel")}</p>
-                  <a href="mailto:hello@peptyl.co.uk" className="text-sm text-foreground hover:text-primary transition-colors">
-                    hello@peptyl.co.uk
+                  <a href="mailto:admin@peptyl.co.uk" className="text-sm text-foreground hover:text-primary transition-colors">
+                    admin@peptyl.co.uk
                   </a>
                 </div>
                 <div>
