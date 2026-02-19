@@ -1,11 +1,10 @@
 {
   "nav": {
-    "dashboard": "Dashboard",
-    "peptides": "Peptide",
-    "calculators": "Rechner",
-    "education": "Bildung",
-    "suppliers": "Lieferanten",
+    "myHealth": "Meine Gesundheit",
+    "improve": "Verbessern",
+    "learn": "Lernen",
     "shop": "Shop",
+    "testing": "Tests",
     "about": "Über uns",
     "admin": "Admin",
     "signIn": "Anmelden",

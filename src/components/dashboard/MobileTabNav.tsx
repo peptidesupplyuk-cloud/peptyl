@@ -1,4 +1,4 @@
-import { LayoutDashboard, Activity, FlaskConical, CalendarDays, User, BookOpen, BarChart3 } from "lucide-react";
+import { LayoutDashboard, Activity, FlaskConical, CalendarDays, User, BookOpen } from "lucide-react";
 import { useIsMobile } from "@/hooks/use-mobile";
 
 interface Props {

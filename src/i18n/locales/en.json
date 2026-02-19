@@ -1,11 +1,10 @@
 {
   "nav": {
-    "dashboard": "Dashboard",
-    "peptides": "Peptides",
-    "calculators": "Calculators",
-    "education": "Education",
-    "suppliers": "Suppliers",
+    "myHealth": "My Health",
+    "improve": "Improve",
+    "learn": "Learn",
     "shop": "Shop",
+    "testing": "Testing",
     "about": "About",
     "admin": "Admin",
     "signIn": "Sign In",

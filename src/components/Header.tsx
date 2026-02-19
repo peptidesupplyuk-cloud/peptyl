@@ -12,12 +12,11 @@ import ThemeToggle from "./ThemeToggle";
 const ADMIN_EMAIL = "peptidesupplyuk@gmail.com";
 
 const navItems = [
-  { labelKey: "nav.dashboard", href: "/dashboard" },
-  { labelKey: "nav.peptides", href: "/peptides" },
-  { labelKey: "nav.calculators", href: "/calculators" },
-  { labelKey: "nav.education", href: "/education" },
-  { labelKey: "nav.suppliers", href: "/suppliers" },
+  { labelKey: "nav.myHealth", href: "/dashboard" },
+  { labelKey: "nav.improve", href: "/improve" },
+  { labelKey: "nav.learn", href: "/education" },
   { labelKey: "nav.shop", href: "/shop" },
+  { labelKey: "nav.testing", href: "/testing" },
   { labelKey: "nav.about", href: "/about" },
   { labelKey: "nav.admin", href: "/admin/dashboard", adminOnly: true },
 ];
