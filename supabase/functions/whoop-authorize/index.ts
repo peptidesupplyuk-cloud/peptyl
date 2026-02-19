@@ -12,9 +12,15 @@ Deno.serve(async (req) => {
   }
 
   try {
-    // Verify the caller is authenticated
+    // Accept token from Authorization header OR query param (for browser redirects)
+    const url = new URL(req.url);
+    const tokenFromQuery = url.searchParams.get("token");
     const authHeader = req.headers.get("Authorization");
-    if (!authHeader) {
+    const bearerToken = tokenFromQuery
+      ? `Bearer ${tokenFromQuery}`
+      : authHeader;
+
+    if (!bearerToken) {
       return new Response(JSON.stringify({ error: "Unauthorized" }), {
         status: 401,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
@@ -24,7 +30,7 @@ Deno.serve(async (req) => {
     const supabase = createClient(
       Deno.env.get("SUPABASE_URL")!,
       Deno.env.get("SUPABASE_ANON_KEY")!,
-      { global: { headers: { Authorization: authHeader } } },
+      { global: { headers: { Authorization: bearerToken } } },
     );
 
     const { data: { user }, error: userErr } = await supabase.auth.getUser();
@@ -53,9 +59,9 @@ Deno.serve(async (req) => {
       `&scope=${encodeURIComponent("read:recovery read:cycles read:sleep read:profile")}` +
       `&state=${user.id}`;
 
-    return new Response(JSON.stringify({ url: authorizeUrl }), {
-      headers: { ...corsHeaders, "Content-Type": "application/json" },
-    });
+    // Return a 302 redirect so the browser performs a top-level navigation
+    // This avoids WHOOP's X-Frame-Options: DENY blocking the login page
+    return Response.redirect(authorizeUrl, 302);
   } catch (err: any) {
     return new Response(JSON.stringify({ error: err.message }), {
       status: 500,
