@@ -1,8 +1,8 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { useSearchParams } from "react-router-dom";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Carousel, CarouselContent, CarouselItem, CarouselPrevious, CarouselNext } from "@/components/ui/carousel";
-import { Activity, FlaskConical, LayoutDashboard, AlertTriangle, User, BookOpen, CalendarDays, BarChart3, Heart, Weight, Droplets } from "lucide-react";
+import { Activity, FlaskConical, LayoutDashboard, AlertTriangle, User, BookOpen, CalendarDays, BarChart3, Heart, Weight, Droplets, ExternalLink, CheckCircle2 } from "lucide-react";
 import { addWeeks, format } from "date-fns";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
@@ -33,6 +33,10 @@ import OptimizationScore from "@/components/dashboard/OptimizationScore";
 import AdherenceSummary from "@/components/dashboard/AdherenceSummary";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { useSaveOnboarding } from "@/hooks/use-save-onboarding";
+import { useAuth } from "@/contexts/AuthContext";
+import { supabase } from "@/integrations/supabase/client";
+import { Button } from "@/components/ui/button";
+import { useQuery } from "@tanstack/react-query";
 
 const Dashboard = () => {
   const { data: panels = [], refetch: refetchPanels } = useBloodworkPanels();
@@ -48,6 +52,37 @@ const Dashboard = () => {
   const isMobile = useIsMobile();
   const [searchParams, setSearchParams] = useSearchParams();
   useSaveOnboarding();
+  const { user } = useAuth();
+
+  const ADMIN_EMAIL = "peptidesupplyuk@gmail.com";
+  const isAdmin = user?.email === ADMIN_EMAIL;
+
+  // Check if WHOOP is already connected (admin only)
+  const { data: whoopConnection } = useQuery({
+    queryKey: ["whoop-connection", user?.id],
+    queryFn: async () => {
+      const { data } = await supabase
+        .from("whoop_connections")
+        .select("id, last_sync_at, whoop_user_id")
+        .eq("user_id", user!.id)
+        .maybeSingle();
+      return data;
+    },
+    enabled: isAdmin && !!user,
+  });
+
+  const handleConnectWhoop = async () => {
+    if (!user) return;
+    try {
+      const { data, error } = await supabase.functions.invoke("whoop-authorize");
+      if (error) throw error;
+      if (data?.url) {
+        window.location.href = data.url;
+      }
+    } catch (err: any) {
+      toast({ title: "WHOOP Error", description: err?.message || "Failed to start WHOOP connect", variant: "destructive" });
+    }
+  };
 
   // Schedule local notifications for protocol doses
   useProtocolNotifications();
@@ -219,16 +254,35 @@ const Dashboard = () => {
               {/* 5. Health Direction Score */}
               <OptimizationScore />
 
-              {/* WHOOP Integration teaser */}
+              {/* WHOOP Integration */}
               <div className="bg-card rounded-2xl border border-border p-5 flex items-center gap-4">
                 <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0">
-                  <Activity className="h-5 w-5 text-primary" />
+                  {whoopConnection ? (
+                    <CheckCircle2 className="h-5 w-5 text-primary" />
+                  ) : (
+                    <Activity className="h-5 w-5 text-primary" />
+                  )}
                 </div>
                 <div className="flex-1">
                   <h3 className="font-heading font-semibold text-foreground text-sm">WHOOP Integration</h3>
-                  <p className="text-xs text-muted-foreground">Auto-sync HRV, recovery, strain &amp; sleep data from your WHOOP band.</p>
+                  <p className="text-xs text-muted-foreground">
+                    {whoopConnection
+                      ? `Connected${whoopConnection.last_sync_at ? ` · Last sync: ${new Date(whoopConnection.last_sync_at).toLocaleDateString()}` : ""}`
+                      : "Auto-sync HRV, recovery, strain & sleep data from your WHOOP band."}
+                  </p>
                 </div>
-                <span className="text-[10px] font-medium text-primary bg-primary/10 rounded-full px-2.5 py-1 whitespace-nowrap">Coming Soon</span>
+                {isAdmin ? (
+                  whoopConnection ? (
+                    <span className="text-[10px] font-medium text-primary bg-primary/10 rounded-full px-2.5 py-1 whitespace-nowrap">Connected</span>
+                  ) : (
+                    <Button size="sm" variant="outline" onClick={handleConnectWhoop} className="gap-1.5 text-xs">
+                      <ExternalLink className="h-3 w-3" />
+                      Connect
+                    </Button>
+                  )
+                ) : (
+                  <span className="text-[10px] font-medium text-primary bg-primary/10 rounded-full px-2.5 py-1 whitespace-nowrap">Coming Soon</span>
+                )}
               </div>
 
               {/* 6. Onboarding recommendations */}
