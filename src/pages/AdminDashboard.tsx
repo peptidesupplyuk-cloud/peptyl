@@ -13,7 +13,7 @@ import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
 import {
   AlertTriangle, Users, Globe, Mail, Activity, FlaskConical, Droplets, Loader2,
-  Upload, CheckCircle, XCircle, Clock, FileText, ExternalLink, Twitter, BarChart3, Target, Sparkles, Megaphone, Search, Copy, Link as LinkIcon, MessageSquare, Trash2,
+  Upload, CheckCircle, XCircle, Clock, FileText, ExternalLink, Twitter, BarChart3, Target, Sparkles, Megaphone, Search, Copy, Link as LinkIcon, MessageSquare, Trash2, BookOpen, TrendingUp,
 } from "lucide-react";
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from "recharts";
 import MonitoredAccounts from "@/components/admin/MonitoredAccounts";
@@ -65,14 +65,21 @@ const COLORS = [
   "#f97316", "#10b981", "#f43f5e", "#6366f1", "#eab308", "#ec4899",
 ];
 
-const StatCard = ({ icon: Icon, label, value }: { icon: any; label: string; value: string | number }) => (
+const StatCard = ({ icon: Icon, label, value, delta }: { icon: any; label: string; value: string | number; delta?: number }) => (
   <div className="bg-card border border-border rounded-xl p-4">
     <div className="flex items-center gap-3">
       <div className="p-2 rounded-lg bg-primary/10">
         <Icon className="h-4 w-4 text-primary" />
       </div>
       <div>
-        <p className="text-2xl font-heading font-bold text-foreground">{value}</p>
+        <div className="flex items-center gap-1.5">
+          <p className="text-2xl font-heading font-bold text-foreground">{value}</p>
+          {delta !== undefined && delta > 0 && (
+            <span className="flex items-center text-xs font-semibold text-emerald-500">
+              <TrendingUp className="h-3 w-3 mr-0.5" />+{delta}
+            </span>
+          )}
+        </div>
         <p className="text-xs text-muted-foreground">{label}</p>
       </div>
     </div>
@@ -114,12 +121,13 @@ const AnalyticsTab = () => {
 
   return (
     <div className="space-y-6">
-      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
+      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-7 gap-3">
         <StatCard icon={Users} label="Total Users" value={stats.total_users} />
         <StatCard icon={Globe} label="Countries" value={Object.keys(stats.by_country).filter(c => c !== "Not specified").length} />
         <StatCard icon={FlaskConical} label="Protocols" value={stats.total_protocols} />
         <StatCard icon={Activity} label="Protocol Users" value={stats.active_protocol_users} />
         <StatCard icon={Droplets} label="Bloodwork" value={stats.total_bloodwork_panels} />
+        <StatCard icon={BookOpen} label="Journal Entries" value={stats.total_journal_entries || 0} delta={stats.journal_entries_today} />
         <StatCard icon={Mail} label="Messages" value={stats.total_contact_submissions} />
       </div>
 
@@ -249,6 +257,79 @@ const AnalyticsTab = () => {
             </div>
           ))}
           {(stats.recent_contacts || []).length === 0 && <p className="text-xs text-muted-foreground">No contact submissions yet.</p>}
+        </div>
+      </div>
+
+      {/* Journal Entries Analytics */}
+      <div className="bg-card border border-border rounded-xl p-5">
+        <h3 className="font-heading font-semibold text-foreground text-sm mb-4 flex items-center gap-2">
+          <BookOpen className="h-4 w-4 text-primary" /> Journal Entries
+          <span className="ml-auto text-xs text-muted-foreground">{stats.unique_journal_users || 0} unique users</span>
+        </h3>
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          {/* Journal entries over time */}
+          {Object.keys(stats.journal_by_day || {}).length > 0 && (
+            <div>
+              <p className="text-xs font-medium text-muted-foreground mb-2">Entries (Last 30 Days)</p>
+              <ResponsiveContainer width="100%" height={180}>
+                <BarChart data={Object.entries(stats.journal_by_day as Record<string, number>).sort(([a], [b]) => a.localeCompare(b)).map(([date, count]) => ({ date: date.slice(5), count }))}>
+                  <XAxis dataKey="date" tick={{ fontSize: 10 }} stroke="hsl(var(--muted-foreground))" />
+                  <YAxis tick={{ fontSize: 10 }} stroke="hsl(var(--muted-foreground))" allowDecimals={false} />
+                  <Tooltip contentStyle={{ backgroundColor: "hsl(var(--card))", border: "1px solid hsl(var(--border))", borderRadius: "8px", fontSize: "12px" }} />
+                  <Bar dataKey="count" fill="hsl(var(--accent))" radius={[4, 4, 0, 0]} />
+                </BarChart>
+              </ResponsiveContainer>
+            </div>
+          )}
+
+          {/* Top peptide mentions */}
+          <div>
+            <p className="text-xs font-medium text-muted-foreground mb-2">Top Peptides Mentioned</p>
+            {Object.keys(stats.journal_peptide_mentions || {}).length > 0 ? (
+              <div className="space-y-1.5">
+                {Object.entries(stats.journal_peptide_mentions as Record<string, number>)
+                  .sort(([, a], [, b]) => b - a)
+                  .slice(0, 10)
+                  .map(([peptide, count]) => (
+                    <div key={peptide} className="flex items-center justify-between text-xs">
+                      <span className="text-foreground font-medium">{peptide}</span>
+                      <div className="flex items-center gap-2">
+                        <div className="h-1.5 rounded-full bg-primary/20 w-24">
+                          <div className="h-1.5 rounded-full bg-primary" style={{ width: `${Math.min(100, (count / Math.max(...Object.values(stats.journal_peptide_mentions as Record<string, number>))) * 100)}%` }} />
+                        </div>
+                        <span className="text-muted-foreground w-6 text-right">{count}</span>
+                      </div>
+                    </div>
+                  ))}
+              </div>
+            ) : (
+              <p className="text-xs text-muted-foreground">No peptide mentions yet.</p>
+            )}
+          </div>
+        </div>
+
+        {/* Recent journal entries */}
+        <div className="mt-5 pt-4 border-t border-border">
+          <p className="text-xs font-medium text-muted-foreground mb-3">Recent Journal Entries</p>
+          <div className="space-y-2 max-h-[300px] overflow-y-auto">
+            {(stats.recent_journal || []).map((j: any) => (
+              <div key={j.id} className="border border-border/50 rounded-lg p-3">
+                <div className="flex items-center justify-between mb-1">
+                  <span className="text-xs font-medium text-foreground truncate">{j.email || "Unknown"}</span>
+                  <span className="text-[10px] text-muted-foreground">{new Date(j.created_at).toLocaleDateString()}</span>
+                </div>
+                <p className="text-xs text-muted-foreground line-clamp-2">{j.content}</p>
+                {Array.isArray(j.peptides) && j.peptides.length > 0 && (
+                  <div className="flex flex-wrap gap-1 mt-1.5">
+                    {j.peptides.map((p: string) => (
+                      <span key={p} className="text-[10px] px-1.5 py-0.5 rounded bg-primary/5 text-primary border border-primary/10">{p}</span>
+                    ))}
+                  </div>
+                )}
+              </div>
+            ))}
+            {(stats.recent_journal || []).length === 0 && <p className="text-xs text-muted-foreground">No journal entries yet.</p>}
+          </div>
         </div>
       </div>
     </div>
