@@ -155,19 +155,23 @@ async function fetchWhoop(url: string, headers: Record<string, string>) {
 }
 
 async function refreshToken(conn: any, supabase: any): Promise<string | null> {
-  // Whoop uses standard OAuth2 refresh
+  // RFC 6749 §2.3.1 — Confidential client MUST authenticate via HTTP Basic header.
+  // WHOOP rejects client_id/client_secret in the request body.
   const clientId = Deno.env.get("WHOOP_CLIENT_ID");
   const clientSecret = Deno.env.get("WHOOP_CLIENT_SECRET");
   if (!clientId || !clientSecret) return null;
 
+  const basicAuth = btoa(`${clientId}:${clientSecret}`);
+
   const res = await fetch("https://api.prod.whoop.com/oauth/token", {
     method: "POST",
-    headers: { "Content-Type": "application/x-www-form-urlencoded" },
+    headers: {
+      "Content-Type": "application/x-www-form-urlencoded",
+      "Authorization": `Basic ${basicAuth}`,
+    },
     body: new URLSearchParams({
       grant_type: "refresh_token",
       refresh_token: conn.refresh_token,
-      client_id: clientId,
-      client_secret: clientSecret,
     }),
   });
 
