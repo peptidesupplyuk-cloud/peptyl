@@ -17,6 +17,9 @@ import Peptides from "./pages/Peptides";
 import Calculators from "./pages/Calculators";
 import Education from "./pages/Education";
 import Dashboard from "./pages/Dashboard";
+import Improve from "./pages/Improve";
+import ShopHub from "./pages/ShopHub";
+const Testing = lazy(() => import("./pages/Testing"));
 import NotFound from "./pages/NotFound";
 import About from "./pages/About";
 import Shop from "./pages/Shop";
@@ -60,10 +63,12 @@ const App = () => (
               <Route path="/peptides" element={<Peptides />} />
               <Route path="/calculators" element={<ProtectedRoute><Calculators /></ProtectedRoute>} />
               <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
+              <Route path="/improve" element={<Improve />} />
               <Route path="/education" element={<Education />} />
               <Route path="/about" element={<About />} />
               <Route path="/suppliers" element={<Suppliers />} />
-              <Route path="/shop" element={<Shop />} />
+              <Route path="/shop" element={<ShopHub />} />
+              <Route path="/testing" element={<Testing />} />
               <Route path="/privacy-policy" element={<PrivacyPolicy />} />
               <Route path="/terms-of-service" element={<TermsOfService />} />
               <Route path="/admin/content" element={<ProtectedRoute><AdminDashboard /></ProtectedRoute>} />

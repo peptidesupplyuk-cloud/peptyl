@@ -1,11 +1,10 @@
 {
   "nav": {
-    "dashboard": "Tableau de bord",
-    "peptides": "Peptides",
-    "calculators": "Calculateurs",
-    "education": "Éducation",
-    "suppliers": "Fournisseurs",
+    "myHealth": "Ma Santé",
+    "improve": "Améliorer",
+    "learn": "Apprendre",
     "shop": "Boutique",
+    "testing": "Tests",
     "about": "À propos",
     "admin": "Admin",
     "signIn": "Connexion",
