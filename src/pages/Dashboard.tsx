@@ -79,9 +79,10 @@ const Dashboard = () => {
         toast({ title: "WHOOP Error", description: "You must be logged in to connect WHOOP", variant: "destructive" });
         return;
       }
-      // Full browser redirect — the edge function returns a 302 to WHOOP's login
+      // Open in a new top-level window to escape iframe context
+      // The edge function returns a 302 redirect to WHOOP's login page
       const functionUrl = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/whoop-authorize?token=${encodeURIComponent(session.access_token)}`;
-      window.location.href = functionUrl;
+      window.open(functionUrl, "_blank");
     } catch (err: any) {
       toast({ title: "WHOOP Error", description: err?.message || "Failed to start WHOOP connect", variant: "destructive" });
     }
