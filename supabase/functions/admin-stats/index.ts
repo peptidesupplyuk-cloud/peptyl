@@ -48,6 +48,7 @@ Deno.serve(async (req) => {
       bloodworkRes,
       recentSignupsRes,
       authUsersRes,
+      journalRes,
     ] = await Promise.all([
       admin.from("profiles").select("country, research_goal, experience_level, risk_tolerance, biomarker_availability, current_compounds, created_at"),
       admin.from("contact_submissions").select("id, name, email, message, created_at").order("created_at", { ascending: false }).limit(50),
@@ -55,6 +56,7 @@ Deno.serve(async (req) => {
       admin.from("bloodwork_panels").select("id, user_id, panel_type, test_date, created_at"),
       admin.from("profiles").select("user_id, username, country, research_goal, created_at").order("created_at", { ascending: false }).limit(20),
       admin.auth.admin.listUsers({ page: 1, perPage: 100 }),
+      admin.from("journal_entries").select("id, user_id, content, peptides, summary, created_at").order("created_at", { ascending: false }),
     ]);
 
     const profiles = profilesRes.data || [];
@@ -62,6 +64,7 @@ Deno.serve(async (req) => {
     const protocols = protocolsRes.data || [];
     const bloodwork = bloodworkRes.data || [];
     const recentSignupsRaw = recentSignupsRes.data || [];
+    const journalEntries = journalRes.data || [];
 
     // Build email lookup from auth users
     const emailMap: Record<string, string> = {};
@@ -123,6 +126,36 @@ Deno.serve(async (req) => {
     const uniqueProtocolUsers = new Set(protocols.map((p: any) => p.user_id)).size;
     const uniqueBloodworkUsers = new Set(bloodwork.map((b: any) => b.user_id)).size;
 
+    // Journal aggregations
+    const today = new Date().toISOString().slice(0, 10);
+    const journalToday = journalEntries.filter((j: any) => j.created_at?.slice(0, 10) === today).length;
+    const uniqueJournalUsers = new Set(journalEntries.map((j: any) => j.user_id)).size;
+
+    // Journal entries by day (last 30 days)
+    const journalByDay: Record<string, number> = {};
+    for (const j of journalEntries) {
+      const d = j.created_at?.slice(0, 10);
+      if (d && new Date(d) >= thirtyDaysAgo) {
+        journalByDay[d] = (journalByDay[d] || 0) + 1;
+      }
+    }
+
+    // Top peptides mentioned across all journal entries
+    const peptideMentions: Record<string, number> = {};
+    for (const j of journalEntries) {
+      if (Array.isArray(j.peptides)) {
+        for (const p of j.peptides) {
+          if (p) peptideMentions[p] = (peptideMentions[p] || 0) + 1;
+        }
+      }
+    }
+
+    // Recent journal entries (last 20) with email
+    const recentJournal = journalEntries.slice(0, 20).map((j: any) => ({
+      ...j,
+      email: emailMap[j.user_id] || "",
+    }));
+
     const stats = {
       total_users: profiles.length,
       total_protocols: protocols.length,
@@ -130,6 +163,12 @@ Deno.serve(async (req) => {
       active_protocol_users: uniqueProtocolUsers,
       active_bloodwork_users: uniqueBloodworkUsers,
       total_contact_submissions: contacts.length,
+      total_journal_entries: journalEntries.length,
+      journal_entries_today: journalToday,
+      unique_journal_users: uniqueJournalUsers,
+      journal_by_day: journalByDay,
+      journal_peptide_mentions: peptideMentions,
+      recent_journal: recentJournal,
       by_country: byCountry,
       by_goal: byGoal,
       by_experience: byExperience,
