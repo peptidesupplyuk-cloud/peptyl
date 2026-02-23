@@ -16,7 +16,7 @@
     "title1": "Your Protocol,",
     "title2": "Backed by Data.",
     "subtitle": "Answer 5 questions. Get a compound protocol matched to your goal and biomarkers. Track outcomes. Adjust doses. Improve every cycle.",
-    "startProtocol": "Start My Protocol",
+    "startProtocol": "Continue",
     "browseDatabase": "Browse Database",
     "meetPeptyl": "Meet Peptyl",
     "views": "views",
@@ -98,7 +98,7 @@
   "cta": {
     "title": "Build Your Protocol Now",
     "subtitle": "Answer 5 questions. Get a compound plan matched to your biomarkers and goals.",
-    "startProtocol": "Start My Protocol",
+    "startProtocol": "Continue",
     "browseDatabase": "Browse Database"
   },
   "disclaimer": {
