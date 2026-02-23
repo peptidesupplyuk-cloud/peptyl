@@ -66,20 +66,6 @@ const HeroSection = () => {
       </motion.div>
       </div>
 
-      <motion.div initial={{ opacity: 0, y: 40 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.8, delay: 0.5 }} className="mt-20 grid grid-cols-2 md:grid-cols-4 gap-6">
-        {[
-          { icon: Database, label: t("hero.stats.peptidesInDb"), value: "56" },
-          { icon: Calculator, label: t("hero.stats.precisionCalc"), value: "3" },
-          { icon: FlaskConical, label: t("hero.stats.educationalGuides"), value: "5+" },
-          { icon: Users, label: t("hero.stats.communityDriven"), value: t("hero.stats.free") },
-        ].map((stat, i) => (
-          <div key={i} className="bg-glass rounded-xl p-5 border border-primary-foreground/10">
-            <stat.icon className="h-5 w-5 text-primary mb-3" />
-            <div className="text-2xl font-heading font-bold text-primary-foreground">{stat.value}</div>
-            <div className="text-xs text-primary-foreground/50 mt-1">{stat.label}</div>
-          </div>
-        ))}
-      </motion.div>
     </div>
   </section>
   </>
