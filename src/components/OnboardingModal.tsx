@@ -87,6 +87,27 @@ const OnboardingModal = ({ open, onOpenChange }: OnboardingModalProps) => {
       ],
     },
     {
+      id: "bloodwork",
+      type: "options",
+      question: t("onboarding.bloodworkQuestion"),
+      options: [
+        { value: "recent", label: t("onboarding.bloodworkYes") },
+        { value: "older", label: t("onboarding.bloodworkOlder") },
+        { value: "no", label: t("onboarding.bloodworkNo") },
+        { value: "planning", label: t("onboarding.bloodworkPlanning") },
+      ],
+    },
+    {
+      id: "dna_testing",
+      type: "options",
+      question: t("onboarding.dnaQuestion"),
+      options: [
+        { value: "yes", label: t("onboarding.dnaYes") },
+        { value: "no", label: t("onboarding.dnaNo") },
+        { value: "interested", label: t("onboarding.dnaInterested") },
+      ],
+    },
+    {
       id: "benefit",
       type: "benefit" as const,
     },
@@ -169,7 +190,7 @@ const OnboardingModal = ({ open, onOpenChange }: OnboardingModalProps) => {
               <div className="space-y-3">
                 <div className="flex items-start gap-3 p-3 rounded-xl bg-muted/50">
                   <Target className="h-4 w-4 text-primary mt-0.5 flex-shrink-0" />
-                  <p className="text-sm text-foreground">Personalised protocols based on your goals & experience</p>
+                  <p className="text-sm text-foreground">Personalised plans matched to your goals and experience</p>
                 </div>
                 <div className="flex items-start gap-3 p-3 rounded-xl bg-muted/50">
                   <CalendarCheck className="h-4 w-4 text-primary mt-0.5 flex-shrink-0" />
@@ -177,7 +198,7 @@ const OnboardingModal = ({ open, onOpenChange }: OnboardingModalProps) => {
                 </div>
                 <div className="flex items-start gap-3 p-3 rounded-xl bg-muted/50">
                   <Pill className="h-4 w-4 text-primary mt-0.5 flex-shrink-0" />
-                  <p className="text-sm text-foreground">Track all your compounds & supplements in one place</p>
+                  <p className="text-sm text-foreground">Track supplements, peptides, and protocols in one place</p>
                 </div>
                 <div className="flex items-start gap-3 p-3 rounded-xl bg-muted/50">
                   <Activity className="h-4 w-4 text-primary mt-0.5 flex-shrink-0" />
