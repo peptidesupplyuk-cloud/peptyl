@@ -27,6 +27,7 @@ const SEO = ({ title, description, path, type = "website", jsonLd }: SEOProps) =
     <Helmet>
       <title>{fullTitle}</title>
       <meta name="description" content={description} />
+      <meta name="robots" content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1" />
       <link rel="canonical" href={url} />
 
       {/* hreflang alternate links */}
