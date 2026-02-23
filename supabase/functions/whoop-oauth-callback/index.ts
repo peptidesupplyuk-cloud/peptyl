@@ -31,7 +31,7 @@ Deno.serve(async (req) => {
     const redirectUri = `${appUrl}/whoop-callback`;
 
     // Exchange authorization code for tokens
-    const tokenRes = await fetch("https://api.prod.whoop.com/oauth/token", {
+    const tokenRes = await fetch("https://api.prod.whoop.com/oauth/oauth2/token", {
       method: "POST",
       headers: {
         "Content-Type": "application/x-www-form-urlencoded",
