@@ -4,8 +4,7 @@ import { useTranslation } from "react-i18next";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import { Input } from "@/components/ui/input";
-import { ArrowRight, ArrowLeft, CheckCircle2 } from "lucide-react";
+import { ArrowRight, ArrowLeft, CheckCircle2, Sparkles, CalendarCheck, Pill, Activity, Target } from "lucide-react";
 
 interface OnboardingModalProps {
   open: boolean;
@@ -18,9 +17,24 @@ const OnboardingModal = ({ open, onOpenChange }: OnboardingModalProps) => {
   const navigate = useNavigate();
   const { t } = useTranslation();
 
-  const steps = [
+  type StepWithOptions = {
+    id: string;
+    question: string;
+    options: { value: string; label: string }[];
+    type: "options";
+  };
+
+  type StepBenefit = {
+    id: string;
+    type: "benefit";
+  };
+
+  type Step = StepWithOptions | StepBenefit;
+
+  const steps: Step[] = [
     {
       id: "goal",
+      type: "options",
       question: t("onboarding.goalQuestion"),
       options: [
         { value: "fat_loss", label: t("onboarding.goalFatLoss") },
@@ -32,48 +46,82 @@ const OnboardingModal = ({ open, onOpenChange }: OnboardingModalProps) => {
       ],
     },
     {
-      id: "experience",
-      question: t("onboarding.experienceQuestion"),
+      id: "glp1_experience",
+      type: "options",
+      question: t("onboarding.glp1Question"),
       options: [
-        { value: "none", label: t("onboarding.expNone") },
-        { value: "beginner", label: t("onboarding.expBeginner") },
-        { value: "intermediate", label: t("onboarding.expIntermediate") },
-        { value: "advanced", label: t("onboarding.expAdvanced") },
+        { value: "yes", label: t("onboarding.glp1Yes") },
+        { value: "no", label: t("onboarding.glp1No") },
       ],
     },
     {
-      id: "compounds",
-      question: t("onboarding.compoundsQuestion"),
-      type: "text" as const,
-      placeholder: t("onboarding.compoundsPlaceholder"),
-    },
-    {
-      id: "biomarkers",
-      question: t("onboarding.biomarkersQuestion"),
+      id: "protocol_experience",
+      type: "options",
+      question: t("onboarding.protocolQuestion"),
       options: [
-        { value: "none", label: t("onboarding.bioNone") },
-        { value: "basic", label: t("onboarding.bioBasic") },
-        { value: "hormones", label: t("onboarding.bioHormones") },
-        { value: "comprehensive", label: t("onboarding.bioComprehensive") },
+        { value: "yes", label: t("onboarding.protocolYes") },
+        { value: "no", label: t("onboarding.protocolNo") },
+        { value: "some", label: t("onboarding.protocolSome") },
       ],
     },
     {
-      id: "risk",
-      question: t("onboarding.riskQuestion"),
+      id: "supplements",
+      type: "options",
+      question: t("onboarding.supplementsQuestion"),
       options: [
-        { value: "conservative", label: t("onboarding.riskConservative") },
-        { value: "moderate", label: t("onboarding.riskModerate") },
-        { value: "aggressive", label: t("onboarding.riskAggressive") },
+        { value: "none", label: t("onboarding.suppNone") },
+        { value: "1-3", label: t("onboarding.supp1to3") },
+        { value: "4-8", label: t("onboarding.supp4to8") },
+        { value: "9+", label: t("onboarding.supp9plus") },
       ],
+    },
+    {
+      id: "consistency",
+      type: "options",
+      question: t("onboarding.consistencyQuestion"),
+      options: [
+        { value: "strong", label: t("onboarding.consistencyStrong") },
+        { value: "moderate", label: t("onboarding.consistencyModerate") },
+        { value: "struggle", label: t("onboarding.consistencyStruggle") },
+        { value: "starting", label: t("onboarding.consistencyStarting") },
+      ],
+    },
+    {
+      id: "benefit",
+      type: "benefit" as const,
     },
   ];
 
   const current = steps[step];
   const isLast = step === steps.length - 1;
-  const canProceed = !!answers[current.id] || current.type === "text";
+  const isBenefit = current.type === "benefit";
+  const canProceed = isBenefit || !!answers[current.id];
+  const optionsStep = current.type === "options" ? current : null;
+
+  // Map new answers to profile fields for backwards compatibility
+  const mapAnswersToProfile = () => {
+    const mapped: Record<string, string> = { ...answers };
+    // Map glp1 + protocol experience into experience_level
+    const glp1 = answers.glp1_experience;
+    const protocol = answers.protocol_experience;
+    if (glp1 === "no" && protocol === "no") mapped.experience = "none";
+    else if (glp1 === "no" && protocol === "some") mapped.experience = "beginner";
+    else if (glp1 === "yes" && (protocol === "no" || protocol === "some")) mapped.experience = "beginner";
+    else if (glp1 === "yes" && protocol === "yes") mapped.experience = "intermediate";
+    else mapped.experience = "beginner";
+    // Map supplements count to current_compounds
+    mapped.compounds = answers.supplements === "none" ? "" : `${answers.supplements} supplements`;
+    // Map consistency to risk_tolerance
+    const c = answers.consistency;
+    if (c === "strong") mapped.risk = "moderate";
+    else if (c === "moderate") mapped.risk = "moderate";
+    else mapped.risk = "conservative";
+    return mapped;
+  };
 
   const handleFinish = () => {
-    sessionStorage.setItem("onboarding_answers", JSON.stringify(answers));
+    const mapped = mapAnswersToProfile();
+    sessionStorage.setItem("onboarding_answers", JSON.stringify(mapped));
     onOpenChange(false);
     setStep(0);
     navigate("/auth");
@@ -87,44 +135,80 @@ const OnboardingModal = ({ open, onOpenChange }: OnboardingModalProps) => {
             {t("onboarding.title")}
           </DialogTitle>
           <DialogDescription className="text-sm text-muted-foreground">
-            {t("onboarding.step", { current: step + 1, total: steps.length })}
+            {isBenefit
+              ? ""
+              : t("onboarding.step", { current: step + 1, total: steps.length - 1 })}
           </DialogDescription>
         </DialogHeader>
 
-        <div className="w-full h-1 rounded-full bg-muted overflow-hidden">
-          <div
-            className="h-full bg-primary transition-all duration-300"
-            style={{ width: `${((step + 1) / steps.length) * 100}%` }}
-          />
-        </div>
+        {!isBenefit && (
+          <div className="w-full h-1 rounded-full bg-muted overflow-hidden">
+            <div
+              className="h-full bg-primary transition-all duration-300"
+              style={{ width: `${((step + 1) / (steps.length - 1)) * 100}%` }}
+            />
+          </div>
+        )}
 
         <div className="py-4 space-y-4">
-          <p className="text-sm font-medium text-foreground">{current.question}</p>
+          {isBenefit ? (
+            <div className="space-y-5">
+              <div className="flex items-center gap-3">
+                <div className="p-2.5 rounded-xl bg-primary/10">
+                  <Sparkles className="h-5 w-5 text-primary" />
+                </div>
+                <h3 className="text-lg font-heading font-bold text-foreground">
+                  {t("onboarding.benefitTitle")}
+                </h3>
+              </div>
 
-          {"options" in current && current.options ? (
-            <RadioGroup
-              value={answers[current.id] || ""}
-              onValueChange={(val) => setAnswers((prev) => ({ ...prev, [current.id]: val }))}
-              className="space-y-2"
-            >
-              {current.options.map((opt) => (
-                <label
-                  key={opt.value}
-                  className="flex items-center gap-3 p-3 rounded-xl border border-border hover:border-primary/30 cursor-pointer transition-colors has-[[data-state=checked]]:border-primary has-[[data-state=checked]]:bg-primary/5"
-                >
-                  <RadioGroupItem value={opt.value} />
-                  <span className="text-sm text-foreground">{opt.label}</span>
-                </label>
-              ))}
-            </RadioGroup>
-          ) : (
-            <Input
-              value={answers[current.id] || ""}
-              onChange={(e) => setAnswers((prev) => ({ ...prev, [current.id]: e.target.value }))}
-              placeholder={(current as any).placeholder}
-              className="w-full"
-            />
-          )}
+              <p className="text-sm text-muted-foreground leading-relaxed">
+                {t("onboarding.benefitMessage")}
+              </p>
+
+              <div className="space-y-3">
+                <div className="flex items-start gap-3 p-3 rounded-xl bg-muted/50">
+                  <Target className="h-4 w-4 text-primary mt-0.5 flex-shrink-0" />
+                  <p className="text-sm text-foreground">Personalised protocols based on your goals & experience</p>
+                </div>
+                <div className="flex items-start gap-3 p-3 rounded-xl bg-muted/50">
+                  <CalendarCheck className="h-4 w-4 text-primary mt-0.5 flex-shrink-0" />
+                  <p className="text-sm text-foreground">Smart reminders so you never miss a dose or supplement</p>
+                </div>
+                <div className="flex items-start gap-3 p-3 rounded-xl bg-muted/50">
+                  <Pill className="h-4 w-4 text-primary mt-0.5 flex-shrink-0" />
+                  <p className="text-sm text-foreground">Track all your compounds & supplements in one place</p>
+                </div>
+                <div className="flex items-start gap-3 p-3 rounded-xl bg-muted/50">
+                  <Activity className="h-4 w-4 text-primary mt-0.5 flex-shrink-0" />
+                  <p className="text-sm text-foreground">Biomarker tracking to see what's actually working</p>
+                </div>
+              </div>
+
+              <p className="text-sm font-medium text-foreground">
+                {t("onboarding.benefitCta")}
+              </p>
+            </div>
+          ) : optionsStep ? (
+            <>
+              <p className="text-sm font-medium text-foreground">{optionsStep.question}</p>
+              <RadioGroup
+                value={answers[optionsStep.id] || ""}
+                onValueChange={(val) => setAnswers((prev) => ({ ...prev, [optionsStep.id]: val }))}
+                className="space-y-2"
+              >
+                {optionsStep.options.map((opt) => (
+                  <label
+                    key={opt.value}
+                    className="flex items-center gap-3 p-3 rounded-xl border border-border hover:border-primary/30 cursor-pointer transition-colors has-[[data-state=checked]]:border-primary has-[[data-state=checked]]:bg-primary/5"
+                  >
+                    <RadioGroupItem value={opt.value} />
+                    <span className="text-sm text-foreground">{opt.label}</span>
+                  </label>
+                ))}
+              </RadioGroup>
+            </>
+          ) : null}
         </div>
 
         <div className="flex items-center justify-between pt-2">
@@ -140,7 +224,7 @@ const OnboardingModal = ({ open, onOpenChange }: OnboardingModalProps) => {
           </Button>
 
           {isLast ? (
-            <Button size="sm" onClick={handleFinish} disabled={!canProceed}>
+            <Button size="sm" onClick={handleFinish} className="shadow-brand">
               <CheckCircle2 className="h-4 w-4 mr-1" />
               {t("onboarding.generatePlan")}
             </Button>
