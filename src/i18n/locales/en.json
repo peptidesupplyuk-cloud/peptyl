@@ -71,17 +71,17 @@
     "researchOnly": "Research only"
   },
   "howItWorks": {
-    "label": "The Peptyl Method",
+    "label": "How It Works",
     "title": "Research With <1>Purpose</1>",
     "track": "Track",
-    "trackDesc": "Log biomarkers, protocols, and doses in one place.",
+    "trackDesc": "Log your goals, biomarkers, and daily protocols in one place.",
     "decide": "Decide",
-    "decideDesc": "Get data-driven insights tailored to your biology.",
+    "decideDesc": "Get personalised insights matched to your body and objectives.",
     "adjust": "Adjust",
-    "adjustDesc": "Fine-tune dosing, timing, and stacks based on real results.",
+    "adjustDesc": "Fine-tune your plan based on real results, not guesswork.",
     "improve": "Improve",
-    "improveDesc": "See measurable progress across every cycle.",
-    "loop": "Continuous cycle — every round gets sharper"
+    "improveDesc": "See measurable progress, cycle after cycle.",
+    "loop": "A continuous loop that sharpens with every cycle"
   },
   "community": {
     "title": "Community <1>Intelligence</1>",
