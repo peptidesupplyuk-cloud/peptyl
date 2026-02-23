@@ -31,12 +31,7 @@ const HeroSection = () => {
     <div className="container mx-auto px-6 relative z-10 pt-24 pb-16">
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 items-center">
       <div className="max-w-3xl">
-        <motion.div initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.8 }}>
-          <span className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-primary-foreground/10 backdrop-blur-sm border border-primary-foreground/10 text-primary text-sm font-medium mb-6 mt-12">
-            <FlaskConical className="h-3.5 w-3.5" />
-            {t("hero.badge")}
-          </span>
-        </motion.div>
+        <div className="mt-12 mb-6" />
 
         <motion.h1 initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.8, delay: 0.1 }} className="text-4xl sm:text-5xl lg:text-7xl font-heading font-bold text-primary-foreground leading-[1.1] mb-6">
           {t("hero.title1")}
