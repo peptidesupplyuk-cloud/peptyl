@@ -42,7 +42,7 @@ const About = () => {
   return (
     <div className="min-h-screen bg-background">
       <SEO
-        title="About Peptyl — The Global Peptide Research Hub"
+        title="About Peptyl | The Global Peptide Research Hub"
         description="Built by biohackers and AI engineers. Peptyl is the research platform the global peptide community deserved."
         path="/about"
       />

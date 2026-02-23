@@ -12,7 +12,7 @@ const CalculatorsPage = () => {
   return (
     <div className="min-h-screen bg-background">
       <SEO
-        title="Peptide Calculators — Reconstitution, Dosing & Cycle Planning"
+        title="Peptide Calculators: Reconstitution, Dosing & Cycle Planning"
         description="Free precision tools for peptide reconstitution, dose calculation with syringe diagrams, and cycle planning with waste buffers. U-100, U-40 and Tuberculin support."
         path="/calculators"
       />

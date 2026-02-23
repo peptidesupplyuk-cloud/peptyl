@@ -31,7 +31,7 @@ const PeptidesPage = () => {
   return (
     <div className="min-h-screen bg-background">
       <SEO
-        title="Peptide Database — 54 Compounds with Dosing Protocols"
+        title="Peptide Database: 54 Compounds with Dosing Protocols"
         description="Searchable peptide database with detailed administration protocols, dose ranges, and community feedback. BPC-157, Semaglutide, Tirzepatide and more."
         path="/peptides"
       />

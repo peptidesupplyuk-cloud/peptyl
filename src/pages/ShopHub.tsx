@@ -29,7 +29,7 @@ const ShopHubPage = () => {
   return (
     <div className="min-h-screen bg-background">
       <SEO
-        title="Shop — Suppliers & Products | Peptyl"
+        title="Shop: Suppliers & Products | Peptyl"
         description="Compare prices from approved UK suppliers and browse curated supplements to support your protocols."
         path="/shop"
       />

@@ -4,7 +4,7 @@ import ArticleLayout from "@/components/ArticleLayout";
 const OralGlp1Boom = () => (
   <ArticleLayout
     category="Deep Dive"
-    title="Why Oral GLP-1s Will Trigger the Next Boom in Peptide Use — 2026 Edition"
+    title="Why Oral GLP-1s Will Trigger the Next Boom in Peptide Use (2026 Edition)"
     readTime="8 min read"
     date="February 2026"
     slug="oral-glp1-boom-2026"

@@ -231,7 +231,7 @@ const Dashboard = () => {
   return (
     <div className="min-h-screen bg-background">
       <SEO
-        title="My Plan — Daily Actions & Protocol Management"
+        title="My Plan | Daily Actions & Protocol Management"
         description="See what to do today, track biomarkers, and manage your active peptide protocols."
         path="/dashboard"
       />

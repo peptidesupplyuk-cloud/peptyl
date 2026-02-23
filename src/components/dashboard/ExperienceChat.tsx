@@ -208,7 +208,7 @@ const ExperienceChat = () => {
               My Peptide Journal
             </p>
             <p className="text-[10px] text-muted-foreground">
-              Log your results, side effects & progress — persisted to your
+              Log your results, side effects & progress. Persisted to your
               account
             </p>
           </div>
@@ -284,7 +284,7 @@ const ExperienceChat = () => {
               </div>
               <div className="bg-muted/50 rounded-xl rounded-tl-sm px-3 py-2">
                 <p className="text-sm text-foreground">
-                  Welcome to your peptide journal. Log your experiences here —
+                  Welcome to your peptide journal. Log your experiences here:
                   dosing, results, bloodwork changes, side effects. Each entry is{" "}
                   <strong>saved to your account</strong> and also helps build our
                   community knowledge base (anonymised).

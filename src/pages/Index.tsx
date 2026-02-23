@@ -20,7 +20,7 @@ const Index = () => {
   return (
     <div className="min-h-screen bg-background">
       <SEO
-        title="Peptyl — Leading Peptide Education & Research Platform"
+        title="Peptyl | Leading Peptide Education & Research Platform"
         description="Community-powered peptide database with 56+ compounds, precision calculators, biomarker tracking, and expert education. Free research tools worldwide."
         path="/"
         jsonLd={{

@@ -46,7 +46,7 @@ export const recommendedStacks: RecommendedStack[] = [
     goal: "Growth Hormone",
     peptides: ["CJC-1295 (no DAC)", "Ipamorelin"],
     description:
-      "Classic GHRH + GHRP combination. CJC-1295 stimulates GH production while Ipamorelin triggers its pulsatile release — mimicking natural GH secretion without significantly elevating cortisol or prolactin.",
+      "Classic GHRH + GHRP combination. CJC-1295 stimulates GH production while Ipamorelin triggers its pulsatile release, mimicking natural GH secretion without significantly elevating cortisol or prolactin.",
     protocol: "CJC-1295 100-300 mcg + Ipamorelin 100-300 mcg before bed, 5 days on / 2 off",
     evidence: "established",
   },

@@ -24,7 +24,7 @@ const ShopContent = () => {
   return (
     <>
       <p className="text-sm text-muted-foreground mb-6">
-        Supplements that complement your research protocols. We earn a small commission on purchases — it helps keep Peptyl free.
+        Supplements that complement your research protocols. We earn a small commission on purchases, which helps keep Peptyl free.
       </p>
 
       {/* Coming Soon overlay */}
