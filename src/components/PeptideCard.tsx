@@ -114,9 +114,31 @@ const PeptideCard = ({ peptide, index }: PeptideCardProps) => {
 
         {/* Admin details */}
         <div className="flex flex-wrap gap-3 mb-4 text-xs text-muted-foreground">
-          <span className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-muted/50">
-            <Syringe className="h-3 w-3" /> {peptide.administration}
-          </span>
+          {peptide.administration.split("/").map((route) => {
+            const trimmed = route.trim();
+            const isOral = trimmed.toLowerCase().includes("oral");
+            const isNasal = trimmed.toLowerCase().includes("nasal");
+            const isTopical = trimmed.toLowerCase().includes("topical");
+            const isInTrial = trimmed.toLowerCase().includes("trial");
+            return (
+              <span
+                key={trimmed}
+                className={`flex items-center gap-1.5 px-2.5 py-1 rounded-lg font-medium ${
+                  isOral
+                    ? "bg-primary/10 text-primary border border-primary/20"
+                    : isNasal
+                    ? "bg-accent text-accent-foreground"
+                    : isTopical
+                    ? "bg-secondary text-secondary-foreground"
+                    : "bg-muted/50"
+                }`}
+              >
+                <Syringe className="h-3 w-3" />
+                {trimmed}
+                {isInTrial && <Sparkles className="h-3 w-3 ml-0.5" />}
+              </span>
+            );
+          })}
           <span className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-muted/50">
             <CalendarDays className="h-3 w-3" /> {peptide.frequency}
           </span>
