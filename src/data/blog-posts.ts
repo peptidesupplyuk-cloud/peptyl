@@ -120,4 +120,12 @@ export const blogPosts: BlogPost[] = [
     readTime: "9 min read",
     date: "February 2026",
   },
+  {
+    slug: "oral-glp1-boom-2026",
+    title: "Why Oral GLP-1s Will Trigger the Next Boom in Peptide Use — 2026 Edition",
+    category: "Deep Dive",
+    excerpt: "Oral Wegovy launched in January 2026. Oral tirzepatide is in Phase III. Here's why the shift from needles to pills will reshape the entire peptide landscape.",
+    readTime: "8 min read",
+    date: "February 2026",
+  },
 ];
