@@ -12,7 +12,6 @@ Deno.serve(async (req) => {
   }
 
   try {
-    // Accept token from Authorization header OR query param (for browser redirects)
     const url = new URL(req.url);
     const tokenFromQuery = url.searchParams.get("token");
     const authHeader = req.headers.get("Authorization");
@@ -49,7 +48,9 @@ Deno.serve(async (req) => {
       });
     }
 
-    const redirectUri = `${Deno.env.get("SUPABASE_URL")}/functions/v1/whoop-oauth-callback`;
+    // Redirect URI points to YOUR app, not the edge function
+    const appUrl = Deno.env.get("APP_URL") || "https://peptyl.lovable.app";
+    const redirectUri = `${appUrl}/whoop-callback`;
 
     const authorizeUrl =
       `https://api.prod.whoop.com/oauth/oauth2/auth` +
@@ -59,8 +60,6 @@ Deno.serve(async (req) => {
       `&scope=${encodeURIComponent("read:recovery read:cycles read:sleep read:profile")}` +
       `&state=${user.id}`;
 
-    // Return a 302 redirect so the browser performs a top-level navigation
-    // This avoids WHOOP's X-Frame-Options: DENY blocking the login page
     return Response.redirect(authorizeUrl, 302);
   } catch (err: any) {
     return new Response(JSON.stringify({ error: err.message }), {
