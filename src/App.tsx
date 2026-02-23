@@ -44,6 +44,7 @@ const CognitiveStack = lazy(() => import("./pages/articles/CognitiveStack"));
 const Mt1VsMt2 = lazy(() => import("./pages/articles/Mt1VsMt2"));
 const OralGlp1Boom = lazy(() => import("./pages/articles/OralGlp1Boom"));
 const CampaignPage = lazy(() => import("./pages/CampaignPage"));
+const WhoopCallback = lazy(() => import("./pages/WhoopCallback"));
 
 const queryClient = new QueryClient();
 
@@ -89,6 +90,7 @@ const App = () => (
               <Route path="/education/cognitive-supplement-stack" element={<CognitiveStack />} />
               <Route path="/education/mt1-vs-mt2" element={<Mt1VsMt2 />} />
               <Route path="/education/oral-glp1-boom-2026" element={<OralGlp1Boom />} />
+              <Route path="/whoop-callback" element={<WhoopCallback />} />
               <Route path="/start/:slug" element={<CampaignPage />} />
               {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
               <Route path="*" element={<NotFound />} />

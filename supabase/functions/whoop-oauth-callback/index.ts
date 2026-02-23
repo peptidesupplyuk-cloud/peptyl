@@ -12,23 +12,23 @@ Deno.serve(async (req) => {
   }
 
   try {
-    const url = new URL(req.url);
-    const code = url.searchParams.get("code");
-    const state = url.searchParams.get("state"); // user_id passed as state
+    // Frontend POSTs { code, state } after WHOOP redirects to the app
+    const { code, state } = await req.json();
 
     if (!code || !state) {
-      return new Response("Missing code or state", { status: 400, headers: corsHeaders });
+      return new Response(JSON.stringify({ error: "Missing code or state" }), {
+        status: 400,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
     }
 
     const clientId = Deno.env.get("WHOOP_CLIENT_ID")!;
     const clientSecret = Deno.env.get("WHOOP_CLIENT_SECRET")!;
-
-    // RFC 6749 §2.3.1 — HTTP Basic authentication for confidential clients
     const basicAuth = btoa(`${clientId}:${clientSecret}`);
 
-    // Determine redirect_uri (must match what was used in authorize URL)
-    const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
-    const redirectUri = `${supabaseUrl}/functions/v1/whoop-oauth-callback`;
+    // redirect_uri must match what was sent in the authorize request
+    const appUrl = Deno.env.get("APP_URL") || "https://peptyl.lovable.app";
+    const redirectUri = `${appUrl}/whoop-callback`;
 
     // Exchange authorization code for tokens
     const tokenRes = await fetch("https://api.prod.whoop.com/oauth/token", {
@@ -47,16 +47,16 @@ Deno.serve(async (req) => {
     const tokenText = await tokenRes.text();
     if (!tokenRes.ok) {
       console.error("WHOOP token exchange failed:", tokenRes.status, tokenText);
-      return new Response(`Token exchange failed: ${tokenText}`, {
+      return new Response(JSON.stringify({ error: "Token exchange failed", detail: tokenText }), {
         status: 400,
-        headers: corsHeaders,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
 
     const tokenData = JSON.parse(tokenText);
     const expiresAt = new Date(Date.now() + tokenData.expires_in * 1000).toISOString();
 
-    // Fetch WHOOP user profile to get whoop_user_id
+    // Fetch WHOOP user profile
     let whoopUserId: string | null = null;
     try {
       const profileRes = await fetch("https://api.prod.whoop.com/developer/v1/user/profile/basic", {
@@ -66,7 +66,7 @@ Deno.serve(async (req) => {
         const profile = await profileRes.json();
         whoopUserId = String(profile.user_id);
       } else {
-        await profileRes.text(); // consume body
+        await profileRes.text();
       }
     } catch {
       // non-critical
@@ -74,7 +74,7 @@ Deno.serve(async (req) => {
 
     // Store connection in DB
     const supabase = createClient(
-      supabaseUrl,
+      Deno.env.get("SUPABASE_URL")!,
       Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!,
     );
 
@@ -92,17 +92,14 @@ Deno.serve(async (req) => {
 
     if (error) {
       console.error("DB upsert error:", error);
-      return new Response(`DB error: ${error.message}`, { status: 500, headers: corsHeaders });
+      return new Response(JSON.stringify({ error: error.message }), {
+        status: 500,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
     }
 
-    // Redirect user back to dashboard
-    const appUrl = Deno.env.get("APP_URL") || "https://peptyl.lovable.app";
-    return new Response(null, {
-      status: 302,
-      headers: {
-        ...corsHeaders,
-        Location: `${appUrl}/dashboard?tab=overview&whoop=connected`,
-      },
+    return new Response(JSON.stringify({ success: true }), {
+      headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
   } catch (err: any) {
     console.error("WHOOP OAuth callback error:", err);
