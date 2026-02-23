@@ -27,7 +27,8 @@ Deno.serve(async (req) => {
     const basicAuth = btoa(`${clientId}:${clientSecret}`);
 
     // Determine redirect_uri (must match what was used in authorize URL)
-    const redirectUri = "https://wmudidfprbtojkmtczaq.supabase.co/functions/v1/whoop-oauth-callback";
+    const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
+    const redirectUri = `${supabaseUrl}/functions/v1/whoop-oauth-callback`;
 
     // Exchange authorization code for tokens
     const tokenRes = await fetch("https://api.prod.whoop.com/oauth/token", {
