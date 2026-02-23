@@ -26,7 +26,7 @@ const ImprovePage = () => {
   return (
     <div className="min-h-screen bg-background">
       <SEO
-        title="Improve — Peptides & Calculators | Peptyl"
+        title="Improve: Peptides & Calculators | Peptyl"
         description="Browse our peptide database and use precision calculators for reconstitution, dosing, and cycle planning."
         path="/improve"
       />

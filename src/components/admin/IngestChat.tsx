@@ -87,7 +87,7 @@ const IngestChat = () => {
         </div>
         <div>
           <p className="text-sm font-heading font-semibold text-foreground">Community Ingest</p>
-          <p className="text-[10px] text-muted-foreground">Paste user reports — AI extracts peptide data for the knowledge base</p>
+          <p className="text-[10px] text-muted-foreground">Paste user reports. AI extracts peptide data for the knowledge base</p>
         </div>
       </div>
 

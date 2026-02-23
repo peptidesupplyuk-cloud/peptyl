@@ -24,7 +24,7 @@ const EducationPage = () => {
   return (
     <div className="min-h-screen bg-background">
       <SEO
-        title="Peptide Education Hub — Science-Backed Guides"
+        title="Peptide Education Hub: Science-Backed Guides"
         description="Learn about peptide reconstitution, storage, GLP-1 protocols, BPC-157 vs TB-500, and more. Free, science-backed educational resources."
         path="/education"
         jsonLd={{

@@ -333,7 +333,7 @@ const ContentAdmin = () => {
 
   return (
     <div className="min-h-screen bg-background">
-      <SEO title="Content Admin — Ingestion & Review" description="Manage content ingestion pipeline and review AI-extracted peptide data." path="/admin/content" />
+      <SEO title="Content Admin: Ingestion & Review" description="Manage content ingestion pipeline and review AI-extracted peptide data." path="/admin/content" />
       <Header />
       <main className="pt-20 pb-16">
         <div className="container mx-auto px-4 sm:px-6 max-w-4xl">
