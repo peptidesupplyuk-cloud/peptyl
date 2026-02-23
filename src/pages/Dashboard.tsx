@@ -1,8 +1,8 @@
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo, useRef } from "react";
 import { useSearchParams } from "react-router-dom";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Carousel, CarouselContent, CarouselItem, CarouselPrevious, CarouselNext } from "@/components/ui/carousel";
-import { Activity, FlaskConical, LayoutDashboard, AlertTriangle, User, BookOpen, CalendarDays, BarChart3, Heart, Weight, Droplets, ExternalLink, CheckCircle2 } from "lucide-react";
+import { Activity, FlaskConical, LayoutDashboard, AlertTriangle, User, BookOpen, CalendarDays, BarChart3, Heart, Weight, Droplets, ExternalLink, CheckCircle2, Play, Eye, X } from "lucide-react";
 import { addWeeks, format } from "date-fns";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
@@ -37,6 +37,50 @@ import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { useQuery } from "@tanstack/react-query";
+
+const VideoHelpButton = () => {
+  const [open, setOpen] = useState(false);
+  const tracked = useRef(false);
+
+  const trackView = () => {
+    if (tracked.current) return;
+    tracked.current = true;
+    (supabase as any).from("video_views").insert({ video_name: "meet-peptyl" });
+  };
+
+  return (
+    <>
+      <Button
+        variant="outline"
+        size="sm"
+        onClick={() => setOpen(true)}
+        className="gap-2 text-xs shrink-0"
+      >
+        <Play className="h-3.5 w-3.5" />
+        Need help? Watch demo
+      </Button>
+
+      {open && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-background/80 backdrop-blur-sm" onClick={() => setOpen(false)}>
+          <div className="relative w-full max-w-3xl mx-4 rounded-2xl overflow-hidden border border-border bg-card shadow-lg" onClick={(e) => e.stopPropagation()}>
+            <div className="flex items-center justify-between p-4 border-b border-border">
+              <div className="flex items-center gap-2">
+                <Play className="h-4 w-4 text-primary" />
+                <span className="text-sm font-heading font-semibold text-foreground">Meet Peptyl</span>
+              </div>
+              <button onClick={() => setOpen(false)} className="p-1.5 rounded-lg hover:bg-muted transition-colors">
+                <X className="h-4 w-4 text-muted-foreground" />
+              </button>
+            </div>
+            <video className="w-full aspect-video" controls autoPlay preload="metadata" onPlay={trackView}>
+              <source src="/videos/meet-peptyl.mp4" type="video/mp4" />
+            </video>
+          </div>
+        </div>
+      )}
+    </>
+  );
+};
 
 const Dashboard = () => {
   const { data: panels = [], refetch: refetchPanels } = useBloodworkPanels();
@@ -194,13 +238,16 @@ const Dashboard = () => {
       <Header />
       <main className="pt-20 pb-24 md:pb-16">
         <div className="container mx-auto px-4 sm:px-6">
-          <div className="mb-8">
-            <h1 className="text-2xl sm:text-3xl font-heading font-bold text-foreground">
-              My <span className="text-gradient-teal">Plan</span>
-            </h1>
-            <p className="text-muted-foreground text-sm mt-1">
-              Your daily actions, biomarkers, and active protocols.
-            </p>
+          <div className="mb-8 flex items-start justify-between gap-4">
+            <div>
+              <h1 className="text-2xl sm:text-3xl font-heading font-bold text-foreground">
+                My <span className="text-gradient-teal">Plan</span>
+              </h1>
+              <p className="text-muted-foreground text-sm mt-1">
+                Your daily actions, biomarkers, and active protocols.
+              </p>
+            </div>
+            <VideoHelpButton />
           </div>
 
           <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">

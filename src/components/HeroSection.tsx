@@ -1,32 +1,14 @@
 import { motion } from "framer-motion";
-import { ArrowRight, Calculator, Database, Users, FlaskConical, Play, Eye } from "lucide-react";
+import { ArrowRight, Calculator, Database, Users, FlaskConical } from "lucide-react";
 import { Link } from "react-router-dom";
-import { useRef, useState, useEffect } from "react";
+import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Button } from "@/components/ui/button";
-import { supabase } from "@/integrations/supabase/client";
 import heroBg from "@/assets/hero-bg.jpg";
 import OnboardingModal from "@/components/OnboardingModal";
-
-const useVideoViews = (videoName: string) => {
-  const [views, setViews] = useState<number | null>(null);
-  const tracked = useRef(false);
-
-  useEffect(() => {
-    (supabase as any).from("video_views").select("id", { count: "exact", head: true }).eq("video_name", videoName).then(({ count }: any) => setViews(count ?? 0));
-  }, [videoName]);
-
-  const trackView = () => {
-    if (tracked.current) return;
-    tracked.current = true;
-    (supabase as any).from("video_views").insert({ video_name: videoName }).then(() => setViews((v) => (v ?? 0) + 1));
-  };
-
-  return { views, trackView };
-};
+import ComingSoonCards from "@/components/ComingSoonCards";
 
 const HeroSection = () => {
-  const { views, trackView } = useVideoViews("meet-peptyl");
   const [onboardingOpen, setOnboardingOpen] = useState(false);
   const { t } = useTranslation();
 
@@ -80,23 +62,7 @@ const HeroSection = () => {
       </div>
 
       <motion.div initial={{ opacity: 0, x: 30 }} animate={{ opacity: 1, x: 0 }} transition={{ duration: 0.8, delay: 0.4 }} className="w-full">
-        <div className="bg-glass rounded-2xl border border-primary-foreground/10 overflow-hidden">
-          <div className="p-3 sm:p-4 flex items-center justify-between border-b border-primary-foreground/10">
-            <div className="flex items-center gap-2">
-              <Play className="h-4 w-4 text-primary" />
-              <span className="text-sm font-medium text-primary-foreground">{t("hero.meetPeptyl")}</span>
-            </div>
-            {views !== null && (
-              <div className="flex items-center gap-1.5 text-xs text-primary-foreground/50">
-                <Eye className="h-3.5 w-3.5" />
-                <span>{views.toLocaleString()} {t("hero.views")}</span>
-              </div>
-            )}
-          </div>
-          <video className="w-full aspect-video" controls preload="metadata" onPlay={trackView}>
-            <source src="/videos/meet-peptyl.mp4" type="video/mp4" />
-          </video>
-        </div>
+        <ComingSoonCards />
       </motion.div>
       </div>
 
