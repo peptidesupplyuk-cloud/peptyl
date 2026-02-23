@@ -71,8 +71,8 @@
     "researchOnly": "Research only"
   },
   "howItWorks": {
-    "label": "How It Works",
-    "title": "Research With <1>Purpose</1>",
+    "label": "",
+    "title": "How It <1>Works</1>",
     "track": "Track",
     "trackDesc": "Log your goals, biomarkers, and daily protocols in one place.",
     "decide": "Decide",
