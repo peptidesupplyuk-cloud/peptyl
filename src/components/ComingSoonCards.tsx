@@ -1,5 +1,5 @@
 import { motion } from "framer-motion";
-import { Activity, Droplets, ArrowRight } from "lucide-react";
+import { Activity, Droplets } from "lucide-react";
 
 const ComingSoonCards = () => {
   return (
@@ -79,11 +79,6 @@ const ComingSoonCards = () => {
                 <span className="text-sm font-semibold text-primary-foreground/80 block leading-none">At-Home Testing</span>
                 <span className="text-[10px] text-primary-foreground/40">Results in 48hrs</span>
               </div>
-            </div>
-            <div className="h-5 w-px bg-primary-foreground/15" />
-            <div className="flex items-center gap-1.5 text-primary text-xs font-medium">
-              <span>Get Notified</span>
-              <ArrowRight className="h-3 w-3" />
             </div>
           </div>
         </div>
