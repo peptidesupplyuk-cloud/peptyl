@@ -12,3 +12,9 @@ createRoot(document.getElementById("root")!).render(
     </ThemeProvider>
   </HelmetProvider>
 );
+
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('/sw.js');
+  });
+}

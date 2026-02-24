@@ -8,6 +8,12 @@
     <link rel="icon" type="image/png" sizes="16x16" href="/app-icon.png" />
     <link rel="apple-touch-icon" href="/app-icon.png" />
     <link rel="shortcut icon" href="/app-icon.png" />
+    <link rel="manifest" href="/manifest.json" />
+    <meta name="theme-color" content="#00d4aa" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="apple-mobile-web-app-title" content="Peptyl" />
+    <script src="https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.page.js" defer></script>
     <title>Peptyl | Peptide & Supplement Research, Tools & Bloodwork Tracking</title>
     <meta name="description" content="Your all-in-one platform for peptide and supplement research. Evidence-based guides, precision tools, bloodwork tracking, and personalised health protocols." />
     <meta name="author" content="Peptyl" />
@@ -78,5 +84,35 @@
       </ul>
     </noscript>
     <script type="module" src="/src/main.tsx"></script>
+    <script>
+      window.OneSignalDeferred = window.OneSignalDeferred || [];
+      OneSignalDeferred.push(async function(OneSignal) {
+        await OneSignal.init({
+          appId: "7dd6be24-0dca-45af-b8b6-15cc95db293d",
+          notifyButton: {
+            enable: true,
+          },
+          promptOptions: {
+            slidedown: {
+              prompts: [
+                {
+                  type: "push",
+                  autoPrompt: true,
+                  text: {
+                    actionMessage: "Get peptide cycle reminders and protocol updates from Peptyl",
+                    acceptButton: "Allow",
+                    cancelButton: "Not now",
+                  },
+                  delay: {
+                    pageViews: 2,
+                    timeDelay: 5
+                  }
+                }
+              ]
+            }
+          }
+        });
+      });
+    </script>
   </body>
 </html>
