@@ -30,12 +30,15 @@ const HeroSection = () => {
       <div className="space-y-5 pt-2">
         <div>
           <h4 className="text-sm font-semibold text-foreground mb-2">iPhone / iPad (Safari)</h4>
-          <ol className="text-sm text-muted-foreground space-y-1.5 list-decimal list-inside">
+          <ol className="text-sm text-muted-foreground space-y-2 list-decimal list-inside">
             <li>Open <span className="font-medium text-foreground">peptyl.co.uk</span> in Safari</li>
-            <li>Tap the <span className="font-medium text-foreground">Share</span> button (square with arrow)</li>
-            <li>Scroll down and tap <span className="font-medium text-foreground">Add to Home Screen</span></li>
-            <li>Tap <span className="font-medium text-foreground">Add</span> to confirm</li>
+            <li>Tap the <span className="inline-flex items-center gap-1 font-medium text-foreground">Share icon <span className="inline-block text-base leading-none" aria-label="share icon">⬆️</span></span> at the bottom of the screen (square with an upward arrow)</li>
+            <li>Scroll down the share menu and tap <span className="font-medium text-foreground">"Add to Home Screen"</span></li>
+            <li>Tap <span className="font-medium text-foreground">Add</span> in the top-right corner</li>
           </ol>
+          <p className="text-xs text-muted-foreground/70 mt-2 italic">
+            Can't see it? Make sure you're using Safari — Chrome on iPhone doesn't support this.
+          </p>
         </div>
         <div className="h-px bg-border" />
         <div>
