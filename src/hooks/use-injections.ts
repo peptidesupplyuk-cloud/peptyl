@@ -17,6 +17,9 @@ export interface InjectionLog {
   created_at: string;
 }
 
+// Module-level mutex to prevent concurrent auto-generation
+let generatingForDate: string | null = null;
+
 /** Check if a peptide is due today based on its frequency */
 function isDueToday(frequency: string, protocolStartDate: string): boolean {
   const today = new Date();
@@ -66,6 +69,12 @@ export function useTodayInjections() {
       if (existing && existing.length > 0) {
         return existing as InjectionLog[];
       }
+
+      // Mutex: prevent concurrent auto-generation
+      if (generatingForDate === today) {
+        return [];
+      }
+      generatingForDate = today;
 
       // No logs yet — auto-generate from active protocols
       const { data: protocols } = await supabase
@@ -134,15 +143,21 @@ export function useTodayInjections() {
         status: "scheduled",
       }));
 
-      if (logsToInsert.length === 0) return [];
+      if (logsToInsert.length === 0) {
+        generatingForDate = null;
+        return [];
+      }
 
-      const { data: inserted, error: insertErr } = await supabase
-        .from("injection_logs")
-        .insert(logsToInsert)
-        .select();
-      if (insertErr) throw insertErr;
-
-      return (inserted ?? []) as InjectionLog[];
+      try {
+        const { data: inserted, error: insertErr } = await supabase
+          .from("injection_logs")
+          .upsert(logsToInsert, { onConflict: "user_id,peptide_name,scheduled_time", ignoreDuplicates: true })
+          .select();
+        if (insertErr) throw insertErr;
+        return (inserted ?? []) as InjectionLog[];
+      } finally {
+        generatingForDate = null;
+      }
     },
   });
 }
