@@ -49,6 +49,7 @@ const Footer = () => {
             <div className="flex flex-col gap-2.5">
               <span className="text-sm text-primary-foreground/50">{t("footer.researchOnly")}</span>
               <Link to="/about" className="text-sm text-primary-foreground/50 hover:text-primary transition-colors">{t("footer.aboutUs")}</Link>
+              <span className="text-sm text-primary-foreground/50 hover:text-primary transition-colors cursor-pointer" title="Visit peptyl.co.uk on your phone and tap 'Add to Home Screen'">📱 Get the App</span>
               <Link to="/privacy-policy" className="text-sm text-primary-foreground/50 hover:text-primary transition-colors">{t("footer.privacyPolicy")}</Link>
               <Link to="/terms-of-service" className="text-sm text-primary-foreground/50 hover:text-primary transition-colors">{t("footer.termsOfService")}</Link>
             </div>
