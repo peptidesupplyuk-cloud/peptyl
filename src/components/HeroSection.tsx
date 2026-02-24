@@ -1,20 +1,58 @@
 import { motion } from "framer-motion";
-import { ArrowRight, Calculator, Database, Users, FlaskConical } from "lucide-react";
+import { ArrowRight, Download, Smartphone, BookOpen } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Button } from "@/components/ui/button";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import heroBg from "@/assets/hero-bg.jpg";
 import OnboardingModal from "@/components/OnboardingModal";
 import ComingSoonCards from "@/components/ComingSoonCards";
 
 const HeroSection = () => {
   const [onboardingOpen, setOnboardingOpen] = useState(false);
+  const [installOpen, setInstallOpen] = useState(false);
   const { t } = useTranslation();
 
   return (
   <>
   <OnboardingModal open={onboardingOpen} onOpenChange={setOnboardingOpen} />
+
+  {/* Install App Dialog */}
+  <Dialog open={installOpen} onOpenChange={setInstallOpen}>
+    <DialogContent className="sm:max-w-md">
+      <DialogHeader>
+        <DialogTitle className="flex items-center gap-2 text-lg font-heading">
+          <Smartphone className="h-5 w-5 text-primary" />
+          Install Peptyl
+        </DialogTitle>
+      </DialogHeader>
+      <div className="space-y-5 pt-2">
+        <div>
+          <h4 className="text-sm font-semibold text-foreground mb-2">iPhone / iPad (Safari)</h4>
+          <ol className="text-sm text-muted-foreground space-y-1.5 list-decimal list-inside">
+            <li>Open <span className="font-medium text-foreground">peptyl.co.uk</span> in Safari</li>
+            <li>Tap the <span className="font-medium text-foreground">Share</span> button (square with arrow)</li>
+            <li>Scroll down and tap <span className="font-medium text-foreground">Add to Home Screen</span></li>
+            <li>Tap <span className="font-medium text-foreground">Add</span> to confirm</li>
+          </ol>
+        </div>
+        <div className="h-px bg-border" />
+        <div>
+          <h4 className="text-sm font-semibold text-foreground mb-2">Android (Chrome)</h4>
+          <ol className="text-sm text-muted-foreground space-y-1.5 list-decimal list-inside">
+            <li>Open <span className="font-medium text-foreground">peptyl.co.uk</span> in Chrome</li>
+            <li>Tap the <span className="font-medium text-foreground">⋮ menu</span> (top right)</li>
+            <li>Tap <span className="font-medium text-foreground">Add to Home Screen</span> or <span className="font-medium text-foreground">Install App</span></li>
+            <li>Tap <span className="font-medium text-foreground">Install</span> to confirm</li>
+          </ol>
+        </div>
+        <p className="text-xs text-muted-foreground/70 pt-1">
+          The app works offline, loads instantly, and receives protocol reminders — just like a native app.
+        </p>
+      </div>
+    </DialogContent>
+  </Dialog>
   <section className="dark-section relative min-h-screen flex items-center overflow-hidden">
     <div className="absolute inset-0">
       <img src={heroBg} alt="" className="w-full h-full object-cover" />
@@ -48,9 +86,14 @@ const HeroSection = () => {
             {t("hero.startProtocol")}
             <ArrowRight className="ml-2 h-4 w-4" />
           </Button>
-          <Link to="/peptides">
+          <Button size="lg" variant="outline" className="border-primary-foreground/20 text-primary-foreground hover:bg-primary-foreground/10 text-base px-8 bg-primary-foreground/5" onClick={() => setInstallOpen(true)}>
+            <Download className="mr-2 h-4 w-4" />
+            Download App
+          </Button>
+          <Link to="/education">
             <Button size="lg" variant="outline" className="border-primary-foreground/20 text-primary-foreground hover:bg-primary-foreground/10 text-base px-8 bg-primary-foreground/5">
-              {t("hero.browseDatabase")}
+              <BookOpen className="mr-2 h-4 w-4" />
+              Learn More
             </Button>
           </Link>
         </motion.div>
