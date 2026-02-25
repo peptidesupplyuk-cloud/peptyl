@@ -10,19 +10,19 @@ const PeptideCycling = () => (
     description="Continuous peptide use leads to receptor desensitisation, diminished returns, and potential safety concerns. Here's how cycling works and why it matters."
   >
     <p>
-      One of the most common mistakes in peptide research is running compounds indefinitely without breaks. The logic seems intuitive — if something works, why stop? But biology doesn't work that way. Receptors adapt, feedback loops adjust, and what worked in week 2 often plateaus by week 10.
+      One of the most common mistakes in peptide research is running compounds indefinitely without breaks. The logic seems intuitive: if something works, why stop? But biology doesn't work that way. Receptors adapt, feedback loops adjust, and what worked in week 2 often plateaus by week 10.
     </p>
 
     <h2>What Is Peptide Cycling?</h2>
     <p>
-      Cycling means using a peptide for a defined period ("on cycle"), followed by a deliberate break ("off cycle"), before resuming. The goal is to maintain receptor sensitivity, allow natural physiological recovery, and prevent tolerance — the same principle that applies to caffeine, adaptogens, and many pharmaceuticals.
+      Cycling means using a peptide for a defined period ("on cycle"), followed by a deliberate break ("off cycle"), before resuming. The goal is to maintain receptor sensitivity, allow natural physiological recovery, and prevent tolerance. The same principle applies to caffeine, adaptogens, and many pharmaceuticals.
     </p>
 
     <h2>Why Continuous Use Becomes Less Effective</h2>
 
     <h3>Receptor Desensitisation</h3>
     <p>
-      When a receptor is continuously stimulated, cells respond by reducing receptor density (downregulation) or decreasing receptor sensitivity. This is well-documented with GHRH receptors (relevant to CJC-1295 and other GH secretagogues), melanocortin receptors (Melanotan), and GLP-1 receptors (semaglutide, tirzepatide). The result: you need more compound to achieve the same effect — a classic tolerance pattern.
+      When a receptor is continuously stimulated, cells respond by reducing receptor density (downregulation) or decreasing receptor sensitivity. This is well-documented with GHRH receptors (relevant to CJC-1295 and other GH secretagogues), melanocortin receptors (Melanotan), and GLP-1 receptors (semaglutide, tirzepatide). The result is that you need more compound to achieve the same effect: a classic tolerance pattern.
     </p>
 
     <h3>Feedback Loop Suppression</h3>
@@ -39,44 +39,44 @@ const PeptideCycling = () => (
 
     <h3>GH Secretagogues (CJC-1295, Ipamorelin, Tesamorelin, MK-677)</h3>
     <ul>
-      <li><strong>On cycle:</strong> 8–12 weeks</li>
-      <li><strong>Off cycle:</strong> 4–6 weeks</li>
-      <li><strong>Why:</strong> Prevents GH receptor desensitisation and pituitary blunting. Monitor IGF-1 and fasting glucose — GH secretagogues can impair insulin sensitivity with prolonged use.</li>
+      <li><strong>On cycle:</strong> 8 to 12 weeks</li>
+      <li><strong>Off cycle:</strong> 4 to 6 weeks</li>
+      <li><strong>Why:</strong> Prevents GH receptor desensitisation and pituitary blunting. Monitor IGF-1 and fasting glucose, as GH secretagogues can impair insulin sensitivity with prolonged use.</li>
     </ul>
 
     <h3>Healing Peptides (BPC-157, TB-500)</h3>
     <ul>
-      <li><strong>On cycle:</strong> 4–8 weeks (injury-dependent)</li>
-      <li><strong>Off cycle:</strong> 2–4 weeks minimum</li>
+      <li><strong>On cycle:</strong> 4 to 8 weeks (injury-dependent)</li>
+      <li><strong>Off cycle:</strong> 2 to 4 weeks minimum</li>
       <li><strong>Why:</strong> These are typically run for a specific healing goal. Once tissue remodelling is underway, discontinuation allows natural repair processes to consolidate. Extended BPC-157 use beyond 8 weeks lacks safety data.</li>
     </ul>
 
     <h3>Immune Peptides (Thymosin Alpha-1, LL-37)</h3>
     <ul>
-      <li><strong>On cycle:</strong> 4–12 weeks</li>
+      <li><strong>On cycle:</strong> 4 to 12 weeks</li>
       <li><strong>Off cycle:</strong> 4 weeks</li>
       <li><strong>Why:</strong> Immune modulation should be time-limited unless under clinical supervision. Monitor white cell counts and inflammatory markers between cycles.</li>
     </ul>
 
     <h3>GLP-1 Agonists (Semaglutide, Tirzepatide)</h3>
     <ul>
-      <li><strong>Cycling is less common here</strong> — these are typically used as ongoing treatments under medical supervision. However, dose titration schedules themselves function as a form of cycling, and some researchers implement maintenance phases with reduced dosing.</li>
+      <li><strong>Cycling is less common here.</strong> These are typically used as ongoing treatments under medical supervision. However, dose titration schedules themselves function as a form of cycling, and some researchers implement maintenance phases with reduced dosing.</li>
     </ul>
 
     <h3>Tanning Peptides (Melanotan I/II)</h3>
     <ul>
-      <li><strong>Loading phase:</strong> 2–4 weeks</li>
-      <li><strong>Maintenance:</strong> 1–2 doses per week</li>
+      <li><strong>Loading phase:</strong> 2 to 4 weeks</li>
+      <li><strong>Maintenance:</strong> 1 to 2 doses per week</li>
       <li><strong>Off season:</strong> Full break during winter months if desired</li>
       <li><strong>Why:</strong> Melanocortin receptor saturation. Continuous high-dose use increases risk of unwanted mole changes and pigmentation irregularities.</li>
     </ul>
 
     <h2>How to Structure Your Cycle</h2>
     <ol>
-      <li><strong>Define your goal</strong> — What are you trying to achieve? Healing, body composition, immune support? The goal dictates duration.</li>
-      <li><strong>Set a hard stop date</strong> — Before you start, decide when you'll stop. Don't let "it's still working" override your protocol.</li>
-      <li><strong>Get bloods before and after</strong> — Baseline markers before starting; repeat at end of cycle. This is the only way to objectively assess whether the cycle achieved its purpose.</li>
-      <li><strong>Use the off cycle productively</strong> — The break isn't wasted time. It's when receptors resensitise, natural hormonal patterns normalise, and you evaluate whether to run another cycle.</li>
+      <li><strong>Define your goal.</strong> What are you trying to achieve? Healing, body composition, immune support? The goal dictates duration.</li>
+      <li><strong>Set a hard stop date.</strong> Before you start, decide when you'll stop. Don't let "it's still working" override your protocol.</li>
+      <li><strong>Get bloods before and after.</strong> Baseline markers before starting; repeat at end of cycle. This is the only way to objectively assess whether the cycle achieved its purpose.</li>
+      <li><strong>Use the off cycle productively.</strong> The break isn't wasted time. It's when receptors resensitise, natural hormonal patterns normalise, and you evaluate whether to run another cycle.</li>
     </ol>
 
     <h2>Signs You Need a Break</h2>
@@ -89,7 +89,7 @@ const PeptideCycling = () => (
 
     <h2>Bottom Line</h2>
     <p>
-      Cycling isn't optional — it's how peptides are designed to be used. Continuous use leads to diminishing returns at best and safety concerns at worst. Define your protocol, set your timeline, test your markers, and take your breaks. The peptide will work better next time because you gave your receptors time to recover.
+      Cycling isn't optional. It's how peptides are designed to be used. Continuous use leads to diminishing returns at best and safety concerns at worst. Define your protocol, set your timeline, test your markers, and take your breaks. The peptide will work better next time because you gave your receptors time to recover.
     </p>
 
     <h2>Disclaimer</h2>

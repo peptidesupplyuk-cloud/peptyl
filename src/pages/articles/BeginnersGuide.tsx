@@ -14,16 +14,16 @@ const BeginnersGuide = () => (
     <p>This comprehensive guide will walk you through everything you need to know as a complete beginner, from understanding what peptides are to safely handling and storing them.</p>
 
     <h2>What Are Peptides?</h2>
-    <p>Peptides are short chains of amino acids — the building blocks of proteins. While proteins can contain hundreds or thousands of amino acids, peptides typically contain between 2-50 amino acids.</p>
+    <p>Peptides are short chains of amino acids, the building blocks of proteins. While proteins can contain hundreds or thousands of amino acids, peptides typically contain between 2 and 50 amino acids.</p>
     <p>Think of peptides as <strong>"biological messengers"</strong> that tell your cells what to do. Different peptides trigger different cellular responses, which is why they're so valuable in research.</p>
 
     <h3>Common Categories of Research Peptides</h3>
     <ul>
-      <li><strong>Healing & Recovery:</strong> BPC-157, TB-500, GHK-Cu — researched for tissue repair and wound healing</li>
-      <li><strong>Metabolic:</strong> Semaglutide, Tirzepatide, Retatrutide — GLP-1 agonists studied for metabolic effects</li>
-      <li><strong>Growth Hormone Secretagogues:</strong> Ipamorelin, CJC-1295 — stimulate natural GH release</li>
-      <li><strong>Cognitive:</strong> Semax, Selank — nootropic peptides researched for cognitive enhancement</li>
-      <li><strong>Longevity:</strong> Epithalon, MOTS-c — studied for anti-aging properties</li>
+      <li><strong>Healing & Recovery:</strong> BPC-157, TB-500, GHK-Cu (researched for tissue repair and wound healing)</li>
+      <li><strong>Metabolic:</strong> Semaglutide, Tirzepatide, Retatrutide (GLP-1 agonists studied for metabolic effects)</li>
+      <li><strong>Growth Hormone Secretagogues:</strong> Ipamorelin, CJC-1295 (stimulate natural GH release)</li>
+      <li><strong>Cognitive:</strong> Semax, Selank (nootropic peptides researched for cognitive enhancement)</li>
+      <li><strong>Longevity:</strong> Epithalon, MOTS-c (studied for anti-aging properties)</li>
     </ul>
 
     <h2>Understanding Peptide Forms</h2>
@@ -31,7 +31,7 @@ const BeginnersGuide = () => (
     <p>Most research peptides come as lyophilized powder in sealed vials. This form is:</p>
     <ul>
       <li>Extremely stable when stored properly</li>
-      <li>Long shelf life (often 2-3 years unreconstituted)</li>
+      <li>Long shelf life (often 2 to 3 years unreconstituted)</li>
       <li>Requires reconstitution with bacteriostatic water before use</li>
       <li>Should be white or off-white in colour</li>
     </ul>
@@ -64,8 +64,8 @@ const BeginnersGuide = () => (
       <li>Calculate amount using our <Link to="/calculators">Reconstitution Calculator</Link></li>
       <li>Draw BAC water into syringe</li>
       <li>Inject slowly down the SIDE of the vial, not onto powder</li>
-      <li>Swirl gently — never shake vigorously</li>
-      <li>Inspect — solution should be clear with no particles</li>
+      <li>Swirl gently (never shake vigorously)</li>
+      <li>Inspect: solution should be clear with no particles</li>
       <li>Label and store refrigerated</li>
     </ol>
     <p><strong>💡 Pro Tip:</strong> Adding water slowly down the side of the vial prevents foaming and preserves peptide integrity.</p>
@@ -75,13 +75,13 @@ const BeginnersGuide = () => (
     <ul>
       <li><strong>Temperature:</strong> -20°C (freezer) for long-term, or 2-8°C (fridge) for short-term</li>
       <li><strong>Light:</strong> Keep in original vial, away from light</li>
-      <li><strong>Shelf life:</strong> Typically 2-3 years when properly stored</li>
+      <li><strong>Shelf life:</strong> Typically 2 to 3 years when properly stored</li>
     </ul>
 
     <h3>Reconstituted (Mixed)</h3>
     <ul>
       <li><strong>Temperature:</strong> Always refrigerate at 2-8°C</li>
-      <li><strong>Duration:</strong> Use within 28-30 days</li>
+      <li><strong>Duration:</strong> Use within 28 to 30 days</li>
       <li><strong>Never freeze:</strong> Freezing can damage peptide structure</li>
       <li><strong>Protect from light:</strong> Store in fridge, not on door</li>
     </ul>
@@ -122,7 +122,7 @@ const BeginnersGuide = () => (
 
     <h2>Common Beginner Mistakes</h2>
     <ul>
-      <li><strong>Shaking vials:</strong> Denatures peptides — always swirl gently</li>
+      <li><strong>Shaking vials:</strong> Denatures peptides. Always swirl gently</li>
       <li><strong>Wrong water type:</strong> Use bacteriostatic water, not sterile saline</li>
       <li><strong>Improper storage:</strong> Reconstituted peptides MUST be refrigerated</li>
       <li><strong>Reusing needles:</strong> Always use fresh, sterile syringes</li>

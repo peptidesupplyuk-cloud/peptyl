@@ -11,12 +11,12 @@ const RussiaPeptides = () => {
       description="Russia has approved multiple cognitive and neuroprotective peptide drugs while Western regulators remain cautious. Here's what they've approved, why, and what researchers should know."
     >
       <p>
-        While Western pharmaceutical markets focus heavily on GLP-1 agonists and monoclonal antibodies, Russia has quietly built one of the most advanced regulatory frameworks for peptide-based cognitive drugs in the world. Several compounds that remain "research-only" in the US, UK, and EU have been prescribed by Russian physicians for decades — backed by extensive clinical data that Western regulators have largely ignored.
+        While Western pharmaceutical markets focus heavily on GLP-1 agonists and monoclonal antibodies, Russia has quietly built one of the most advanced regulatory frameworks for peptide-based cognitive drugs in the world. Several compounds that remain "research-only" in the US, UK, and EU have been prescribed by Russian physicians for decades, backed by extensive clinical data that Western regulators have largely ignored.
       </p>
 
       <h2>The Russian Peptide Tradition</h2>
       <p>
-        Russia's head start traces back to the Soviet-era Institute of Molecular Genetics and the Military Medical Academy in St. Petersburg. In the 1980s and 1990s, Soviet researchers — particularly <strong>Professor Nikolai Myasoedov</strong> at the Russian Academy of Sciences and <strong>Professor Vladimir Khavinson</strong> at the St. Petersburg Institute of Bioregulation and Gerontology — began systematically developing synthetic peptide analogues of natural regulatory molecules.
+        Russia's head start traces back to the Soviet-era Institute of Molecular Genetics and the Military Medical Academy in St. Petersburg. In the 1980s and 1990s, Soviet researchers (particularly <strong>Professor Nikolai Myasoedov</strong> at the Russian Academy of Sciences and <strong>Professor Vladimir Khavinson</strong> at the St. Petersburg Institute of Bioregulation and Gerontology) began systematically developing synthetic peptide analogues of natural regulatory molecules.
       </p>
       <p>
         The result was a generation of peptide drugs that passed through Russia's regulatory system (overseen by the Ministry of Health) and entered clinical practice years before Western researchers even began investigating them seriously.
@@ -62,7 +62,7 @@ const RussiaPeptides = () => {
         <li><strong>Approved in Russia and 45+ countries:</strong> Prescribed for Alzheimer's disease, vascular dementia, stroke recovery, and TBI (but notably not approved in the US or UK)</li>
         <li><strong>Mechanism:</strong> Porcine brain-derived peptide preparation. Contains neurotrophic peptides that mimic the action of endogenous growth factors (CNTF, GDNF, IGF-1)</li>
         <li><strong>Key research:</strong> Large-scale RCTs (CASTA trial, CARS trial) in stroke and dementia patients. Cochrane review acknowledged evidence of benefit but noted trial quality concerns by Western standards</li>
-        <li><strong>Western status:</strong> Approved in over 45 countries across Asia, Europe, and Latin America — but not FDA-approved, not MHRA-approved</li>
+        <li><strong>Western status:</strong> Approved in over 45 countries across Asia, Europe, and Latin America, but not FDA-approved and not MHRA-approved</li>
       </ul>
 
       <h3>6. Pinealon</h3>
@@ -174,7 +174,7 @@ const RussiaPeptides = () => {
       <ul>
         <li><strong>Russia has approved 5+ cognitive peptide drugs</strong> that remain unavailable through Western healthcare systems</li>
         <li><strong>Semax, Selank, and Noopept</strong> are the most well-studied, with mechanisms involving BDNF, NGF, and GABA modulation</li>
-        <li><strong>The regulatory gap</strong> is driven by patent economics and differing clinical trial standards — not by lack of evidence</li>
+        <li><strong>The regulatory gap</strong> is driven by patent economics and differing clinical trial standards, not by lack of evidence</li>
         <li><strong>Cerebrolysin</strong> is the closest to Western acceptance, approved in 45+ countries but still blocked by FDA and MHRA</li>
         <li><strong>Decades of real-world prescribing data</strong> in Russia provides a unique evidence base that Western researchers are beginning to explore</li>
       </ul>
