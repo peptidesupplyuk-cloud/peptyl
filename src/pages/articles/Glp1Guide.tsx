@@ -53,11 +53,11 @@ const Glp1Guide = () => (
 
     <h3>Potency Hierarchy (Research Observations)</h3>
     <ol>
-      <li><strong>Retatrutide</strong> — Most potent in metabolic studies</li>
-      <li><strong>Tirzepatide</strong> — Strong effects, well-studied</li>
-      <li><strong>Semaglutide</strong> — Effective, most established</li>
+      <li><strong>Retatrutide:</strong> Most potent in metabolic studies</li>
+      <li><strong>Tirzepatide:</strong> Strong effects, well-studied</li>
+      <li><strong>Semaglutide:</strong> Effective, most established</li>
     </ol>
-    <p>Note: Potency differences don't necessarily mean one is "better" — research applications vary.</p>
+    <p>Note: Potency differences don't necessarily mean one is "better." Research applications vary.</p>
 
     <h3>Side Effect Profile (Research Context)</h3>
     <p>All three show similar side effect patterns in research:</p>
@@ -113,7 +113,7 @@ const Glp1Guide = () => (
 
     <h3>Reconstituted Form</h3>
     <ul>
-      <li>Store at 2-8°C (refrigerator) — never freeze</li>
+      <li>Store at 2-8°C (refrigerator). Never freeze</li>
       <li>Use within 28-30 days</li>
       <li>Protect from light (use amber vials if possible)</li>
     </ul>

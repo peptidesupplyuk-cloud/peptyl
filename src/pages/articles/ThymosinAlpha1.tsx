@@ -7,7 +7,7 @@ const ThymosinAlpha1 = () => (
     readTime="8 min read"
     date="February 2026"
     slug="thymosin-alpha-1-immune-peptide"
-    description="Thymosin Alpha-1 is one of the most clinically validated peptides in existence — approved for hepatitis, studied in cancer immunotherapy, and used as an immune modulator worldwide."
+    description="Thymosin Alpha-1 is one of the most clinically validated peptides in existence, approved for hepatitis, studied in cancer immunotherapy, and used as an immune modulator worldwide."
   >
     <p>
       Thymosin Alpha-1 (Tα1) is a 28-amino acid peptide originally isolated from the thymus gland in the 1970s by Allan Goldstein at George Washington University. Unlike many peptides that exist primarily in research contexts, Tα1 has been approved as a pharmaceutical drug (marketed as Zadaxin®) in over 35 countries for the treatment of hepatitis B, hepatitis C, and as an immune adjuvant. It remains one of the most clinically validated peptides in the world.
@@ -15,14 +15,14 @@ const ThymosinAlpha1 = () => (
 
     <h2>Mechanism of Action</h2>
     <p>
-      Tα1 is an immunomodulator, not an immunostimulant — a critical distinction. Rather than simply "boosting" the immune system (which can be dangerous in autoimmune contexts), it modulates and balances immune responses:
+      Tα1 is an immunomodulator, not an immunostimulant. That's a critical distinction. Rather than simply "boosting" the immune system (which can be dangerous in autoimmune contexts), it modulates and balances immune responses:
     </p>
     <ul>
-      <li><strong>T-Cell Maturation</strong> — Promotes differentiation of immature T-cells in the thymus into functional CD4+ and CD8+ T-cells. The thymus shrinks with age (thymic involution), reducing naive T-cell output. Tα1 partially compensates for this decline.</li>
-      <li><strong>Dendritic Cell Activation</strong> — Enhances antigen presentation, improving the immune system's ability to identify and respond to threats.</li>
-      <li><strong>NK Cell Activity</strong> — Increases natural killer cell cytotoxicity against virally infected and tumour cells.</li>
-      <li><strong>Toll-Like Receptor Signalling</strong> — Activates TLR2 and TLR9, enhancing innate immune recognition of pathogens.</li>
-      <li><strong>Anti-Inflammatory Balance</strong> — Reduces excessive pro-inflammatory cytokine production (IL-6, TNF-α) while supporting appropriate immune activation.</li>
+      <li><strong>T-Cell Maturation:</strong> Promotes differentiation of immature T-cells in the thymus into functional CD4+ and CD8+ T-cells. The thymus shrinks with age (thymic involution), reducing naive T-cell output. Tα1 partially compensates for this decline.</li>
+      <li><strong>Dendritic Cell Activation:</strong> Enhances antigen presentation, improving the immune system's ability to identify and respond to threats.</li>
+      <li><strong>NK Cell Activity:</strong> Increases natural killer cell cytotoxicity against virally infected and tumour cells.</li>
+      <li><strong>Toll-Like Receptor Signalling:</strong> Activates TLR2 and TLR9, enhancing innate immune recognition of pathogens.</li>
+      <li><strong>Anti-Inflammatory Balance:</strong> Reduces excessive pro-inflammatory cytokine production (IL-6, TNF-α) while supporting appropriate immune activation.</li>
     </ul>
 
     <h2>Clinical Evidence</h2>
@@ -52,9 +52,9 @@ const ThymosinAlpha1 = () => (
       In clinical settings, the most common protocol is:
     </p>
     <ul>
-      <li><strong>Standard</strong> — 1.6mg subcutaneous injection, twice weekly</li>
-      <li><strong>Intensive (acute illness)</strong> — 1.6mg daily for 7–14 days, then twice weekly maintenance</li>
-      <li><strong>Duration</strong> — 6–12 months in hepatitis protocols; 3–6 months in adjunct cancer therapy</li>
+      <li><strong>Standard:</strong> 1.6mg subcutaneous injection, twice weekly</li>
+      <li><strong>Intensive (acute illness):</strong> 1.6mg daily for 7 to 14 days, then twice weekly maintenance</li>
+      <li><strong>Duration:</strong> 6 to 12 months in hepatitis protocols; 3 to 6 months in adjunct cancer therapy</li>
     </ul>
     <p>
       Tα1 has an excellent safety profile across decades of clinical use. Side effects are rare and typically limited to mild injection site reactions. No significant adverse events have been reported even with long-term use.
@@ -67,9 +67,9 @@ const ThymosinAlpha1 = () => (
 
     <h2>Important Considerations</h2>
     <ul>
-      <li>Tα1 modulates — not simply stimulates — the immune system. This is generally advantageous but means baseline immune status matters. Get a full blood count and white cell differential before starting.</li>
+      <li>Tα1 modulates (not simply stimulates) the immune system. This is generally advantageous but means baseline immune status matters. Get a full blood count and white cell differential before starting.</li>
       <li>Those with autoimmune conditions should approach with caution and under medical supervision, as any immune modulator carries theoretical risk of flare.</li>
-      <li>Source quality is critical — ensure pharmaceutical-grade Tα1 from reputable suppliers with third-party testing.</li>
+      <li>Source quality is critical. Ensure pharmaceutical-grade Tα1 from reputable suppliers with third-party testing.</li>
       <li>This is educational content, not medical advice.</li>
     </ul>
   </ArticleLayout>
