@@ -1,9 +1,45 @@
 import { motion } from "framer-motion";
-import { Activity, Droplets } from "lucide-react";
+import { Activity, Droplets, Dna, ArrowRight } from "lucide-react";
+import { Link } from "react-router-dom";
 
 const ComingSoonCards = () => {
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+    <div className="grid grid-cols-1 gap-5">
+      {/* DNA Health Assessment — NOW LIVE */}
+      <Link to="/dna">
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6, delay: 0.3 }}
+          className="group relative rounded-2xl border border-primary/30 bg-glass overflow-hidden cursor-pointer hover:border-primary/50 transition-colors"
+        >
+          <div className="absolute inset-0 bg-gradient-to-br from-primary/8 to-transparent" />
+          <div className="relative p-6 sm:p-8 flex flex-col h-full min-h-[180px]">
+            <div className="flex items-center gap-3 mb-4">
+              <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-primary/20 text-primary text-[11px] font-semibold uppercase tracking-wider">
+                Now Live
+              </span>
+            </div>
+
+            <h3 className="text-xl sm:text-2xl font-heading font-bold text-primary-foreground mb-2">
+              DNA Health Assessment
+            </h3>
+            <p className="text-sm text-primary-foreground/50 leading-relaxed mb-5 max-w-sm">
+              Upload your 23andMe or lab results. Get a personalised health score and supplement protocol in minutes.
+            </p>
+
+            <div className="mt-auto flex items-center gap-2 text-primary text-sm font-medium group-hover:gap-3 transition-all">
+              <Dna className="h-4 w-4" />
+              Start your analysis
+              <ArrowRight className="h-4 w-4" />
+            </div>
+          </div>
+
+          <div className="absolute -bottom-12 -right-12 w-40 h-40 rounded-full bg-primary/10 blur-3xl opacity-50 group-hover:opacity-80 transition-opacity" />
+        </motion.div>
+      </Link>
+
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
       {/* WHOOP / OURA Integration */}
       <motion.div
         initial={{ opacity: 0, y: 20 }}
@@ -86,6 +122,7 @@ const ComingSoonCards = () => {
         {/* Decorative glow */}
         <div className="absolute -bottom-12 -right-12 w-40 h-40 rounded-full bg-warm/10 blur-3xl opacity-50 group-hover:opacity-80 transition-opacity" />
       </motion.div>
+    </div>
     </div>
   );
 };
