@@ -1,16 +1,16 @@
 import { Link } from "react-router-dom";
-import { FileText, Upload, Camera, MessageSquare, Shield, ArrowRight } from "lucide-react";
+import { Dna, Activity, FlaskConical, AlertTriangle, Shield, ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import SEO from "@/components/SEO";
 import AnimatedDNA from "@/components/dna/AnimatedDNA";
 
-const features = [
-  { icon: FileText, title: "PDF Lab Reports", desc: "Upload Thriva, Medichecks, or clinic PDFs" },
-  { icon: Upload, title: "23andMe / Ancestry", desc: "Drop your raw .txt file — we extract the key SNPs" },
-  { icon: Camera, title: "Photo of Results", desc: "Snap a photo of your lab printout" },
-  { icon: MessageSquare, title: "Paste as Text", desc: "Copy-paste results or describe your genotype" },
+const outcomes = [
+  { icon: Activity, title: "Health Score", desc: "A weighted 0–100 score across genetics, biomarkers, and lifestyle" },
+  { icon: Dna, title: "Gene Variant Analysis", desc: "Key SNP results (MTHFR, APOE, COMT, etc.) with risk flags explained" },
+  { icon: FlaskConical, title: "Supplement Protocol", desc: "A personalised supplement stack built around your genetic profile" },
+  { icon: AlertTriangle, title: "Drug Interaction Flags", desc: "Variants that affect how you metabolise common medications" },
 ];
 
 const DNALanding = () => {
@@ -43,17 +43,17 @@ const DNALanding = () => {
           </div>
         </section>
 
-        {/* Input Methods */}
+        {/* What You Get */}
         <section className="py-20 bg-background">
           <div className="container mx-auto px-6">
             <h2 className="text-2xl md:text-3xl font-heading font-bold text-foreground text-center mb-4">
-              Four Ways to Upload
+              What You'll Get
             </h2>
             <p className="text-muted-foreground text-center mb-12 max-w-lg mx-auto">
-              No manual typing required. We handle the parsing.
+              One upload. Four actionable outputs.
             </p>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 max-w-5xl mx-auto">
-              {features.map((f) => (
+              {outcomes.map((f) => (
                 <div key={f.title} className="bg-card border border-border rounded-xl p-6 text-center">
                   <div className="h-12 w-12 rounded-xl bg-accent flex items-center justify-center mx-auto mb-4">
                     <f.icon className="h-6 w-6 text-accent-foreground" />
