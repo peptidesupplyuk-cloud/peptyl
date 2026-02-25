@@ -25,6 +25,20 @@ const PRODUCTS = [
     status: "coming-soon" as const,
   },
   {
+    name: "GHK-Cu Topical",
+    description: "Copper peptide cream for skin rejuvenation, wound healing, and collagen synthesis.",
+    fits: ["Skin", "Anti-Aging", "Healing"],
+    icon: Sparkles,
+    status: "coming-soon" as const,
+  },
+  {
+    name: "AHK-Cu Topical",
+    description: "Advanced copper tripeptide for hair follicle support and skin repair.",
+    fits: ["Hair", "Skin", "Recovery"],
+    icon: Sparkles,
+    status: "coming-soon" as const,
+  },
+  {
     name: "Many More Coming Soon",
     description: "We're curating the best research-grade products for the community. Stay tuned.",
     fits: ["Research", "Community Picks"],
