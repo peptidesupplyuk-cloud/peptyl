@@ -1,15 +1,17 @@
 import { useState } from "react";
 import { useSearchParams } from "react-router-dom";
-import { Database, Calculator } from "lucide-react";
+import { Database, Calculator, Pill } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import PeptidesContent from "@/components/content/PeptidesContent";
+import SupplementsContent from "@/components/content/SupplementsContent";
 import CalculatorsContent from "@/components/content/CalculatorsContent";
 import SEO from "@/components/SEO";
 
 const TABS = [
   { value: "peptides", label: "Peptides", icon: Database },
+  { value: "supplements", label: "Supplements", icon: Pill },
   { value: "calculators", label: "Calculators", icon: Calculator },
 ] as const;
 
@@ -34,7 +36,7 @@ const ImprovePage = () => {
       <main className="pt-24 pb-16">
         <div className="container mx-auto px-6">
           <Tabs value={activeTab} onValueChange={handleTabChange}>
-            <TabsList className="mb-8 w-full max-w-xs">
+             <TabsList className="mb-8 w-full max-w-sm">
               {TABS.map(({ value, label, icon: Icon }) => (
                 <TabsTrigger key={value} value={value} className="flex items-center gap-2 flex-1">
                   <Icon className="h-4 w-4" />
@@ -44,6 +46,9 @@ const ImprovePage = () => {
             </TabsList>
             <TabsContent value="peptides">
               <PeptidesContent />
+            </TabsContent>
+            <TabsContent value="supplements">
+              <SupplementsContent />
             </TabsContent>
             <TabsContent value="calculators">
               <CalculatorsContent />
