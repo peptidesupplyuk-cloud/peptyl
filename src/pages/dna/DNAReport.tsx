@@ -13,11 +13,15 @@ import DrugInteractionPanel from "@/components/dna/DrugInteractionPanel";
 import SupplementTable from "@/components/dna/SupplementTable";
 import ActionPlan from "@/components/dna/ActionPlan";
 import LegalDisclaimer from "@/components/dna/LegalDisclaimer";
+import ReportReview from "@/components/dna/ReportReview";
+import { useAuth } from "@/contexts/AuthContext";
 
 const DNAReport = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
+  const { user } = useAuth();
   const [report, setReport] = useState<any>(null);
+  const [review, setReview] = useState<{ rating: number; note: string | null } | null | undefined>(undefined);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -33,10 +37,22 @@ const DNAReport = () => {
         return;
       }
       setReport(data);
+
+      // Fetch existing review
+      if (user) {
+        const { data: rev } = await supabase
+          .from("dna_reviews" as any)
+          .select("rating, note")
+          .eq("report_id", id)
+          .eq("user_id", user.id)
+          .maybeSingle();
+        setReview(rev as any ?? null);
+      }
+
       setLoading(false);
     };
     fetchReport();
-  }, [id]);
+  }, [id, user]);
 
   if (loading) {
     return (
@@ -69,6 +85,9 @@ const DNAReport = () => {
           <SupplementTable supplements={r.supplement_protocol} />
           <ActionPlan plan={r.action_plan} />
           <LegalDisclaimer />
+          {review !== undefined && (
+            <ReportReview reportId={id!} existingReview={review} />
+          )}
         </div>
       </main>
       <Footer />
