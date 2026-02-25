@@ -16,7 +16,7 @@ const DNAAnalysing = () => {
   const navigate = useNavigate();
   const { inputText, imageBase64, method, userId } = (location.state || {}) as any;
   const [statusIndex, setStatusIndex] = useState(0);
-  const [streamText, setStreamText] = useState("");
+  const [_streamText, setStreamText] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [elapsed, setElapsed] = useState(0);
   const startRef = useRef(Date.now());
@@ -170,14 +170,12 @@ const DNAAnalysing = () => {
             {elapsed > 90 && " — Taking longer than expected, still working…"}
           </p>
 
-          {/* Stream preview */}
-          {streamText && (
-            <div className="bg-card border border-border rounded-lg p-4 text-left">
-              <p className="font-mono text-xs text-muted-foreground whitespace-pre-wrap break-words leading-relaxed max-h-32 overflow-hidden">
-                {streamText}
-              </p>
-            </div>
-          )}
+          {/* Reassurance message */}
+          <div className="bg-card border border-border rounded-lg p-4 text-center">
+            <p className="text-sm text-muted-foreground">
+              Can't wait? Don't worry, we'll send you a push notification and email when your report is ready.
+            </p>
+          </div>
         </div>
       </main>
     </>

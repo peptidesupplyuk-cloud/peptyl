@@ -427,5 +427,77 @@ async function saveReport(fullContent: string, method: string, userId: string | 
     console.error("Insert error:", error.message);
   } else {
     console.log("Report saved:", data.id);
+
+    // Send push notification via OneSignal
+    try {
+      const onesignalKey = Deno.env.get("ONESIGNAL_REST_API_KEY");
+      if (onesignalKey) {
+        await fetch("https://onesignal.com/api/v1/notifications", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Basic ${onesignalKey}`,
+          },
+          body: JSON.stringify({
+            app_id: "7dd6be24-0dca-45af-b8b6-15cc95db293d",
+            include_external_user_ids: [userId],
+            headings: { en: "Your DNA Report is Ready" },
+            contents: { en: `Health Score: ${overallScore ?? "N/A"}/100. Tap to view your personalised assessment.` },
+            url: `https://peptyl.lovable.app/dna/report/${data.id}`,
+          }),
+        });
+        console.log("Push notification sent");
+      }
+    } catch (pushErr) {
+      console.error("Push notification error:", pushErr);
+    }
+
+    // Send email notification via Resend
+    try {
+      const resendKey = Deno.env.get("RESEND_API_KEY");
+      if (resendKey) {
+        const { data: profile } = await supabase.auth.admin.getUserById(userId);
+        const email = profile?.user?.email;
+        if (email) {
+          const scoreLabel = overallScore != null
+            ? overallScore >= 80 ? "Good" : overallScore >= 65 ? "Needs Attention" : "Action Required"
+            : "Complete";
+          await fetch("https://api.resend.com/emails", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${resendKey}`,
+            },
+            body: JSON.stringify({
+              from: "Peptyl <noreply@peptyl.com>",
+              to: [email],
+              subject: "Your Peptyl DNA Report is Ready",
+              html: `
+                <div style="font-family:system-ui,sans-serif;max-width:560px;margin:0 auto;padding:32px 24px;background:#ffffff;">
+                  <div style="text-align:center;margin-bottom:24px;">
+                    <h1 style="color:#070B14;font-size:24px;margin:0;">Your DNA Health Report</h1>
+                    <p style="color:#6b7280;font-size:14px;margin-top:8px;">is ready to view</p>
+                  </div>
+                  <div style="background:#070B14;border-radius:12px;padding:32px;text-align:center;margin-bottom:24px;">
+                    <div style="font-size:48px;font-weight:700;color:#00D4AA;">${overallScore ?? "—"}</div>
+                    <div style="color:#9ca3af;font-size:14px;margin-top:4px;">/ 100 Health Score</div>
+                    <div style="display:inline-block;margin-top:12px;padding:4px 16px;border-radius:20px;font-size:12px;font-weight:600;background:${overallScore != null && overallScore >= 80 ? "rgba(0,212,170,0.15);color:#00D4AA" : overallScore != null && overallScore >= 65 ? "rgba(245,158,11,0.15);color:#F59E0B" : "rgba(239,68,68,0.15);color:#EF4444"};">
+                      ${scoreLabel}
+                    </div>
+                  </div>
+                  <div style="text-align:center;">
+                    <a href="https://peptyl.lovable.app/dna/report/${data.id}" style="display:inline-block;background:#00D4AA;color:#070B14;font-weight:600;font-size:14px;padding:12px 32px;border-radius:8px;text-decoration:none;">View Full Report</a>
+                  </div>
+                  <p style="color:#9ca3af;font-size:11px;text-align:center;margin-top:24px;">This is a wellness assessment, not a medical diagnosis. Consult your GP for clinical decisions.</p>
+                </div>
+              `,
+            }),
+          });
+          console.log("Email notification sent to", email);
+        }
+      }
+    } catch (emailErr) {
+      console.error("Email notification error:", emailErr);
+    }
   }
 }
