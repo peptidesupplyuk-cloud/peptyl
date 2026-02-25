@@ -15,7 +15,7 @@ const ComingSoonCards = () => {
         >
           <div className="absolute inset-0 bg-gradient-to-br from-primary/8 to-transparent" />
           <div className="relative p-5 sm:p-6">
-            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-primary/20 text-primary text-[11px] font-semibold uppercase tracking-wider mb-3">
+            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-primary text-primary-foreground text-[11px] font-bold uppercase tracking-wider mb-3">
               Now Live
             </span>
             <h3 className="text-lg sm:text-xl font-heading font-bold text-primary-foreground mb-1.5">
