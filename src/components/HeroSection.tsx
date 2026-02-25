@@ -62,14 +62,12 @@ const HeroSection = () => {
       <div className="absolute inset-0 bg-gradient-to-b from-navy/60 via-navy/80 to-navy" />
     </div>
 
-
     <div className="absolute top-1/4 left-1/4 w-64 h-64 rounded-full bg-teal/10 blur-3xl animate-pulse-glow" />
     <div className="absolute bottom-1/3 right-1/4 w-48 h-48 rounded-full bg-teal/5 blur-3xl animate-pulse-glow" style={{ animationDelay: "1.5s" }} />
 
-    <div className="container mx-auto px-6 relative z-10 pt-24 pb-16">
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 items-center">
+    <div className="container mx-auto px-6 relative z-10 pt-28 pb-16">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
       <div className="max-w-3xl">
-        <div className="mt-12 mb-6" />
 
         <motion.h1 initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.8, delay: 0.1 }} className="text-4xl sm:text-5xl lg:text-7xl font-heading font-bold text-primary-foreground leading-[1.1] mb-6">
           {t("hero.title1")}
