@@ -12,9 +12,6 @@ const Footer = () => {
         <div className="grid grid-cols-1 md:grid-cols-4 gap-12">
           <div className="md:col-span-1">
             <Logo size="sm" inverted />
-            <p className="mt-4 text-sm text-primary-foreground/50 leading-relaxed">
-              {t("footer.tagline")}
-            </p>
             <div className="flex items-center gap-3 mt-5">
               <a href="https://www.instagram.com/peptyl.uk" target="_blank" rel="noopener noreferrer" className="p-2 rounded-lg bg-primary-foreground/5 hover:bg-primary-foreground/10 text-primary-foreground/50 hover:text-primary transition-colors" aria-label="Instagram">
                 <Instagram className="h-4 w-4" />
