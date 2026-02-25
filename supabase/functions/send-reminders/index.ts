@@ -31,11 +31,14 @@ Deno.serve(async (req) => {
     const resendApiKey = Deno.env.get("RESEND_API_KEY");
     const whatsappToken = Deno.env.get("WHATSAPP_TOKEN");
     const whatsappPhoneNumberId = Deno.env.get("WHATSAPP_PHONE_NUMBER_ID");
+    const onesignalApiKey = Deno.env.get("ONESIGNAL_REST_API_KEY");
+    const onesignalAppId = "7dd6be24-0dca-45af-b8b6-15cc95db293d";
 
     console.log("Environment check:", {
       hasResendKey: !!resendApiKey,
       hasWhatsappToken: !!whatsappToken,
       hasWhatsappPhoneId: !!whatsappPhoneNumberId,
+      hasOneSignalKey: !!onesignalApiKey,
     });
 
     const supabase = createClient(supabaseUrl, serviceRoleKey);
@@ -75,7 +78,7 @@ Deno.serve(async (req) => {
       userProtocols[p.user_id].push(p);
     }
 
-    const results: Array<{ user_id: string; email_sent: boolean; whatsapp_sent: boolean; peptides_count: number; supplements_count: number; error?: string }> = [];
+    const results: Array<{ user_id: string; email_sent: boolean; whatsapp_sent: boolean; push_sent: boolean; peptides_count: number; supplements_count: number; error?: string }> = [];
 
     for (const [userId, userProts] of Object.entries(userProtocols)) {
       const { data: profile } = await supabase
@@ -216,10 +219,39 @@ Deno.serve(async (req) => {
         }
       }
 
+      // Send push notification via OneSignal
+      let pushSent = false;
+      if (onesignalApiKey) {
+        try {
+          const pushMessage = buildPushMessage(reminders, supplementReminders, window);
+          const pushRes = await fetch("https://onesignal.com/api/v1/notifications", {
+            method: "POST",
+            headers: {
+              Authorization: `Basic ${onesignalApiKey}`,
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              app_id: onesignalAppId,
+              include_external_user_ids: [userId],
+              headings: { en: pushMessage.title },
+              contents: { en: pushMessage.body },
+              url: "https://peptyl.co.uk/dashboard",
+              chrome_web_icon: "https://peptyl.co.uk/icon-192.png",
+            }),
+          });
+          const pushData = await pushRes.json();
+          pushSent = pushRes.ok && pushData.recipients > 0;
+          console.log(`Push to ${userId}: ${pushSent ? "sent" : "no recipients"}`, pushData);
+        } catch (pushErr) {
+          console.error("OneSignal push error:", pushErr);
+        }
+      }
+
       results.push({
         user_id: userId,
         email_sent: emailSent,
         whatsapp_sent: whatsappSent,
+        push_sent: pushSent,
         peptides_count: reminders.length,
         supplements_count: supplementReminders.length,
         ...(errorMsg ? { error: errorMsg } : {}),
@@ -367,4 +399,25 @@ function buildReminderEmail(
       </div>
     </div>
   `;
+}
+
+function buildPushMessage(
+  reminders: PeptideReminder[],
+  supplements: SupplementReminder[],
+  window: string
+): { title: string; body: string } {
+  const totalCount = reminders.length + supplements.length;
+  const title = `⏰ ${window} Protocol — ${totalCount} item${totalCount > 1 ? "s" : ""} due`;
+
+  const items: string[] = [];
+  for (const r of reminders) {
+    items.push(`💉 ${r.peptide_name} ${r.dose_mcg}mcg`);
+  }
+  for (const s of supplements) {
+    items.push(`💊 ${s.name} ${s.dose}`);
+  }
+
+  const body = items.slice(0, 3).join(", ") + (items.length > 3 ? ` +${items.length - 3} more` : "") + " — tap to log";
+
+  return { title, body };
 }
