@@ -14,6 +14,7 @@ import SupplementTable from "@/components/dna/SupplementTable";
 import ActionPlan from "@/components/dna/ActionPlan";
 import LegalDisclaimer from "@/components/dna/LegalDisclaimer";
 import ReportReview from "@/components/dna/ReportReview";
+import CreateProtocolFromReport from "@/components/dna/CreateProtocolFromReport";
 import { useAuth } from "@/contexts/AuthContext";
 
 const DNAReport = () => {
@@ -84,6 +85,12 @@ const DNAReport = () => {
           <DrugInteractionPanel interactions={r.drug_interactions} />
           <SupplementTable supplements={r.supplement_protocol} />
           <ActionPlan plan={r.action_plan} />
+          {r.supplement_protocol?.length > 0 && (
+            <CreateProtocolFromReport
+              supplements={r.supplement_protocol}
+              reportId={id!}
+            />
+          )}
           <LegalDisclaimer />
           {review !== undefined && (
             <ReportReview reportId={id!} existingReview={review} />
