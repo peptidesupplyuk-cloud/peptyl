@@ -313,6 +313,63 @@ export type Database = {
         }
         Relationships: []
       }
+      dna_consents: {
+        Row: {
+          consented_at: string
+          feature: string
+          id: string
+          user_id: string
+        }
+        Insert: {
+          consented_at?: string
+          feature?: string
+          id?: string
+          user_id: string
+        }
+        Update: {
+          consented_at?: string
+          feature?: string
+          id?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      dna_reports: {
+        Row: {
+          confidence: string | null
+          created_at: string
+          id: string
+          input_method: string
+          narrative: string | null
+          overall_score: number | null
+          report_json: Json
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          confidence?: string | null
+          created_at?: string
+          id?: string
+          input_method: string
+          narrative?: string | null
+          overall_score?: number | null
+          report_json: Json
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          confidence?: string | null
+          created_at?: string
+          id?: string
+          input_method?: string
+          narrative?: string | null
+          overall_score?: number | null
+          report_json?: Json
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       feed_posts: {
         Row: {
           content: string
