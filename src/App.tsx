@@ -45,6 +45,11 @@ const Mt1VsMt2 = lazy(() => import("./pages/articles/Mt1VsMt2"));
 const OralGlp1Boom = lazy(() => import("./pages/articles/OralGlp1Boom"));
 const CampaignPage = lazy(() => import("./pages/CampaignPage"));
 const WhoopCallback = lazy(() => import("./pages/WhoopCallback"));
+const DNALanding = lazy(() => import("./pages/dna/DNALanding"));
+const DNAUpload = lazy(() => import("./pages/dna/DNAUpload"));
+const DNAAnalysing = lazy(() => import("./pages/dna/DNAAnalysing"));
+const DNAReport = lazy(() => import("./pages/dna/DNAReport"));
+const DNADashboard = lazy(() => import("./pages/dna/DNADashboard"));
 
 const queryClient = new QueryClient();
 
@@ -92,6 +97,11 @@ const App = () => (
               <Route path="/education/oral-glp1-boom-2026" element={<OralGlp1Boom />} />
               <Route path="/whoop-callback" element={<WhoopCallback />} />
               <Route path="/start/:slug" element={<CampaignPage />} />
+              <Route path="/dna" element={<DNALanding />} />
+              <Route path="/dna/upload" element={<ProtectedRoute><DNAUpload /></ProtectedRoute>} />
+              <Route path="/dna/analysing" element={<ProtectedRoute><DNAAnalysing /></ProtectedRoute>} />
+              <Route path="/dna/report/:id" element={<ProtectedRoute><DNAReport /></ProtectedRoute>} />
+              <Route path="/dna/dashboard" element={<ProtectedRoute><DNADashboard /></ProtectedRoute>} />
               {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
               <Route path="*" element={<NotFound />} />
             </Routes>
