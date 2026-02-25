@@ -43,6 +43,11 @@ const RecoveryStack = lazy(() => import("./pages/articles/RecoveryStack"));
 const CognitiveStack = lazy(() => import("./pages/articles/CognitiveStack"));
 const Mt1VsMt2 = lazy(() => import("./pages/articles/Mt1VsMt2"));
 const OralGlp1Boom = lazy(() => import("./pages/articles/OralGlp1Boom"));
+const BloodworkFirst = lazy(() => import("./pages/articles/BloodworkFirst"));
+const NadLongevityStack = lazy(() => import("./pages/articles/NadLongevityStack"));
+const ThymosinAlpha1 = lazy(() => import("./pages/articles/ThymosinAlpha1"));
+const PeptideCycling = lazy(() => import("./pages/articles/PeptideCycling"));
+const GutHealthPeptides = lazy(() => import("./pages/articles/GutHealthPeptides"));
 const CampaignPage = lazy(() => import("./pages/CampaignPage"));
 const WhoopCallback = lazy(() => import("./pages/WhoopCallback"));
 const DNALanding = lazy(() => import("./pages/dna/DNALanding"));
@@ -95,6 +100,11 @@ const App = () => (
               <Route path="/education/cognitive-supplement-stack" element={<CognitiveStack />} />
               <Route path="/education/mt1-vs-mt2" element={<Mt1VsMt2 />} />
               <Route path="/education/oral-glp1-boom-2026" element={<OralGlp1Boom />} />
+              <Route path="/education/bloodwork-comes-first" element={<BloodworkFirst />} />
+              <Route path="/education/nad-longevity-stack" element={<NadLongevityStack />} />
+              <Route path="/education/thymosin-alpha-1-immune-peptide" element={<ThymosinAlpha1 />} />
+              <Route path="/education/peptide-cycling-guide" element={<PeptideCycling />} />
+              <Route path="/education/gut-health-peptides" element={<GutHealthPeptides />} />
               <Route path="/whoop-callback" element={<WhoopCallback />} />
               <Route path="/start/:slug" element={<CampaignPage />} />
               <Route path="/dna" element={<DNALanding />} />
