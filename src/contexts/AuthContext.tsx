@@ -40,6 +40,18 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         setSession(session);
         setUser(session?.user ?? null);
         setLoading(false);
+
+        // Link OneSignal external_user_id for targeted push notifications
+        if (session?.user?.id && typeof window !== "undefined" && (window as any).OneSignalDeferred) {
+          (window as any).OneSignalDeferred.push(async (OneSignal: any) => {
+            try {
+              await OneSignal.login(session.user.id);
+              console.log("OneSignal: linked external_user_id", session.user.id);
+            } catch (e) {
+              console.warn("OneSignal login failed:", e);
+            }
+          });
+        }
       }
     );
 
