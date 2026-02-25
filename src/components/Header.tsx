@@ -14,6 +14,7 @@ const ADMIN_EMAIL = "peptidesupplyuk@gmail.com";
 const navItems = [
   { labelKey: "nav.myHealth", href: "/dashboard" },
   { labelKey: "nav.improve", href: "/improve" },
+  { labelKey: "nav.dna", href: "/dna" },
   { labelKey: "nav.learn", href: "/education" },
   { labelKey: "nav.shop", href: "/shop" },
   { labelKey: "nav.testing", href: "/testing" },
