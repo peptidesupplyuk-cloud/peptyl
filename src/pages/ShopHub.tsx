@@ -1,59 +1,95 @@
-import { useState } from "react";
-import { useSearchParams } from "react-router-dom";
-import { ShoppingBag, ShieldCheck } from "lucide-react";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { ShoppingBag, Pill, Zap, Sparkles } from "lucide-react";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import SEO from "@/components/SEO";
+import { motion } from "framer-motion";
+import { Badge } from "@/components/ui/badge";
 
-// Lazy-load the heavy content
-import { lazy, Suspense } from "react";
-const SuppliersContent = lazy(() => import("@/components/content/SuppliersContent"));
-const ShopContent = lazy(() => import("@/components/content/ShopContent"));
+// Kept for future use — suppliers tab code lives in SuppliersContent
+// import { lazy } from "react";
+// const SuppliersContent = lazy(() => import("@/components/content/SuppliersContent"));
 
-const TABS = [
-  { value: "suppliers", label: "Suppliers", icon: ShieldCheck },
-  { value: "shop", label: "Shop", icon: ShoppingBag },
-] as const;
+const PRODUCTS = [
+  {
+    name: "NAD+ At Home Kit",
+    description: "Clinical-grade NAD+ self-administration kit for cellular energy and longevity support.",
+    fits: ["Longevity", "Energy", "Recovery"],
+    icon: Zap,
+    status: "coming-soon" as const,
+  },
+  {
+    name: "BPC-157 Capsules",
+    description: "Oral BPC-157 for gut healing and systemic recovery — no injection required.",
+    fits: ["Gut Health", "Recovery", "Healing"],
+    icon: Pill,
+    status: "coming-soon" as const,
+  },
+  {
+    name: "Many More Coming Soon",
+    description: "We're curating the best research-grade products for the community. Stay tuned.",
+    fits: ["Research", "Community Picks"],
+    icon: Sparkles,
+    status: "teaser" as const,
+  },
+];
 
 const ShopHubPage = () => {
-  const [searchParams, setSearchParams] = useSearchParams();
-  const initialTab = searchParams.get("tab") || "suppliers";
-  const [activeTab, setActiveTab] = useState(initialTab);
-
-  const handleTabChange = (value: string) => {
-    setActiveTab(value);
-    setSearchParams({ tab: value }, { replace: true });
-  };
-
   return (
     <div className="min-h-screen bg-background">
       <SEO
-        title="Shop: Suppliers & Products | Peptyl"
-        description="Compare prices from approved UK suppliers and browse curated supplements to support your protocols."
+        title="Shop — Research Products | Peptyl"
+        description="Curated research-grade products for your protocols. NAD+ kits, BPC-157 capsules, and more coming soon."
         path="/shop"
       />
       <Header />
       <main className="pt-24 pb-16">
         <div className="container mx-auto px-6">
-          <Tabs value={activeTab} onValueChange={handleTabChange}>
-            <TabsList className="mb-8 w-full max-w-xs">
-              {TABS.map(({ value, label, icon: Icon }) => (
-                <TabsTrigger key={value} value={value} className="flex items-center gap-2 flex-1">
-                  <Icon className="h-4 w-4" />
-                  {label}
-                </TabsTrigger>
-              ))}
-            </TabsList>
-            <Suspense fallback={<div className="py-20 text-center text-muted-foreground">Loading…</div>}>
-              <TabsContent value="suppliers">
-                <SuppliersContent />
-              </TabsContent>
-              <TabsContent value="shop">
-                <ShopContent />
-              </TabsContent>
-            </Suspense>
-          </Tabs>
+          <div className="mb-8">
+            <div className="flex items-center gap-2 mb-1">
+              <ShoppingBag className="h-5 w-5 text-primary" />
+              <h1 className="text-2xl sm:text-3xl font-heading font-bold text-foreground">Shop</h1>
+            </div>
+            <p className="text-muted-foreground text-sm">
+              Curated research-grade products for your protocols.
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+            {PRODUCTS.map((product, i) => {
+              const Icon = product.icon;
+              return (
+                <motion.div
+                  key={product.name}
+                  initial={{ opacity: 0, y: 16 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: i * 0.08, duration: 0.4 }}
+                  className="relative bg-card rounded-2xl border border-border p-6 flex flex-col"
+                >
+                  <div className="flex items-start justify-between mb-3">
+                    <div className="bg-primary/10 rounded-xl p-2.5">
+                      <Icon className="h-5 w-5 text-primary" />
+                    </div>
+                    <Badge variant="secondary" className="text-[10px] font-semibold uppercase tracking-wide">
+                      Coming Soon
+                    </Badge>
+                  </div>
+                  <h3 className="font-heading font-semibold text-foreground text-base mb-1.5">{product.name}</h3>
+                  <p className="text-xs text-muted-foreground leading-relaxed mb-4">{product.description}</p>
+                  <div className="flex flex-wrap gap-1.5 mt-auto">
+                    {product.fits.map((fit) => (
+                      <Badge key={fit} variant="outline" className="text-[10px] font-medium">
+                        {fit}
+                      </Badge>
+                    ))}
+                  </div>
+                </motion.div>
+              );
+            })}
+          </div>
+
+          <div className="mt-10 bg-muted/30 rounded-2xl border border-border p-5 text-xs text-muted-foreground leading-relaxed">
+            <strong className="text-foreground">Note:</strong> Products shown are not yet available for purchase. We're finalising partnerships to bring you the best research-grade options. Sign up to be notified when they launch.
+          </div>
         </div>
       </main>
       <Footer />
