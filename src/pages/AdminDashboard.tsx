@@ -869,7 +869,7 @@ const KnowledgeBaseTab = () => {
             Authorization: `Bearer ${session?.access_token}`,
             "Content-Type": "application/json",
           },
-          body: JSON.stringify({ type, batch_size: 5 }),
+          body: JSON.stringify({ type, batch_size: 20 }),
         }
       );
       const data = await resp.json();
