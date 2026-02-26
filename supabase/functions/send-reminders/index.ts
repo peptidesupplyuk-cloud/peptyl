@@ -258,8 +258,133 @@ Deno.serve(async (req) => {
       });
     }
 
+    // ── WEEK 10 RETEST NUDGE BLOCK ──
+    const nudgeResults: Array<{ user_id: string; protocol: string; push: boolean; email: boolean }> = [];
+
+    const { data: nudgeProtocols } = await supabase
+      .from("protocols")
+      .select("id, name, user_id, start_date, goal")
+      .eq("status", "active")
+      .gte("start_date", new Date(Date.now() - 71 * 86400000).toISOString().split("T")[0])
+      .lte("start_date", new Date(Date.now() - 69 * 86400000).toISOString().split("T")[0]);
+
+    if (nudgeProtocols && nudgeProtocols.length > 0) {
+      for (const np of nudgeProtocols) {
+        // Check if retest already logged
+        const { data: existingRetest } = await supabase
+          .from("bloodwork_panels")
+          .select("id")
+          .eq("protocol_id", np.id)
+          .like("panel_type", "retest%")
+          .limit(1)
+          .maybeSingle();
+        if (existingRetest) continue;
+
+        // Check if nudge already sent
+        const { data: existingNudge } = await supabase
+          .from("nudge_log")
+          .select("id")
+          .eq("protocol_id", np.id)
+          .eq("nudge_type", "week_10")
+          .limit(1)
+          .maybeSingle();
+        if (existingNudge) continue;
+
+        const { data: nudgeUser } = await supabase.auth.admin.getUserById(np.user_id);
+        const nudgeEmail = nudgeUser?.user?.email;
+        let pushOk = false;
+        let emailOk = false;
+
+        // Send OneSignal push
+        if (onesignalApiKey) {
+          try {
+            const pushRes = await fetch("https://onesignal.com/api/v1/notifications", {
+              method: "POST",
+              headers: {
+                Authorization: `Basic ${onesignalApiKey}`,
+                "Content-Type": "application/json",
+              },
+              body: JSON.stringify({
+                app_id: onesignalAppId,
+                include_external_user_ids: [np.user_id],
+                headings: { en: "Time to retest your bloods" },
+                contents: { en: `${np.name} — 10 weeks in. Book a test to see your results.` },
+                url: `https://peptyl.co.uk/dashboard?tab=bloodwork&retest=true&protocolId=${np.id}`,
+                chrome_web_icon: "https://peptyl.co.uk/icon-192.png",
+              }),
+            });
+            const pushData = await pushRes.json();
+            pushOk = pushRes.ok && pushData.recipients > 0;
+            console.log(`Nudge push to ${np.user_id}: ${pushOk ? "sent" : "no recipients"}`);
+          } catch (e) {
+            console.error("Nudge push error:", e);
+          }
+        }
+
+        // Send Resend email
+        if (resendApiKey && nudgeEmail) {
+          try {
+            const ctaUrl = `https://peptyl.co.uk/dashboard?tab=bloodwork&retest=true&protocolId=${np.id}`;
+            const nudgeHtml = `
+              <div style="font-family:system-ui,-apple-system,sans-serif;max-width:520px;margin:0 auto;background:#ffffff">
+                <div style="background:linear-gradient(135deg,#0d9488,#0f766e);padding:28px 24px;text-align:center;border-radius:12px 12px 0 0">
+                  <h1 style="color:#ffffff;font-size:22px;margin:0;font-weight:700">🔬 Week 10 — Time to Retest</h1>
+                </div>
+                <div style="padding:24px;border:1px solid #e5e7eb;border-top:none;border-radius:0 0 12px 12px">
+                  <p style="font-size:15px;color:#374151;line-height:1.6;margin:0 0 16px">
+                    You started <strong>${np.name}</strong> 10 weeks ago. Now's the time to see what changed.
+                  </p>
+                  <div style="background:#f0fdfa;border-left:4px solid #0d9488;padding:14px 16px;border-radius:6px;margin:0 0 20px">
+                    <p style="margin:0;font-size:13px;color:#0f766e;font-weight:600">Key markers to retest:</p>
+                    <p style="margin:6px 0 0;font-size:13px;color:#374151">Homocysteine, Vitamin D, hsCRP, LDL, Full Blood Count</p>
+                  </div>
+                  <div style="text-align:center;margin:24px 0 8px">
+                    <a href="${ctaUrl}" style="display:inline-block;background:#0d9488;color:#ffffff;text-decoration:none;padding:14px 32px;border-radius:8px;font-weight:600;font-size:15px">
+                      📊 Log My Retest
+                    </a>
+                  </div>
+                </div>
+                <div style="padding:20px 24px;text-align:center">
+                  <p style="font-size:11px;color:#9ca3af;margin:0;line-height:1.6">
+                    This is an automated reminder from Peptyl. For educational and research purposes only.
+                    <br/>Manage preferences in your <a href="https://peptyl.co.uk/dashboard" style="color:#0d9488;text-decoration:underline">dashboard</a>.
+                  </p>
+                </div>
+              </div>`;
+
+            const emailRes = await fetch("https://api.resend.com/emails", {
+              method: "POST",
+              headers: {
+                Authorization: `Bearer ${resendApiKey}`,
+                "Content-Type": "application/json",
+              },
+              body: JSON.stringify({
+                from: "Peptyl <reminders@peptyl.co.uk>",
+                to: [nudgeEmail],
+                subject: `Week 10 — time to see if ${np.name} worked`,
+                html: nudgeHtml,
+              }),
+            });
+            emailOk = emailRes.ok;
+            console.log(`Nudge email to ${nudgeEmail}: ${emailOk ? "sent" : "failed"}`);
+          } catch (e) {
+            console.error("Nudge email error:", e);
+          }
+        }
+
+        // Log the nudge
+        await supabase.from("nudge_log").insert({
+          user_id: np.user_id,
+          protocol_id: np.id,
+          nudge_type: "week_10",
+        });
+
+        nudgeResults.push({ user_id: np.user_id, protocol: np.name, push: pushOk, email: emailOk });
+      }
+    }
+
     return new Response(
-      JSON.stringify({ success: true, reminders_sent: results.length, details: results }),
+      JSON.stringify({ success: true, reminders_sent: results.length, nudges_sent: nudgeResults.length, details: results, nudge_details: nudgeResults }),
       { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } }
     );
   } catch (err) {
