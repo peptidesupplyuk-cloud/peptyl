@@ -1084,9 +1084,9 @@ const KnowledgeBaseTab = () => {
 
       {/* Enrichment Progress */}
       <div className="bg-card border border-border rounded-xl p-6">
-        <h3 className="font-heading font-semibold text-foreground mb-2">GPT-4o Enrichment</h3>
+        <h3 className="font-heading font-semibold text-foreground mb-2">AI Enrichment</h3>
         <p className="text-xs text-muted-foreground mb-4">
-          Enriches next 5 pending records using GPT-4o via OpenAI API. Adds mechanism of action, evidence grades, research refs, DNA signals, and more.
+          Enriches next 5 pending records using AI. Adds mechanism of action, evidence grades, research refs, DNA signals, and more.
         </p>
         <div className="flex gap-3 flex-wrap">
           <Button onClick={() => runEnrichment("peptides")} disabled={!!enriching || (pendingPeptides ?? 0) === 0} className="gap-2">
@@ -1115,7 +1115,7 @@ const KnowledgeBaseTab = () => {
       <div className="bg-card border border-border rounded-xl p-6">
         <h3 className="font-heading font-semibold text-foreground mb-2">Knowledge Gap Analysis</h3>
         <p className="text-xs text-muted-foreground mb-4">
-          Uses GPT-4o to identify peptides and supplements missing from the database based on current research landscape.
+          Uses AI to identify peptides and supplements missing from the database based on current research landscape.
         </p>
         <Button onClick={runGapAnalysis} disabled={analyzingGaps} className="gap-2" variant="outline">
           {analyzingGaps ? <Loader2 className="h-4 w-4 animate-spin" /> : <Search className="h-4 w-4" />}
@@ -1220,7 +1220,7 @@ const KnowledgeBaseTab = () => {
       <div className="bg-card border border-border rounded-xl p-6">
         <h3 className="font-heading font-semibold text-foreground mb-2">E2E Knowledge Base Audit</h3>
         <p className="text-xs text-muted-foreground mb-4">
-          Uses GPT-4o to audit all enriched records for factual errors, contradictions, missing safety data, and regulatory issues. Also checks articles for contradictions.
+          Uses AI to audit all enriched records for factual errors, contradictions, missing safety data, and regulatory issues. Also checks articles for contradictions.
         </p>
         <Button onClick={runAudit} disabled={auditing} className="gap-2" variant="outline">
           {auditing ? <Loader2 className="h-4 w-4 animate-spin" /> : <AlertTriangle className="h-4 w-4" />}

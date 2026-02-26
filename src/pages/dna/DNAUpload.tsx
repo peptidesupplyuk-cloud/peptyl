@@ -232,7 +232,7 @@ const DNAUpload = () => {
             <label className="flex items-start gap-3 cursor-pointer">
               <Checkbox checked={consent1} onCheckedChange={(v) => setConsent1(!!v)} className="mt-0.5" />
               <span className="text-xs text-muted-foreground leading-relaxed">
-                I explicitly consent to my genetic data being processed by AI (GPT-4o, OpenAI) for the sole purpose of generating a personalised educational health report. I understand this is special category data under UK GDPR Article 9.
+                I explicitly consent to my genetic data being processed by AI for the sole purpose of generating a personalised educational health report. I understand this is special category data under UK GDPR Article 9.
               </span>
             </label>
 
