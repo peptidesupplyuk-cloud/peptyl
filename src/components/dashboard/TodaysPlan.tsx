@@ -1,11 +1,16 @@
-import { Check, SkipForward, Clock, FlaskConical, ArrowRight, Target, Pill, CheckCheck, Dna } from "lucide-react";
+import { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { Check, SkipForward, Clock, FlaskConical, ArrowRight, Target, Pill, CheckCheck, Dna, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useTodayInjections, useUpdateInjectionStatus } from "@/hooks/use-injections";
 import { useProtocols, type ProtocolSupplement } from "@/hooks/use-protocols";
 import { useBloodworkPanels } from "@/hooks/use-bloodwork";
 import { useTodaySupplementLogs, useToggleSupplement, useBatchCompleteSupplement } from "@/hooks/use-supplement-logs";
 import { BIOMARKERS, getMarkerStatus } from "@/data/biomarker-ranges";
-import { format } from "date-fns";
+import { format, differenceInDays, differenceInCalendarDays } from "date-fns";
+import { useAuth } from "@/contexts/AuthContext";
+import { supabase } from "@/integrations/supabase/client";
+import { useQuery } from "@tanstack/react-query";
 import DoseCalendar from "./InjectionCalendar";
 
 interface TodaysPlanProps {
@@ -36,6 +41,8 @@ interface SupplementItem {
 }
 
 const TodaysPlan = ({ onActivate }: TodaysPlanProps) => {
+  const navigate = useNavigate();
+  const { user } = useAuth();
   const { data: injections = [], isLoading } = useTodayInjections();
   const updateStatus = useUpdateInjectionStatus();
   const { data: protocols = [] } = useProtocols();
@@ -48,6 +55,93 @@ const TodaysPlan = ({ onActivate }: TodaysPlanProps) => {
   const batchComplete = useBatchCompleteSupplement();
   const completedSupplements = new Set(supplementLogs.filter((l) => l.completed).map((l) => l.item));
   const skippedSupplements = new Set(supplementLogs.filter((l) => !l.completed).map((l) => l.item));
+
+  // --- J2: Fetch active outcome record + DNA report for 90-day progress ---
+  const { data: outcomeRecord } = useQuery({
+    queryKey: ["active-outcome", user?.id],
+    enabled: !!user,
+    queryFn: async () => {
+      const { data } = await supabase
+        .from("outcome_records")
+        .select("id, dna_report_id, protocol_id, protocol_start_date, status")
+        .eq("user_id", user!.id)
+        .in("status", ["baseline_only", "in_progress"])
+        .order("created_at", { ascending: false })
+        .limit(1)
+        .maybeSingle();
+      return data;
+    },
+  });
+
+  const dnaReportId = outcomeRecord?.dna_report_id;
+
+  const { data: dnaReport } = useQuery({
+    queryKey: ["dna-report-plan", dnaReportId],
+    enabled: !!dnaReportId,
+    queryFn: async () => {
+      const { data } = await supabase
+        .from("dna_reports")
+        .select("id, report_json")
+        .eq("id", dnaReportId!)
+        .maybeSingle();
+      return data;
+    },
+  });
+
+  // Compute active protocol progress
+  const activeProtocol = protocols.find(
+    (p) => p.status === "active" && outcomeRecord?.protocol_id === p.id
+  ) || protocols.find((p) => p.status === "active");
+
+  const protocolStartDate = outcomeRecord?.protocol_start_date || activeProtocol?.start_date;
+  const protocolEndDate = activeProtocol?.end_date;
+
+  const daysActive = protocolStartDate
+    ? Math.max(0, differenceInCalendarDays(new Date(), new Date(protocolStartDate)))
+    : 0;
+  const totalDays = protocolStartDate && protocolEndDate
+    ? Math.max(1, differenceInCalendarDays(new Date(protocolEndDate), new Date(protocolStartDate)))
+    : 90;
+  const progressPct = Math.min(100, Math.round((daysActive / totalDays) * 100));
+
+  // Extract action_plan from DNA report
+  const actionPlan = (dnaReport?.report_json as any)?.action_plan as
+    | { immediate?: string[]; "30_days"?: string[]; "90_days"?: string[] }
+    | undefined;
+
+  // Milestone label
+  let milestoneLabel = "";
+  let milestonePrefix = "";
+  let milestoneAmber = false;
+  if (daysActive >= 70) {
+    milestoneLabel = "Retest due soon";
+    milestonePrefix = "";
+    milestoneAmber = true;
+  } else if (actionPlan) {
+    if (daysActive <= 7 && actionPlan.immediate?.[0]) {
+      milestonePrefix = "This week:";
+      milestoneLabel = actionPlan.immediate[0];
+    } else if (daysActive <= 30 && actionPlan["30_days"]?.[0]) {
+      milestonePrefix = "30-day goal:";
+      milestoneLabel = actionPlan["30_days"][0];
+    } else if (actionPlan["90_days"]?.[0]) {
+      milestonePrefix = "90-day goal:";
+      milestoneLabel = actionPlan["90_days"][0];
+    }
+  }
+
+  const showProgressStrip = hasActiveProtocol && protocolStartDate && (dnaReportId || protocolEndDate);
+
+  // Milestone celebration banners (day 30 and 90)
+  const [dismissed30, setDismissed30] = useState(() =>
+    activeProtocol ? sessionStorage.getItem(`milestone_30_dismissed_${activeProtocol.id}`) === "true" : false
+  );
+  const [dismissed90, setDismissed90] = useState(() =>
+    activeProtocol ? sessionStorage.getItem(`milestone_90_dismissed_${activeProtocol.id}`) === "true" : false
+  );
+
+  const showMilestone30 = daysActive === 30 && !dismissed30 && actionPlan?.["30_days"]?.[0];
+  const showMilestone90 = daysActive === 90 && !dismissed90 && actionPlan?.["90_days"]?.[0];
 
   // Build a map from peptide name → formatted protocol goal for active protocols
   const peptideGoalMap = new Map<string, string>();
@@ -64,7 +158,6 @@ const TodaysPlan = ({ onActivate }: TodaysPlanProps) => {
   for (const protocol of protocols.filter((p) => p.status === "active")) {
     if (protocol.supplements && protocol.supplements.length > 0) {
       for (const supp of protocol.supplements) {
-        // Avoid duplicates by name
         if (!supplements.find((s) => s.name === supp.name)) {
           supplements.push({
             name: supp.name,
@@ -84,7 +177,6 @@ const TodaysPlan = ({ onActivate }: TodaysPlanProps) => {
     const freq = s.frequency.toLowerCase();
     if (freq.includes("daily") || freq.includes("day")) return true;
     if (freq.includes("2x") || freq.includes("twice")) return true;
-    // Default: show it
     return true;
   });
 
@@ -121,18 +213,14 @@ const TodaysPlan = ({ onActivate }: TodaysPlanProps) => {
   const completed = injections.filter((i) => i.status === "completed");
   const skipped = injections.filter((i) => i.status === "skipped");
 
-  // Total counts for progress
   const totalItems = injections.length + todaySupplements.length;
   const completedItems = completed.length + doneSupplements.length;
   const remainingScheduled = scheduled.length + pendingSupplements.length;
 
-  // Complete All handler
   const handleCompleteAll = () => {
-    // Complete all scheduled injections
     for (const inj of scheduled) {
       updateStatus.mutate({ id: inj.id, status: "completed" });
     }
-    // Complete all pending supplements in DB
     const pendingNames = pendingSupplements.map((s) => s.name);
     if (pendingNames.length > 0) {
       batchComplete.mutate(pendingNames);
@@ -188,217 +276,289 @@ const TodaysPlan = ({ onActivate }: TodaysPlanProps) => {
   const hasAnyItems = injections.length > 0 || todaySupplements.length > 0;
 
   return (
-    <div className="bg-card rounded-2xl border border-border p-5 space-y-4">
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-2">
-          <FlaskConical className="h-5 w-5 text-primary" />
-          <h2 className="font-heading font-semibold text-foreground">What To Do Today</h2>
+    <>
+      {/* Milestone celebration banners */}
+      {showMilestone30 && activeProtocol && (
+        <div className="bg-card rounded-2xl border border-[#00D4AA]/30 p-4 flex items-start gap-3 mb-4">
+          <span className="text-lg">🎯</span>
+          <div className="flex-1 min-w-0">
+            <p className="text-sm font-medium text-foreground">
+              30-day milestone — your protocol said: <span className="text-primary">{actionPlan?.["30_days"]?.[0]}</span>
+            </p>
+          </div>
+          <button
+            className="p-1 rounded hover:bg-muted transition-colors shrink-0"
+            onClick={() => {
+              sessionStorage.setItem(`milestone_30_dismissed_${activeProtocol.id}`, "true");
+              setDismissed30(true);
+            }}
+          >
+            <X className="h-3.5 w-3.5 text-muted-foreground" />
+          </button>
         </div>
-        <div className="flex items-center gap-3">
-          <DoseCalendar />
-          <span className="text-xs text-muted-foreground">{format(new Date(), "EEEE, MMM d")}</span>
-        </div>
-      </div>
-
-      {/* Active goal summary + detected issues */}
-      {(activeGoals.length > 0 || detectedIssues.length > 0) && (
-        <div className="flex flex-wrap items-center gap-1.5">
-          {activeGoals.length > 0 && <Target className="h-3.5 w-3.5 text-primary/60" />}
-          {activeGoals.map((goal) => (
-            <span key={goal} className="text-xs px-2.5 py-1 rounded-full bg-primary/10 text-primary font-medium">
-              {goal}
-            </span>
-          ))}
-          {detectedIssues.slice(0, 3).map((issue) => (
-            <span key={issue} className="text-xs px-2.5 py-1 rounded-full bg-accent text-accent-foreground font-medium">
-              {issue}
-            </span>
-          ))}
-          {detectedIssues.length > 3 && (
-            <span className="text-xs px-2.5 py-1 rounded-full bg-muted text-muted-foreground">
-              +{detectedIssues.length - 3} more
-            </span>
-          )}
+      )}
+      {showMilestone90 && activeProtocol && (
+        <div className="bg-card rounded-2xl border border-[#00D4AA]/30 p-4 flex items-start gap-3 mb-4">
+          <span className="text-lg">🎯</span>
+          <div className="flex-1 min-w-0">
+            <p className="text-sm font-medium text-foreground">
+              90-day milestone — your protocol said: <span className="text-primary">{actionPlan?.["90_days"]?.[0]}</span>
+            </p>
+          </div>
+          <button
+            className="p-1 rounded hover:bg-muted transition-colors shrink-0"
+            onClick={() => {
+              sessionStorage.setItem(`milestone_90_dismissed_${activeProtocol.id}`, "true");
+              setDismissed90(true);
+            }}
+          >
+            <X className="h-3.5 w-3.5 text-muted-foreground" />
+          </button>
         </div>
       )}
 
-      {/* Complete All button */}
-      {remainingScheduled > 1 && (
-        <Button
-          variant="outline"
-          size="sm"
-          className="w-full text-xs h-8 border-primary/20 text-primary hover:bg-primary/5"
-          onClick={handleCompleteAll}
-        >
-          <CheckCheck className="h-3.5 w-3.5 mr-1.5" />
-          Complete All ({remainingScheduled} remaining)
-        </Button>
-      )}
+      <div className="bg-card rounded-2xl border border-border p-5 space-y-4">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <FlaskConical className="h-5 w-5 text-primary" />
+            <h2 className="font-heading font-semibold text-foreground">What To Do Today</h2>
+          </div>
+          <div className="flex items-center gap-3">
+            <DoseCalendar />
+            <span className="text-xs text-muted-foreground">{format(new Date(), "EEEE, MMM d")}</span>
+          </div>
+        </div>
 
-      {!hasAnyItems ? (
-        <p className="text-sm text-muted-foreground py-2 text-center">
-          All doses completed or none scheduled today. Check your active plan below.
-        </p>
-      ) : (
-        <div className="space-y-2">
-          {/* Scheduled peptide doses */}
-          {scheduled.map((inj) => {
-            const goal = peptideGoalMap.get(inj.peptide_name.toLowerCase());
-            return (
-              <div key={inj.id} className="flex items-center justify-between bg-muted/50 rounded-xl px-4 py-3">
+        {/* J2: Day X of N progress strip */}
+        {showProgressStrip && (
+          <button
+            onClick={() => dnaReportId && navigate(`/dna/report/${dnaReportId}`)}
+            className="w-full bg-muted/30 rounded-xl px-4 py-3 flex items-center gap-4 text-left hover:bg-muted/50 transition-colors"
+          >
+            <div className="flex-1 min-w-0">
+              <p className="font-heading font-semibold text-sm text-foreground">
+                Day {daysActive} of {totalDays}
+              </p>
+              <div className="w-full h-1 bg-muted rounded-full mt-1.5">
+                <div
+                  className="h-1 bg-[#00D4AA] rounded-full transition-all duration-500"
+                  style={{ width: `${progressPct}%` }}
+                />
+              </div>
+            </div>
+            {milestoneLabel && (
+              <div className="max-w-[180px] shrink-0 text-right">
+                {milestonePrefix && (
+                  <p className="text-[10px] text-muted-foreground">{milestonePrefix}</p>
+                )}
+                <p className={`text-xs truncate ${milestoneAmber ? "text-amber-400 font-medium" : "text-muted-foreground"}`}>
+                  {milestoneLabel}
+                </p>
+              </div>
+            )}
+          </button>
+        )}
+
+        {/* Active goal summary + detected issues */}
+        {(activeGoals.length > 0 || detectedIssues.length > 0) && (
+          <div className="flex flex-wrap items-center gap-1.5">
+            {activeGoals.length > 0 && <Target className="h-3.5 w-3.5 text-primary/60" />}
+            {activeGoals.map((goal) => (
+              <span key={goal} className="text-xs px-2.5 py-1 rounded-full bg-primary/10 text-primary font-medium">
+                {goal}
+              </span>
+            ))}
+            {detectedIssues.slice(0, 3).map((issue) => (
+              <span key={issue} className="text-xs px-2.5 py-1 rounded-full bg-accent text-accent-foreground font-medium">
+                {issue}
+              </span>
+            ))}
+            {detectedIssues.length > 3 && (
+              <span className="text-xs px-2.5 py-1 rounded-full bg-muted text-muted-foreground">
+                +{detectedIssues.length - 3} more
+              </span>
+            )}
+          </div>
+        )}
+
+        {/* Complete All button */}
+        {remainingScheduled > 1 && (
+          <Button
+            variant="outline"
+            size="sm"
+            className="w-full text-xs h-8 border-primary/20 text-primary hover:bg-primary/5"
+            onClick={handleCompleteAll}
+          >
+            <CheckCheck className="h-3.5 w-3.5 mr-1.5" />
+            Complete All ({remainingScheduled} remaining)
+          </Button>
+        )}
+
+        {!hasAnyItems ? (
+          <p className="text-sm text-muted-foreground py-2 text-center">
+            All doses completed or none scheduled today. Check your active plan below.
+          </p>
+        ) : (
+          <div className="space-y-2">
+            {/* Scheduled peptide doses */}
+            {scheduled.map((inj) => {
+              const goal = peptideGoalMap.get(inj.peptide_name.toLowerCase());
+              return (
+                <div key={inj.id} className="flex items-center justify-between bg-muted/50 rounded-xl px-4 py-3">
+                  <div>
+                    <div className="flex items-center gap-2">
+                      <Clock className="h-3.5 w-3.5 text-primary" />
+                      <span className="text-sm font-medium text-foreground">{inj.peptide_name}</span>
+                      <span className="text-xs text-muted-foreground">{inj.dose_mcg}mcg</span>
+                    </div>
+                    <p className="text-xs text-muted-foreground ml-5.5 mt-0.5">
+                      {format(new Date(inj.scheduled_time), "h:mm a")}
+                      {goal && (
+                        <span className="ml-1.5 text-primary/70">· {goal}</span>
+                      )}
+                    </p>
+                  </div>
+                  <div className="flex gap-1.5">
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      className="h-8 text-xs"
+                      onClick={() => updateStatus.mutate({ id: inj.id, status: "skipped" })}
+                    >
+                      <SkipForward className="h-3 w-3 mr-1" /> Skip
+                    </Button>
+                    <Button
+                      size="sm"
+                      className="h-8 text-xs shadow-brand"
+                      onClick={() => updateStatus.mutate({ id: inj.id, status: "completed" })}
+                    >
+                      <Check className="h-3 w-3 mr-1" /> Done
+                    </Button>
+                  </div>
+                </div>
+              );
+            })}
+
+            {/* Pending supplements */}
+            {pendingSupplements.map((supp) => (
+              <div key={`supp-${supp.name}`} className="flex items-center justify-between bg-muted/50 rounded-xl px-4 py-3">
                 <div>
                   <div className="flex items-center gap-2">
-                    <Clock className="h-3.5 w-3.5 text-primary" />
-                    <span className="text-sm font-medium text-foreground">{inj.peptide_name}</span>
-                    <span className="text-xs text-muted-foreground">{inj.dose_mcg}mcg</span>
+                    <Pill className="h-3.5 w-3.5 text-accent-foreground/70" />
+                    <span className="text-sm font-medium text-foreground">{supp.name}</span>
+                    <span className="text-xs text-muted-foreground">{supp.dose}</span>
                   </div>
                   <p className="text-xs text-muted-foreground ml-5.5 mt-0.5">
-                    {format(new Date(inj.scheduled_time), "h:mm a")}
-                    {goal && (
-                      <span className="ml-1.5 text-primary/70">· {goal}</span>
+                    {supp.frequency}
+                    {supp.goal && (
+                      <span className="ml-1.5 text-primary/70">· {supp.goal}</span>
                     )}
                   </p>
+                  {supp.drivenBy && supp.drivenBy.length > 0 && (
+                    <span className="text-[10px] text-primary/70 flex items-center gap-1 ml-5.5 mt-0.5">
+                      <Dna className="h-2.5 w-2.5" /> {supp.drivenBy[0]}
+                    </span>
+                  )}
                 </div>
                 <div className="flex gap-1.5">
                   <Button
                     size="sm"
                     variant="outline"
                     className="h-8 text-xs"
-                    onClick={() => updateStatus.mutate({ id: inj.id, status: "skipped" })}
+                    onClick={() => toggleSupplement.mutate({ item: supp.name, completed: false })}
                   >
                     <SkipForward className="h-3 w-3 mr-1" /> Skip
                   </Button>
                   <Button
                     size="sm"
                     className="h-8 text-xs shadow-brand"
-                    onClick={() => updateStatus.mutate({ id: inj.id, status: "completed" })}
+                    onClick={() => toggleSupplement.mutate({ item: supp.name, completed: true })}
                   >
                     <Check className="h-3 w-3 mr-1" /> Done
                   </Button>
                 </div>
               </div>
-            );
-          })}
+            ))}
 
-          {/* Pending supplements */}
-          {pendingSupplements.map((supp) => (
-            <div key={`supp-${supp.name}`} className="flex items-center justify-between bg-muted/50 rounded-xl px-4 py-3">
-              <div>
-                <div className="flex items-center gap-2">
-                  <Pill className="h-3.5 w-3.5 text-accent-foreground/70" />
-                  <span className="text-sm font-medium text-foreground">{supp.name}</span>
-                  <span className="text-xs text-muted-foreground">{supp.dose}</span>
+            {/* Completed peptide doses */}
+            {completed.map((inj) => {
+              const goal = peptideGoalMap.get(inj.peptide_name.toLowerCase());
+              return (
+                <div key={inj.id} className="flex items-center justify-between bg-primary/5 border border-primary/10 rounded-xl px-4 py-3">
+                  <div>
+                    <div className="flex items-center gap-2">
+                      <Check className="h-3.5 w-3.5 text-primary" />
+                      <span className="text-sm font-medium text-foreground line-through opacity-60">{inj.peptide_name}</span>
+                      <span className="text-xs text-muted-foreground">{inj.dose_mcg}mcg</span>
+                    </div>
+                    {goal && (
+                      <p className="text-[11px] text-muted-foreground ml-5.5 mt-0.5">{goal}</p>
+                    )}
+                  </div>
+                  <span className="text-xs text-primary">Completed</span>
                 </div>
-                <p className="text-xs text-muted-foreground ml-5.5 mt-0.5">
-                  {supp.frequency}
-                  {supp.goal && (
-                    <span className="ml-1.5 text-primary/70">· {supp.goal}</span>
-                  )}
-                </p>
-                {supp.drivenBy && supp.drivenBy.length > 0 && (
-                  <span className="text-[10px] text-primary/70 flex items-center gap-1 ml-5.5 mt-0.5">
-                    <Dna className="h-2.5 w-2.5" /> {supp.drivenBy[0]}
-                  </span>
-                )}
-              </div>
-              <div className="flex gap-1.5">
-                <Button
-                  size="sm"
-                  variant="outline"
-                  className="h-8 text-xs"
-                  onClick={() => toggleSupplement.mutate({ item: supp.name, completed: false })}
-                >
-                  <SkipForward className="h-3 w-3 mr-1" /> Skip
-                </Button>
-                <Button
-                  size="sm"
-                  className="h-8 text-xs shadow-brand"
-                  onClick={() => toggleSupplement.mutate({ item: supp.name, completed: true })}
-                >
-                  <Check className="h-3 w-3 mr-1" /> Done
-                </Button>
-              </div>
-            </div>
-          ))}
+              );
+            })}
 
-          {/* Completed peptide doses */}
-          {completed.map((inj) => {
-            const goal = peptideGoalMap.get(inj.peptide_name.toLowerCase());
-            return (
-              <div key={inj.id} className="flex items-center justify-between bg-primary/5 border border-primary/10 rounded-xl px-4 py-3">
+            {/* Completed supplements */}
+            {doneSupplements.map((supp) => (
+              <div key={`supp-done-${supp.name}`} className="flex items-center justify-between bg-primary/5 border border-primary/10 rounded-xl px-4 py-3">
                 <div>
                   <div className="flex items-center gap-2">
                     <Check className="h-3.5 w-3.5 text-primary" />
-                    <span className="text-sm font-medium text-foreground line-through opacity-60">{inj.peptide_name}</span>
-                    <span className="text-xs text-muted-foreground">{inj.dose_mcg}mcg</span>
+                    <span className="text-sm font-medium text-foreground line-through opacity-60">{supp.name}</span>
+                    <span className="text-xs text-muted-foreground">{supp.dose}</span>
                   </div>
-                  {goal && (
-                    <p className="text-[11px] text-muted-foreground ml-5.5 mt-0.5">{goal}</p>
+                  {supp.goal && (
+                    <p className="text-[11px] text-muted-foreground ml-5.5 mt-0.5">{supp.goal}</p>
                   )}
                 </div>
                 <span className="text-xs text-primary">Completed</span>
               </div>
-            );
-          })}
+            ))}
 
-          {/* Completed supplements */}
-          {doneSupplements.map((supp) => (
-            <div key={`supp-done-${supp.name}`} className="flex items-center justify-between bg-primary/5 border border-primary/10 rounded-xl px-4 py-3">
-              <div>
-                <div className="flex items-center gap-2">
-                  <Check className="h-3.5 w-3.5 text-primary" />
-                  <span className="text-sm font-medium text-foreground line-through opacity-60">{supp.name}</span>
-                  <span className="text-xs text-muted-foreground">{supp.dose}</span>
+            {/* Skipped peptide doses */}
+            {skipped.map((inj) => {
+              const goal = peptideGoalMap.get(inj.peptide_name.toLowerCase());
+              return (
+                <div key={inj.id} className="flex items-center justify-between bg-muted/30 rounded-xl px-4 py-3 opacity-50">
+                  <div>
+                    <div className="flex items-center gap-2">
+                      <SkipForward className="h-3.5 w-3.5 text-muted-foreground" />
+                      <span className="text-sm font-medium text-foreground line-through">{inj.peptide_name}</span>
+                    </div>
+                    {goal && (
+                      <p className="text-[11px] text-muted-foreground ml-5.5 mt-0.5">{goal}</p>
+                    )}
+                  </div>
+                  <span className="text-xs text-muted-foreground">Skipped</span>
                 </div>
-                {supp.goal && (
-                  <p className="text-[11px] text-muted-foreground ml-5.5 mt-0.5">{supp.goal}</p>
-                )}
-              </div>
-              <span className="text-xs text-primary">Completed</span>
-            </div>
-          ))}
+              );
+            })}
 
-          {/* Skipped peptide doses */}
-          {skipped.map((inj) => {
-            const goal = peptideGoalMap.get(inj.peptide_name.toLowerCase());
-            return (
-              <div key={inj.id} className="flex items-center justify-between bg-muted/30 rounded-xl px-4 py-3 opacity-50">
+            {/* Skipped supplements */}
+            {skippedSuppList.map((supp) => (
+              <div key={`supp-skip-${supp.name}`} className="flex items-center justify-between bg-muted/30 rounded-xl px-4 py-3 opacity-50">
                 <div>
                   <div className="flex items-center gap-2">
                     <SkipForward className="h-3.5 w-3.5 text-muted-foreground" />
-                    <span className="text-sm font-medium text-foreground line-through">{inj.peptide_name}</span>
+                    <span className="text-sm font-medium text-foreground line-through">{supp.name}</span>
                   </div>
-                  {goal && (
-                    <p className="text-[11px] text-muted-foreground ml-5.5 mt-0.5">{goal}</p>
-                  )}
                 </div>
                 <span className="text-xs text-muted-foreground">Skipped</span>
               </div>
-            );
-          })}
+            ))}
+          </div>
+        )}
 
-          {/* Skipped supplements */}
-          {skippedSuppList.map((supp) => (
-            <div key={`supp-skip-${supp.name}`} className="flex items-center justify-between bg-muted/30 rounded-xl px-4 py-3 opacity-50">
-              <div>
-                <div className="flex items-center gap-2">
-                  <SkipForward className="h-3.5 w-3.5 text-muted-foreground" />
-                  <span className="text-sm font-medium text-foreground line-through">{supp.name}</span>
-                </div>
-              </div>
-              <span className="text-xs text-muted-foreground">Skipped</span>
-            </div>
-          ))}
-        </div>
-      )}
-
-      {totalItems > 0 && (
-        <div className="flex items-center gap-4 text-xs text-muted-foreground pt-1">
-          <span>{completedItems}/{totalItems} completed</span>
-          {remainingScheduled > 0 && <span>{remainingScheduled} remaining</span>}
-        </div>
-      )}
-    </div>
+        {totalItems > 0 && (
+          <div className="flex items-center gap-4 text-xs text-muted-foreground pt-1">
+            <span>{completedItems}/{totalItems} completed</span>
+            {remainingScheduled > 0 && <span>{remainingScheduled} remaining</span>}
+          </div>
+        )}
+      </div>
+    </>
   );
 };
 
