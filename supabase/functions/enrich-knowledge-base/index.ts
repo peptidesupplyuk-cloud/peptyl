@@ -181,7 +181,7 @@ Deno.serve(async (req) => {
       Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!
     );
 
-    const { type = "both", batch_size = 5 } = await req.json();
+    const { type = "both", batch_size = 20 } = await req.json();
 
     const results = {
       enriched: 0,
