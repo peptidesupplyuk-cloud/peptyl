@@ -35,12 +35,63 @@ serve(async (req) => {
   }
 
   try {
-    const { messages } = await req.json();
-    const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
-    if (!LOVABLE_API_KEY) throw new Error("LOVABLE_API_KEY is not configured");
+    // --- Auth: require a valid user session ---
+    const authHeader = req.headers.get("Authorization");
+    if (!authHeader?.startsWith("Bearer ")) {
+      return new Response(
+        JSON.stringify({ error: "Authentication required" }),
+        { status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
 
     const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
+    const supabaseAnonKey = Deno.env.get("SUPABASE_ANON_KEY")!;
     const supabaseKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
+
+    const anonClient = createClient(supabaseUrl, supabaseAnonKey, {
+      global: { headers: { Authorization: authHeader } },
+    });
+    const token = authHeader.replace("Bearer ", "");
+    const { data, error: authError } = await anonClient.auth.getClaims(token);
+    if (authError || !data?.claims?.sub) {
+      return new Response(
+        JSON.stringify({ error: "Invalid or expired session" }),
+        { status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
+    // --- Input validation ---
+    const { messages } = await req.json();
+
+    if (!Array.isArray(messages) || messages.length === 0) {
+      return new Response(
+        JSON.stringify({ error: "Invalid messages format" }),
+        { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+    if (messages.length > 50) {
+      return new Response(
+        JSON.stringify({ error: "Too many messages" }),
+        { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+    for (const msg of messages) {
+      if (!msg.role || !msg.content || typeof msg.content !== "string") {
+        return new Response(
+          JSON.stringify({ error: "Invalid message format" }),
+          { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        );
+      }
+      if (msg.content.length > 10000) {
+        return new Response(
+          JSON.stringify({ error: "Message too long" }),
+          { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        );
+      }
+    }
+
+    const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
+    if (!LOVABLE_API_KEY) throw new Error("LOVABLE_API_KEY is not configured");
 
     // --- RAG: Retrieve relevant context ---
     let ragContext = "";
@@ -48,7 +99,6 @@ serve(async (req) => {
 
     if (lastUserMsg?.content) {
       try {
-        // 1. Generate embedding for the user's query
         const embResponse = await fetch("https://ai.gateway.lovable.dev/v1/embeddings", {
           method: "POST",
           headers: {
@@ -66,7 +116,6 @@ serve(async (req) => {
           const queryEmbedding = embData.data?.[0]?.embedding;
 
           if (queryEmbedding) {
-            // 2. Vector similarity search
             const supabase = createClient(supabaseUrl, supabaseKey);
             const { data: matches } = await supabase.rpc("match_embeddings", {
               query_embedding: JSON.stringify(queryEmbedding),
@@ -75,7 +124,6 @@ serve(async (req) => {
             });
 
             if (matches && matches.length > 0) {
-              // 3. Fetch article titles for citation
               const articleIds = [...new Set(matches.map((m: any) => m.article_id))];
               const { data: articles } = await supabase
                 .from("articles")
