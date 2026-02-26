@@ -17,6 +17,7 @@ export interface ProtocolSupplement {
   name: string;
   dose: string;
   frequency: string;
+  drivenBy?: string[];
 }
 
 export interface Protocol {
