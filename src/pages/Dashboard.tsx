@@ -507,7 +507,7 @@ const Dashboard = () => {
                   <div>
                     <h3 className="font-heading font-semibold text-foreground text-sm">Medical Disclaimer</h3>
                     <p className="text-xs text-muted-foreground mt-1 leading-relaxed">
-                      All protocols and recommendations are for educational and research purposes only. They do not constitute medical advice. Always consult with a qualified healthcare professional before beginning any peptide protocol.
+                      All protocols, recommendations, and content on this dashboard are for educational and research information purposes only. They do not constitute medical advice, clinical guidance, or a professional recommendation. Peptyl is not operated by medical professionals. Always consult a qualified GP, pharmacist, or specialist before beginning any new protocol, changing medications, or making decisions about your health based on information shown here.
                     </p>
                   </div>
                 </div>

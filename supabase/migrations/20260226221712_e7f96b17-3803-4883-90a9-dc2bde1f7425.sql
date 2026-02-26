@@ -1,0 +1,1 @@
+ALTER TABLE public.dna_consents ADD COLUMN IF NOT EXISTS consent_version TEXT DEFAULT '1.0';

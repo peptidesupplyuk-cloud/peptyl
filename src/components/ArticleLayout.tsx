@@ -80,9 +80,16 @@ const ArticleLayout = ({ category, title, readTime, date, children, slug, descri
               {children}
             </article>
 
-            <div className="mt-12 p-6 rounded-2xl bg-accent border border-primary/20 text-center">
-              <p className="text-xs text-muted-foreground">
-                ⚠ All peptides discussed are research chemicals for laboratory use only. Not approved for human consumption. This article is for educational purposes only.
+            <div className="mt-12 p-6 rounded-2xl bg-accent border border-primary/20 space-y-3">
+              <p className="text-xs font-semibold text-foreground">⚠ Research &amp; Educational Content Only</p>
+              <p className="text-xs text-muted-foreground leading-relaxed">
+                All peptides and compounds discussed in Peptyl content are research chemicals. They are not approved for human consumption, veterinary use, or dietary supplementation by the MHRA, FDA, or any other regulatory authority. This content is for educational and informational purposes only.
+              </p>
+              <p className="text-xs text-muted-foreground leading-relaxed">
+                Peptyl is not operated by medical professionals. Nothing in this article constitutes medical advice, clinical guidance, or a recommendation to use any compound. Always consult a qualified GP, pharmacist, or specialist before beginning any new health intervention.
+              </p>
+              <p className="text-xs text-muted-foreground leading-relaxed">
+                Dosing figures, protocols, and safety data referenced in articles are drawn from published research literature. Peptyl makes no representations about their accuracy, completeness, or applicability to any individual.
               </p>
             </div>
           </div>

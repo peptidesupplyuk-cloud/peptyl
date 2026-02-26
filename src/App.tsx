@@ -9,6 +9,7 @@ import ProtectedRoute from "@/components/ProtectedRoute";
 import PeptideChat from "@/components/PeptideChat";
 import SignupBanner from "@/components/SignupBanner";
 import FeedbackBanner from "@/components/FeedbackBanner";
+import SitewideDisclaimer from "@/components/SitewideDisclaimer";
 import ScrollToTop from "@/components/ScrollToTop";
 import Index from "./pages/Index";
 import Auth from "./pages/Auth";
@@ -119,6 +120,7 @@ const App = () => (
           <PeptideChat />
           <SignupBanner />
           <FeedbackBanner />
+          <SitewideDisclaimer />
         </BrowserRouter>
       </TooltipProvider>
     </AuthProvider>

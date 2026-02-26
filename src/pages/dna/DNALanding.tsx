@@ -40,6 +40,9 @@ const DNALanding = () => {
                 Start Your Analysis <ArrowRight className="ml-2 h-5 w-5" />
               </Button>
             </Link>
+            <p className="text-xs text-primary-foreground/50 mt-3 text-center">
+              For educational purposes only. Not medical advice. We are not medical professionals.
+            </p>
           </div>
         </section>
 
@@ -74,6 +77,9 @@ const DNALanding = () => {
             <p className="text-muted-foreground text-sm">
               Your raw genetic data is never stored. It's processed in memory, analysed by AI, then discarded.
               Only your processed health report is saved — and you can delete it at any time.
+            </p>
+            <p className="text-muted-foreground text-sm mt-3">
+              Genetic data is special category data under UK GDPR Article 9. Your explicit consent is required and captured before processing. This report is for educational purposes only — it is not a clinical genetic test and Peptyl is not operated by medical professionals. Peptyl is registering with the ICO as a special category data controller prior to launching paid services.
             </p>
           </div>
         </section>
