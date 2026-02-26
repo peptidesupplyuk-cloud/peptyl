@@ -8,6 +8,8 @@ export interface BloodworkPanel {
   test_date: string;
   panel_type: string;
   created_at: string;
+  protocol_id: string | null;
+  dna_report_id: string | null;
   markers: { marker_name: string; value: number; unit: string }[];
 }
 
@@ -45,16 +47,28 @@ export function useSaveBloodwork() {
       testDate,
       panelType,
       markers,
+      protocolId,
+      dnaReportId,
     }: {
       testDate: string;
       panelType: string;
       markers: { marker_name: string; value: number; unit: string }[];
+      protocolId?: string | null;
+      dnaReportId?: string | null;
     }) => {
       if (!user) throw new Error("Not authenticated");
 
+      const insertPayload: { user_id: string; test_date: string; panel_type: string; protocol_id?: string; dna_report_id?: string } = {
+        user_id: user.id,
+        test_date: testDate,
+        panel_type: panelType,
+      };
+      if (protocolId) insertPayload.protocol_id = protocolId;
+      if (dnaReportId) insertPayload.dna_report_id = dnaReportId;
+
       const { data: panel, error: pErr } = await supabase
         .from("bloodwork_panels")
-        .insert({ user_id: user.id, test_date: testDate, panel_type: panelType })
+        .insert(insertPayload)
         .select()
         .single();
       if (pErr) throw pErr;

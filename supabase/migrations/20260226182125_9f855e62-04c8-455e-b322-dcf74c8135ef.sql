@@ -1,0 +1,1 @@
+ALTER VIEW public.outcome_aggregates SET (security_invoker = on);
