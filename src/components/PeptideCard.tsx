@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { motion } from "framer-motion";
-import { ThumbsUp, ThumbsDown, TrendingUp, AlertTriangle, Clock, Filter, ChevronDown, ChevronUp, Syringe, CalendarDays, Sparkles, CheckCircle2, FlaskConical, Plus, ArrowRight, Users } from "lucide-react";
+import { ThumbsUp, ThumbsDown, TrendingUp, AlertTriangle, Clock, Filter, ChevronDown, ChevronUp, Syringe, CalendarDays, Sparkles, CheckCircle2, FlaskConical, Plus, ArrowRight, Users, Beaker } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/contexts/AuthContext";
 import OnboardingModal from "@/components/OnboardingModal";
@@ -36,7 +36,15 @@ const ApprovalBadge = ({ region, approval }: { region: string; approval: Approva
   );
 };
 
+const gradeLabel: Record<string, { text: string; className: string }> = {
+  A: { text: "Grade A — Strong clinical evidence", className: "bg-primary/10 text-primary" },
+  B: { text: "Grade B — Moderate evidence", className: "bg-blue-500/10 text-blue-600 dark:text-blue-400" },
+  C: { text: "Grade C — Preliminary evidence", className: "bg-amber-500/10 text-amber-600 dark:text-amber-400" },
+  D: { text: "Grade D — Theoretical / Anecdotal", className: "bg-muted text-muted-foreground" },
+};
+
 const PeptideCard = ({ peptide, index }: PeptideCardProps) => {
+  const grade = peptide.evidenceGrade ? gradeLabel[peptide.evidenceGrade] : null;
   const [expanded, setExpanded] = useState(false);
   const [onboardingOpen, setOnboardingOpen] = useState(false);
   const { user } = useAuth();
@@ -92,6 +100,11 @@ const PeptideCard = ({ peptide, index }: PeptideCardProps) => {
               {peptide.isNew && (
                 <span className="text-xs font-medium px-2.5 py-0.5 rounded-full bg-primary text-primary-foreground flex items-center gap-1">
                   <Sparkles className="h-3 w-3" /> {t("peptideCard.new")}
+                </span>
+              )}
+              {grade && (
+                <span className={`text-[10px] font-bold px-2 py-0.5 rounded-md ${grade.className}`}>
+                  {peptide.evidenceGrade}
                 </span>
               )}
             </div>
