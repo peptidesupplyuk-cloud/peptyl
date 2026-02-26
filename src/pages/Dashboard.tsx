@@ -15,7 +15,7 @@ import ActiveProtocols from "@/components/dashboard/ActiveProtocols";
 import CreateProtocolForm from "@/components/dashboard/CreateProtocolForm";
 import ProfileBiometrics from "@/components/dashboard/ProfileBiometrics";
 import { useBloodworkPanels } from "@/hooks/use-bloodwork";
-import { useCreateProtocol } from "@/hooks/use-protocols";
+import { useCreateProtocol, useProtocols } from "@/hooks/use-protocols";
 import { useLogInjection, useUpdateInjectionStatus } from "@/hooks/use-injections";
 import AdherenceTracker from "@/components/dashboard/AdherenceTracker";
 import { useProtocolNotifications, useNotificationActions } from "@/hooks/use-notifications";
@@ -32,6 +32,7 @@ import MobileTabNav from "@/components/dashboard/MobileTabNav";
 import OptimizationScore from "@/components/dashboard/OptimizationScore";
 import AdherenceSummary from "@/components/dashboard/AdherenceSummary";
 import { useIsMobile } from "@/hooks/use-mobile";
+import ProtocolOutcomeCard from "@/components/dashboard/ProtocolOutcomeCard";
 import { useSaveOnboarding } from "@/hooks/use-save-onboarding";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
@@ -85,6 +86,7 @@ const VideoHelpButton = () => {
 const Dashboard = () => {
   const { data: panels = [], refetch: refetchPanels } = useBloodworkPanels();
   const createProtocol = useCreateProtocol();
+  const { data: protocols = [] } = useProtocols();
   const logInjection = useLogInjection();
   const updateInjectionStatus = useUpdateInjectionStatus();
   const { toast } = useToast();
@@ -430,6 +432,23 @@ const Dashboard = () => {
 
                 {/* BLOODWORK SUB-TAB */}
                 <TabsContent value="bloodwork" className="space-y-6">
+                  {/* Protocol Results */}
+                  {(() => {
+                    const retestPanels = panels.filter(p => p.panel_type?.startsWith('retest') && p.protocol_id);
+                    if (retestPanels.length === 0) return null;
+                    return (
+                      <div className="space-y-4 mb-2">
+                        <h3 className="font-heading font-semibold text-foreground text-sm">Protocol Results</h3>
+                        {retestPanels.map(retest => {
+                          const baseline = panels.find(p => p.protocol_id === retest.protocol_id && !p.panel_type?.startsWith('retest'));
+                          const protocol = protocols.find(p => p.id === retest.protocol_id);
+                          if (!baseline) return null;
+                          return <ProtocolOutcomeCard key={retest.id} baselinePanel={baseline} retestPanel={retest} protocolName={protocol?.name ?? 'Protocol'} />;
+                        })}
+                      </div>
+                    );
+                  })()}
+
                   <div className="bg-card rounded-2xl border border-border p-5 sm:p-6">
                     <h2 className="font-heading font-semibold text-foreground mb-4">Enter Bloodwork Results</h2>
                     <BloodworkForm onSaved={() => { refetchPanels(); setActiveTab("protocols"); }} filterCategories={["Metabolic", "Lipids", "Liver", "Kidney", "Inflammation", "Vitamins", "Hormones", "Thyroid"]} defaultProtocolId={retestProtocolId} defaultIsRetest={defaultIsRetest} />
