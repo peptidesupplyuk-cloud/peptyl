@@ -810,6 +810,21 @@ const KnowledgeBaseTab = () => {
   const [analyzingGaps, setAnalyzingGaps] = useState(false);
   const [gapResults, setGapResults] = useState<any>(null);
   const [addingGaps, setAddingGaps] = useState(false);
+  const [auditing, setAuditing] = useState(false);
+  const [auditSummary, setAuditSummary] = useState<any>(null);
+
+  const { data: auditIssues } = useQuery({
+    queryKey: ["kb-audit-issues"],
+    queryFn: async () => {
+      const { data } = await supabase
+        .from("audit_results")
+        .select("*")
+        .eq("status", "open")
+        .order("created_at", { ascending: false })
+        .limit(50);
+      return data || [];
+    },
+  });
 
   const { data: peptideCount } = useQuery({
     queryKey: ["kb-peptide-count"],
@@ -965,6 +980,52 @@ const KnowledgeBaseTab = () => {
     } finally {
       setAddingGaps(false);
     }
+  };
+
+  const runAudit = async () => {
+    setAuditing(true);
+    setAuditSummary(null);
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      const resp = await fetch(
+        `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/audit-knowledge-base`,
+        {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${session?.access_token}`,
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({}),
+        }
+      );
+      const data = await resp.json();
+      setAuditSummary(data);
+      if (data.error) {
+        toast({ title: "Audit failed", description: data.error, variant: "destructive" });
+      } else {
+        toast({
+          title: "Audit complete",
+          description: `${data.issues_found} issues found across ${data.total_records_audited} records.`,
+        });
+        queryClient.invalidateQueries({ queryKey: ["kb-audit-issues"] });
+      }
+    } catch (e: any) {
+      toast({ title: "Audit error", description: e.message, variant: "destructive" });
+    } finally {
+      setAuditing(false);
+    }
+  };
+
+  const dismissAuditIssue = async (id: string) => {
+    await supabase.from("audit_results").update({ status: "dismissed" }).eq("id", id);
+    queryClient.invalidateQueries({ queryKey: ["kb-audit-issues"] });
+    toast({ title: "Issue dismissed" });
+  };
+
+  const markAuditFixed = async (id: string) => {
+    await supabase.from("audit_results").update({ status: "fixed", fixed_at: new Date().toISOString() }).eq("id", id);
+    queryClient.invalidateQueries({ queryKey: ["kb-audit-issues"] });
+    toast({ title: "Issue marked as fixed" });
   };
 
   const runMigration = async () => {
@@ -1174,6 +1235,69 @@ const KnowledgeBaseTab = () => {
                 <div className="mt-1 text-destructive">{results.supplements.errors.join(", ")}</div>
               )}
             </div>
+          </div>
+        )}
+      </div>
+
+      {/* E2E Audit */}
+      <div className="bg-card border border-border rounded-xl p-6">
+        <h3 className="font-heading font-semibold text-foreground mb-2">E2E Knowledge Base Audit</h3>
+        <p className="text-xs text-muted-foreground mb-4">
+          Uses GPT-4o to audit all enriched records for factual errors, contradictions, missing safety data, and regulatory issues. Also checks articles for contradictions.
+        </p>
+        <Button onClick={runAudit} disabled={auditing} className="gap-2" variant="outline">
+          {auditing ? <Loader2 className="h-4 w-4 animate-spin" /> : <AlertTriangle className="h-4 w-4" />}
+          {auditing ? "Auditing..." : "Run Full Audit"}
+        </Button>
+
+        {auditSummary && !auditSummary.error && (
+          <div className="mt-4 bg-muted/50 rounded-lg p-3 text-xs space-y-1">
+            <p className="font-semibold text-foreground">Audit Summary</p>
+            <p className="text-muted-foreground">Records audited: {auditSummary.total_records_audited} | Issues found: {auditSummary.issues_found}</p>
+            <div className="flex gap-3 mt-1">
+              {auditSummary.critical > 0 && <span className="px-1.5 py-0.5 rounded bg-destructive/20 text-destructive text-[10px] font-medium">{auditSummary.critical} Critical</span>}
+              {auditSummary.high > 0 && <span className="px-1.5 py-0.5 rounded bg-orange-500/20 text-orange-700 dark:text-orange-400 text-[10px] font-medium">{auditSummary.high} High</span>}
+              {auditSummary.medium > 0 && <span className="px-1.5 py-0.5 rounded bg-yellow-500/20 text-yellow-700 dark:text-yellow-400 text-[10px] font-medium">{auditSummary.medium} Medium</span>}
+              {auditSummary.low > 0 && <span className="px-1.5 py-0.5 rounded bg-muted text-muted-foreground text-[10px] font-medium">{auditSummary.low} Low</span>}
+            </div>
+            {auditSummary.article_contradictions > 0 && (
+              <p className="text-muted-foreground mt-1">Article contradictions: {auditSummary.article_contradictions}</p>
+            )}
+            <p className="text-muted-foreground">Est. cost: ${auditSummary.estimated_cost_usd?.toFixed(2)}</p>
+          </div>
+        )}
+
+        {/* Open audit issues */}
+        {auditIssues && auditIssues.length > 0 && (
+          <div className="mt-4 space-y-2">
+            <p className="text-sm font-semibold text-foreground">Open Issues ({auditIssues.length})</p>
+            {auditIssues.map((issue: any) => (
+              <div key={issue.id} className="bg-muted/50 rounded-lg p-3 text-xs space-y-1">
+                <div className="flex items-center gap-2 flex-wrap">
+                  <span className="font-semibold text-foreground">{issue.compound_name}</span>
+                  <span className={`px-1.5 py-0.5 rounded text-[10px] font-medium ${
+                    issue.severity === "critical" ? "bg-destructive/20 text-destructive" :
+                    issue.severity === "high" ? "bg-orange-500/20 text-orange-700 dark:text-orange-400" :
+                    issue.severity === "medium" ? "bg-yellow-500/20 text-yellow-700 dark:text-yellow-400" :
+                    "bg-muted text-muted-foreground"
+                  }`}>{issue.severity}</span>
+                  <span className="px-1.5 py-0.5 rounded bg-primary/10 text-primary text-[10px]">{issue.issue_type}</span>
+                  <span className="text-muted-foreground">{issue.field_affected}</span>
+                </div>
+                <p className="text-muted-foreground">{issue.issue_description}</p>
+                {issue.recommended_fix && (
+                  <p className="text-foreground/80"><span className="font-medium">Fix:</span> {issue.recommended_fix}</p>
+                )}
+                <div className="flex gap-2 mt-1">
+                  <Button size="sm" variant="outline" className="h-6 text-[10px] px-2" onClick={() => markAuditFixed(issue.id)}>
+                    <CheckCircle className="h-3 w-3 mr-1" /> Fixed
+                  </Button>
+                  <Button size="sm" variant="ghost" className="h-6 text-[10px] px-2" onClick={() => dismissAuditIssue(issue.id)}>
+                    <XCircle className="h-3 w-3 mr-1" /> Dismiss
+                  </Button>
+                </div>
+              </div>
+            ))}
           </div>
         )}
       </div>

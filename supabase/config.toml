@@ -44,3 +44,6 @@ verify_jwt = false
 
 [functions.knowledge-gap-analysis]
 verify_jwt = false
+
+[functions.audit-knowledge-base]
+verify_jwt = false

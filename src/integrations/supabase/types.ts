@@ -88,6 +88,60 @@ export type Database = {
           },
         ]
       }
+      audit_results: {
+        Row: {
+          audit_run_id: string | null
+          compound_name: string
+          compound_type: string
+          created_at: string
+          current_value: string | null
+          field_affected: string | null
+          fixed_at: string | null
+          fixed_by: string | null
+          id: string
+          issue_description: string | null
+          issue_type: string
+          peptyl_id: string | null
+          recommended_fix: string | null
+          severity: string
+          status: string
+        }
+        Insert: {
+          audit_run_id?: string | null
+          compound_name: string
+          compound_type?: string
+          created_at?: string
+          current_value?: string | null
+          field_affected?: string | null
+          fixed_at?: string | null
+          fixed_by?: string | null
+          id?: string
+          issue_description?: string | null
+          issue_type: string
+          peptyl_id?: string | null
+          recommended_fix?: string | null
+          severity?: string
+          status?: string
+        }
+        Update: {
+          audit_run_id?: string | null
+          compound_name?: string
+          compound_type?: string
+          created_at?: string
+          current_value?: string | null
+          field_affected?: string | null
+          fixed_at?: string | null
+          fixed_by?: string | null
+          id?: string
+          issue_description?: string | null
+          issue_type?: string
+          peptyl_id?: string | null
+          recommended_fix?: string | null
+          severity?: string
+          status?: string
+        }
+        Relationships: []
+      }
       benefit_votes: {
         Row: {
           benefit: string
