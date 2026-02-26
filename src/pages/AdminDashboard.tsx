@@ -813,18 +813,6 @@ const KnowledgeBaseTab = () => {
   const [auditing, setAuditing] = useState(false);
   const [auditSummary, setAuditSummary] = useState<any>(null);
 
-  const { data: auditIssues } = useQuery({
-    queryKey: ["kb-audit-issues"],
-    queryFn: async () => {
-      const { data } = await supabase
-        .from("audit_results")
-        .select("*")
-        .eq("status", "open")
-        .order("created_at", { ascending: false })
-        .limit(50);
-      return data || [];
-    },
-  });
 
   const { data: peptideCount } = useQuery({
     queryKey: ["kb-peptide-count"],
@@ -1016,17 +1004,6 @@ const KnowledgeBaseTab = () => {
     }
   };
 
-  const dismissAuditIssue = async (id: string) => {
-    await supabase.from("audit_results").update({ status: "dismissed" }).eq("id", id);
-    queryClient.invalidateQueries({ queryKey: ["kb-audit-issues"] });
-    toast({ title: "Issue dismissed" });
-  };
-
-  const markAuditFixed = async (id: string) => {
-    await supabase.from("audit_results").update({ status: "fixed", fixed_at: new Date().toISOString() }).eq("id", id);
-    queryClient.invalidateQueries({ queryKey: ["kb-audit-issues"] });
-    toast({ title: "Issue marked as fixed" });
-  };
 
   const runMigration = async () => {
     setMigrating(true);
@@ -1253,7 +1230,7 @@ const KnowledgeBaseTab = () => {
         {auditSummary && !auditSummary.error && (
           <div className="mt-4 bg-muted/50 rounded-lg p-3 text-xs space-y-1">
             <p className="font-semibold text-foreground">Audit Summary</p>
-            <p className="text-muted-foreground">Records audited: {auditSummary.total_records_audited} | Issues found: {auditSummary.issues_found}</p>
+            <p className="text-muted-foreground">Records audited: {auditSummary.total_records_audited} | Fixes applied: {auditSummary.fixes_applied}{auditSummary.fixes_failed > 0 ? ` | Failed: ${auditSummary.fixes_failed}` : ""}</p>
             <div className="flex gap-3 mt-1">
               {auditSummary.critical > 0 && <span className="px-1.5 py-0.5 rounded bg-destructive/20 text-destructive text-[10px] font-medium">{auditSummary.critical} Critical</span>}
               {auditSummary.high > 0 && <span className="px-1.5 py-0.5 rounded bg-orange-500/20 text-orange-700 dark:text-orange-400 text-[10px] font-medium">{auditSummary.high} High</span>}
@@ -1261,43 +1238,21 @@ const KnowledgeBaseTab = () => {
               {auditSummary.low > 0 && <span className="px-1.5 py-0.5 rounded bg-muted text-muted-foreground text-[10px] font-medium">{auditSummary.low} Low</span>}
             </div>
             {auditSummary.article_contradictions > 0 && (
-              <p className="text-muted-foreground mt-1">Article contradictions: {auditSummary.article_contradictions}</p>
+              <p className="text-muted-foreground mt-1">Article contradictions flagged: {auditSummary.article_contradictions}</p>
             )}
             <p className="text-muted-foreground">Est. cost: ${auditSummary.estimated_cost_usd?.toFixed(2)}</p>
-          </div>
-        )}
 
-        {/* Open audit issues */}
-        {auditIssues && auditIssues.length > 0 && (
-          <div className="mt-4 space-y-2">
-            <p className="text-sm font-semibold text-foreground">Open Issues ({auditIssues.length})</p>
-            {auditIssues.map((issue: any) => (
-              <div key={issue.id} className="bg-muted/50 rounded-lg p-3 text-xs space-y-1">
-                <div className="flex items-center gap-2 flex-wrap">
-                  <span className="font-semibold text-foreground">{issue.compound_name}</span>
-                  <span className={`px-1.5 py-0.5 rounded text-[10px] font-medium ${
-                    issue.severity === "critical" ? "bg-destructive/20 text-destructive" :
-                    issue.severity === "high" ? "bg-orange-500/20 text-orange-700 dark:text-orange-400" :
-                    issue.severity === "medium" ? "bg-yellow-500/20 text-yellow-700 dark:text-yellow-400" :
-                    "bg-muted text-muted-foreground"
-                  }`}>{issue.severity}</span>
-                  <span className="px-1.5 py-0.5 rounded bg-primary/10 text-primary text-[10px]">{issue.issue_type}</span>
-                  <span className="text-muted-foreground">{issue.field_affected}</span>
-                </div>
-                <p className="text-muted-foreground">{issue.issue_description}</p>
-                {issue.recommended_fix && (
-                  <p className="text-foreground/80"><span className="font-medium">Fix:</span> {issue.recommended_fix}</p>
-                )}
-                <div className="flex gap-2 mt-1">
-                  <Button size="sm" variant="outline" className="h-6 text-[10px] px-2" onClick={() => markAuditFixed(issue.id)}>
-                    <CheckCircle className="h-3 w-3 mr-1" /> Fixed
-                  </Button>
-                  <Button size="sm" variant="ghost" className="h-6 text-[10px] px-2" onClick={() => dismissAuditIssue(issue.id)}>
-                    <XCircle className="h-3 w-3 mr-1" /> Dismiss
-                  </Button>
-                </div>
+            {auditSummary.fix_details?.length > 0 && (
+              <div className="mt-3 space-y-1.5">
+                <p className="font-medium text-foreground text-[11px]">Fixes Applied:</p>
+                {auditSummary.fix_details.map((fix: any, i: number) => (
+                  <div key={i} className="flex items-start gap-2">
+                    <CheckCircle className="h-3 w-3 text-green-500 mt-0.5 flex-shrink-0" />
+                    <span className="text-muted-foreground"><span className="text-foreground font-medium">{fix.name}</span> → {fix.field}: {fix.reason}</span>
+                  </div>
+                ))}
               </div>
-            ))}
+            )}
           </div>
         )}
       </div>
