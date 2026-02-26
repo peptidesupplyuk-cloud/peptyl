@@ -6,7 +6,6 @@ import HeroSection from "@/components/HeroSection";
 import MissionSection from "@/components/MissionSection";
 import FeaturesSection from "@/components/FeaturesSection";
 import LatestArticlesSection from "@/components/LatestArticlesSection";
-import CommunitySection from "@/components/CommunitySection";
 import SignupBenefits from "@/components/SignupBenefits";
 import HowItWorksSection from "@/components/HowItWorksSection";
 import SEO from "@/components/SEO";
@@ -43,7 +42,7 @@ const Index = () => {
       <MissionSection />
       <FeaturesSection />
       <LatestArticlesSection />
-      <CommunitySection />
+      
 
       {/* CTA Section */}
       <section className="dark-section py-24 bg-hero relative overflow-hidden">
