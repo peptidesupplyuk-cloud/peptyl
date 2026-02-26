@@ -151,11 +151,16 @@ Deno.serve(async (req) => {
 });
 
 function formatWhatsAppNumber(raw: string): string | null {
-  let n = raw.replace(/[\s\-\(\)\.]/g, "");
+  // Strip all non-digit chars except leading +
+  let n = raw.replace(/[^\d+]/g, "");
   if (n.startsWith("+")) n = n.slice(1);
-  if (n.startsWith("07")) n = "44" + n.slice(1); // UK mobile
+  if (n.startsWith("07") && n.length >= 10 && n.length <= 11) {
+    // UK mobile: 07XXX XXXXXX → 447XXX XXXXXX
+    n = "44" + n.slice(1);
+  }
   if (n.startsWith("00")) n = n.slice(2); // international prefix
   if (!/^\d{10,15}$/.test(n)) return null;
-  if (n.startsWith("0")) return null; // still local format
+  // Must start with a valid country code (1-3 digits), not 0
+  if (n.startsWith("0")) return null;
   return n;
 }
