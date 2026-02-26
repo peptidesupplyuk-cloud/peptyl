@@ -205,7 +205,7 @@ const TermsOfService = () => {
                 <p>Peptyl is in the process of registering with the UK Information Commissioner's Office (ICO) as a data controller for special category data processing. Registration will be completed prior to any paid services being offered on this platform.</p>
 
                 <h3 className="text-lg font-semibold text-foreground mt-6 mb-3">12.3 AI Processing</h3>
-                <p>Your genetic data is processed by OpenAI's GPT-4o model via their API. OpenAI processes data under their data processing agreement and privacy policy. Raw genetic data is not stored by Peptyl — only the derived report is retained on our servers.</p>
+                <p>Your genetic data is processed by our AI system. Our AI processing partner operates under appropriate data processing agreements. Raw genetic data is not stored by Peptyl — only the derived report is retained on our servers.</p>
 
                 <h3 className="text-lg font-semibold text-foreground mt-6 mb-3">12.4 Your Rights</h3>
                 <p>You may delete your DNA report at any time from your account dashboard. Deletion removes the stored report from our servers. Consent records are retained for legal compliance purposes only.</p>

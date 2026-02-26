@@ -92,7 +92,7 @@ const PrivacyPolicy = () => {
                 <ul className="list-disc pl-6 mt-2 space-y-2">
                   <li>You upload raw genetic data (23andMe file, PDF report, image, or text)</li>
                   <li>Relevant genetic variants are extracted client-side in your browser</li>
-                  <li>The extracted variant data is transmitted to OpenAI's API (GPT-4o) for AI analysis</li>
+                  <li>The extracted variant data is transmitted to our AI processing system for analysis</li>
                   <li>A personalised health report is generated and stored in your Peptyl account</li>
                   <li>Your raw genetic data is never stored on Peptyl's servers — only the processed report</li>
                 </ul>
@@ -101,7 +101,7 @@ const PrivacyPolicy = () => {
                 <p>We process your genetic data under UK GDPR Article 9(2)(a): explicit consent. You provide this consent via the triple-checkbox consent form on the upload page. You may withdraw consent and request deletion of your report at any time.</p>
 
                 <h3 className="text-lg font-semibold text-foreground mt-6 mb-3">2A.4 Third-Party Processing</h3>
-                <p>Your genetic variant data is transmitted to OpenAI (US-based) for AI processing. This constitutes an international data transfer. OpenAI processes this data under their Data Processing Addendum. We have assessed this transfer as necessary and proportionate for the service provided.</p>
+                <p>Your genetic variant data is transmitted to our AI processing partner for analysis. This constitutes an international data transfer. Our AI processing partner operates under appropriate data processing agreements. We have assessed this transfer as necessary and proportionate for the service provided.</p>
 
                 <h3 className="text-lg font-semibold text-foreground mt-6 mb-3">2A.5 Retention</h3>
                 <p>Processed DNA reports are retained until you delete them or close your account. Consent records (not the genetic data itself) are retained for 7 years for legal compliance.</p>
@@ -116,7 +116,7 @@ const PrivacyPolicy = () => {
                 </ul>
 
                 <h3 className="text-lg font-semibold text-foreground mt-6 mb-3">2A.7 Sensitive Nature</h3>
-                <p>We recognise that genetic data is uniquely personal and potentially sensitive for you and your biological relatives. We do not share genetic data with third parties other than OpenAI for processing purposes. We do not use genetic data for advertising, profiling, or any purpose other than generating your personalised report.</p>
+                <p>We recognise that genetic data is uniquely personal and potentially sensitive for you and your biological relatives. We do not share genetic data with third parties other than our AI partner for processing purposes. We do not use genetic data for advertising, profiling, or any purpose other than generating your personalised report.</p>
               </div>
 
               <div>
