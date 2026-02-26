@@ -15,6 +15,7 @@ import ActionPlan from "@/components/dna/ActionPlan";
 import LegalDisclaimer from "@/components/dna/LegalDisclaimer";
 import ReportReview from "@/components/dna/ReportReview";
 import CreateProtocolFromReport from "@/components/dna/CreateProtocolFromReport";
+import OutcomeInsights from "@/components/dna/OutcomeInsights";
 import { useAuth } from "@/contexts/AuthContext";
 
 const DNAReport = () => {
@@ -68,6 +69,16 @@ const DNAReport = () => {
 
   const r = report.report_json || {};
 
+  const buildGenotypeKey = (geneResults: any[]) => {
+    if (!geneResults?.length) return null;
+    const priority = ['MTHFR', 'APOE', 'VDR'];
+    const parts = priority
+      .map(gene => geneResults.find((g: any) => g.gene === gene || g.rsid?.includes(gene)))
+      .filter(Boolean)
+      .map((g: any) => g.gene + '_' + (g.genotype || g.variant || 'unknown').replace(/\//g, ''));
+    return parts.length > 0 ? parts.join('+') : null;
+  };
+
   return (
     <>
       <SEO title="Your DNA Report | Peptyl" description="Personalised genetic health assessment report." path={`/dna/report/${id}`} />
@@ -85,6 +96,7 @@ const DNAReport = () => {
           <DrugInteractionPanel interactions={r.drug_interactions} />
           <SupplementTable supplements={r.supplement_protocol} />
           <ActionPlan plan={r.action_plan} />
+          <OutcomeInsights reportId={id!} genotypeKey={buildGenotypeKey(r.gene_results)} />
           {r.supplement_protocol?.length > 0 && (
             <CreateProtocolFromReport
               supplements={r.supplement_protocol}
