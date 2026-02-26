@@ -140,7 +140,7 @@ const ContactForm = () => {
                 {t("aboutPage.contactWhatsappTitle")}
               </h3>
               <p className="text-sm text-muted-foreground leading-relaxed">
-                {t("aboutPage.contactWhatsappDesc")}
+                Reach us directly on WhatsApp for quick questions about peptides, research, or anything else.
               </p>
               <a
                 href={whatsappUrl}
