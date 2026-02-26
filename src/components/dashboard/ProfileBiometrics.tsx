@@ -286,19 +286,15 @@ const ProfileBiometrics = ({ onUpdate }: { onUpdate?: (bio: any) => void }) => {
           />
         </div>
 
-        <div className="flex items-center justify-between">
+        <div className="flex items-center justify-between opacity-60">
           <div className="flex items-center gap-2">
             <MessageCircle className="h-3.5 w-3.5 text-muted-foreground" />
             <span className="text-sm text-foreground">WhatsApp reminders</span>
-            {notifPrefs.whatsapp_verified && notifPrefs.notify_whatsapp && (
-              <span className="flex items-center gap-0.5 text-[10px] text-primary">
-                <ShieldCheck className="h-3 w-3" /> Verified
-              </span>
-            )}
+            <span className="text-[10px] text-muted-foreground italic">Coming soon</span>
           </div>
           <Switch
-            checked={notifPrefs.notify_whatsapp}
-            onCheckedChange={handleWhatsAppToggle}
+            checked={false}
+            disabled
           />
         </div>
 
