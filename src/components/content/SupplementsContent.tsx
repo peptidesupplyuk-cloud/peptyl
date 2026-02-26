@@ -1,13 +1,13 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { Search, Pill, Filter } from "lucide-react";
 import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import SupplementCard from "@/components/SupplementCard";
+import CategoryGroup from "@/components/CategoryGroup";
 import { supplements as staticSupplements, supplementCategories } from "@/data/supplements";
 import { useEnrichedSupplements } from "@/hooks/use-enriched-supplements";
 import type { SupplementData } from "@/data/supplements";
-import { Sparkles, Zap, Heart, Brain, Shield, Flame, Eye, Clock, Activity } from "lucide-react";
+import { Sparkles, Zap, Heart, Brain, Shield, Flame, Clock, Activity } from "lucide-react";
 
 const iconMap: Record<string, any> = {
   "Longevity & NAD+": Sparkles,
@@ -25,13 +25,14 @@ const iconMap: Record<string, any> = {
   "Metabolic": Flame,
 };
 
+const gradeOrder: Record<string, number> = { A: 0, B: 1, C: 2, D: 3 };
+
 const SupplementsContent = () => {
   const [search, setSearch] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("All");
   const [selectedGrade, setSelectedGrade] = useState("All");
   const { data: enrichedSupplements } = useEnrichedSupplements();
 
-  // Map enriched DB data back to SupplementData, or fall back to static
   const supplements: SupplementData[] = (enrichedSupplements && enrichedSupplements.length > 0)
     ? enrichedSupplements.map((es) => {
         const staticMatch = staticSupplements.find(
@@ -62,8 +63,6 @@ const SupplementsContent = () => {
       })
     : staticSupplements;
 
-  const gradeOrder: Record<string, number> = { A: 0, B: 1, C: 2, D: 3 };
-
   const filtered = supplements.filter((s) => {
     const q = search.toLowerCase();
     const matchesSearch =
@@ -75,6 +74,16 @@ const SupplementsContent = () => {
     const matchesGrade = selectedGrade === "All" || s.evidenceGrade === selectedGrade;
     return matchesSearch && matchesCat && matchesGrade;
   }).sort((a, b) => (gradeOrder[a.evidenceGrade] ?? 3) - (gradeOrder[b.evidenceGrade] ?? 3));
+
+  const grouped = useMemo(() => {
+    const map = new Map<string, SupplementData[]>();
+    filtered.forEach((s) => {
+      const list = map.get(s.category) || [];
+      list.push(s);
+      map.set(s.category, list);
+    });
+    return Array.from(map.entries());
+  }, [filtered]);
 
   return (
     <>
@@ -97,7 +106,7 @@ const SupplementsContent = () => {
         />
       </div>
 
-      <div className="flex flex-wrap items-center gap-3 mb-8">
+      <div className="flex flex-wrap items-center gap-3 mb-6">
         <Select value={selectedCategory} onValueChange={setSelectedCategory}>
           <SelectTrigger className="w-[200px]">
             <Filter className="h-4 w-4 mr-2 text-muted-foreground" />
@@ -126,10 +135,20 @@ const SupplementsContent = () => {
         </Select>
       </div>
 
-      <div className="space-y-4">
-        {filtered.map((supp, i) => (
-          <SupplementCard key={supp.name} supplement={supp} index={i} />
-        ))}
+      <div className="space-y-1">
+        {grouped.map(([category, items]) => {
+          const bestGrade = items.reduce((best, s) => {
+            const g = s.evidenceGrade || "D";
+            return (gradeOrder[g] ?? 3) < (gradeOrder[best] ?? 3) ? g : best;
+          }, "D");
+          return (
+            <CategoryGroup key={category} category={category} count={items.length} bestGrade={bestGrade}>
+              {items.map((supp, i) => (
+                <SupplementCard key={supp.name} supplement={supp} index={i} />
+              ))}
+            </CategoryGroup>
+          );
+        })}
         {filtered.length === 0 && (
           <div className="text-center py-16 text-muted-foreground">
             <Pill className="h-8 w-8 mx-auto mb-3 opacity-50" />

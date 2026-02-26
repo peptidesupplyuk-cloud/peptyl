@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import { ChevronDown, ChevronUp, CheckCircle2, AlertTriangle, BookOpen, FlaskConical, Beaker } from "lucide-react";
 import type { SupplementData } from "@/data/supplements";
 
@@ -8,163 +8,139 @@ interface Props {
   index: number;
 }
 
-const gradeLabel: Record<string, { text: string; className: string }> = {
-  A: { text: "Grade A — Strong clinical evidence", className: "bg-primary/10 text-primary" },
-  B: { text: "Grade B — Moderate evidence", className: "bg-blue-500/10 text-blue-600 dark:text-blue-400" },
-  C: { text: "Grade C — Preliminary evidence", className: "bg-amber-500/10 text-amber-600 dark:text-amber-400" },
-  D: { text: "Grade D — Theoretical / Anecdotal", className: "bg-muted text-muted-foreground" },
+const gradeConfig: Record<string, { label: string; className: string }> = {
+  A: { label: "A", className: "bg-primary/20 text-primary border border-primary/30" },
+  B: { label: "B", className: "bg-blue-500/20 text-blue-400 border border-blue-500/30" },
+  C: { label: "C", className: "bg-amber-500/20 text-amber-400 border border-amber-500/30" },
+  D: { label: "D", className: "bg-muted text-muted-foreground border border-border" },
 };
 
 const SupplementCard = ({ supplement: s, index }: Props) => {
   const [expanded, setExpanded] = useState(false);
-  const grade = gradeLabel[s.evidenceGrade] ?? gradeLabel.D;
+  const grade = gradeConfig[s.evidenceGrade] ?? gradeConfig.D;
 
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ delay: index * 0.03 }}
-      className="bg-card rounded-2xl border border-border p-6 sm:p-8 hover:border-primary/20 transition-all"
-    >
-      {/* Header */}
-      <div className="flex items-start gap-4 mb-4">
-        <div className="p-3 rounded-xl bg-accent">
-          <s.icon className="h-6 w-6 text-primary" />
-        </div>
-        <div className="flex-1 min-w-0">
-          <div className="flex items-center gap-3 mb-1 flex-wrap">
-            <h2 className="text-xl font-heading font-bold text-foreground">{s.name}</h2>
-            <span className="text-xs font-medium px-2.5 py-0.5 rounded-full bg-secondary text-secondary-foreground">
-              {s.category}
-            </span>
-            <span className={`text-[10px] font-bold px-2 py-0.5 rounded-md ${grade.className}`}>
-              {grade.text}
-            </span>
-          </div>
-          <p className="text-xs text-muted-foreground mb-1">{s.fullName}</p>
-          <p className="text-sm text-muted-foreground leading-relaxed">{s.description}</p>
-        </div>
-      </div>
-
-      {/* Benefits */}
-      {s.benefits.length > 0 && (
-        <div className="flex flex-wrap gap-1.5 mb-4">
-          {s.benefits.map((b) => (
-            <span key={b} className="inline-flex items-center gap-1 text-[11px] font-medium px-2 py-0.5 rounded-full bg-primary/10 text-primary">
-              <CheckCircle2 className="h-2.5 w-2.5" />
-              {b}
-            </span>
-          ))}
-        </div>
-      )}
-
-      {/* Quick details */}
-      <div className="flex flex-wrap gap-3 mb-4 text-xs text-muted-foreground">
-        <span className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-muted/50">
-          <Beaker className="h-3 w-3" /> {s.form}
-        </span>
-        <span className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-muted/50">
-          {s.doseRange}
-        </span>
-        <span className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-muted/50">
-          🕐 {s.timing}
-        </span>
-      </div>
-
-      {/* Biomarker targets */}
-      {s.biomarkerTargets && s.biomarkerTargets.length > 0 && (
-        <div className="flex flex-wrap gap-1.5 mb-4">
-          {s.biomarkerTargets.map((bm, i) => {
-            const label = typeof bm === "string" ? bm : (bm as any).biomarker || (bm as any).name || JSON.stringify(bm);
-            return (
-              <span key={i} className="text-[10px] px-2 py-0.5 rounded-full bg-accent text-accent-foreground">
-                📊 {label}
-              </span>
-            );
-          })}
-        </div>
-      )}
-
-      {/* Toggle */}
-      <button
+    <>
+      {/* Compact row */}
+      <div
         onClick={() => setExpanded(!expanded)}
-        className="flex items-center gap-2 text-xs font-medium text-primary hover:text-primary/80 transition-colors"
+        className="flex items-center gap-3 px-4 py-3 bg-card border border-border rounded-lg cursor-pointer hover:border-primary/20 transition-all group"
+        style={{ minHeight: "65px" }}
       >
-        {expanded ? <ChevronUp className="h-3.5 w-3.5" /> : <ChevronDown className="h-3.5 w-3.5" />}
-        {expanded ? "Hide details" : "Show synergies, studies & notes"}
-      </button>
+        <s.icon className="h-4 w-4 text-primary flex-shrink-0" />
+        <div className="flex-1 min-w-0">
+          <span className="text-sm font-bold text-foreground">{s.name}</span>
+          <p className="text-[11px] text-muted-foreground truncate leading-tight">{s.fullName}</p>
+        </div>
+        <div className="flex items-center gap-2 flex-shrink-0">
+          <span className="text-[10px] font-medium px-2 py-0.5 rounded-full bg-secondary text-secondary-foreground hidden sm:inline-flex">
+            {s.category}
+          </span>
+          <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded ${grade.className}`}>
+            {grade.label}
+          </span>
+          {expanded ? (
+            <ChevronUp className="h-4 w-4 text-muted-foreground" />
+          ) : (
+            <ChevronDown className="h-4 w-4 text-muted-foreground group-hover:text-primary transition-colors" />
+          )}
+        </div>
+      </div>
 
-      {/* Expanded */}
-      {expanded && (
-        <motion.div
-          initial={{ opacity: 0, height: 0 }}
-          animate={{ opacity: 1, height: "auto" }}
-          className="mt-4 space-y-4"
-        >
-          {/* Evidence grade detail */}
-          <div className={`inline-flex items-center gap-2 text-xs font-medium px-3 py-1.5 rounded-lg ${grade.className}`}>
-            <FlaskConical className="h-3.5 w-3.5" />
-            {grade.text}
-          </div>
+      {/* Expanded details */}
+      <AnimatePresence>
+        {expanded && (
+          <motion.div
+            initial={{ opacity: 0, height: 0 }}
+            animate={{ opacity: 1, height: "auto" }}
+            exit={{ opacity: 0, height: 0 }}
+            className="overflow-hidden"
+          >
+            <div className="ml-4 mr-0 border-l-2 border-primary/20 pl-4 pb-4 pt-2 space-y-3">
+              {/* Description */}
+              <p className="text-sm text-muted-foreground leading-relaxed">{s.description}</p>
 
-          {/* Synergies */}
-          {s.synergies && s.synergies.length > 0 && (
-            <div>
-              <h3 className="text-sm font-heading font-semibold text-foreground mb-2">Synergies</h3>
-              <div className="flex flex-wrap gap-1.5">
-                {s.synergies.map((syn) => (
-                  <span key={syn} className="text-xs px-2.5 py-1 rounded-full bg-success/10 text-success border border-success/20">
-                    ✦ {syn}
-                  </span>
-                ))}
+              {/* Benefits */}
+              {s.benefits.length > 0 && (
+                <div className="flex flex-wrap gap-1.5">
+                  {s.benefits.map((b) => (
+                    <span key={b} className="inline-flex items-center gap-1 text-[11px] font-medium px-2 py-0.5 rounded-full bg-primary/10 text-primary">
+                      <CheckCircle2 className="h-2.5 w-2.5" />
+                      {b}
+                    </span>
+                  ))}
+                </div>
+              )}
+
+              {/* Dosing row */}
+              <div className="flex flex-wrap gap-2 text-xs text-muted-foreground">
+                <span className="flex items-center gap-1 px-2 py-1 rounded-md bg-muted/50">
+                  <Beaker className="h-3 w-3" /> {s.form}
+                </span>
+                <span className="px-2 py-1 rounded-md bg-muted/50">{s.doseRange}</span>
+                <span className="px-2 py-1 rounded-md bg-muted/50">🕐 {s.timing}</span>
               </div>
+
+              {/* Biomarker targets */}
+              {s.biomarkerTargets && s.biomarkerTargets.length > 0 && (
+                <div className="flex flex-wrap gap-1.5">
+                  {s.biomarkerTargets.map((bm, i) => {
+                    const label = typeof bm === "string" ? bm : JSON.stringify(bm);
+                    return (
+                      <span key={i} className="text-[10px] px-2 py-0.5 rounded-full bg-accent text-accent-foreground">
+                        📊 {label}
+                      </span>
+                    );
+                  })}
+                </div>
+              )}
+
+              {/* Synergies */}
+              {s.synergies && s.synergies.length > 0 && (
+                <div>
+                  <h4 className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-1">Synergies</h4>
+                  <div className="flex flex-wrap gap-1.5">
+                    {s.synergies.map((syn) => (
+                      <span key={syn} className="text-[11px] px-2 py-0.5 rounded-full bg-success/10 text-success border border-success/20">
+                        ✦ {syn}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Contraindications */}
+              {s.contraindications && s.contraindications.length > 0 && (
+                <div className="bg-warm/5 border border-warm/20 rounded-lg p-3 space-y-1">
+                  <h4 className="text-xs font-semibold text-warm flex items-center gap-1">
+                    <AlertTriangle className="h-3 w-3" /> Cautions
+                  </h4>
+                  {s.contraindications.map((c) => (
+                    <p key={c} className="text-[11px] text-muted-foreground">{c}</p>
+                  ))}
+                </div>
+              )}
+
+              {/* Key studies */}
+              {s.keyStudies && s.keyStudies.length > 0 && (
+                <div>
+                  <h4 className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-1 flex items-center gap-1">
+                    <BookOpen className="h-3 w-3" /> Key Studies
+                  </h4>
+                  {s.keyStudies.map((st) => (
+                    <p key={st} className="text-[11px] text-muted-foreground italic leading-relaxed">{st}</p>
+                  ))}
+                </div>
+              )}
+
+              {/* Notes & half-life */}
+              {s.notes && <p className="text-xs text-muted-foreground italic">💡 {s.notes}</p>}
+              {s.halfLife && <p className="text-xs text-muted-foreground">Half-life: {s.halfLife}</p>}
             </div>
-          )}
-
-          {/* Contraindications */}
-          {s.contraindications && s.contraindications.length > 0 && (
-            <div>
-              <h3 className="text-sm font-heading font-semibold text-foreground mb-2 flex items-center gap-1.5">
-                <AlertTriangle className="h-3.5 w-3.5 text-warm" /> Cautions
-              </h3>
-              <div className="space-y-1.5">
-                {s.contraindications.map((c) => (
-                  <p key={c} className="text-xs text-muted-foreground bg-warm/5 border border-warm/20 px-3 py-2 rounded-lg">
-                    {c}
-                  </p>
-                ))}
-              </div>
-            </div>
-          )}
-
-          {/* Key studies */}
-          {s.keyStudies && s.keyStudies.length > 0 && (
-            <div>
-              <h3 className="text-sm font-heading font-semibold text-foreground mb-2 flex items-center gap-1.5">
-                <BookOpen className="h-3.5 w-3.5" /> Key Studies
-              </h3>
-              <div className="space-y-1.5">
-                {s.keyStudies.map((st) => (
-                  <p key={st} className="text-xs text-muted-foreground bg-muted/50 px-3 py-2 rounded-lg italic">
-                    {st}
-                  </p>
-                ))}
-              </div>
-            </div>
-          )}
-
-          {/* Notes */}
-          {s.notes && (
-            <p className="text-xs text-muted-foreground italic px-3">💡 {s.notes}</p>
-          )}
-
-          {/* Half-life */}
-          {s.halfLife && (
-            <p className="text-xs text-muted-foreground px-3">Half-life: {s.halfLife}</p>
-          )}
-        </motion.div>
-      )}
-    </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </>
   );
 };
 
