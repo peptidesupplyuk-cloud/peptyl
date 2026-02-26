@@ -1,4 +1,4 @@
-import { Check, SkipForward, Clock, FlaskConical, ArrowRight, Target, Pill, CheckCheck } from "lucide-react";
+import { Check, SkipForward, Clock, FlaskConical, ArrowRight, Target, Pill, CheckCheck, Dna } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useTodayInjections, useUpdateInjectionStatus } from "@/hooks/use-injections";
 import { useProtocols, type ProtocolSupplement } from "@/hooks/use-protocols";
@@ -32,6 +32,7 @@ interface SupplementItem {
   frequency: string;
   protocolName: string;
   goal: string;
+  drivenBy?: string[];
 }
 
 const TodaysPlan = ({ onActivate }: TodaysPlanProps) => {
@@ -71,6 +72,7 @@ const TodaysPlan = ({ onActivate }: TodaysPlanProps) => {
             frequency: supp.frequency,
             protocolName: protocol.name,
             goal: protocol.goal ? formatGoalLabel(protocol.goal) : "",
+            drivenBy: (supp as any).drivenBy || [],
           });
         }
       }
@@ -293,6 +295,11 @@ const TodaysPlan = ({ onActivate }: TodaysPlanProps) => {
                     <span className="ml-1.5 text-primary/70">· {supp.goal}</span>
                   )}
                 </p>
+                {supp.drivenBy && supp.drivenBy.length > 0 && (
+                  <span className="text-[10px] text-primary/70 flex items-center gap-1 ml-5.5 mt-0.5">
+                    <Dna className="h-2.5 w-2.5" /> {supp.drivenBy[0]}
+                  </span>
+                )}
               </div>
               <div className="flex gap-1.5">
                 <Button
