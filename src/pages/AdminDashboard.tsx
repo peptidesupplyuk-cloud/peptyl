@@ -798,6 +798,155 @@ const FeedbackTab = () => {
   );
 };
 
+/* ========== KNOWLEDGE BASE TAB ========== */
+
+const KnowledgeBaseTab = () => {
+  const { toast } = useToast();
+  const [migrating, setMigrating] = useState(false);
+  const [results, setResults] = useState<any>(null);
+
+  const { data: peptideCount } = useQuery({
+    queryKey: ["kb-peptide-count"],
+    queryFn: async () => {
+      const { count } = await supabase.from("peptides_enriched").select("*", { count: "exact", head: true });
+      return count || 0;
+    },
+  });
+
+  const { data: supplementCount } = useQuery({
+    queryKey: ["kb-supplement-count"],
+    queryFn: async () => {
+      const { count } = await supabase.from("supplements_enriched").select("*", { count: "exact", head: true });
+      return count || 0;
+    },
+  });
+
+  const { data: pendingPeptides } = useQuery({
+    queryKey: ["kb-pending-peptides"],
+    queryFn: async () => {
+      const { count } = await supabase.from("peptides_enriched").select("*", { count: "exact", head: true }).eq("enrichment_status", "pending");
+      return count || 0;
+    },
+  });
+
+  const { data: pendingSupplements } = useQuery({
+    queryKey: ["kb-pending-supplements"],
+    queryFn: async () => {
+      const { count } = await supabase.from("supplements_enriched").select("*", { count: "exact", head: true }).eq("enrichment_status", "pending");
+      return count || 0;
+    },
+  });
+
+  const runMigration = async () => {
+    setMigrating(true);
+    setResults(null);
+    try {
+      // Dynamic import of static data
+      const { peptides } = await import("@/data/peptides");
+      const { supplements } = await import("@/data/supplements");
+
+      const peptidesPayload = peptides.map((p) => ({
+        name: p.name,
+        fullName: p.fullName,
+        category: p.category,
+        description: p.description,
+        administration: p.administration,
+        frequency: p.frequency,
+        doseRange: p.doseRange,
+        cycleDuration: p.cycleDuration,
+        notes: p.notes,
+        benefits: p.benefits,
+        regulatoryStatus: p.regulatoryStatus,
+      }));
+
+      const supplementsPayload = supplements.map((s) => ({
+        name: s.name,
+        fullName: s.fullName,
+        category: s.category,
+        description: s.description,
+        form: s.form,
+        doseRange: s.doseRange,
+        timing: s.timing,
+        benefits: s.benefits,
+        evidenceGrade: s.evidenceGrade,
+        synergies: s.synergies,
+        contraindications: s.contraindications,
+        biomarkerTargets: s.biomarkerTargets,
+        keyStudies: s.keyStudies,
+        notes: s.notes,
+      }));
+
+      const resp = await fetch(
+        `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/migrate-knowledge-base`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ peptides: peptidesPayload, supplements: supplementsPayload }),
+        }
+      );
+
+      const data = await resp.json();
+      setResults(data);
+
+      if (data.error) {
+        toast({ title: "Migration failed", description: data.error, variant: "destructive" });
+      } else {
+        toast({
+          title: "Migration complete",
+          description: `Peptides: ${data.peptides?.migrated || 0} migrated. Supplements: ${data.supplements?.migrated || 0} migrated.`,
+        });
+      }
+    } catch (e: any) {
+      toast({ title: "Migration error", description: e.message, variant: "destructive" });
+    } finally {
+      setMigrating(false);
+    }
+  };
+
+  return (
+    <div className="space-y-6">
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+        <StatCard icon={FlaskConical} label="Peptides in DB" value={peptideCount ?? 0} />
+        <StatCard icon={Sparkles} label="Supplements in DB" value={supplementCount ?? 0} />
+        <StatCard icon={Clock} label="Peptides Pending" value={pendingPeptides ?? 0} />
+        <StatCard icon={Clock} label="Supplements Pending" value={pendingSupplements ?? 0} />
+      </div>
+
+      <div className="bg-card border border-border rounded-xl p-6">
+        <h3 className="font-heading font-semibold text-foreground mb-2">Migrate Static Data → Database</h3>
+        <p className="text-xs text-muted-foreground mb-4">
+          Upserts all peptides.ts and supplements.ts entries into the enriched tables. Safe to run multiple times (idempotent).
+        </p>
+        <Button onClick={runMigration} disabled={migrating} className="gap-2">
+          {migrating ? <Loader2 className="h-4 w-4 animate-spin" /> : <Upload className="h-4 w-4" />}
+          {migrating ? "Migrating..." : "Run Migration"}
+        </Button>
+
+        {results && !results.error && (
+          <div className="mt-4 grid grid-cols-2 gap-4 text-xs">
+            <div className="bg-muted/50 rounded-lg p-3">
+              <p className="font-semibold text-foreground mb-1">Peptides</p>
+              <p className="text-muted-foreground">Migrated: {results.peptides?.migrated}</p>
+              <p className="text-muted-foreground">Errors: {results.peptides?.errors?.length || 0}</p>
+              {results.peptides?.errors?.length > 0 && (
+                <div className="mt-1 text-destructive">{results.peptides.errors.join(", ")}</div>
+              )}
+            </div>
+            <div className="bg-muted/50 rounded-lg p-3">
+              <p className="font-semibold text-foreground mb-1">Supplements</p>
+              <p className="text-muted-foreground">Migrated: {results.supplements?.migrated}</p>
+              <p className="text-muted-foreground">Errors: {results.supplements?.errors?.length || 0}</p>
+              {results.supplements?.errors?.length > 0 && (
+                <div className="mt-1 text-destructive">{results.supplements.errors.join(", ")}</div>
+              )}
+            </div>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+};
+
 /* ========== MAIN PAGE ========== */
 
 const AdminDashboard = () => {
@@ -846,6 +995,9 @@ const AdminDashboard = () => {
               <TabsTrigger value="feedback" className="gap-1.5">
                 <MessageSquare className="h-4 w-4" /> Feedback
               </TabsTrigger>
+              <TabsTrigger value="knowledge" className="gap-1.5">
+                <Sparkles className="h-4 w-4" /> Knowledge Base
+              </TabsTrigger>
             </TabsList>
 
             <TabsContent value="analytics">
@@ -859,6 +1011,9 @@ const AdminDashboard = () => {
             </TabsContent>
             <TabsContent value="feedback">
               <FeedbackTab />
+            </TabsContent>
+            <TabsContent value="knowledge">
+              <KnowledgeBaseTab />
             </TabsContent>
           </Tabs>
         </div>

@@ -3,11 +3,62 @@ import { Search, Pill } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import SupplementCard from "@/components/SupplementCard";
-import { supplements, supplementCategories } from "@/data/supplements";
+import { supplements as staticSupplements, supplementCategories } from "@/data/supplements";
+import { useEnrichedSupplements } from "@/hooks/use-enriched-supplements";
+import type { SupplementData } from "@/data/supplements";
+import { Sparkles, Zap, Heart, Brain, Shield, Flame, Eye, Clock, Activity } from "lucide-react";
+
+const iconMap: Record<string, any> = {
+  "Longevity & NAD+": Sparkles,
+  "Mitochondrial Support": Zap,
+  "Cardiovascular": Heart,
+  "Cognitive": Brain,
+  "Gut Health": Shield,
+  "Immune Support": Shield,
+  "Hormonal Support": Activity,
+  "Anti-Inflammatory": Flame,
+  "Sleep & Recovery": Clock,
+  "Methylation": Activity,
+  "Antioxidant": Shield,
+  "Joint & Connective Tissue": Heart,
+  "Metabolic": Flame,
+};
 
 const SupplementsContent = () => {
   const [search, setSearch] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("All");
+  const { data: enrichedSupplements } = useEnrichedSupplements();
+
+  // Map enriched DB data back to SupplementData, or fall back to static
+  const supplements: SupplementData[] = (enrichedSupplements && enrichedSupplements.length > 0)
+    ? enrichedSupplements.map((es) => {
+        const staticMatch = staticSupplements.find(
+          (ss) => ss.name.toLowerCase() === es.name.toLowerCase()
+        );
+        return {
+          name: es.name,
+          fullName: staticMatch?.fullName || es.name,
+          category: es.category || "Uncategorized",
+          description: es.description || "",
+          icon: staticMatch?.icon || iconMap[es.category || ""] || Pill,
+          form: es.best_form || staticMatch?.form || "",
+          doseRange: es.dose_range || staticMatch?.doseRange || "",
+          timing: es.timing || staticMatch?.timing || "",
+          halfLife: staticMatch?.halfLife,
+          synergies: es.synergistic_supplements || staticMatch?.synergies,
+          contraindications: es.contraindications || staticMatch?.contraindications,
+          biomarkerTargets: es.biomarker_targets
+            ? (es.biomarker_targets as any[]).map((b: any) => b.name || b)
+            : staticMatch?.biomarkerTargets,
+          evidenceGrade: (es.evidence_grade as "A" | "B" | "C" | "D") || staticMatch?.evidenceGrade || "D",
+          benefits: es.primary_effects || staticMatch?.benefits || [],
+          notes: es.cycling_notes || staticMatch?.notes,
+          keyStudies: es.key_research_refs
+            ? (es.key_research_refs as any[]).map((r: any) => r.one_line_summary || r.title || r)
+            : staticMatch?.keyStudies,
+        };
+      })
+    : staticSupplements;
 
   const filtered = supplements.filter((s) => {
     const q = search.toLowerCase();
