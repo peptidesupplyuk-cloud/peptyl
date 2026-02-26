@@ -809,6 +809,7 @@ const KnowledgeBaseTab = () => {
   const [enrichResults, setEnrichResults] = useState<any>(null);
   const [analyzingGaps, setAnalyzingGaps] = useState(false);
   const [gapResults, setGapResults] = useState<any>(null);
+  const [addingGaps, setAddingGaps] = useState(false);
 
   const { data: peptideCount } = useQuery({
     queryKey: ["kb-peptide-count"],
@@ -922,6 +923,47 @@ const KnowledgeBaseTab = () => {
       toast({ title: "Gap analysis error", description: e.message, variant: "destructive" });
     } finally {
       setAnalyzingGaps(false);
+    }
+  };
+
+  const addGapItemsToDatabase = async () => {
+    if (!gapResults) return;
+    setAddingGaps(true);
+    try {
+      const peptides = (gapResults.missing_peptides || []).map((p: any) => ({
+        name: p.name,
+        fullName: p.full_name || null,
+        category: p.category || null,
+        description: p.rationale || null,
+      }));
+      const supplements = (gapResults.missing_supplements || []).map((s: any) => ({
+        name: s.name,
+        category: s.category || null,
+        description: s.rationale || null,
+      }));
+
+      const resp = await fetch(
+        `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/migrate-knowledge-base`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ peptides, supplements }),
+        }
+      );
+      const data = await resp.json();
+      if (data.error) {
+        toast({ title: "Failed to add items", description: data.error, variant: "destructive" });
+      } else {
+        toast({
+          title: "Items added to database",
+          description: `${data.peptides?.migrated || 0} peptides and ${data.supplements?.migrated || 0} supplements added with pending enrichment status.`,
+        });
+        queryClient.invalidateQueries({ queryKey: ["kb-"] });
+      }
+    } catch (e: any) {
+      toast({ title: "Error adding items", description: e.message, variant: "destructive" });
+    } finally {
+      setAddingGaps(false);
     }
   };
 
@@ -1044,9 +1086,17 @@ const KnowledgeBaseTab = () => {
 
         {gapResults && !gapResults.error && (
           <div className="mt-4 space-y-4">
-            <p className="text-xs text-muted-foreground">
-              Current DB: {gapResults.current_peptides} peptides, {gapResults.current_supplements} supplements
-            </p>
+            <div className="flex items-center justify-between">
+              <p className="text-xs text-muted-foreground">
+                Current DB: {gapResults.current_peptides} peptides, {gapResults.current_supplements} supplements
+              </p>
+              {((gapResults.missing_peptides?.length || 0) + (gapResults.missing_supplements?.length || 0)) > 0 && (
+                <Button onClick={addGapItemsToDatabase} disabled={addingGaps} size="sm" className="gap-2">
+                  {addingGaps ? <Loader2 className="h-3 w-3 animate-spin" /> : <Upload className="h-3 w-3" />}
+                  {addingGaps ? "Adding..." : `Add All ${(gapResults.missing_peptides?.length || 0) + (gapResults.missing_supplements?.length || 0)} to Database`}
+                </Button>
+              )}
+            </div>
 
             {gapResults.missing_peptides?.length > 0 && (
               <div>
