@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { Search, Database, Layers } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { Input } from "@/components/ui/input";
@@ -6,7 +6,10 @@ import { Button } from "@/components/ui/button";
 import PeptideCard from "@/components/PeptideCard";
 import StackBuilder from "@/components/StackBuilder";
 import PeptideActionBlock from "@/components/PeptideActionBlock";
-import { peptides, categories } from "@/data/peptides";
+import { peptides as staticPeptides, categories } from "@/data/peptides";
+import { useEnrichedPeptides } from "@/hooks/use-enriched-peptides";
+import type { PeptideData } from "@/data/peptides";
+import { FlaskConical } from "lucide-react";
 
 type Tab = "database" | "stacks";
 
@@ -15,6 +18,34 @@ const PeptidesContent = () => {
   const [tab, setTab] = useState<Tab>("database");
   const [search, setSearch] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("All");
+  const { data: enrichedPeptides } = useEnrichedPeptides();
+
+  // Map enriched DB records to the PeptideData shape the card expects,
+  // falling back to static data for icon/experiences
+  const peptides: PeptideData[] = useMemo(() => {
+    if (!enrichedPeptides || enrichedPeptides.length === 0) return staticPeptides;
+
+    return enrichedPeptides.map((ep) => {
+      const staticMatch = staticPeptides.find(
+        (sp) => sp.name.toLowerCase() === ep.name.toLowerCase()
+      );
+      return {
+        name: ep.name,
+        fullName: ep.full_name || staticMatch?.fullName || ep.name,
+        category: ep.category || staticMatch?.category || "Uncategorised",
+        description: ep.description || staticMatch?.description || "",
+        icon: staticMatch?.icon || FlaskConical,
+        administration: ep.administration?.[0] || staticMatch?.administration || "Subcutaneous",
+        frequency: ep.frequency || staticMatch?.frequency || "",
+        doseRange: ep.dose_range || staticMatch?.doseRange,
+        cycleDuration: ep.cycle_duration || staticMatch?.cycleDuration,
+        notes: ep.dosing_notes || staticMatch?.notes,
+        benefits: ep.primary_effects || staticMatch?.benefits || [],
+        regulatoryStatus: staticMatch?.regulatoryStatus,
+        experiences: staticMatch?.experiences || [],
+      };
+    });
+  }, [enrichedPeptides]);
 
   const filtered = peptides.filter((p) => {
     const matchesSearch =
