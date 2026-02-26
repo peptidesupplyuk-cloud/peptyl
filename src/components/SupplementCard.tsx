@@ -38,7 +38,7 @@ const SupplementCard = ({ supplement: s, index }: Props) => {
               {s.category}
             </span>
             <span className={`text-[10px] font-bold px-2 py-0.5 rounded-md ${grade.className}`}>
-              {s.evidenceGrade}
+              {grade.text}
             </span>
           </div>
           <p className="text-xs text-muted-foreground mb-1">{s.fullName}</p>

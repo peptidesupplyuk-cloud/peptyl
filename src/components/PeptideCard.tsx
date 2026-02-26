@@ -104,7 +104,7 @@ const PeptideCard = ({ peptide, index }: PeptideCardProps) => {
               )}
               {grade && (
                 <span className={`text-[10px] font-bold px-2 py-0.5 rounded-md ${grade.className}`}>
-                  {peptide.evidenceGrade}
+                  {grade.text}
                 </span>
               )}
             </div>
