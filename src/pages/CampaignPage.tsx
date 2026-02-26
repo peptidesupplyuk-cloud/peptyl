@@ -153,18 +153,6 @@ const CampaignPage = () => {
         </div>
       </section>
 
-      {/* Legal */}
-      <section className="py-6 bg-background border-t border-border">
-        <div className="container mx-auto px-6">
-          <div className="flex items-start gap-3 bg-muted/50 rounded-xl p-4 border border-border">
-            <AlertTriangle className="h-4 w-4 text-destructive mt-0.5 shrink-0" />
-            <p className="text-[11px] text-muted-foreground leading-relaxed">
-              Research Use Only — Not for Human Consumption. All peptides referenced are intended strictly for in-vitro research. Nothing on this website constitutes medical advice.{" "}
-              <Link to="/terms-of-service" className="text-primary underline hover:text-primary/80">Terms of Service</Link>.
-            </p>
-          </div>
-        </div>
-      </section>
     </div>
   );
 };
