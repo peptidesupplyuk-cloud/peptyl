@@ -73,6 +73,24 @@ export function useSaveBloodwork() {
         .single();
       if (pErr) throw pErr;
 
+      // Auto-link latest DNA report if none explicitly provided
+      if (!dnaReportId) {
+        const { data: latestDna } = await supabase
+          .from("dna_reports")
+          .select("id")
+          .eq("user_id", user.id)
+          .order("created_at", { ascending: false })
+          .limit(1)
+          .maybeSingle();
+
+        if (latestDna) {
+          await supabase
+            .from("bloodwork_panels")
+            .update({ dna_report_id: latestDna.id })
+            .eq("id", panel.id);
+        }
+      }
+
       const rows = markers
         .filter((m) => m.value !== null && m.value !== undefined && !isNaN(m.value))
         .map((m) => ({ panel_id: panel.id, marker_name: m.marker_name, value: m.value, unit: m.unit }));
