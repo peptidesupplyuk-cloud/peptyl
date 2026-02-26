@@ -863,9 +863,11 @@ export type Database = {
           created_at: string
           current_compounds: string | null
           experience_level: string | null
+          first_name: string | null
           gender: string | null
           height_cm: number | null
           id: string
+          last_name: string | null
           notify_am_time: string
           notify_email: boolean
           notify_pm_time: string
@@ -887,9 +889,11 @@ export type Database = {
           created_at?: string
           current_compounds?: string | null
           experience_level?: string | null
+          first_name?: string | null
           gender?: string | null
           height_cm?: number | null
           id?: string
+          last_name?: string | null
           notify_am_time?: string
           notify_email?: boolean
           notify_pm_time?: string
@@ -911,9 +915,11 @@ export type Database = {
           created_at?: string
           current_compounds?: string | null
           experience_level?: string | null
+          first_name?: string | null
           gender?: string | null
           height_cm?: number | null
           id?: string
+          last_name?: string | null
           notify_am_time?: string
           notify_email?: boolean
           notify_pm_time?: string
