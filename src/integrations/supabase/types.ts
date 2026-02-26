@@ -742,6 +742,38 @@ export type Database = {
         }
         Relationships: []
       }
+      nudge_log: {
+        Row: {
+          id: string
+          nudge_type: string
+          protocol_id: string | null
+          sent_at: string
+          user_id: string
+        }
+        Insert: {
+          id?: string
+          nudge_type: string
+          protocol_id?: string | null
+          sent_at?: string
+          user_id: string
+        }
+        Update: {
+          id?: string
+          nudge_type?: string
+          protocol_id?: string | null
+          sent_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "nudge_log_protocol_id_fkey"
+            columns: ["protocol_id"]
+            isOneToOne: false
+            referencedRelation: "protocols"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       outcome_records: {
         Row: {
           adherence_percentage: number | null
