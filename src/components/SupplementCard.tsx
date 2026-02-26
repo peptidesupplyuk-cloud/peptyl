@@ -85,10 +85,17 @@ const SupplementCard = ({ supplement: s, index }: Props) => {
               {s.biomarkerTargets && s.biomarkerTargets.length > 0 && (
                 <div className="flex flex-wrap gap-1.5">
                   {s.biomarkerTargets.map((bm, i) => {
-                    const label = typeof bm === "string" ? bm : JSON.stringify(bm);
+                    if (typeof bm === "string") {
+                      return (
+                        <span key={i} className="text-[10px] px-2 py-0.5 rounded-full bg-accent text-accent-foreground">
+                          📊 {bm}
+                        </span>
+                      );
+                    }
+                    const obj = bm as { biomarker?: string; notes?: string; direction?: string; threshold?: string };
                     return (
                       <span key={i} className="text-[10px] px-2 py-0.5 rounded-full bg-accent text-accent-foreground">
-                        📊 {label}
+                        📊 {obj.biomarker ?? "Unknown"}{obj.direction ? ` — ${obj.direction}` : ""}{obj.threshold ? ` (${obj.threshold})` : ""}
                       </span>
                     );
                   })}
