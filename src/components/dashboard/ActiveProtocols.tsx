@@ -1,9 +1,12 @@
 import { useState } from "react";
-import { Pause, Play, CheckCircle2, Clock, FlaskConical, Trash2, Pill } from "lucide-react";
+import { Pause, Play, CheckCircle2, Clock, FlaskConical, Trash2, Pill, CheckCircle, Info } from "lucide-react";
 import PeptideInfoTooltip from "./PeptideInfoTooltip";
 import { Button } from "@/components/ui/button";
+import { Checkbox } from "@/components/ui/checkbox";
 import { useProtocols, useUpdateProtocolStatus, useDeleteProtocol, type Protocol } from "@/hooks/use-protocols";
-import { differenceInDays } from "date-fns";
+import { differenceInDays, subDays, format } from "date-fns";
+import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/contexts/AuthContext";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -14,17 +17,176 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { useToast } from "@/hooks/use-toast";
+import { useNavigate } from "react-router-dom";
 
 const ActiveProtocols = () => {
   const { data: protocols = [], isLoading } = useProtocols();
   const updateStatus = useUpdateProtocolStatus();
   const deleteProtocol = useDeleteProtocol();
   const { toast } = useToast();
+  const { user } = useAuth();
+  const navigate = useNavigate();
   const [deleteTarget, setDeleteTarget] = useState<Protocol | null>(null);
+  const [completeTarget, setCompleteTarget] = useState<Protocol | null>(null);
+  const [completeStep, setCompleteStep] = useState<1 | 2>(1);
+  const [consentChecked, setConsentChecked] = useState(false);
+  const [completing, setCompleting] = useState(false);
   const active = protocols.filter((p) => p.status === "active");
   const paused = protocols.filter((p) => p.status === "paused");
   const completed = protocols.filter((p) => p.status === "completed");
+
+  const handleLogRetestNow = async (p: Protocol) => {
+    // Mark complete, create outcome record, then navigate
+    await handleFinalComplete(p, false);
+    navigate(`/dashboard?tab=biomarkers&retest=true&protocolId=${p.id}`);
+  };
+
+  const handleFinalComplete = async (p: Protocol, consent: boolean) => {
+    if (!user) return;
+    setCompleting(true);
+    try {
+      // 1. Mark protocol complete
+      await supabase.from("protocols").update({ status: "completed" }).eq("id", p.id);
+
+      // 2. Build outcome record
+      const protocolSnapshot = p.peptides.map((pp) => ({
+        peptide_name: pp.peptide_name,
+        dose_mcg: pp.dose_mcg,
+        frequency: pp.frequency,
+        route: pp.route,
+      }));
+      if (p.supplements?.length) {
+        protocolSnapshot.push(...(p.supplements as any));
+      }
+
+      // Genotype signals from latest DNA report
+      let dnaReportId: string | null = null;
+      let genotypeSignals: Record<string, string> = {};
+      let aggregationGenotypeKey: string | null = null;
+      const { data: latestDna } = await supabase
+        .from("dna_reports")
+        .select("id, report_json")
+        .eq("user_id", user.id)
+        .order("created_at", { ascending: false })
+        .limit(1)
+        .maybeSingle();
+      if (latestDna) {
+        dnaReportId = latestDna.id;
+        const report = latestDna.report_json as any;
+        const geneResults = report?.gene_results ?? report?.genes ?? [];
+        if (Array.isArray(geneResults)) {
+          for (const g of geneResults) {
+            if (g.gene && g.genotype) {
+              genotypeSignals[g.gene] = g.genotype;
+            }
+          }
+          // Top 3 genes for aggregation key
+          const top3 = geneResults.slice(0, 3).map((g: any) => `${g.gene}_${g.genotype}`);
+          if (top3.length > 0) aggregationGenotypeKey = top3.join("+");
+        }
+      }
+
+      // Baseline panel (earliest panel linked to this protocol)
+      let baselinePanelId: string | null = null;
+      let baselineDate: string | null = null;
+      let baselineMarkers: Record<string, number> = {};
+      const { data: baselinePanel } = await supabase
+        .from("bloodwork_panels")
+        .select("id, test_date")
+        .eq("protocol_id", p.id)
+        .order("test_date", { ascending: true })
+        .limit(1)
+        .maybeSingle();
+      if (baselinePanel) {
+        baselinePanelId = baselinePanel.id;
+        baselineDate = baselinePanel.test_date;
+        const { data: markers } = await supabase
+          .from("bloodwork_markers")
+          .select("marker_name, value")
+          .eq("panel_id", baselinePanel.id);
+        for (const m of markers ?? []) {
+          if (m.value != null) baselineMarkers[m.marker_name] = Number(m.value);
+        }
+      }
+
+      // Adherence: completed / total past-due injection logs
+      const { count: totalLogs } = await supabase
+        .from("injection_logs")
+        .select("id", { count: "exact", head: true })
+        .eq("user_id", user.id)
+        .lte("scheduled_time", new Date().toISOString())
+        .in("protocol_peptide_id", p.peptides.map((pp) => pp.id));
+      const { count: completedLogs } = await supabase
+        .from("injection_logs")
+        .select("id", { count: "exact", head: true })
+        .eq("user_id", user.id)
+        .eq("status", "done")
+        .in("protocol_peptide_id", p.peptides.map((pp) => pp.id));
+      const adherence = totalLogs && totalLogs > 0 ? Math.round(((completedLogs ?? 0) / totalLogs) * 100) : null;
+
+      // Whoop baseline: 14 days before protocol start
+      const protocolStart = new Date(p.start_date);
+      const baselineStart = format(subDays(protocolStart, 14), "yyyy-MM-dd");
+      const baselineEnd = format(subDays(protocolStart, 1), "yyyy-MM-dd");
+      const { data: whoopBaseline } = await supabase
+        .from("whoop_daily_metrics")
+        .select("hrv, recovery_score, sleep_score")
+        .eq("user_id", user.id)
+        .gte("date", baselineStart)
+        .lte("date", baselineEnd);
+
+      const avg = (arr: (number | null)[]): number | null => {
+        const valid = arr.filter((v): v is number => v != null);
+        return valid.length > 0 ? Math.round(valid.reduce((a, b) => a + b, 0) / valid.length * 10) / 10 : null;
+      };
+
+      const avgHrvBaseline = avg(whoopBaseline?.map((w) => w.hrv != null ? Number(w.hrv) : null) ?? []);
+      const avgRecoveryBaseline = avg(whoopBaseline?.map((w) => w.recovery_score != null ? Number(w.recovery_score) : null) ?? []);
+      const avgSleepBaseline = avg(whoopBaseline?.map((w) => w.sleep_score != null ? Number(w.sleep_score) : null) ?? []);
+
+      const weeksOnProtocol = Math.round(differenceInDays(new Date(), protocolStart) / 7);
+
+      // Insert outcome record
+      await supabase.from("outcome_records").insert({
+        user_id: user.id,
+        protocol_id: p.id,
+        protocol_start_date: p.start_date,
+        protocol_snapshot: protocolSnapshot as any,
+        genotype_signals: genotypeSignals as any,
+        dna_report_id: dnaReportId,
+        baseline_panel_id: baselinePanelId,
+        baseline_date: baselineDate,
+        baseline_markers: baselineMarkers as any,
+        adherence_percentage: adherence,
+        avg_hrv_baseline: avgHrvBaseline,
+        avg_recovery_baseline: avgRecoveryBaseline,
+        avg_sleep_score_baseline: avgSleepBaseline,
+        aggregation_genotype_key: aggregationGenotypeKey,
+        consented_to_aggregate: consent,
+        weeks_on_protocol: weeksOnProtocol,
+        status: "in_progress",
+      } as any);
+
+      // Invalidate queries
+      updateStatus.mutate({ id: p.id, status: "completed" });
+
+      toast({ title: "Protocol completed", description: `${p.name} has been marked as complete.` });
+    } catch (err: any) {
+      toast({ title: "Error completing protocol", description: err?.message || "Please try again.", variant: "destructive" });
+    } finally {
+      setCompleting(false);
+      setCompleteTarget(null);
+      setCompleteStep(1);
+      setConsentChecked(false);
+    }
+  };
 
   if (isLoading) {
     return (
@@ -104,7 +266,7 @@ const ActiveProtocols = () => {
                 <Button size="sm" variant="ghost" className="h-7 text-xs" onClick={() => updateStatus.mutate({ id: p.id, status: "paused" })}>
                   <Pause className="h-3 w-3" />
                 </Button>
-                <Button size="sm" variant="ghost" className="h-7 text-xs" onClick={() => updateStatus.mutate({ id: p.id, status: "completed" })}>
+                <Button size="sm" variant="ghost" className="h-7 text-xs" onClick={() => { setCompleteTarget(p); setCompleteStep(1); }}>
                   <CheckCircle2 className="h-3 w-3" />
                 </Button>
               </>
@@ -151,6 +313,7 @@ const ActiveProtocols = () => {
         </div>
       )}
 
+      {/* Delete Confirmation Dialog */}
       <AlertDialog open={!!deleteTarget} onOpenChange={(open) => !open && setDeleteTarget(null)}>
         <AlertDialogContent>
           <AlertDialogHeader>
@@ -182,6 +345,78 @@ const ActiveProtocols = () => {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      {/* Protocol Completion Modal */}
+      <Dialog open={!!completeTarget} onOpenChange={(open) => { if (!open && !completing) { setCompleteTarget(null); setCompleteStep(1); setConsentChecked(false); } }}>
+        <DialogContent className="bg-card border-border max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2 text-foreground">
+              <CheckCircle className="h-5 w-5 text-primary" />
+              Great work! Protocol complete
+            </DialogTitle>
+          </DialogHeader>
+
+          {completeStep === 1 && (
+            <div className="space-y-4">
+              <div className="border-l-2 border-primary pl-4 py-2 space-y-2">
+                <h4 className="text-sm font-semibold text-foreground">Log your results</h4>
+                <p className="text-xs text-muted-foreground leading-relaxed">
+                  Have you retested your bloods since starting this protocol? Comparing your results is the most powerful thing you can do.
+                </p>
+              </div>
+              <div className="flex gap-3">
+                <Button
+                  className="flex-1 shadow-brand"
+                  disabled={completing}
+                  onClick={() => completeTarget && handleLogRetestNow(completeTarget)}
+                >
+                  {completing ? "Saving..." : "Log retest now"}
+                </Button>
+                <Button
+                  variant="ghost"
+                  className="flex-1"
+                  disabled={completing}
+                  onClick={() => setCompleteStep(2)}
+                >
+                  I'll do it later
+                </Button>
+              </div>
+            </div>
+          )}
+
+          {completeStep === 2 && (
+            <div className="space-y-4">
+              <div className="space-y-3">
+                <div className="flex items-start gap-2">
+                  <Checkbox
+                    id="consent-aggregate"
+                    checked={consentChecked}
+                    onCheckedChange={(checked) => setConsentChecked(checked === true)}
+                    className="mt-0.5"
+                  />
+                  <label htmlFor="consent-aggregate" className="text-sm text-foreground cursor-pointer leading-snug">
+                    Share my anonymised results to help the community
+                  </label>
+                </div>
+                <div className="flex items-start gap-2 pl-6">
+                  <Info className="h-3.5 w-3.5 text-muted-foreground mt-0.5 shrink-0" />
+                  <p className="text-xs text-muted-foreground leading-relaxed">
+                    Your results are never shown individually. Data only appears when 5 or more people with the same genetic profile complete the same protocol. Your name, email and raw genetic data are never included.
+                  </p>
+                </div>
+              </div>
+
+              <Button
+                className="w-full shadow-brand"
+                disabled={completing}
+                onClick={() => completeTarget && handleFinalComplete(completeTarget, consentChecked)}
+              >
+                {completing ? "Completing..." : "Complete Protocol"}
+              </Button>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
