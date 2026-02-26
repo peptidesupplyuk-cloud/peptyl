@@ -103,8 +103,12 @@ const ProfileBiometrics = ({ onUpdate }: { onUpdate?: (bio: any) => void }) => {
       const { data, error } = await supabase.functions.invoke("send-whatsapp-verify", {
         body: { whatsapp_number: verifyNumber.trim() },
       });
-      if (error) throw error;
-      if (data?.error) {
+      // Edge function returns non-2xx as an error with context in data
+      if (error) {
+        // Try to extract a user-friendly message from the response
+        const msg = (data as any)?.error || error.message || "Failed to send code";
+        toast({ title: "Could not send code", description: msg, variant: "destructive" });
+      } else if (data?.error) {
         toast({ title: "Error", description: data.error, variant: "destructive" });
       } else {
         setVerifyStep("code");
