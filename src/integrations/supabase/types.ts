@@ -679,6 +679,126 @@ export type Database = {
         }
         Relationships: []
       }
+      peptides_enriched: {
+        Row: {
+          administration: string[] | null
+          aliases: string[] | null
+          antagonistic_compounds: string[] | null
+          category: string | null
+          contraindications: string[] | null
+          created_at: string
+          cycle_duration: string | null
+          description: string | null
+          dna_profile_signals: Json | null
+          dose_range: string | null
+          dosing_notes: string | null
+          drug_interactions: string[] | null
+          enriched_at: string | null
+          enrichment_model: string | null
+          enrichment_status: string
+          evidence_grade: string | null
+          evidence_summary: string | null
+          fitness_relevance: string | null
+          frequency: string | null
+          full_name: string | null
+          health_optimisation_relevance: string | null
+          id: string
+          is_active: boolean
+          key_research_refs: Json | null
+          longevity_relevance: string | null
+          mechanism_of_action: string | null
+          name: string
+          peptyl_id: string
+          primary_effects: string[] | null
+          regulatory_note: string | null
+          regulatory_status_eu: string | null
+          regulatory_status_uk: string | null
+          regulatory_status_us: string | null
+          side_effects_common: string[] | null
+          side_effects_rare: string[] | null
+          synergistic_compounds: string[] | null
+          updated_at: string
+        }
+        Insert: {
+          administration?: string[] | null
+          aliases?: string[] | null
+          antagonistic_compounds?: string[] | null
+          category?: string | null
+          contraindications?: string[] | null
+          created_at?: string
+          cycle_duration?: string | null
+          description?: string | null
+          dna_profile_signals?: Json | null
+          dose_range?: string | null
+          dosing_notes?: string | null
+          drug_interactions?: string[] | null
+          enriched_at?: string | null
+          enrichment_model?: string | null
+          enrichment_status?: string
+          evidence_grade?: string | null
+          evidence_summary?: string | null
+          fitness_relevance?: string | null
+          frequency?: string | null
+          full_name?: string | null
+          health_optimisation_relevance?: string | null
+          id?: string
+          is_active?: boolean
+          key_research_refs?: Json | null
+          longevity_relevance?: string | null
+          mechanism_of_action?: string | null
+          name: string
+          peptyl_id: string
+          primary_effects?: string[] | null
+          regulatory_note?: string | null
+          regulatory_status_eu?: string | null
+          regulatory_status_uk?: string | null
+          regulatory_status_us?: string | null
+          side_effects_common?: string[] | null
+          side_effects_rare?: string[] | null
+          synergistic_compounds?: string[] | null
+          updated_at?: string
+        }
+        Update: {
+          administration?: string[] | null
+          aliases?: string[] | null
+          antagonistic_compounds?: string[] | null
+          category?: string | null
+          contraindications?: string[] | null
+          created_at?: string
+          cycle_duration?: string | null
+          description?: string | null
+          dna_profile_signals?: Json | null
+          dose_range?: string | null
+          dosing_notes?: string | null
+          drug_interactions?: string[] | null
+          enriched_at?: string | null
+          enrichment_model?: string | null
+          enrichment_status?: string
+          evidence_grade?: string | null
+          evidence_summary?: string | null
+          fitness_relevance?: string | null
+          frequency?: string | null
+          full_name?: string | null
+          health_optimisation_relevance?: string | null
+          id?: string
+          is_active?: boolean
+          key_research_refs?: Json | null
+          longevity_relevance?: string | null
+          mechanism_of_action?: string | null
+          name?: string
+          peptyl_id?: string
+          primary_effects?: string[] | null
+          regulatory_note?: string | null
+          regulatory_status_eu?: string | null
+          regulatory_status_uk?: string | null
+          regulatory_status_us?: string | null
+          side_effects_common?: string[] | null
+          side_effects_rare?: string[] | null
+          synergistic_compounds?: string[] | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           age: number | null
@@ -972,6 +1092,126 @@ export type Database = {
           id?: string
           item?: string
           user_id?: string
+        }
+        Relationships: []
+      }
+      supplements_enriched: {
+        Row: {
+          aliases: string[] | null
+          antagonistic_supplements: string[] | null
+          best_form: string | null
+          bioavailability_notes: string | null
+          biomarker_targets: Json | null
+          category: string | null
+          contraindications: string[] | null
+          created_at: string
+          cycling_notes: string | null
+          description: string | null
+          dna_profile_signals: Json | null
+          dose_range: string | null
+          drug_interactions: string[] | null
+          enriched_at: string | null
+          enrichment_model: string | null
+          enrichment_status: string
+          evidence_grade: string | null
+          evidence_summary: string | null
+          fitness_relevance: string | null
+          food_sources: string[] | null
+          forms_available: string[] | null
+          gene_interactions: Json | null
+          health_optimisation_relevance: string | null
+          id: string
+          is_active: boolean
+          key_research_refs: Json | null
+          longevity_relevance: string | null
+          mechanism_of_action: string | null
+          name: string
+          peptyl_id: string
+          primary_effects: string[] | null
+          side_effects_common: string[] | null
+          side_effects_rare: string[] | null
+          synergistic_supplements: string[] | null
+          timing: string | null
+          updated_at: string
+          upper_safe_limit: string | null
+        }
+        Insert: {
+          aliases?: string[] | null
+          antagonistic_supplements?: string[] | null
+          best_form?: string | null
+          bioavailability_notes?: string | null
+          biomarker_targets?: Json | null
+          category?: string | null
+          contraindications?: string[] | null
+          created_at?: string
+          cycling_notes?: string | null
+          description?: string | null
+          dna_profile_signals?: Json | null
+          dose_range?: string | null
+          drug_interactions?: string[] | null
+          enriched_at?: string | null
+          enrichment_model?: string | null
+          enrichment_status?: string
+          evidence_grade?: string | null
+          evidence_summary?: string | null
+          fitness_relevance?: string | null
+          food_sources?: string[] | null
+          forms_available?: string[] | null
+          gene_interactions?: Json | null
+          health_optimisation_relevance?: string | null
+          id?: string
+          is_active?: boolean
+          key_research_refs?: Json | null
+          longevity_relevance?: string | null
+          mechanism_of_action?: string | null
+          name: string
+          peptyl_id: string
+          primary_effects?: string[] | null
+          side_effects_common?: string[] | null
+          side_effects_rare?: string[] | null
+          synergistic_supplements?: string[] | null
+          timing?: string | null
+          updated_at?: string
+          upper_safe_limit?: string | null
+        }
+        Update: {
+          aliases?: string[] | null
+          antagonistic_supplements?: string[] | null
+          best_form?: string | null
+          bioavailability_notes?: string | null
+          biomarker_targets?: Json | null
+          category?: string | null
+          contraindications?: string[] | null
+          created_at?: string
+          cycling_notes?: string | null
+          description?: string | null
+          dna_profile_signals?: Json | null
+          dose_range?: string | null
+          drug_interactions?: string[] | null
+          enriched_at?: string | null
+          enrichment_model?: string | null
+          enrichment_status?: string
+          evidence_grade?: string | null
+          evidence_summary?: string | null
+          fitness_relevance?: string | null
+          food_sources?: string[] | null
+          forms_available?: string[] | null
+          gene_interactions?: Json | null
+          health_optimisation_relevance?: string | null
+          id?: string
+          is_active?: boolean
+          key_research_refs?: Json | null
+          longevity_relevance?: string | null
+          mechanism_of_action?: string | null
+          name?: string
+          peptyl_id?: string
+          primary_effects?: string[] | null
+          side_effects_common?: string[] | null
+          side_effects_rare?: string[] | null
+          synergistic_supplements?: string[] | null
+          timing?: string | null
+          updated_at?: string
+          upper_safe_limit?: string | null
         }
         Relationships: []
       }
