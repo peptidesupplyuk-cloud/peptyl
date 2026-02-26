@@ -274,19 +274,6 @@ const ProfileBiometrics = ({ onUpdate }: { onUpdate?: (bio: any) => void }) => {
           <Bell className="h-4 w-4 text-primary" /> Reminder Alerts
         </h3>
 
-        <div className="relative">
-          {/* Coming Soon overlay */}
-          <div className="absolute inset-0 z-10 backdrop-blur-md bg-background/40 rounded-xl flex flex-col items-center justify-center gap-2">
-            <div className="bg-primary/10 rounded-full p-3">
-              <Lock className="h-6 w-6 text-primary" />
-            </div>
-            <h4 className="font-heading font-bold text-base text-foreground">Coming Soon</h4>
-            <p className="text-xs text-muted-foreground text-center max-w-xs px-3">
-              WhatsApp & email reminders are being finalised. Check back soon.
-            </p>
-          </div>
-
-          <div className="pointer-events-none select-none space-y-3" aria-hidden="true">
         <p className="text-xs text-muted-foreground">Get consolidated AM/PM reminders across all active protocols.</p>
         
         <div className="flex items-center justify-between">
@@ -300,102 +287,114 @@ const ProfileBiometrics = ({ onUpdate }: { onUpdate?: (bio: any) => void }) => {
           />
         </div>
 
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <MessageCircle className="h-3.5 w-3.5 text-muted-foreground" />
-            <span className="text-sm text-foreground">WhatsApp reminders</span>
-            {notifPrefs.whatsapp_verified && notifPrefs.notify_whatsapp && (
-              <span className="flex items-center gap-0.5 text-[10px] text-primary">
-                <ShieldCheck className="h-3 w-3" /> Verified
-              </span>
+        {/* WhatsApp - Coming Soon */}
+        <div className="relative">
+          <div className="absolute inset-0 z-10 backdrop-blur-md bg-background/40 rounded-xl flex flex-col items-center justify-center gap-1.5">
+            <div className="bg-primary/10 rounded-full p-2">
+              <Lock className="h-4 w-4 text-primary" />
+            </div>
+            <span className="font-heading font-bold text-sm text-foreground">Coming Soon</span>
+          </div>
+
+          <div className="pointer-events-none select-none space-y-3" aria-hidden="true">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <MessageCircle className="h-3.5 w-3.5 text-muted-foreground" />
+                <span className="text-sm text-foreground">WhatsApp reminders</span>
+                {notifPrefs.whatsapp_verified && notifPrefs.notify_whatsapp && (
+                  <span className="flex items-center gap-0.5 text-[10px] text-primary">
+                    <ShieldCheck className="h-3 w-3" /> Verified
+                  </span>
+                )}
+              </div>
+              <Switch
+                checked={notifPrefs.notify_whatsapp}
+                onCheckedChange={handleWhatsAppToggle}
+              />
+            </div>
+
+            {/* WhatsApp verification flow - Step 1: Enter number */}
+            {verifyStep === "number" && (
+              <div className="ml-6 space-y-2 p-3 rounded-xl bg-muted/30 border border-border">
+                <p className="text-xs text-muted-foreground">
+                  We'll send a verification code via WhatsApp to confirm your number.
+                </p>
+                <input
+                  type="tel"
+                  value={verifyNumber}
+                  onChange={(e) => setVerifyNumber(e.target.value)}
+                  placeholder="+447XXXXXXXXX"
+                  className="w-full px-3 py-2 rounded-xl bg-background border border-border text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-primary/40"
+                />
+                <p className="text-[10px] text-muted-foreground">Include country code (e.g. +447700900000) or UK format (07700900000)</p>
+                <Button
+                  size="sm"
+                  onClick={handleSendCode}
+                  disabled={sendingCode || !verifyNumber.trim()}
+                  className="w-full"
+                >
+                  {sendingCode ? <Loader2 className="h-3.5 w-3.5 animate-spin mr-1" /> : <Send className="h-3.5 w-3.5 mr-1" />}
+                  Send Verification Code
+                </Button>
+              </div>
+            )}
+
+            {/* WhatsApp verification flow - Step 2: Enter code */}
+            {verifyStep === "code" && (
+              <div className="ml-6 space-y-3 p-3 rounded-xl bg-muted/30 border border-border">
+                <p className="text-xs text-muted-foreground">
+                  Enter the 6-digit code sent to <strong>{verifyNumber}</strong>
+                </p>
+                <div className="flex justify-center">
+                  <InputOTP maxLength={6} value={verifyCode} onChange={setVerifyCode}>
+                    <InputOTPGroup>
+                      <InputOTPSlot index={0} />
+                      <InputOTPSlot index={1} />
+                      <InputOTPSlot index={2} />
+                      <InputOTPSlot index={3} />
+                      <InputOTPSlot index={4} />
+                      <InputOTPSlot index={5} />
+                    </InputOTPGroup>
+                  </InputOTP>
+                </div>
+                <div className="flex gap-2">
+                  <Button
+                    size="sm"
+                    variant="ghost"
+                    className="flex-1"
+                    onClick={() => { setVerifyStep("number"); setVerifyCode(""); }}
+                  >
+                    Back
+                  </Button>
+                  <Button
+                    size="sm"
+                    className="flex-1"
+                    onClick={handleVerifyCode}
+                    disabled={verifying || verifyCode.length !== 6}
+                  >
+                    {verifying ? <Loader2 className="h-3.5 w-3.5 animate-spin mr-1" /> : <ShieldCheck className="h-3.5 w-3.5 mr-1" />}
+                    Verify
+                  </Button>
+                </div>
+              </div>
+            )}
+
+            {/* Show current verified number when WhatsApp is active */}
+            {notifPrefs.notify_whatsapp && notifPrefs.whatsapp_verified && verifyStep === "idle" && (
+              <div className="ml-6">
+                <p className="text-xs text-muted-foreground">
+                  Sending to <strong>{notifPrefs.whatsapp_number}</strong>
+                  <button
+                    className="text-primary ml-2 underline text-[10px]"
+                    onClick={() => setVerifyStep("number")}
+                  >
+                    Change number
+                  </button>
+                </p>
+              </div>
             )}
           </div>
-          <Switch
-            checked={notifPrefs.notify_whatsapp}
-            onCheckedChange={handleWhatsAppToggle}
-          />
         </div>
-
-        {/* WhatsApp verification flow - Step 1: Enter number */}
-        {verifyStep === "number" && (
-          <div className="ml-6 space-y-2 p-3 rounded-xl bg-muted/30 border border-border">
-            <p className="text-xs text-muted-foreground">
-              We'll send a verification code via WhatsApp to confirm your number.
-            </p>
-            <input
-              type="tel"
-              value={verifyNumber}
-              onChange={(e) => setVerifyNumber(e.target.value)}
-              placeholder="+447XXXXXXXXX"
-              className="w-full px-3 py-2 rounded-xl bg-background border border-border text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-primary/40"
-            />
-            <p className="text-[10px] text-muted-foreground">Include country code (e.g. +447700900000) or UK format (07700900000)</p>
-            <Button
-              size="sm"
-              onClick={handleSendCode}
-              disabled={sendingCode || !verifyNumber.trim()}
-              className="w-full"
-            >
-              {sendingCode ? <Loader2 className="h-3.5 w-3.5 animate-spin mr-1" /> : <Send className="h-3.5 w-3.5 mr-1" />}
-              Send Verification Code
-            </Button>
-          </div>
-        )}
-
-        {/* WhatsApp verification flow - Step 2: Enter code */}
-        {verifyStep === "code" && (
-          <div className="ml-6 space-y-3 p-3 rounded-xl bg-muted/30 border border-border">
-            <p className="text-xs text-muted-foreground">
-              Enter the 6-digit code sent to <strong>{verifyNumber}</strong>
-            </p>
-            <div className="flex justify-center">
-              <InputOTP maxLength={6} value={verifyCode} onChange={setVerifyCode}>
-                <InputOTPGroup>
-                  <InputOTPSlot index={0} />
-                  <InputOTPSlot index={1} />
-                  <InputOTPSlot index={2} />
-                  <InputOTPSlot index={3} />
-                  <InputOTPSlot index={4} />
-                  <InputOTPSlot index={5} />
-                </InputOTPGroup>
-              </InputOTP>
-            </div>
-            <div className="flex gap-2">
-              <Button
-                size="sm"
-                variant="ghost"
-                className="flex-1"
-                onClick={() => { setVerifyStep("number"); setVerifyCode(""); }}
-              >
-                Back
-              </Button>
-              <Button
-                size="sm"
-                className="flex-1"
-                onClick={handleVerifyCode}
-                disabled={verifying || verifyCode.length !== 6}
-              >
-                {verifying ? <Loader2 className="h-3.5 w-3.5 animate-spin mr-1" /> : <ShieldCheck className="h-3.5 w-3.5 mr-1" />}
-                Verify
-              </Button>
-            </div>
-          </div>
-        )}
-
-        {/* Show current verified number when WhatsApp is active */}
-        {notifPrefs.notify_whatsapp && notifPrefs.whatsapp_verified && verifyStep === "idle" && (
-          <div className="ml-6">
-            <p className="text-xs text-muted-foreground">
-              Sending to <strong>{notifPrefs.whatsapp_number}</strong>
-              <button
-                className="text-primary ml-2 underline text-[10px]"
-                onClick={() => setVerifyStep("number")}
-              >
-                Change number
-              </button>
-            </p>
-          </div>
-        )}
 
         <div className="grid grid-cols-2 gap-3">
           <div>
@@ -415,8 +414,6 @@ const ProfileBiometrics = ({ onUpdate }: { onUpdate?: (bio: any) => void }) => {
               onChange={(e) => setNotifPrefs({ ...notifPrefs, notify_pm_time: e.target.value })}
               className="w-full px-3 py-2 rounded-xl bg-background border border-border text-sm text-foreground focus:outline-none focus:border-primary/40"
             />
-          </div>
-        </div>
           </div>
         </div>
       </div>
