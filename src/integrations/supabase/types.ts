@@ -1069,6 +1069,9 @@ export type Database = {
           username: string | null
           weight_kg: number | null
           whatsapp_number: string | null
+          whatsapp_verified: boolean | null
+          whatsapp_verify_code: string | null
+          whatsapp_verify_expires_at: string | null
         }
         Insert: {
           age?: number | null
@@ -1095,6 +1098,9 @@ export type Database = {
           username?: string | null
           weight_kg?: number | null
           whatsapp_number?: string | null
+          whatsapp_verified?: boolean | null
+          whatsapp_verify_code?: string | null
+          whatsapp_verify_expires_at?: string | null
         }
         Update: {
           age?: number | null
@@ -1121,6 +1127,9 @@ export type Database = {
           username?: string | null
           weight_kg?: number | null
           whatsapp_number?: string | null
+          whatsapp_verified?: boolean | null
+          whatsapp_verify_code?: string | null
+          whatsapp_verify_expires_at?: string | null
         }
         Relationships: []
       }

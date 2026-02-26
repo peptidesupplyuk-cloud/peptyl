@@ -73,7 +73,7 @@ Deno.serve(async (req) => {
         for (const [userId, userProts] of Object.entries(userProtocols)) {
           const { data: profile } = await supabase
             .from("profiles")
-            .select("notify_email, notify_whatsapp, whatsapp_number, notify_am_time, notify_pm_time")
+            .select("notify_email, notify_whatsapp, whatsapp_number, whatsapp_verified, notify_am_time, notify_pm_time")
             .eq("user_id", userId)
             .single();
 
@@ -182,30 +182,63 @@ Deno.serve(async (req) => {
           }
 
           // Send WhatsApp via Meta Cloud API
-          if (profile.notify_whatsapp && whatsappToken && whatsappPhoneNumberId && profile.whatsapp_number) {
-            const waMessage = buildWhatsAppMessage(reminders, supplementReminders, window);
-            try {
-              const waRes = await fetch(
-                `https://graph.facebook.com/v21.0/${whatsappPhoneNumberId}/messages`,
-                {
-                  method: "POST",
-                  headers: {
-                    Authorization: `Bearer ${whatsappToken}`,
-                    "Content-Type": "application/json",
-                  },
-                  body: JSON.stringify({
-                    messaging_product: "whatsapp",
-                    to: profile.whatsapp_number.replace(/\s+/g, "").replace(/^\+/, ""),
-                    type: "text",
-                    text: { body: waMessage },
-                  }),
+          if (profile.notify_whatsapp && profile.whatsapp_verified && whatsappToken && whatsappPhoneNumberId && profile.whatsapp_number) {
+            const formattedWa = formatWhatsAppNumber(profile.whatsapp_number);
+            if (!formattedWa) {
+              console.warn(`Invalid WhatsApp number for ${userId}: ${profile.whatsapp_number}, skipping`);
+            } else {
+              // Get protocol context for day counter + streak
+              const firstProt = userProts[0];
+              const daysActive = firstProt ? Math.floor((Date.now() - new Date(firstProt.start_date || today).getTime()) / 86400000) : 0;
+
+              // Check streak from injection_logs
+              let streak = 0;
+              try {
+                const { data: recentLogs } = await supabase
+                  .from("injection_logs")
+                  .select("scheduled_time, status")
+                  .eq("user_id", userId)
+                  .eq("status", "completed")
+                  .order("scheduled_time", { ascending: false })
+                  .limit(30);
+                if (recentLogs) {
+                  const seen = new Set<string>();
+                  for (const log of recentLogs) {
+                    seen.add(new Date(log.scheduled_time).toISOString().split("T")[0]);
+                  }
+                  const d = new Date();
+                  for (let i = 1; i <= 30; i++) {
+                    d.setDate(d.getDate() - 1);
+                    if (seen.has(d.toISOString().split("T")[0])) streak++;
+                    else break;
+                  }
                 }
-              );
-              const waData = await waRes.json();
-              whatsappSent = waRes.ok;
-              console.log(`WhatsApp to ${profile.whatsapp_number}: ${waRes.ok ? "sent" : "failed"}`, waData);
-            } catch (waErr) {
-              console.error("WhatsApp send error:", waErr);
+              } catch (_) { /* ignore streak calc errors */ }
+
+              const waMessage = buildWhatsAppMessage(reminders, supplementReminders, window, firstProt?.name, daysActive, streak);
+              try {
+                const waRes = await fetch(
+                  `https://graph.facebook.com/v21.0/${whatsappPhoneNumberId}/messages`,
+                  {
+                    method: "POST",
+                    headers: {
+                      Authorization: `Bearer ${whatsappToken}`,
+                      "Content-Type": "application/json",
+                    },
+                    body: JSON.stringify({
+                      messaging_product: "whatsapp",
+                      to: formattedWa,
+                      type: "text",
+                      text: { body: waMessage },
+                    }),
+                  }
+                );
+                const waData = await waRes.json();
+                whatsappSent = waRes.ok;
+                console.log(`WhatsApp to ${formattedWa}: ${waRes.ok ? "sent" : "failed"}`, waData);
+              } catch (waErr) {
+                console.error("WhatsApp send error:", waErr);
+              }
             }
           }
 
@@ -416,7 +449,7 @@ Deno.serve(async (req) => {
 
         const { data: profile } = await supabase
           .from("profiles")
-          .select("notify_email, notify_whatsapp, whatsapp_number")
+          .select("notify_email, notify_whatsapp, whatsapp_number, whatsapp_verified")
           .eq("user_id", outcome.user_id)
           .single();
 
@@ -455,41 +488,44 @@ Deno.serve(async (req) => {
         }
 
         // WhatsApp
-        if (profile?.notify_whatsapp && whatsappToken && whatsappPhoneNumberId && profile.whatsapp_number) {
-          try {
-            const waLines = [
-              `🧬 *Your Results Are Ready*`,
-              `━━━━━━━━━━━━━━━━`,
-              `You completed *${protocolName}*.`,
-              ``,
-            ];
-            if (topResult) {
-              waLines.push(`Top result: *${topResult}*`);
-              waLines.push(``);
-            }
-            waLines.push(`View your full analysis:`);
-            waLines.push(reportUrl);
-
-            const waRes = await fetch(
-              `https://graph.facebook.com/v21.0/${whatsappPhoneNumberId}/messages`,
-              {
-                method: "POST",
-                headers: {
-                  Authorization: `Bearer ${whatsappToken}`,
-                  "Content-Type": "application/json",
-                },
-                body: JSON.stringify({
-                  messaging_product: "whatsapp",
-                  to: profile.whatsapp_number.replace(/\s+/g, "").replace(/^\+/, ""),
-                  type: "text",
-                  text: { body: waLines.join("\n") },
-                }),
+        if (profile?.notify_whatsapp && profile?.whatsapp_verified && whatsappToken && whatsappPhoneNumberId && profile.whatsapp_number) {
+          const formattedWa = formatWhatsAppNumber(profile.whatsapp_number);
+          if (formattedWa) {
+            try {
+              const waLines = [
+                `🧬 *Your Results Are Ready*`,
+                `━━━━━━━━━━━━━━━━`,
+                `You completed *${protocolName}*.`,
+                ``,
+              ];
+              if (topResult) {
+                waLines.push(`Top result: *${topResult}*`);
+                waLines.push(``);
               }
-            );
-            whatsappOk = waRes.ok;
-            console.log(`Results WhatsApp to ${profile.whatsapp_number}: ${whatsappOk ? "sent" : "failed"}`);
-          } catch (e) {
-            console.error("Results WhatsApp error:", e);
+              waLines.push(`View your full analysis:`);
+              waLines.push(reportUrl);
+
+              const waRes = await fetch(
+                `https://graph.facebook.com/v21.0/${whatsappPhoneNumberId}/messages`,
+                {
+                  method: "POST",
+                  headers: {
+                    Authorization: `Bearer ${whatsappToken}`,
+                    "Content-Type": "application/json",
+                  },
+                  body: JSON.stringify({
+                    messaging_product: "whatsapp",
+                    to: formattedWa,
+                    type: "text",
+                    text: { body: waLines.join("\n") },
+                  }),
+                }
+              );
+              whatsappOk = waRes.ok;
+              console.log(`Results WhatsApp to ${formattedWa}: ${whatsappOk ? "sent" : "failed"}`);
+            } catch (e) {
+              console.error("Results WhatsApp error:", e);
+            }
           }
         }
 
@@ -624,13 +660,35 @@ function checkFrequencyDue(frequency: string, todayStr: string): boolean {
   }
 }
 
-function buildWhatsAppMessage(reminders: PeptideReminder[], supplements: SupplementReminder[], window: string): string {
+function formatWhatsAppNumber(raw: string): string | null {
+  let n = raw.replace(/[\s\-\(\)\.]/g, "");
+  if (n.startsWith("+")) n = n.slice(1);
+  if (n.startsWith("07")) n = "44" + n.slice(1); // UK mobile
+  if (n.startsWith("00")) n = n.slice(2); // international prefix
+  if (!/^\d{10,15}$/.test(n)) return null;
+  if (n.startsWith("0")) return null; // still local format
+  return n;
+}
+
+function buildWhatsAppMessage(
+  reminders: PeptideReminder[],
+  supplements: SupplementReminder[],
+  window: string,
+  protocolName?: string,
+  daysActive?: number,
+  streak?: number,
+): string {
   const totalCount = reminders.length + supplements.length;
   const lines = [
     `🧬 *Action Required — Your ${window} Protocol*`,
     `━━━━━━━━━━━━━━━━`,
-    `You have *${totalCount} item${totalCount > 1 ? "s" : ""}* to complete.\n`,
   ];
+
+  if (protocolName && daysActive && daysActive > 0) {
+    lines.push(`_Day ${daysActive} of your ${protocolName} protocol_`);
+  }
+
+  lines.push(`You have *${totalCount} item${totalCount > 1 ? "s" : ""}* to complete.\n`);
 
   if (reminders.length > 0) {
     for (const r of reminders) {
@@ -645,6 +703,10 @@ function buildWhatsAppMessage(reminders: PeptideReminder[], supplements: Supplem
       lines.push(`   • ${s.name} — ${s.dose}`);
     }
     lines.push("");
+  }
+
+  if (streak && streak > 7) {
+    lines.push(`🔥 ${streak}-day streak — keep going!\n`);
   }
 
   lines.push(`━━━━━━━━━━━━━━━━`);
