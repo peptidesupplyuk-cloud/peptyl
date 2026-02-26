@@ -1,9 +1,11 @@
 import { useState, useEffect } from "react";
-import { User, Loader2, Save, Bell, Mail, MessageCircle, Users, Calendar } from "lucide-react";
+import { User, Loader2, Save, Bell, Mail, MessageCircle, Users, Calendar, ShieldCheck, Send } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { useToast } from "@/hooks/use-toast";
 import { Switch } from "@/components/ui/switch";
+import { Button } from "@/components/ui/button";
+import { InputOTP, InputOTPGroup, InputOTPSlot } from "@/components/ui/input-otp";
 
 interface ProfileData {
   gender: string | null;
@@ -15,6 +17,7 @@ interface NotificationPrefs {
   notify_email: boolean;
   notify_whatsapp: boolean;
   whatsapp_number: string | null;
+  whatsapp_verified: boolean;
   notify_am_time: string;
   notify_pm_time: string;
 }
@@ -33,15 +36,23 @@ const ProfileBiometrics = ({ onUpdate }: { onUpdate?: (bio: any) => void }) => {
     notify_email: true,
     notify_whatsapp: false,
     whatsapp_number: null,
+    whatsapp_verified: false,
     notify_am_time: "08:00",
     notify_pm_time: "20:00",
   });
+
+  // WhatsApp verification flow state
+  const [verifyStep, setVerifyStep] = useState<"idle" | "number" | "code">("idle");
+  const [verifyNumber, setVerifyNumber] = useState("");
+  const [verifyCode, setVerifyCode] = useState("");
+  const [sendingCode, setSendingCode] = useState(false);
+  const [verifying, setVerifying] = useState(false);
 
   useEffect(() => {
     if (!user) return;
     supabase
       .from("profiles")
-      .select("gender, age, username, notify_email, notify_whatsapp, whatsapp_number, notify_am_time, notify_pm_time")
+      .select("gender, age, username, notify_email, notify_whatsapp, whatsapp_number, whatsapp_verified, notify_am_time, notify_pm_time")
       .eq("user_id", user.id)
       .single()
       .then(({ data }) => {
@@ -51,17 +62,122 @@ const ProfileBiometrics = ({ onUpdate }: { onUpdate?: (bio: any) => void }) => {
             age: (data as any).age as number | null,
             username: (data as any).username as string | null,
           });
-          setNotifPrefs({
+          const prefs = {
             notify_email: (data as any).notify_email ?? true,
             notify_whatsapp: (data as any).notify_whatsapp ?? false,
             whatsapp_number: (data as any).whatsapp_number ?? null,
+            whatsapp_verified: (data as any).whatsapp_verified ?? false,
             notify_am_time: (data as any).notify_am_time ?? "08:00",
             notify_pm_time: (data as any).notify_pm_time ?? "20:00",
-          });
+          };
+          setNotifPrefs(prefs);
+          if (prefs.whatsapp_number) setVerifyNumber(prefs.whatsapp_number);
         }
         setLoading(false);
       });
   }, [user]);
+
+  const handleWhatsAppToggle = (enabled: boolean) => {
+    if (enabled) {
+      if (notifPrefs.whatsapp_verified && notifPrefs.whatsapp_number) {
+        // Already verified, just enable
+        setNotifPrefs({ ...notifPrefs, notify_whatsapp: true });
+      } else {
+        // Start verification flow
+        setVerifyStep("number");
+        setNotifPrefs({ ...notifPrefs, notify_whatsapp: false });
+      }
+    } else {
+      setNotifPrefs({ ...notifPrefs, notify_whatsapp: false });
+      setVerifyStep("idle");
+    }
+  };
+
+  const handleSendCode = async () => {
+    if (!verifyNumber.trim()) {
+      toast({ title: "Enter your number", description: "Please enter your WhatsApp number.", variant: "destructive" });
+      return;
+    }
+    setSendingCode(true);
+    try {
+      const { data, error } = await supabase.functions.invoke("send-whatsapp-verify", {
+        body: { whatsapp_number: verifyNumber.trim() },
+      });
+      if (error) throw error;
+      if (data?.error) {
+        toast({ title: "Error", description: data.error, variant: "destructive" });
+      } else {
+        setVerifyStep("code");
+        toast({ title: "Code sent", description: "Check your WhatsApp for a 6-digit code." });
+      }
+    } catch (err: any) {
+      toast({ title: "Error", description: err.message || "Failed to send code", variant: "destructive" });
+    } finally {
+      setSendingCode(false);
+    }
+  };
+
+  const handleVerifyCode = async () => {
+    if (verifyCode.length !== 6) return;
+    setVerifying(true);
+    try {
+      // Check code against profiles
+      const { data: profileData } = await supabase
+        .from("profiles")
+        .select("whatsapp_verify_code, whatsapp_verify_expires_at")
+        .eq("user_id", user!.id)
+        .single();
+
+      if (!profileData) throw new Error("Profile not found");
+
+      const code = (profileData as any).whatsapp_verify_code;
+      const expiresAt = (profileData as any).whatsapp_verify_expires_at;
+
+      if (!code || !expiresAt) {
+        toast({ title: "Error", description: "No verification code found. Please request a new one.", variant: "destructive" });
+        setVerifying(false);
+        return;
+      }
+
+      if (new Date(expiresAt) < new Date()) {
+        toast({ title: "Expired", description: "Code has expired. Please request a new one.", variant: "destructive" });
+        setVerifyStep("number");
+        setVerifying(false);
+        return;
+      }
+
+      if (code !== verifyCode) {
+        toast({ title: "Incorrect", description: "Incorrect code, please try again.", variant: "destructive" });
+        setVerifying(false);
+        return;
+      }
+
+      // Code is correct — mark verified
+      await supabase
+        .from("profiles")
+        .update({
+          whatsapp_verified: true,
+          notify_whatsapp: true,
+          whatsapp_verify_code: null,
+          whatsapp_verify_expires_at: null,
+        } as any)
+        .eq("user_id", user!.id);
+
+      setNotifPrefs({
+        ...notifPrefs,
+        notify_whatsapp: true,
+        whatsapp_number: verifyNumber.trim(),
+        whatsapp_verified: true,
+      });
+      setVerifyStep("idle");
+      setVerifyCode("");
+      toast({ title: "Verified ✓", description: "WhatsApp reminders are now active." });
+    } catch (err: any) {
+      toast({ title: "Error", description: err.message || "Verification failed", variant: "destructive" });
+    } finally {
+      setVerifying(false);
+    }
+  };
 
   const handleSave = async () => {
     if (!user) return;
@@ -170,24 +286,96 @@ const ProfileBiometrics = ({ onUpdate }: { onUpdate?: (bio: any) => void }) => {
           <div className="flex items-center gap-2">
             <MessageCircle className="h-3.5 w-3.5 text-muted-foreground" />
             <span className="text-sm text-foreground">WhatsApp reminders</span>
+            {notifPrefs.whatsapp_verified && notifPrefs.notify_whatsapp && (
+              <span className="flex items-center gap-0.5 text-[10px] text-primary">
+                <ShieldCheck className="h-3 w-3" /> Verified
+              </span>
+            )}
           </div>
           <Switch
             checked={notifPrefs.notify_whatsapp}
-            onCheckedChange={(v) => setNotifPrefs({ ...notifPrefs, notify_whatsapp: v })}
+            onCheckedChange={handleWhatsAppToggle}
           />
         </div>
 
-        {notifPrefs.notify_whatsapp && (
-          <div>
-            <label className="text-xs font-medium text-muted-foreground mb-1 block">WhatsApp number (with country code)</label>
+        {/* WhatsApp verification flow - Step 1: Enter number */}
+        {verifyStep === "number" && (
+          <div className="ml-6 space-y-2 p-3 rounded-xl bg-muted/30 border border-border">
+            <p className="text-xs text-muted-foreground">
+              We'll send a verification code via WhatsApp to confirm your number.
+            </p>
             <input
               type="tel"
-              value={notifPrefs.whatsapp_number ?? ""}
-              onChange={(e) => setNotifPrefs({ ...notifPrefs, whatsapp_number: e.target.value || null })}
+              value={verifyNumber}
+              onChange={(e) => setVerifyNumber(e.target.value)}
               placeholder="+447XXXXXXXXX"
               className="w-full px-3 py-2 rounded-xl bg-background border border-border text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-primary/40"
             />
-            <p className="text-[10px] text-muted-foreground mt-1">Include country code, no spaces (e.g. +447700900000)</p>
+            <p className="text-[10px] text-muted-foreground">Include country code (e.g. +447700900000) or UK format (07700900000)</p>
+            <Button
+              size="sm"
+              onClick={handleSendCode}
+              disabled={sendingCode || !verifyNumber.trim()}
+              className="w-full"
+            >
+              {sendingCode ? <Loader2 className="h-3.5 w-3.5 animate-spin mr-1" /> : <Send className="h-3.5 w-3.5 mr-1" />}
+              Send Verification Code
+            </Button>
+          </div>
+        )}
+
+        {/* WhatsApp verification flow - Step 2: Enter code */}
+        {verifyStep === "code" && (
+          <div className="ml-6 space-y-3 p-3 rounded-xl bg-muted/30 border border-border">
+            <p className="text-xs text-muted-foreground">
+              Enter the 6-digit code sent to <strong>{verifyNumber}</strong>
+            </p>
+            <div className="flex justify-center">
+              <InputOTP maxLength={6} value={verifyCode} onChange={setVerifyCode}>
+                <InputOTPGroup>
+                  <InputOTPSlot index={0} />
+                  <InputOTPSlot index={1} />
+                  <InputOTPSlot index={2} />
+                  <InputOTPSlot index={3} />
+                  <InputOTPSlot index={4} />
+                  <InputOTPSlot index={5} />
+                </InputOTPGroup>
+              </InputOTP>
+            </div>
+            <div className="flex gap-2">
+              <Button
+                size="sm"
+                variant="ghost"
+                className="flex-1"
+                onClick={() => { setVerifyStep("number"); setVerifyCode(""); }}
+              >
+                Back
+              </Button>
+              <Button
+                size="sm"
+                className="flex-1"
+                onClick={handleVerifyCode}
+                disabled={verifying || verifyCode.length !== 6}
+              >
+                {verifying ? <Loader2 className="h-3.5 w-3.5 animate-spin mr-1" /> : <ShieldCheck className="h-3.5 w-3.5 mr-1" />}
+                Verify
+              </Button>
+            </div>
+          </div>
+        )}
+
+        {/* Show current verified number when WhatsApp is active */}
+        {notifPrefs.notify_whatsapp && notifPrefs.whatsapp_verified && verifyStep === "idle" && (
+          <div className="ml-6">
+            <p className="text-xs text-muted-foreground">
+              Sending to <strong>{notifPrefs.whatsapp_number}</strong>
+              <button
+                className="text-primary ml-2 underline text-[10px]"
+                onClick={() => setVerifyStep("number")}
+              >
+                Change number
+              </button>
+            </p>
           </div>
         )}
 
