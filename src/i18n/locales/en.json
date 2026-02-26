@@ -347,10 +347,11 @@
   },
   "peptideCard": {
     "new": "New",
-    "showExperiences": "Show Community Experiences",
-    "hideExperiences": "Hide Community Experiences",
+    "showExperiences": "Show Details",
+    "hideExperiences": "Hide Details",
     "addToProtocol": "Add to My Protocol",
-    "communityExperiences": "Community Experiences",
+    "researchReferences": "Research References",
+    "userExperiences": "User Experiences",
     "source": "Source",
     "purity": "purity"
   },
