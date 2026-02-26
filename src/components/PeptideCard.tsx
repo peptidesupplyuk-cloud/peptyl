@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { motion, AnimatePresence } from "framer-motion";
-import { ThumbsUp, ThumbsDown, TrendingUp, AlertTriangle, Clock, ChevronDown, ChevronUp, Syringe, CalendarDays, Sparkles, CheckCircle2, FlaskConical, Plus, ArrowRight, Users } from "lucide-react";
+import { ThumbsUp, ThumbsDown, TrendingUp, AlertTriangle, Clock, ChevronDown, ChevronUp, Syringe, CalendarDays, Sparkles, CheckCircle2, FlaskConical, Plus, ArrowRight, Users, FileText, MessageSquarePlus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/contexts/AuthContext";
 import OnboardingModal from "@/components/OnboardingModal";
@@ -170,10 +170,12 @@ const PeptideCard = ({ peptide, index }: PeptideCardProps) => {
                 <p className="text-xs text-muted-foreground italic">💡 {peptide.notes}</p>
               )}
 
-              {/* Community experiences */}
-              {(peptide.experiences.length > 0 || communityReports.length > 0) && (
+              {/* Research References */}
+              {peptide.experiences.length > 0 && (
                 <div className="space-y-2 pt-2 border-t border-border">
-                  <h4 className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">Experiences</h4>
+                  <h4 className="text-xs font-semibold text-muted-foreground uppercase tracking-wide flex items-center gap-1.5">
+                    <FlaskConical className="h-3 w-3" /> Research References
+                  </h4>
                   {peptide.experiences.map((exp, ei) => {
                     const key = `research_${ei}`;
                     const myVote = myVotes[key];
@@ -189,7 +191,12 @@ const PeptideCard = ({ peptide, index }: PeptideCardProps) => {
                            exp.sentiment === "caution" ? <AlertTriangle className="h-3 w-3" /> :
                            <Clock className="h-3 w-3" />}
                         </div>
-                        <p className="flex-1 text-foreground/80 leading-relaxed">{exp.text}</p>
+                        <div className="flex-1">
+                          <p className="text-foreground/80 leading-relaxed">{exp.text}</p>
+                          {(exp as any).source && (
+                            <p className="text-[10px] text-muted-foreground mt-0.5 italic">Source: {(exp as any).source}</p>
+                          )}
+                        </div>
                         <div className="flex items-center gap-1 flex-shrink-0">
                           <button onClick={(e) => { e.stopPropagation(); handleVote(key, "up"); }}
                             className={`p-1 rounded transition-colors ${myVote === "up" ? "bg-success/20 text-success" : "hover:bg-muted text-muted-foreground"}`}>
@@ -204,7 +211,16 @@ const PeptideCard = ({ peptide, index }: PeptideCardProps) => {
                       </div>
                     );
                   })}
-                  {communityReports.map((report) => {
+                </div>
+              )}
+
+              {/* User Experiences */}
+              <div className="space-y-2 pt-2 border-t border-border">
+                <h4 className="text-xs font-semibold text-muted-foreground uppercase tracking-wide flex items-center gap-1.5">
+                  <Users className="h-3 w-3" /> User Experiences
+                </h4>
+                {communityReports.length > 0 ? (
+                  communityReports.map((report) => {
                     const key = report.journal_id;
                     const myVote = myVotes[key];
                     const netVotes = getNetVotes(key);
@@ -232,9 +248,20 @@ const PeptideCard = ({ peptide, index }: PeptideCardProps) => {
                         </div>
                       </div>
                     );
-                  })}
-                </div>
-              )}
+                  })
+                ) : (
+                  <div className="flex items-center gap-2 p-3 rounded-md bg-muted/20 border border-dashed border-border">
+                    <MessageSquarePlus className="h-4 w-4 text-muted-foreground" />
+                    <p className="text-[11px] text-muted-foreground">No user experiences yet.</p>
+                    <button
+                      onClick={(e) => { e.stopPropagation(); handleAddToProtocol(); }}
+                      className="text-[11px] font-medium text-primary hover:text-primary/80 transition-colors ml-auto"
+                    >
+                      Share your experience →
+                    </button>
+                  </div>
+                )}
+              </div>
 
               {/* Add to protocol */}
               <Button size="sm" onClick={(e) => { e.stopPropagation(); handleAddToProtocol(); }} className="shadow-brand text-xs gap-1.5">

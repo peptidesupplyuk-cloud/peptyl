@@ -334,10 +334,11 @@
   },
   "peptideCard": {
     "new": "Neu",
-    "showExperiences": "Community-Erfahrungen anzeigen",
-    "hideExperiences": "Community-Erfahrungen ausblenden",
+    "showExperiences": "Details anzeigen",
+    "hideExperiences": "Details ausblenden",
     "addToProtocol": "Zu meinem Protokoll hinzufügen",
-    "communityExperiences": "Community-Erfahrungen",
+    "researchReferences": "Forschungsreferenzen",
+    "userExperiences": "Nutzererfahrungen",
     "source": "Quelle",
     "purity": "Reinheit"
   },
