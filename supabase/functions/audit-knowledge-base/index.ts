@@ -30,23 +30,25 @@ function buildAuditPrompt(records: any[]): string {
     longevity_relevance: r.longevity_relevance,
   }));
 
-  return `Audit these ${records.length} records for accuracy. For each issue found return:
+  return `Audit these ${records.length} records for accuracy. For each issue found, return the corrected value so it can be applied directly.
+
+Return:
 {
-  "audit_results": [
+  "fixes": [
     {
       "peptyl_id": "id of the record",
       "name": "compound name",
-      "issue_type": "factual_error | contradiction | outdated | missing_safety | regulatory_error | overstated_evidence",
-      "field_affected": "which field has the issue",
-      "current_value": "what it currently says (brief)",
-      "issue_description": "what is wrong and why",
-      "recommended_fix": "what it should say",
+      "field_affected": "the database column name to update",
+      "old_value": "current value (brief)",
+      "new_value": "the corrected value — must be the exact replacement, same type as the field (string, array, etc.)",
+      "reason": "why this fix is needed",
       "severity": "critical | high | medium | low"
     }
   ]
 }
 
-If no issues are found for a record, omit it. Only flag genuine problems.
+Only flag genuine problems. If no issues, return {"fixes": []}.
+Use exact database column names: mechanism_of_action, evidence_grade, evidence_summary, contraindications, drug_interactions, synergistic_compounds, antagonistic_compounds, side_effects_common, side_effects_rare, regulatory_status_uk, regulatory_status_us, regulatory_status_eu, regulatory_note, longevity_relevance, fitness_relevance, health_optimisation_relevance, dosing_notes, synergistic_supplements, antagonistic_supplements.
 
 Records to audit:
 ${JSON.stringify(summaries, null, 2)}`;
@@ -127,13 +129,15 @@ Deno.serve(async (req) => {
 
     const summary = {
       total_records_audited: allRecords.length,
-      issues_found: 0,
+      fixes_applied: 0,
+      fixes_failed: 0,
       critical: 0,
       high: 0,
       medium: 0,
       low: 0,
       article_contradictions: 0,
       estimated_cost_usd: 0,
+      fix_details: [] as { name: string; field: string; reason: string; severity: string }[],
     };
 
     // Process in batches of 10
@@ -145,28 +149,28 @@ Deno.serve(async (req) => {
         const result = await callGpt4o(SYSTEM_PROMPT, buildAuditPrompt(batch), apiKey);
         summary.estimated_cost_usd += 0.06;
 
-        const issues = result.audit_results || [];
-        for (const issue of issues) {
-          const { error: insertErr } = await supabase.from("audit_results").insert({
-            peptyl_id: issue.peptyl_id || null,
-            compound_name: issue.name,
-            compound_type: batch.find((b) => b.name === issue.name)?.compound_type || "peptide",
-            issue_type: issue.issue_type,
-            field_affected: issue.field_affected,
-            current_value: issue.current_value,
-            issue_description: issue.issue_description,
-            recommended_fix: issue.recommended_fix,
-            severity: issue.severity,
-            audit_run_id: auditRunId,
-          });
+        const fixes = result.fixes || [];
+        for (const fix of fixes) {
+          const record = batch.find((b) => b.peptyl_id === fix.peptyl_id || b.name === fix.name);
+          if (!record || !fix.field_affected || fix.new_value === undefined) continue;
 
-          if (!insertErr) {
-            summary.issues_found++;
-            if (issue.severity === "critical") summary.critical++;
-            else if (issue.severity === "high") summary.high++;
-            else if (issue.severity === "medium") summary.medium++;
-            else summary.low++;
+          const table = record.compound_type === "supplement" ? "supplements_enriched" : "peptides_enriched";
+          const { error: updateErr } = await supabase
+            .from(table)
+            .update({ [fix.field_affected]: fix.new_value, updated_at: new Date().toISOString() })
+            .eq("peptyl_id", record.peptyl_id);
+
+          if (!updateErr) {
+            summary.fixes_applied++;
+            summary.fix_details.push({ name: fix.name, field: fix.field_affected, reason: fix.reason, severity: fix.severity });
+          } else {
+            summary.fixes_failed++;
           }
+
+          if (fix.severity === "critical") summary.critical++;
+          else if (fix.severity === "high") summary.high++;
+          else if (fix.severity === "medium") summary.medium++;
+          else summary.low++;
         }
       } catch (e) {
         console.error(`Audit batch error (records ${i}-${i + batch.length}):`, e.message);
@@ -195,43 +199,25 @@ Deno.serve(async (req) => {
         const contradictionPrompt = `Compare these published articles against the knowledge base compounds (${compoundNames.join(", ")}).
 Flag any claims in articles that contradict the database records. Return:
 {
-  "audit_results": [
+  "fixes": [
     {
-      "peptyl_id": "article",
       "name": "article title",
-      "issue_type": "contradiction",
-      "field_affected": "article_content",
-      "current_value": "what the article claims",
-      "issue_description": "how it contradicts the database",
-      "recommended_fix": "which is correct and what to update",
+      "field": "article_content",
+      "contradiction": "what the article claims vs what the database says",
       "severity": "medium"
     }
   ]
 }
-If no contradictions found, return {"audit_results": []}.
+If no contradictions found, return {"fixes": []}.
 
 Articles:
 ${JSON.stringify(articleSummaries, null, 2)}`;
 
         const contradictions = await callGpt4o(SYSTEM_PROMPT, contradictionPrompt, apiKey);
         summary.estimated_cost_usd += 0.04;
-
-        for (const issue of contradictions.audit_results || []) {
-          await supabase.from("audit_results").insert({
-            peptyl_id: "article",
-            compound_name: issue.name,
-            compound_type: "article",
-            issue_type: issue.issue_type,
-            field_affected: issue.field_affected,
-            current_value: issue.current_value,
-            issue_description: issue.issue_description,
-            recommended_fix: issue.recommended_fix,
-            severity: issue.severity,
-            audit_run_id: auditRunId,
-          });
-          summary.article_contradictions++;
-          summary.issues_found++;
-          summary.medium++;
+        summary.article_contradictions = (contradictions.fixes || []).length;
+        for (const c of contradictions.fixes || []) {
+          summary.fix_details.push({ name: c.name, field: "article", reason: c.contradiction, severity: c.severity || "medium" });
         }
       }
     } catch (e) {
