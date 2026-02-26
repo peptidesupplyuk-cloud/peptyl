@@ -1237,9 +1237,6 @@ const KnowledgeBaseTab = () => {
               {auditSummary.medium > 0 && <span className="px-1.5 py-0.5 rounded bg-yellow-500/20 text-yellow-700 dark:text-yellow-400 text-[10px] font-medium">{auditSummary.medium} Medium</span>}
               {auditSummary.low > 0 && <span className="px-1.5 py-0.5 rounded bg-muted text-muted-foreground text-[10px] font-medium">{auditSummary.low} Low</span>}
             </div>
-            {auditSummary.article_contradictions > 0 && (
-              <p className="text-muted-foreground mt-1">Article contradictions flagged: {auditSummary.article_contradictions}</p>
-            )}
             <p className="text-muted-foreground">Est. cost: ${auditSummary.estimated_cost_usd?.toFixed(2)}</p>
 
             {auditSummary.fix_details?.length > 0 && (
@@ -1249,6 +1246,27 @@ const KnowledgeBaseTab = () => {
                   <div key={i} className="flex items-start gap-2">
                     <CheckCircle className="h-3 w-3 text-green-500 mt-0.5 flex-shrink-0" />
                     <span className="text-muted-foreground"><span className="text-foreground font-medium">{fix.name}</span> → {fix.field}: {fix.reason}</span>
+                  </div>
+                ))}
+              </div>
+            )}
+
+            {auditSummary.article_notes?.length > 0 && (
+              <div className="mt-3 space-y-1.5">
+                <p className="font-medium text-foreground text-[11px]">Article Notes ({auditSummary.article_notes.length}):</p>
+                {auditSummary.article_notes.map((note: any, i: number) => (
+                  <div key={i} className="flex items-start gap-2">
+                    <BookOpen className="h-3 w-3 text-primary mt-0.5 flex-shrink-0" />
+                    <div className="text-muted-foreground">
+                      <span className="text-foreground font-medium">{note.article_title}</span>
+                      <span className={`ml-1.5 px-1.5 py-0.5 rounded text-[9px] font-medium ${
+                        note.type === "supplemental" ? "bg-primary/10 text-primary" :
+                        note.type === "contrarian" ? "bg-yellow-500/20 text-yellow-700 dark:text-yellow-400" :
+                        "bg-muted text-muted-foreground"
+                      }`}>{note.type}</span>
+                      <span className="ml-1.5 text-muted-foreground/80">re: {note.compound}</span>
+                      <p className="mt-0.5">{note.perspective}</p>
+                    </div>
                   </div>
                 ))}
               </div>

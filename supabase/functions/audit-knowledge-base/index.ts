@@ -135,7 +135,7 @@ Deno.serve(async (req) => {
       high: 0,
       medium: 0,
       low: 0,
-      article_contradictions: 0,
+      article_notes: [] as { title: string; compound: string; perspective: string; type: string }[],
       estimated_cost_usd: 0,
       fix_details: [] as { name: string; field: string; reason: string; severity: string }[],
     };
@@ -197,28 +197,32 @@ Deno.serve(async (req) => {
         const compoundNames = allRecords.map((r) => r.name);
 
         const contradictionPrompt = `Compare these published articles against the knowledge base compounds (${compoundNames.join(", ")}).
-Flag any claims in articles that contradict the database records. Return:
+Identify where articles present claims that differ from the database records. These are NOT errors to fix — they may be supplemental evidence or valid contrarian viewpoints.
+
+Classify each as:
+- "supplemental" — adds supporting nuance or additional evidence not in the database
+- "contrarian" — presents a differing view backed by some evidence
+- "outdated" — article references older data superseded by the database
+
+Return:
 {
-  "fixes": [
+  "notes": [
     {
-      "name": "article title",
-      "field": "article_content",
-      "contradiction": "what the article claims vs what the database says",
-      "severity": "medium"
+      "article_title": "title of the article",
+      "compound": "compound name discussed",
+      "perspective": "what the article claims and how it differs",
+      "type": "supplemental | contrarian | outdated"
     }
   ]
 }
-If no contradictions found, return {"fixes": []}.
+If no notable differences found, return {"notes": []}.
 
 Articles:
 ${JSON.stringify(articleSummaries, null, 2)}`;
 
-        const contradictions = await callGpt4o(SYSTEM_PROMPT, contradictionPrompt, apiKey);
+        const result = await callGpt4o(SYSTEM_PROMPT, contradictionPrompt, apiKey);
         summary.estimated_cost_usd += 0.04;
-        summary.article_contradictions = (contradictions.fixes || []).length;
-        for (const c of contradictions.fixes || []) {
-          summary.fix_details.push({ name: c.name, field: "article", reason: c.contradiction, severity: c.severity || "medium" });
-        }
+        summary.article_notes = result.notes || [];
       }
     } catch (e) {
       console.error("Article contradiction check error:", e.message);
