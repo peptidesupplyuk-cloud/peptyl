@@ -8,8 +8,27 @@ import Footer from "@/components/Footer";
 import PeptideCard from "@/components/PeptideCard";
 import StackBuilder from "@/components/StackBuilder";
 import PeptideActionBlock from "@/components/PeptideActionBlock";
-import { peptides, categories } from "@/data/peptides";
+import { peptides as staticPeptides, categories } from "@/data/peptides";
+import { useEnrichedPeptides } from "@/hooks/use-enriched-peptides";
 import SEO from "@/components/SEO";
+import type { PeptideData } from "@/data/peptides";
+import { Shield, Heart, Zap, TrendingUp, Clock, Brain, Dumbbell, Eye, Flame, Pill, Sparkles, Activity } from "lucide-react";
+
+const iconMap: Record<string, any> = {
+  "Weight Management": Flame,
+  "Healing & Recovery": Shield,
+  "Growth Hormone": TrendingUp,
+  "Cognitive Enhancement": Brain,
+  "Anti-Aging & Skin": Sparkles,
+  "Sleep & Recovery": Clock,
+  "Hormone Support": Activity,
+  "Immune Support": Shield,
+  "Sexual Health": Heart,
+  "Muscle Growth": Dumbbell,
+  "Metabolic & Exercise": Activity,
+  "Anti-Inflammatory": Shield,
+  "Cosmetic": Eye,
+};
 
 type Tab = "database" | "stacks";
 
@@ -18,6 +37,33 @@ const PeptidesPage = () => {
   const [tab, setTab] = useState<Tab>("database");
   const [search, setSearch] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("All");
+  const { data: enrichedPeptides } = useEnrichedPeptides();
+
+  // Map enriched DB data back to PeptideData format, or fall back to static
+  const peptides: PeptideData[] = (enrichedPeptides && enrichedPeptides.length > 0)
+    ? enrichedPeptides.map((ep) => {
+        // Find matching static entry for icon/experiences
+        const staticMatch = staticPeptides.find(
+          (sp) => sp.name.toLowerCase() === ep.name.toLowerCase()
+        );
+        return {
+          name: ep.name,
+          fullName: ep.full_name || ep.name,
+          category: ep.category || "Uncategorized",
+          description: ep.description || "",
+          icon: staticMatch?.icon || iconMap[ep.category || ""] || Pill,
+          administration: ep.administration?.[0] || staticMatch?.administration || "SubQ",
+          frequency: ep.frequency || staticMatch?.frequency || "",
+          doseRange: ep.dose_range || staticMatch?.doseRange,
+          cycleDuration: ep.cycle_duration || staticMatch?.cycleDuration,
+          notes: ep.dosing_notes || staticMatch?.notes,
+          isNew: staticMatch?.isNew,
+          benefits: ep.primary_effects || staticMatch?.benefits || [],
+          regulatoryStatus: staticMatch?.regulatoryStatus,
+          experiences: staticMatch?.experiences || [],
+        };
+      })
+    : staticPeptides;
 
   const filtered = peptides.filter((p) => {
     const matchesSearch =
