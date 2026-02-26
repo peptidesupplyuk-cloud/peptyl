@@ -807,6 +807,8 @@ const KnowledgeBaseTab = () => {
   const [enriching, setEnriching] = useState<string | null>(null);
   const [results, setResults] = useState<any>(null);
   const [enrichResults, setEnrichResults] = useState<any>(null);
+  const [analyzingGaps, setAnalyzingGaps] = useState(false);
+  const [gapResults, setGapResults] = useState<any>(null);
 
   const { data: peptideCount } = useQuery({
     queryKey: ["kb-peptide-count"],
@@ -887,6 +889,39 @@ const KnowledgeBaseTab = () => {
       toast({ title: "Enrichment error", description: e.message, variant: "destructive" });
     } finally {
       setEnriching(null);
+    }
+  };
+
+  const runGapAnalysis = async () => {
+    setAnalyzingGaps(true);
+    setGapResults(null);
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      const resp = await fetch(
+        `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/knowledge-gap-analysis`,
+        {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${session?.access_token}`,
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({}),
+        }
+      );
+      const data = await resp.json();
+      setGapResults(data);
+      if (data.error) {
+        toast({ title: "Gap analysis failed", description: data.error, variant: "destructive" });
+      } else {
+        toast({
+          title: "Gap analysis complete",
+          description: `Found ${data.missing_peptides?.length || 0} missing peptides and ${data.missing_supplements?.length || 0} missing supplements.`,
+        });
+      }
+    } catch (e: any) {
+      toast({ title: "Gap analysis error", description: e.message, variant: "destructive" });
+    } finally {
+      setAnalyzingGaps(false);
     }
   };
 
@@ -996,7 +1031,71 @@ const KnowledgeBaseTab = () => {
         )}
       </div>
 
-      {/* Migration */}
+      {/* Gap Analysis */}
+      <div className="bg-card border border-border rounded-xl p-6">
+        <h3 className="font-heading font-semibold text-foreground mb-2">Knowledge Gap Analysis</h3>
+        <p className="text-xs text-muted-foreground mb-4">
+          Uses GPT-4o to identify peptides and supplements missing from the database based on current research landscape.
+        </p>
+        <Button onClick={runGapAnalysis} disabled={analyzingGaps} className="gap-2" variant="outline">
+          {analyzingGaps ? <Loader2 className="h-4 w-4 animate-spin" /> : <Search className="h-4 w-4" />}
+          {analyzingGaps ? "Analysing Gaps..." : "Run Gap Analysis"}
+        </Button>
+
+        {gapResults && !gapResults.error && (
+          <div className="mt-4 space-y-4">
+            <p className="text-xs text-muted-foreground">
+              Current DB: {gapResults.current_peptides} peptides, {gapResults.current_supplements} supplements
+            </p>
+
+            {gapResults.missing_peptides?.length > 0 && (
+              <div>
+                <p className="text-sm font-semibold text-foreground mb-2">Missing Peptides ({gapResults.missing_peptides.length})</p>
+                <div className="space-y-2">
+                  {gapResults.missing_peptides.map((p: any, i: number) => (
+                    <div key={i} className="bg-muted/50 rounded-lg p-3 text-xs">
+                      <div className="flex items-center gap-2 mb-1">
+                        <span className="font-semibold text-foreground">{p.name}</span>
+                        {p.full_name && <span className="text-muted-foreground">({p.full_name})</span>}
+                        <span className={`px-1.5 py-0.5 rounded text-[10px] font-medium ${
+                          p.priority === "high" ? "bg-destructive/20 text-destructive" :
+                          p.priority === "medium" ? "bg-yellow-500/20 text-yellow-700 dark:text-yellow-400" :
+                          "bg-muted text-muted-foreground"
+                        }`}>{p.priority}</span>
+                        <span className="px-1.5 py-0.5 rounded bg-primary/10 text-primary text-[10px]">{p.category}</span>
+                      </div>
+                      <p className="text-muted-foreground">{p.rationale}</p>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {gapResults.missing_supplements?.length > 0 && (
+              <div>
+                <p className="text-sm font-semibold text-foreground mb-2">Missing Supplements ({gapResults.missing_supplements.length})</p>
+                <div className="space-y-2">
+                  {gapResults.missing_supplements.map((s: any, i: number) => (
+                    <div key={i} className="bg-muted/50 rounded-lg p-3 text-xs">
+                      <div className="flex items-center gap-2 mb-1">
+                        <span className="font-semibold text-foreground">{s.name}</span>
+                        <span className={`px-1.5 py-0.5 rounded text-[10px] font-medium ${
+                          s.priority === "high" ? "bg-destructive/20 text-destructive" :
+                          s.priority === "medium" ? "bg-yellow-500/20 text-yellow-700 dark:text-yellow-400" :
+                          "bg-muted text-muted-foreground"
+                        }`}>{s.priority}</span>
+                        <span className="px-1.5 py-0.5 rounded bg-primary/10 text-primary text-[10px]">{s.category}</span>
+                      </div>
+                      <p className="text-muted-foreground">{s.rationale}</p>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
+        )}
+      </div>
+
       <div className="bg-card border border-border rounded-xl p-6">
         <h3 className="font-heading font-semibold text-foreground mb-2">Migrate Static Data → Database</h3>
         <p className="text-xs text-muted-foreground mb-4">
