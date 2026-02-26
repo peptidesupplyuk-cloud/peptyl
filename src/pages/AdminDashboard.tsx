@@ -802,8 +802,11 @@ const FeedbackTab = () => {
 
 const KnowledgeBaseTab = () => {
   const { toast } = useToast();
+  const queryClient = useQueryClient();
   const [migrating, setMigrating] = useState(false);
+  const [enriching, setEnriching] = useState<string | null>(null);
   const [results, setResults] = useState<any>(null);
+  const [enrichResults, setEnrichResults] = useState<any>(null);
 
   const { data: peptideCount } = useQuery({
     queryKey: ["kb-peptide-count"],
@@ -836,6 +839,56 @@ const KnowledgeBaseTab = () => {
       return count || 0;
     },
   });
+
+  const { data: enrichedPeptides } = useQuery({
+    queryKey: ["kb-enriched-peptides"],
+    queryFn: async () => {
+      const { count } = await supabase.from("peptides_enriched").select("*", { count: "exact", head: true }).eq("enrichment_status", "enriched");
+      return count || 0;
+    },
+  });
+
+  const { data: enrichedSupplements } = useQuery({
+    queryKey: ["kb-enriched-supplements"],
+    queryFn: async () => {
+      const { count } = await supabase.from("supplements_enriched").select("*", { count: "exact", head: true }).eq("enrichment_status", "enriched");
+      return count || 0;
+    },
+  });
+
+  const runEnrichment = async (type: "peptides" | "supplements") => {
+    setEnriching(type);
+    setEnrichResults(null);
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      const resp = await fetch(
+        `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/enrich-knowledge-base`,
+        {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${session?.access_token}`,
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ type, batch_size: 5 }),
+        }
+      );
+      const data = await resp.json();
+      setEnrichResults(data);
+      if (data.error) {
+        toast({ title: "Enrichment failed", description: data.error, variant: "destructive" });
+      } else {
+        toast({
+          title: "Enrichment complete",
+          description: `${data.enriched} enriched, ${data.failed} failed, ${data.remaining} remaining. Est. cost: $${data.estimated_cost_usd?.toFixed(2)}`,
+        });
+        queryClient.invalidateQueries({ queryKey: ["kb-"] });
+      }
+    } catch (e: any) {
+      toast({ title: "Enrichment error", description: e.message, variant: "destructive" });
+    } finally {
+      setEnriching(null);
+    }
+  };
 
   const runMigration = async () => {
     setMigrating(true);
@@ -905,19 +958,51 @@ const KnowledgeBaseTab = () => {
 
   return (
     <div className="space-y-6">
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
         <StatCard icon={FlaskConical} label="Peptides in DB" value={peptideCount ?? 0} />
         <StatCard icon={Sparkles} label="Supplements in DB" value={supplementCount ?? 0} />
         <StatCard icon={Clock} label="Peptides Pending" value={pendingPeptides ?? 0} />
-        <StatCard icon={Clock} label="Supplements Pending" value={pendingSupplements ?? 0} />
+        <StatCard icon={Clock} label="Supps Pending" value={pendingSupplements ?? 0} />
+        <StatCard icon={CheckCircle} label="Peptides Enriched" value={enrichedPeptides ?? 0} />
+        <StatCard icon={CheckCircle} label="Supps Enriched" value={enrichedSupplements ?? 0} />
       </div>
 
+      {/* Enrichment Progress */}
+      <div className="bg-card border border-border rounded-xl p-6">
+        <h3 className="font-heading font-semibold text-foreground mb-2">GPT-4o Enrichment</h3>
+        <p className="text-xs text-muted-foreground mb-4">
+          Enriches next 5 pending records using GPT-4o via OpenAI API. Adds mechanism of action, evidence grades, research refs, DNA signals, and more.
+        </p>
+        <div className="flex gap-3 flex-wrap">
+          <Button onClick={() => runEnrichment("peptides")} disabled={!!enriching || (pendingPeptides ?? 0) === 0} className="gap-2">
+            {enriching === "peptides" ? <Loader2 className="h-4 w-4 animate-spin" /> : <FlaskConical className="h-4 w-4" />}
+            {enriching === "peptides" ? "Enriching Peptides..." : `Enrich Peptides (${pendingPeptides ?? 0} pending)`}
+          </Button>
+          <Button onClick={() => runEnrichment("supplements")} disabled={!!enriching || (pendingSupplements ?? 0) === 0} className="gap-2" variant="secondary">
+            {enriching === "supplements" ? <Loader2 className="h-4 w-4 animate-spin" /> : <Sparkles className="h-4 w-4" />}
+            {enriching === "supplements" ? "Enriching Supplements..." : `Enrich Supplements (${pendingSupplements ?? 0} pending)`}
+          </Button>
+        </div>
+
+        {enrichResults && !enrichResults.error && (
+          <div className="mt-4 bg-muted/50 rounded-lg p-3 text-xs space-y-1">
+            <p className="text-foreground font-semibold">Enrichment Results</p>
+            <p className="text-muted-foreground">Enriched: {enrichResults.enriched} | Failed: {enrichResults.failed} | Remaining: {enrichResults.remaining}</p>
+            <p className="text-muted-foreground">Est. cost: ${enrichResults.estimated_cost_usd?.toFixed(2)}</p>
+            {enrichResults.errors?.length > 0 && (
+              <div className="mt-1 text-destructive">{enrichResults.errors.join(", ")}</div>
+            )}
+          </div>
+        )}
+      </div>
+
+      {/* Migration */}
       <div className="bg-card border border-border rounded-xl p-6">
         <h3 className="font-heading font-semibold text-foreground mb-2">Migrate Static Data → Database</h3>
         <p className="text-xs text-muted-foreground mb-4">
           Upserts all peptides.ts and supplements.ts entries into the enriched tables. Safe to run multiple times (idempotent).
         </p>
-        <Button onClick={runMigration} disabled={migrating} className="gap-2">
+        <Button onClick={runMigration} disabled={migrating} className="gap-2" variant="outline">
           {migrating ? <Loader2 className="h-4 w-4 animate-spin" /> : <Upload className="h-4 w-4" />}
           {migrating ? "Migrating..." : "Run Migration"}
         </Button>
