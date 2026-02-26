@@ -52,213 +52,205 @@ Deno.serve(async (req) => {
 
     console.log(`Current UTC hour: ${currentHour}, window: ${window}`);
 
-    if (!window) {
-      return new Response(
-        JSON.stringify({ message: "Outside reminder windows" }),
-        { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-      );
-    }
-
-    const { data: protocols, error: protErr } = await supabase
-      .from("protocols")
-      .select("id, user_id, name, status, supplements")
-      .eq("status", "active");
-
-    if (protErr) throw protErr;
-    if (!protocols || protocols.length === 0) {
-      return new Response(
-        JSON.stringify({ message: "No active protocols" }),
-        { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-      );
-    }
-
-    const userProtocols: Record<string, typeof protocols> = {};
-    for (const p of protocols) {
-      if (!userProtocols[p.user_id]) userProtocols[p.user_id] = [];
-      userProtocols[p.user_id].push(p);
-    }
-
+    // ── DOSE REMINDERS (only within AM/PM window) ──
     const results: Array<{ user_id: string; email_sent: boolean; whatsapp_sent: boolean; push_sent: boolean; peptides_count: number; supplements_count: number; error?: string }> = [];
 
-    for (const [userId, userProts] of Object.entries(userProtocols)) {
-      const { data: profile } = await supabase
-        .from("profiles")
-        .select("notify_email, notify_whatsapp, whatsapp_number, notify_am_time, notify_pm_time")
-        .eq("user_id", userId)
-        .single();
+    if (window) {
+      const { data: protocols, error: protErr } = await supabase
+        .from("protocols")
+        .select("id, user_id, name, status, supplements")
+        .eq("status", "active");
 
-      if (!profile) continue;
-      if (!profile.notify_email && !profile.notify_whatsapp) continue;
+      if (protErr) throw protErr;
 
-      const { data: authUser } = await supabase.auth.admin.getUserById(userId);
-      const userEmail = authUser?.user?.email;
+      if (protocols && protocols.length > 0) {
+        const userProtocols: Record<string, typeof protocols> = {};
+        for (const p of protocols) {
+          if (!userProtocols[p.user_id]) userProtocols[p.user_id] = [];
+          userProtocols[p.user_id].push(p);
+        }
 
-      if (!userEmail && profile.notify_email) {
-        console.log(`User ${userId}: notify_email=true but no email found, skipping`);
-        continue;
-      }
+        for (const [userId, userProts] of Object.entries(userProtocols)) {
+          const { data: profile } = await supabase
+            .from("profiles")
+            .select("notify_email, notify_whatsapp, whatsapp_number, notify_am_time, notify_pm_time")
+            .eq("user_id", userId)
+            .single();
 
-      const reminders: PeptideReminder[] = [];
-      const supplementReminders: SupplementReminder[] = [];
-      const seenSupplements = new Set<string>();
+          if (!profile) continue;
+          if (!profile.notify_email && !profile.notify_whatsapp) continue;
 
-      for (const prot of userProts) {
-        const { data: peptides } = await supabase
-          .from("protocol_peptides")
-          .select("peptide_name, dose_mcg, timing, frequency")
-          .eq("protocol_id", prot.id);
+          const { data: authUser } = await supabase.auth.admin.getUserById(userId);
+          const userEmail = authUser?.user?.email;
 
-        if (peptides) {
-          for (const pep of peptides) {
-            const timing = (pep.timing || "AM").toUpperCase();
-            const matchesWindow =
-              (window === "AM" && timing.includes("AM")) ||
-              (window === "PM" && (timing.includes("PM") || timing.includes("BED")));
+          if (!userEmail && profile.notify_email) {
+            console.log(`User ${userId}: notify_email=true but no email found, skipping`);
+            continue;
+          }
 
-            if (matchesWindow) {
-              const isDue = checkFrequencyDue(pep.frequency, today);
-              if (isDue) {
-                reminders.push({
-                  peptide_name: pep.peptide_name,
-                  dose_mcg: pep.dose_mcg,
-                  timing: pep.timing || "AM",
-                  protocol_name: prot.name,
-                });
+          const reminders: PeptideReminder[] = [];
+          const supplementReminders: SupplementReminder[] = [];
+          const seenSupplements = new Set<string>();
+
+          for (const prot of userProts) {
+            const { data: peptides } = await supabase
+              .from("protocol_peptides")
+              .select("peptide_name, dose_mcg, timing, frequency")
+              .eq("protocol_id", prot.id);
+
+            if (peptides) {
+              for (const pep of peptides) {
+                const timing = (pep.timing || "AM").toUpperCase();
+                const matchesWindow =
+                  (window === "AM" && timing.includes("AM")) ||
+                  (window === "PM" && (timing.includes("PM") || timing.includes("BED")));
+
+                if (matchesWindow) {
+                  const isDue = checkFrequencyDue(pep.frequency, today);
+                  if (isDue) {
+                    reminders.push({
+                      peptide_name: pep.peptide_name,
+                      dose_mcg: pep.dose_mcg,
+                      timing: pep.timing || "AM",
+                      protocol_name: prot.name,
+                    });
+                  }
+                }
+              }
+            }
+
+            if (window === "AM" && Array.isArray(prot.supplements)) {
+              for (const supp of prot.supplements as Array<{ name: string; dose: string; frequency: string }>) {
+                if (supp.name && !seenSupplements.has(supp.name)) {
+                  seenSupplements.add(supp.name);
+                  supplementReminders.push({
+                    name: supp.name,
+                    dose: supp.dose || "",
+                    frequency: supp.frequency || "daily",
+                    protocol_name: prot.name,
+                  });
+                }
               }
             }
           }
-        }
 
-        if (window === "AM" && Array.isArray(prot.supplements)) {
-          for (const supp of prot.supplements as Array<{ name: string; dose: string; frequency: string }>) {
-            if (supp.name && !seenSupplements.has(supp.name)) {
-              seenSupplements.add(supp.name);
-              supplementReminders.push({
-                name: supp.name,
-                dose: supp.dose || "",
-                frequency: supp.frequency || "daily",
-                protocol_name: prot.name,
+          if (reminders.length === 0 && supplementReminders.length === 0) continue;
+
+          let emailSent = false;
+          let whatsappSent = false;
+          let errorMsg: string | undefined;
+
+          // Send email via Resend
+          if (profile.notify_email && resendApiKey && userEmail) {
+            try {
+              const emailHtml = buildReminderEmail(reminders, supplementReminders, window, today);
+              const totalCount = reminders.length + supplementReminders.length;
+
+              const emailPayload = {
+                from: "Peptyl <reminders@peptyl.co.uk>",
+                to: [userEmail],
+                subject: `⏰ Action Required: ${totalCount} item${totalCount > 1 ? "s" : ""} to complete on your dashboard`,
+                html: emailHtml,
+              };
+
+              console.log(`Sending email to ${userEmail} with ${totalCount} items...`);
+
+              const emailRes = await fetch("https://api.resend.com/emails", {
+                method: "POST",
+                headers: {
+                  Authorization: `Bearer ${resendApiKey}`,
+                  "Content-Type": "application/json",
+                },
+                body: JSON.stringify(emailPayload),
               });
+
+              const emailResBody = await emailRes.text();
+              emailSent = emailRes.ok;
+
+              if (!emailRes.ok) {
+                console.error(`Resend API error (${emailRes.status}): ${emailResBody}`);
+                errorMsg = `Resend ${emailRes.status}: ${emailResBody}`;
+              } else {
+                console.log(`Email sent to ${userEmail}: ${emailResBody}`);
+              }
+            } catch (emailErr) {
+              console.error(`Email send exception for ${userEmail}:`, emailErr);
+              errorMsg = emailErr instanceof Error ? emailErr.message : "Email send failed";
             }
-          }
-        }
-      }
-
-      if (reminders.length === 0 && supplementReminders.length === 0) continue;
-
-      let emailSent = false;
-      let whatsappSent = false;
-      let errorMsg: string | undefined;
-
-      // Send email via Resend
-      if (profile.notify_email && resendApiKey && userEmail) {
-        try {
-          const emailHtml = buildReminderEmail(reminders, supplementReminders, window, today);
-          const totalCount = reminders.length + supplementReminders.length;
-
-          const emailPayload = {
-            from: "Peptyl <reminders@peptyl.co.uk>",
-            to: [userEmail],
-            subject: `⏰ Action Required: ${totalCount} item${totalCount > 1 ? "s" : ""} to complete on your dashboard`,
-            html: emailHtml,
-          };
-
-          console.log(`Sending email to ${userEmail} with ${totalCount} items...`);
-
-          const emailRes = await fetch("https://api.resend.com/emails", {
-            method: "POST",
-            headers: {
-              Authorization: `Bearer ${resendApiKey}`,
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify(emailPayload),
-          });
-
-          const emailResBody = await emailRes.text();
-          emailSent = emailRes.ok;
-
-          if (!emailRes.ok) {
-            console.error(`Resend API error (${emailRes.status}): ${emailResBody}`);
-            errorMsg = `Resend ${emailRes.status}: ${emailResBody}`;
           } else {
-            console.log(`Email sent to ${userEmail}: ${emailResBody}`);
+            console.log(`Email skipped for ${userId}: notify=${profile.notify_email}, hasKey=${!!resendApiKey}, email=${userEmail}`);
           }
-        } catch (emailErr) {
-          console.error(`Email send exception for ${userEmail}:`, emailErr);
-          errorMsg = emailErr instanceof Error ? emailErr.message : "Email send failed";
-        }
-      } else {
-        console.log(`Email skipped for ${userId}: notify=${profile.notify_email}, hasKey=${!!resendApiKey}, email=${userEmail}`);
-      }
 
-      // Send WhatsApp via Meta Cloud API
-      if (profile.notify_whatsapp && whatsappToken && whatsappPhoneNumberId && profile.whatsapp_number) {
-        const waMessage = buildWhatsAppMessage(reminders, supplementReminders, window);
-        try {
-          const waRes = await fetch(
-            `https://graph.facebook.com/v21.0/${whatsappPhoneNumberId}/messages`,
-            {
-              method: "POST",
-              headers: {
-                Authorization: `Bearer ${whatsappToken}`,
-                "Content-Type": "application/json",
-              },
-              body: JSON.stringify({
-                messaging_product: "whatsapp",
-                to: profile.whatsapp_number.replace(/\s+/g, "").replace(/^\+/, ""),
-                type: "text",
-                text: { body: waMessage },
-              }),
+          // Send WhatsApp via Meta Cloud API
+          if (profile.notify_whatsapp && whatsappToken && whatsappPhoneNumberId && profile.whatsapp_number) {
+            const waMessage = buildWhatsAppMessage(reminders, supplementReminders, window);
+            try {
+              const waRes = await fetch(
+                `https://graph.facebook.com/v21.0/${whatsappPhoneNumberId}/messages`,
+                {
+                  method: "POST",
+                  headers: {
+                    Authorization: `Bearer ${whatsappToken}`,
+                    "Content-Type": "application/json",
+                  },
+                  body: JSON.stringify({
+                    messaging_product: "whatsapp",
+                    to: profile.whatsapp_number.replace(/\s+/g, "").replace(/^\+/, ""),
+                    type: "text",
+                    text: { body: waMessage },
+                  }),
+                }
+              );
+              const waData = await waRes.json();
+              whatsappSent = waRes.ok;
+              console.log(`WhatsApp to ${profile.whatsapp_number}: ${waRes.ok ? "sent" : "failed"}`, waData);
+            } catch (waErr) {
+              console.error("WhatsApp send error:", waErr);
             }
-          );
-          const waData = await waRes.json();
-          whatsappSent = waRes.ok;
-          console.log(`WhatsApp to ${profile.whatsapp_number}: ${waRes.ok ? "sent" : "failed"}`, waData);
-        } catch (waErr) {
-          console.error("WhatsApp send error:", waErr);
-        }
-      }
+          }
 
-      // Send push notification via OneSignal
-      let pushSent = false;
-      if (onesignalApiKey) {
-        try {
-          const pushMessage = buildPushMessage(reminders, supplementReminders, window);
-          const pushRes = await fetch("https://onesignal.com/api/v1/notifications", {
-            method: "POST",
-            headers: {
-              Authorization: `Basic ${onesignalApiKey}`,
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify({
-              app_id: onesignalAppId,
-              include_external_user_ids: [userId],
-              headings: { en: pushMessage.title },
-              contents: { en: pushMessage.body },
-              url: "https://peptyl.co.uk/dashboard",
-              chrome_web_icon: "https://peptyl.co.uk/icon-192.png",
-            }),
+          // Send push notification via OneSignal
+          let pushSent = false;
+          if (onesignalApiKey) {
+            try {
+              const pushMessage = buildPushMessage(reminders, supplementReminders, window);
+              const pushRes = await fetch("https://onesignal.com/api/v1/notifications", {
+                method: "POST",
+                headers: {
+                  Authorization: `Basic ${onesignalApiKey}`,
+                  "Content-Type": "application/json",
+                },
+                body: JSON.stringify({
+                  app_id: onesignalAppId,
+                  include_external_user_ids: [userId],
+                  headings: { en: pushMessage.title },
+                  contents: { en: pushMessage.body },
+                  url: "https://peptyl.co.uk/dashboard",
+                  chrome_web_icon: "https://peptyl.co.uk/icon-192.png",
+                }),
+              });
+              const pushData = await pushRes.json();
+              pushSent = pushRes.ok && pushData.recipients > 0;
+              console.log(`Push to ${userId}: ${pushSent ? "sent" : "no recipients"}`, pushData);
+            } catch (pushErr) {
+              console.error("OneSignal push error:", pushErr);
+            }
+          }
+
+          results.push({
+            user_id: userId,
+            email_sent: emailSent,
+            whatsapp_sent: whatsappSent,
+            push_sent: pushSent,
+            peptides_count: reminders.length,
+            supplements_count: supplementReminders.length,
+            ...(errorMsg ? { error: errorMsg } : {}),
           });
-          const pushData = await pushRes.json();
-          pushSent = pushRes.ok && pushData.recipients > 0;
-          console.log(`Push to ${userId}: ${pushSent ? "sent" : "no recipients"}`, pushData);
-        } catch (pushErr) {
-          console.error("OneSignal push error:", pushErr);
         }
       }
-
-      results.push({
-        user_id: userId,
-        email_sent: emailSent,
-        whatsapp_sent: whatsappSent,
-        push_sent: pushSent,
-        peptides_count: reminders.length,
-        supplements_count: supplementReminders.length,
-        ...(errorMsg ? { error: errorMsg } : {}),
-      });
     }
 
-    // ── WEEK 10 RETEST NUDGE BLOCK ──
+    // ── WEEK 10 RETEST NUDGE BLOCK (runs regardless of window) ──
     const nudgeResults: Array<{ user_id: string; protocol: string; push: boolean; email: boolean }> = [];
 
     const { data: nudgeProtocols } = await supabase
@@ -270,7 +262,6 @@ Deno.serve(async (req) => {
 
     if (nudgeProtocols && nudgeProtocols.length > 0) {
       for (const np of nudgeProtocols) {
-        // Check if retest already logged
         const { data: existingRetest } = await supabase
           .from("bloodwork_panels")
           .select("id")
@@ -280,7 +271,6 @@ Deno.serve(async (req) => {
           .maybeSingle();
         if (existingRetest) continue;
 
-        // Check if nudge already sent
         const { data: existingNudge } = await supabase
           .from("nudge_log")
           .select("id")
@@ -295,7 +285,6 @@ Deno.serve(async (req) => {
         let pushOk = false;
         let emailOk = false;
 
-        // Send OneSignal push
         if (onesignalApiKey) {
           try {
             const pushRes = await fetch("https://onesignal.com/api/v1/notifications", {
@@ -321,7 +310,6 @@ Deno.serve(async (req) => {
           }
         }
 
-        // Send Resend email
         if (resendApiKey && nudgeEmail) {
           try {
             const ctaUrl = `https://peptyl.co.uk/dashboard?tab=bloodwork&retest=true&protocolId=${np.id}`;
@@ -372,7 +360,6 @@ Deno.serve(async (req) => {
           }
         }
 
-        // Log the nudge
         await supabase.from("nudge_log").insert({
           user_id: np.user_id,
           protocol_id: np.id,
@@ -383,8 +370,210 @@ Deno.serve(async (req) => {
       }
     }
 
+    // ── RESULTS READY NOTIFICATION BLOCK (runs regardless of window) ──
+    const resultsReadyResults: Array<{ user_id: string; protocol: string; push: boolean; email: boolean; whatsapp: boolean }> = [];
+
+    const twoHoursAgo = new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString();
+
+    const { data: completedOutcomes } = await supabase
+      .from("outcome_records")
+      .select("id, user_id, protocol_id, dna_report_id, outcome_markers, updated_at")
+      .eq("status", "completed")
+      .gte("updated_at", twoHoursAgo);
+
+    if (completedOutcomes && completedOutcomes.length > 0) {
+      for (const outcome of completedOutcomes) {
+        // Check if already sent
+        const { data: existingNudge } = await supabase
+          .from("nudge_log")
+          .select("id")
+          .eq("protocol_id", outcome.protocol_id)
+          .eq("nudge_type", "results_ready")
+          .limit(1)
+          .maybeSingle();
+        if (existingNudge) continue;
+
+        // Get protocol name
+        const { data: protocol } = await supabase
+          .from("protocols")
+          .select("name")
+          .eq("id", outcome.protocol_id)
+          .single();
+        if (!protocol) continue;
+
+        const protocolName = protocol.name;
+        const reportId = outcome.dna_report_id;
+        const reportUrl = reportId
+          ? `https://peptyl.co.uk/dna/report/${reportId}`
+          : "https://peptyl.co.uk/dashboard";
+
+        // Extract top result from outcome_markers
+        const topResult = extractTopResult(outcome.outcome_markers as Record<string, any> | null);
+
+        // Get user info
+        const { data: authUser } = await supabase.auth.admin.getUserById(outcome.user_id);
+        const userEmail = authUser?.user?.email;
+
+        const { data: profile } = await supabase
+          .from("profiles")
+          .select("notify_email, notify_whatsapp, whatsapp_number")
+          .eq("user_id", outcome.user_id)
+          .single();
+
+        let pushOk = false;
+        let emailOk = false;
+        let whatsappOk = false;
+
+        // Push via OneSignal
+        if (onesignalApiKey) {
+          try {
+            const pushBody = topResult
+              ? `${protocolName} — ${topResult}. View your DNA report.`
+              : `${protocolName} — your analysis is complete. View your DNA report.`;
+
+            const pushRes = await fetch("https://onesignal.com/api/v1/notifications", {
+              method: "POST",
+              headers: {
+                Authorization: `Basic ${onesignalApiKey}`,
+                "Content-Type": "application/json",
+              },
+              body: JSON.stringify({
+                app_id: onesignalAppId,
+                include_external_user_ids: [outcome.user_id],
+                headings: { en: "Your results are ready 🧬" },
+                contents: { en: pushBody },
+                url: reportUrl,
+                chrome_web_icon: "https://peptyl.co.uk/icon-192.png",
+              }),
+            });
+            const pushData = await pushRes.json();
+            pushOk = pushRes.ok && pushData.recipients > 0;
+            console.log(`Results push to ${outcome.user_id}: ${pushOk ? "sent" : "no recipients"}`);
+          } catch (e) {
+            console.error("Results push error:", e);
+          }
+        }
+
+        // WhatsApp
+        if (profile?.notify_whatsapp && whatsappToken && whatsappPhoneNumberId && profile.whatsapp_number) {
+          try {
+            const waLines = [
+              `🧬 *Your Results Are Ready*`,
+              `━━━━━━━━━━━━━━━━`,
+              `You completed *${protocolName}*.`,
+              ``,
+            ];
+            if (topResult) {
+              waLines.push(`Top result: *${topResult}*`);
+              waLines.push(``);
+            }
+            waLines.push(`View your full analysis:`);
+            waLines.push(reportUrl);
+
+            const waRes = await fetch(
+              `https://graph.facebook.com/v21.0/${whatsappPhoneNumberId}/messages`,
+              {
+                method: "POST",
+                headers: {
+                  Authorization: `Bearer ${whatsappToken}`,
+                  "Content-Type": "application/json",
+                },
+                body: JSON.stringify({
+                  messaging_product: "whatsapp",
+                  to: profile.whatsapp_number.replace(/\s+/g, "").replace(/^\+/, ""),
+                  type: "text",
+                  text: { body: waLines.join("\n") },
+                }),
+              }
+            );
+            whatsappOk = waRes.ok;
+            console.log(`Results WhatsApp to ${profile.whatsapp_number}: ${whatsappOk ? "sent" : "failed"}`);
+          } catch (e) {
+            console.error("Results WhatsApp error:", e);
+          }
+        }
+
+        // Email via Resend
+        if (profile?.notify_email && resendApiKey && userEmail) {
+          try {
+            const resultHighlight = topResult
+              ? `<div style="background:#f0fdfa;border-left:4px solid #0d9488;padding:14px 16px;border-radius:6px;margin:0 0 20px">
+                   <p style="margin:0;font-size:13px;color:#0f766e;font-weight:600">Top result:</p>
+                   <p style="margin:6px 0 0;font-size:15px;color:#374151;font-weight:700">${topResult}</p>
+                 </div>`
+              : "";
+
+            const resultsHtml = `
+              <div style="font-family:system-ui,-apple-system,sans-serif;max-width:520px;margin:0 auto;background:#ffffff">
+                <div style="background:linear-gradient(135deg,#0d9488,#0f766e);padding:28px 24px;text-align:center;border-radius:12px 12px 0 0">
+                  <h1 style="color:#ffffff;font-size:22px;margin:0;font-weight:700">🧬 Your Results Are Ready</h1>
+                </div>
+                <div style="padding:24px;border:1px solid #e5e7eb;border-top:none;border-radius:0 0 12px 12px">
+                  <p style="font-size:15px;color:#374151;line-height:1.6;margin:0 0 16px">
+                    You completed <strong>${protocolName}</strong>. Your full analysis is ready to view.
+                  </p>
+                  ${resultHighlight}
+                  <div style="text-align:center;margin:24px 0 8px">
+                    <a href="${reportUrl}" style="display:inline-block;background:#0d9488;color:#ffffff;text-decoration:none;padding:14px 32px;border-radius:8px;font-weight:600;font-size:15px">
+                      📊 View Your Results
+                    </a>
+                  </div>
+                </div>
+                <div style="padding:20px 24px;text-align:center">
+                  <p style="font-size:11px;color:#9ca3af;margin:0;line-height:1.6">
+                    This is an automated notification from Peptyl. For educational and research purposes only.
+                    <br/>Manage preferences in your <a href="https://peptyl.co.uk/dashboard" style="color:#0d9488;text-decoration:underline">dashboard</a>.
+                  </p>
+                </div>
+              </div>`;
+
+            const emailRes = await fetch("https://api.resend.com/emails", {
+              method: "POST",
+              headers: {
+                Authorization: `Bearer ${resendApiKey}`,
+                "Content-Type": "application/json",
+              },
+              body: JSON.stringify({
+                from: "Peptyl <reminders@peptyl.co.uk>",
+                to: [userEmail],
+                subject: `Your ${protocolName} results are ready`,
+                html: resultsHtml,
+              }),
+            });
+            emailOk = emailRes.ok;
+            console.log(`Results email to ${userEmail}: ${emailOk ? "sent" : "failed"}`);
+          } catch (e) {
+            console.error("Results email error:", e);
+          }
+        }
+
+        // Log the nudge
+        await supabase.from("nudge_log").insert({
+          user_id: outcome.user_id,
+          protocol_id: outcome.protocol_id,
+          nudge_type: "results_ready",
+        });
+
+        resultsReadyResults.push({
+          user_id: outcome.user_id,
+          protocol: protocolName,
+          push: pushOk,
+          email: emailOk,
+          whatsapp: whatsappOk,
+        });
+      }
+    }
+
     return new Response(
-      JSON.stringify({ success: true, reminders_sent: results.length, nudges_sent: nudgeResults.length, details: results, nudge_details: nudgeResults }),
+      JSON.stringify({
+        success: true,
+        reminders_sent: results.length,
+        nudges_sent: nudgeResults.length,
+        results_ready_sent: resultsReadyResults.length,
+        details: results,
+        nudge_details: nudgeResults,
+        results_ready_details: resultsReadyResults,
+      }),
       { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } }
     );
   } catch (err) {
@@ -395,6 +584,32 @@ Deno.serve(async (req) => {
     );
   }
 });
+
+// ── Helper: extract top result from outcome_markers ──
+function extractTopResult(markers: Record<string, any> | null): string | null {
+  if (!markers || typeof markers !== "object") return null;
+
+  let topMarker = "";
+  let topPct = 0;
+
+  for (const [key, val] of Object.entries(markers)) {
+    if (val && typeof val === "object" && "pct_change" in val) {
+      const pct = Math.abs(Number(val.pct_change) || 0);
+      if (pct > topPct) {
+        topPct = pct;
+        topMarker = key;
+      }
+    }
+  }
+
+  if (!topMarker || topPct === 0) return null;
+
+  const markerVal = markers[topMarker];
+  const direction = Number(markerVal.pct_change) > 0 ? "improved" : "changed";
+  // Format marker name: snake_case → Title Case
+  const name = topMarker.replace(/_/g, " ").replace(/\b\w/g, (c: string) => c.toUpperCase());
+  return `${name} ${direction} ${Math.round(topPct)}%`;
+}
 
 function checkFrequencyDue(frequency: string, todayStr: string): boolean {
   const today = new Date(todayStr);
@@ -434,7 +649,7 @@ function buildWhatsAppMessage(reminders: PeptideReminder[], supplements: Supplem
 
   lines.push(`━━━━━━━━━━━━━━━━`);
   lines.push(`✅ *Log your doses on your dashboard:*`);
-  lines.push(`peptyl.co.uk/dashboard`);
+  lines.push(`https://peptyl.co.uk/dashboard`);
 
   return lines.join("\n");
 }
