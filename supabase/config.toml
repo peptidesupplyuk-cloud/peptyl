@@ -38,3 +38,9 @@ verify_jwt = false
 
 [functions.migrate-knowledge-base]
 verify_jwt = false
+
+[functions.enrich-knowledge-base]
+verify_jwt = false
+
+[functions.knowledge-gap-analysis]
+verify_jwt = false
