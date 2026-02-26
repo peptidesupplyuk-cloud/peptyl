@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useNavigate, Navigate } from "react-router-dom";
 import { motion } from "framer-motion";
-import { Mail, Lock, AlertCircle, ArrowRight, Loader2, Globe, Target } from "lucide-react";
+import { Mail, Lock, AlertCircle, ArrowRight, Loader2, Globe, Target, User } from "lucide-react";
 import { z } from "zod";
 import { useTranslation } from "react-i18next";
 import { useAuth } from "@/contexts/AuthContext";
@@ -26,6 +26,8 @@ const Auth = () => {
   const [isSignUp, setIsSignUp] = useState(false);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [firstName, setFirstName] = useState("");
+  const [lastName, setLastName] = useState("");
   const [country, setCountry] = useState("");
   const [researchGoal, setResearchGoal] = useState("");
   const [error, setError] = useState("");
@@ -91,6 +93,14 @@ const Auth = () => {
       return;
     }
 
+    if (isSignUp && !firstName.trim()) {
+      setError("Please enter your first name.");
+      return;
+    }
+    if (isSignUp && !lastName.trim()) {
+      setError("Please enter your last name.");
+      return;
+    }
     if (isSignUp && !country) {
       setError("Please select your country.");
       return;
@@ -112,6 +122,8 @@ const Auth = () => {
         sessionStorage.setItem("onboarding_answers", JSON.stringify(mergedAnswers));
         
         const { error } = await signUp(emailResult.data, password, {
+          first_name: firstName.trim(),
+          last_name: lastName.trim(),
           country,
           research_goal: researchGoal || onboarding.goal || undefined,
           experience_level: onboarding.experience || undefined,
@@ -158,6 +170,8 @@ const Auth = () => {
     const existing = onboardingRaw ? JSON.parse(onboardingRaw) : {};
     const merged = {
       ...existing,
+      ...(firstName.trim() ? { first_name: firstName.trim() } : {}),
+      ...(lastName.trim() ? { last_name: lastName.trim() } : {}),
       ...(country ? { country } : {}),
       ...(researchGoal ? { goal: researchGoal } : {}),
     };
@@ -306,6 +320,39 @@ const Auth = () => {
                 />
               </div>
             </div>
+
+            {isSignUp && (
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="text-xs font-medium text-foreground mb-1.5 block">First Name <span className="text-destructive">*</span></label>
+                  <div className="relative">
+                    <User className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                    <input
+                      type="text"
+                      value={firstName}
+                      onChange={(e) => setFirstName(e.target.value)}
+                      placeholder="First name"
+                      className="w-full pl-10 pr-4 py-2.5 rounded-xl bg-background border border-border text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-primary/40 transition-colors"
+                      required
+                    />
+                  </div>
+                </div>
+                <div>
+                  <label className="text-xs font-medium text-foreground mb-1.5 block">Last Name <span className="text-destructive">*</span></label>
+                  <div className="relative">
+                    <User className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                    <input
+                      type="text"
+                      value={lastName}
+                      onChange={(e) => setLastName(e.target.value)}
+                      placeholder="Last name"
+                      className="w-full pl-10 pr-4 py-2.5 rounded-xl bg-background border border-border text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-primary/40 transition-colors"
+                      required
+                    />
+                  </div>
+                </div>
+              </div>
+            )}
 
             {isSignUp && (
               <>

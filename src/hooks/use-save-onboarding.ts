@@ -28,12 +28,13 @@ export function useSaveOnboarding() {
     }
 
     const updates: Record<string, string | null> = {};
+    if (answers.first_name) updates.first_name = answers.first_name;
+    if (answers.last_name) updates.last_name = answers.last_name;
     if (answers.goal) updates.research_goal = answers.goal;
     if (answers.experience) updates.experience_level = answers.experience;
     if (answers.compounds) updates.current_compounds = answers.compounds;
     if (answers.biomarkers) updates.biomarker_availability = answers.biomarkers;
     if (answers.risk) updates.risk_tolerance = answers.risk;
-    // country and researchGoal from the auth form may also be stored
     if (answers.country) updates.country = answers.country;
 
     if (Object.keys(updates).length === 0) {

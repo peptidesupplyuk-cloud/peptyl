@@ -3,6 +3,8 @@ import { supabase } from "@/integrations/supabase/client";
 import type { User, Session } from "@supabase/supabase-js";
 
 interface SignUpMeta {
+  first_name?: string;
+  last_name?: string;
   country?: string;
   research_goal?: string;
   experience_level?: string;
@@ -74,6 +76,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     // Store extra profile fields after signup
     if (!error && data.user && meta) {
       await supabase.from("profiles").update({
+        first_name: meta.first_name || null,
+        last_name: meta.last_name || null,
         country: meta.country || null,
         research_goal: meta.research_goal || null,
         experience_level: meta.experience_level || null,
