@@ -1,9 +1,10 @@
 import { useMemo, useState } from "react";
-import { Search, FlaskConical, Plus } from "lucide-react";
+import { Search, FlaskConical, Plus, Filter } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import PeptideCard from "@/components/PeptideCard";
 import PeptideActionBlock from "@/components/PeptideActionBlock";
 import { peptides as staticPeptides, categories } from "@/data/peptides";
@@ -17,6 +18,7 @@ const PeptidesContent = () => {
   const { user } = useAuth();
   const [search, setSearch] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("All");
+  const [selectedGrade, setSelectedGrade] = useState("All");
   const { data: enrichedPeptides } = useEnrichedPeptides();
 
   const peptides: PeptideData[] = useMemo(() => {
@@ -53,7 +55,8 @@ const PeptidesContent = () => {
       p.fullName.toLowerCase().includes(search.toLowerCase()) ||
       p.description.toLowerCase().includes(search.toLowerCase());
     const matchesCat = selectedCategory === "All" || p.category === selectedCategory;
-    return matchesSearch && matchesCat;
+    const matchesGrade = selectedGrade === "All" || (p.evidenceGrade || "D") === selectedGrade;
+    return matchesSearch && matchesCat && matchesGrade;
   }).sort((a, b) => (gradeOrder[a.evidenceGrade || "D"] ?? 3) - (gradeOrder[b.evidenceGrade || "D"] ?? 3));
 
   const handleCreateProtocol = () => {
@@ -75,39 +78,46 @@ const PeptidesContent = () => {
         </p>
       </div>
 
-      <div className="flex gap-2 mb-8">
+      <div className="relative max-w-md mb-4">
+        <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+        <Input
+          placeholder={t("peptidesPage.searchPlaceholder")}
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+          className="pl-10"
+        />
+      </div>
+
+      <div className="flex flex-wrap items-center gap-3 mb-8">
+        <Select value={selectedCategory} onValueChange={setSelectedCategory}>
+          <SelectTrigger className="w-[200px]">
+            <Filter className="h-4 w-4 mr-2 text-muted-foreground" />
+            <SelectValue placeholder="Category" />
+          </SelectTrigger>
+          <SelectContent>
+            {categories.filter(c => c === "All" || peptides.some(p => p.category === c)).map((cat) => (
+              <SelectItem key={cat} value={cat}>{cat}</SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+
+        <Select value={selectedGrade} onValueChange={setSelectedGrade}>
+          <SelectTrigger className="w-[180px]">
+            <SelectValue placeholder="Evidence Grade" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="All">All Grades</SelectItem>
+            <SelectItem value="A">Grade A — Strong</SelectItem>
+            <SelectItem value="B">Grade B — Moderate</SelectItem>
+            <SelectItem value="C">Grade C — Preliminary</SelectItem>
+            <SelectItem value="D">Grade D — Anecdotal</SelectItem>
+          </SelectContent>
+        </Select>
+
         <Button variant="default" className="gap-2" onClick={handleCreateProtocol}>
           <Plus className="h-4 w-4" />
           Create Your Protocol
         </Button>
-      </div>
-
-      <div className="flex flex-col sm:flex-row gap-4 mb-8">
-        <div className="relative flex-1 max-w-md">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-          <Input
-            placeholder={t("peptidesPage.searchPlaceholder")}
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            className="pl-10"
-          />
-        </div>
-        <div className="flex gap-2 flex-wrap">
-          {categories.filter(c => {
-            if (c === "All") return true;
-            return peptides.some(p => p.category === c);
-          }).map((cat) => (
-            <Button
-              key={cat}
-              variant={selectedCategory === cat ? "default" : "outline"}
-              size="sm"
-              onClick={() => setSelectedCategory(cat)}
-              className="text-xs"
-            >
-              {cat}
-            </Button>
-          ))}
-        </div>
       </div>
 
       <div className="space-y-4">

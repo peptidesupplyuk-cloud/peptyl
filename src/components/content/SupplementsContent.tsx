@@ -1,7 +1,8 @@
 import { useState } from "react";
-import { Search, Pill } from "lucide-react";
+import { Search, Pill, Filter } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import SupplementCard from "@/components/SupplementCard";
 import { supplements as staticSupplements, supplementCategories } from "@/data/supplements";
 import { useEnrichedSupplements } from "@/hooks/use-enriched-supplements";
@@ -27,6 +28,7 @@ const iconMap: Record<string, any> = {
 const SupplementsContent = () => {
   const [search, setSearch] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("All");
+  const [selectedGrade, setSelectedGrade] = useState("All");
   const { data: enrichedSupplements } = useEnrichedSupplements();
 
   // Map enriched DB data back to SupplementData, or fall back to static
@@ -70,7 +72,8 @@ const SupplementsContent = () => {
       s.description.toLowerCase().includes(q) ||
       s.benefits.some((b) => b.toLowerCase().includes(q));
     const matchesCat = selectedCategory === "All" || s.category === selectedCategory;
-    return matchesSearch && matchesCat;
+    const matchesGrade = selectedGrade === "All" || s.evidenceGrade === selectedGrade;
+    return matchesSearch && matchesCat && matchesGrade;
   }).sort((a, b) => (gradeOrder[a.evidenceGrade] ?? 3) - (gradeOrder[b.evidenceGrade] ?? 3));
 
   return (
@@ -84,31 +87,43 @@ const SupplementsContent = () => {
         </p>
       </div>
 
-      <div className="flex flex-col sm:flex-row gap-4 mb-8">
-        <div className="relative flex-1 max-w-md">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-          <Input
-            placeholder="Search supplements, benefits, biomarkers..."
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            className="pl-10"
-          />
-        </div>
-        <div className="flex gap-2 flex-wrap">
-          {supplementCategories
-            .filter((c) => c === "All" || supplements.some((s) => s.category === c))
-            .map((cat) => (
-              <Button
-                key={cat}
-                variant={selectedCategory === cat ? "default" : "outline"}
-                size="sm"
-                onClick={() => setSelectedCategory(cat)}
-                className="text-xs"
-              >
-                {cat}
-              </Button>
-            ))}
-        </div>
+      <div className="relative max-w-md mb-4">
+        <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+        <Input
+          placeholder="Search supplements, benefits, biomarkers..."
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+          className="pl-10"
+        />
+      </div>
+
+      <div className="flex flex-wrap items-center gap-3 mb-8">
+        <Select value={selectedCategory} onValueChange={setSelectedCategory}>
+          <SelectTrigger className="w-[200px]">
+            <Filter className="h-4 w-4 mr-2 text-muted-foreground" />
+            <SelectValue placeholder="Category" />
+          </SelectTrigger>
+          <SelectContent>
+            {supplementCategories
+              .filter((c) => c === "All" || supplements.some((s) => s.category === c))
+              .map((cat) => (
+                <SelectItem key={cat} value={cat}>{cat}</SelectItem>
+              ))}
+          </SelectContent>
+        </Select>
+
+        <Select value={selectedGrade} onValueChange={setSelectedGrade}>
+          <SelectTrigger className="w-[180px]">
+            <SelectValue placeholder="Evidence Grade" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="All">All Grades</SelectItem>
+            <SelectItem value="A">Grade A — Strong</SelectItem>
+            <SelectItem value="B">Grade B — Moderate</SelectItem>
+            <SelectItem value="C">Grade C — Preliminary</SelectItem>
+            <SelectItem value="D">Grade D — Anecdotal</SelectItem>
+          </SelectContent>
+        </Select>
       </div>
 
       <div className="space-y-4">
