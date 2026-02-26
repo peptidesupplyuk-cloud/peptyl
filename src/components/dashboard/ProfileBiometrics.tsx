@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { User, Loader2, Save, Bell, Mail, MessageCircle, Users, Calendar, ShieldCheck, Send } from "lucide-react";
+import { User, Loader2, Save, Bell, Mail, MessageCircle, Users, Calendar, ShieldCheck, Send, Lock } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { useToast } from "@/hooks/use-toast";
@@ -273,6 +273,20 @@ const ProfileBiometrics = ({ onUpdate }: { onUpdate?: (bio: any) => void }) => {
         <h3 className="font-heading font-semibold text-foreground text-sm flex items-center gap-2">
           <Bell className="h-4 w-4 text-primary" /> Reminder Alerts
         </h3>
+
+        <div className="relative">
+          {/* Coming Soon overlay */}
+          <div className="absolute inset-0 z-10 backdrop-blur-md bg-background/40 rounded-xl flex flex-col items-center justify-center gap-2">
+            <div className="bg-primary/10 rounded-full p-3">
+              <Lock className="h-6 w-6 text-primary" />
+            </div>
+            <h4 className="font-heading font-bold text-base text-foreground">Coming Soon</h4>
+            <p className="text-xs text-muted-foreground text-center max-w-xs px-3">
+              WhatsApp & email reminders are being finalised. Check back soon.
+            </p>
+          </div>
+
+          <div className="pointer-events-none select-none space-y-3" aria-hidden="true">
         <p className="text-xs text-muted-foreground">Get consolidated AM/PM reminders across all active protocols.</p>
         
         <div className="flex items-center justify-between">
@@ -401,6 +415,8 @@ const ProfileBiometrics = ({ onUpdate }: { onUpdate?: (bio: any) => void }) => {
               onChange={(e) => setNotifPrefs({ ...notifPrefs, notify_pm_time: e.target.value })}
               className="w-full px-3 py-2 rounded-xl bg-background border border-border text-sm text-foreground focus:outline-none focus:border-primary/40"
             />
+          </div>
+        </div>
           </div>
         </div>
       </div>
