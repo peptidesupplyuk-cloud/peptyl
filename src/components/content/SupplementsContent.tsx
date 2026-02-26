@@ -60,6 +60,8 @@ const SupplementsContent = () => {
       })
     : staticSupplements;
 
+  const gradeOrder: Record<string, number> = { A: 0, B: 1, C: 2, D: 3 };
+
   const filtered = supplements.filter((s) => {
     const q = search.toLowerCase();
     const matchesSearch =
@@ -69,7 +71,7 @@ const SupplementsContent = () => {
       s.benefits.some((b) => b.toLowerCase().includes(q));
     const matchesCat = selectedCategory === "All" || s.category === selectedCategory;
     return matchesSearch && matchesCat;
-  });
+  }).sort((a, b) => (gradeOrder[a.evidenceGrade] ?? 3) - (gradeOrder[b.evidenceGrade] ?? 3));
 
   return (
     <>

@@ -37,12 +37,15 @@ const PeptidesContent = () => {
         doseRange: ep.dose_range || staticMatch?.doseRange,
         cycleDuration: ep.cycle_duration || staticMatch?.cycleDuration,
         notes: ep.dosing_notes || staticMatch?.notes,
+        evidenceGrade: (ep.evidence_grade as "A" | "B" | "C" | "D") || staticMatch?.evidenceGrade,
         benefits: ep.primary_effects || staticMatch?.benefits || [],
         regulatoryStatus: staticMatch?.regulatoryStatus,
         experiences: staticMatch?.experiences || [],
       };
     });
   }, [enrichedPeptides]);
+
+  const gradeOrder: Record<string, number> = { A: 0, B: 1, C: 2, D: 3 };
 
   const filtered = peptides.filter((p) => {
     const matchesSearch =
@@ -51,7 +54,7 @@ const PeptidesContent = () => {
       p.description.toLowerCase().includes(search.toLowerCase());
     const matchesCat = selectedCategory === "All" || p.category === selectedCategory;
     return matchesSearch && matchesCat;
-  });
+  }).sort((a, b) => (gradeOrder[a.evidenceGrade || "D"] ?? 3) - (gradeOrder[b.evidenceGrade || "D"] ?? 3));
 
   const handleCreateProtocol = () => {
     if (user) {

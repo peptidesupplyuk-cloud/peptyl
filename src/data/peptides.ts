@@ -30,6 +30,7 @@ export interface PeptideData {
   cycleDuration?: string;
   notes?: string;
   isNew?: boolean;
+  evidenceGrade?: "A" | "B" | "C" | "D";
   benefits: string[];
   regulatoryStatus?: RegulatoryStatus;
   experiences: PeptideExperience[];
