@@ -4,7 +4,6 @@ import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import HeroSection from "@/components/HeroSection";
 import MissionSection from "@/components/MissionSection";
-import FeaturesSection from "@/components/FeaturesSection";
 import LatestArticlesSection from "@/components/LatestArticlesSection";
 import SignupBenefits from "@/components/SignupBenefits";
 import HowItWorksSection from "@/components/HowItWorksSection";
@@ -40,7 +39,6 @@ const Index = () => {
       <HowItWorksSection />
       <SignupBenefits />
       <MissionSection />
-      <FeaturesSection />
       <LatestArticlesSection />
       
 
