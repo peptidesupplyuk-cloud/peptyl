@@ -106,11 +106,11 @@ const Dashboard = () => {
     queryKey: ["whoop-connection", user?.id],
     queryFn: async () => {
       const { data } = await supabase
-        .from("whoop_connections")
+        .from("whoop_connections_safe" as any)
         .select("id, last_sync_at, whoop_user_id")
         .eq("user_id", user!.id)
         .maybeSingle();
-      return data;
+      return data as unknown as { id: string; last_sync_at: string | null; whoop_user_id: string | null } | null;
     },
     enabled: isAdmin && !!user,
   });
