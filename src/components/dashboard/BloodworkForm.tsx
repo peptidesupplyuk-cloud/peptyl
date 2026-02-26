@@ -1,27 +1,54 @@
-import { useState } from "react";
-import { format } from "date-fns";
-import { CalendarIcon, FlaskConical, ChevronDown, ChevronUp } from "lucide-react";
+import { useState, useEffect } from "react";
+import { format, subDays } from "date-fns";
+import { CalendarIcon, FlaskConical, ChevronDown, ChevronUp, Info } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Checkbox } from "@/components/ui/checkbox";
 import { BIOMARKERS, getMarkerStatus, getStatusBg, getStatusColor, type BiomarkerDef } from "@/data/biomarker-ranges";
 import { useSaveBloodwork } from "@/hooks/use-bloodwork";
+import { useProtocols } from "@/hooks/use-protocols";
 import { useToast } from "@/hooks/use-toast";
 
-const BloodworkForm = ({ onSaved, filterCategories }: { onSaved?: () => void; filterCategories?: string[] }) => {
+interface BloodworkFormProps {
+  onSaved?: () => void;
+  filterCategories?: string[];
+  defaultProtocolId?: string | null;
+  defaultIsRetest?: boolean;
+}
+
+const BloodworkForm = ({ onSaved, filterCategories, defaultProtocolId, defaultIsRetest }: BloodworkFormProps) => {
   const [testDate, setTestDate] = useState<Date>(new Date());
   const [showAdvanced, setShowAdvanced] = useState(false);
   const [values, setValues] = useState<Record<string, string>>({});
+  const [selectedProtocolId, setSelectedProtocolId] = useState<string | null>(defaultProtocolId ?? null);
+  const [isRetest, setIsRetest] = useState(defaultIsRetest ?? false);
   const saveBloodwork = useSaveBloodwork();
   const { toast } = useToast();
+  const { data: protocols } = useProtocols();
+
+  // Sync defaults when they change (e.g. navigating from protocol completion modal)
+  useEffect(() => {
+    if (defaultProtocolId) setSelectedProtocolId(defaultProtocolId);
+    if (defaultIsRetest) setIsRetest(true);
+  }, [defaultProtocolId, defaultIsRetest]);
 
   const allBasic = BIOMARKERS.filter((m) => m.panel === "basic");
   const allAdvanced = BIOMARKERS.filter((m) => m.panel === "advanced");
   const basicMarkers = filterCategories ? allBasic.filter((m) => filterCategories.includes(m.category)) : allBasic;
   const advancedMarkers = filterCategories ? allAdvanced.filter((m) => filterCategories.includes(m.category)) : allAdvanced;
+
+  // Filter protocols: active, paused, or completed within last 90 days
+  const now = new Date();
+  const ninetyDaysAgo = subDays(now, 90);
+  const eligibleProtocols = (protocols ?? []).filter((p) => {
+    if (p.status === "active" || p.status === "paused") return true;
+    if (p.status === "completed" && new Date(p.updated_at) >= ninetyDaysAgo) return true;
+    return false;
+  });
 
   const setValue = (key: string, val: string) => {
     setValues((prev) => ({ ...prev, [key]: val }));
@@ -44,14 +71,20 @@ const BloodworkForm = ({ onSaved, filterCategories }: { onSaved?: () => void; fi
       return;
     }
 
+    const basePanelType = filterCategories ? filterCategories[0].toLowerCase().replace(" ", "_") : (showAdvanced ? "advanced" : "basic");
+    const panelType = isRetest ? `retest_${basePanelType}` : basePanelType;
+
     try {
       await saveBloodwork.mutateAsync({
         testDate: format(testDate, "yyyy-MM-dd"),
-        panelType: filterCategories ? filterCategories[0].toLowerCase().replace(" ", "_") : (showAdvanced ? "advanced" : "basic"),
+        panelType,
         markers,
+        protocolId: selectedProtocolId,
       });
       toast({ title: "Bloodwork saved", description: `${markers.length} markers recorded.` });
       setValues({});
+      setSelectedProtocolId(null);
+      setIsRetest(false);
       onSaved?.();
     } catch {
       toast({ title: "Error saving", description: "Please try again.", variant: "destructive" });
@@ -106,6 +139,7 @@ const BloodworkForm = ({ onSaved, filterCategories }: { onSaved?: () => void; fi
 
   return (
     <div className="space-y-6">
+      {/* Date Picker */}
       <div className="flex items-center gap-4 flex-wrap">
         <div>
           <Label className="text-sm font-medium">Test Date</Label>
@@ -128,6 +162,69 @@ const BloodworkForm = ({ onSaved, filterCategories }: { onSaved?: () => void; fi
           </Popover>
         </div>
       </div>
+
+      {/* Protocol Linking */}
+      {eligibleProtocols.length > 0 && (
+        <div className="space-y-3">
+          <Label className="text-sm font-medium">Were you on a protocol when this test was taken?</Label>
+          <div className="flex flex-wrap gap-2">
+            <button
+              type="button"
+              onClick={() => { setSelectedProtocolId(null); setIsRetest(false); }}
+              className={cn(
+                "px-3 py-1.5 rounded-full text-sm font-medium border transition-colors",
+                selectedProtocolId === null
+                  ? "border-primary bg-primary/10 text-primary"
+                  : "border-border bg-muted/30 text-muted-foreground hover:bg-muted/50"
+              )}
+            >
+              Not linked
+            </button>
+            {eligibleProtocols.map((p) => (
+              <button
+                key={p.id}
+                type="button"
+                onClick={() => setSelectedProtocolId(p.id)}
+                className={cn(
+                  "px-3 py-1.5 rounded-full text-sm font-medium border transition-colors",
+                  selectedProtocolId === p.id
+                    ? "border-primary bg-primary/10 text-primary"
+                    : "border-border bg-muted/30 text-muted-foreground hover:bg-muted/50"
+                )}
+              >
+                {p.name}
+                {p.status !== "active" && (
+                  <span className="ml-1 text-xs opacity-60">({p.status})</span>
+                )}
+              </button>
+            ))}
+          </div>
+
+          {/* Retest Checkbox */}
+          {selectedProtocolId && (
+            <div className="space-y-2">
+              <div className="flex items-center gap-2">
+                <Checkbox
+                  id="is-retest"
+                  checked={isRetest}
+                  onCheckedChange={(checked) => setIsRetest(checked === true)}
+                />
+                <label htmlFor="is-retest" className="text-sm text-foreground cursor-pointer">
+                  This is a retest — I want to compare to my previous results
+                </label>
+              </div>
+              {isRetest && (
+                <div className="flex items-start gap-2 pl-6">
+                  <Info className="h-3.5 w-3.5 text-primary mt-0.5 shrink-0" />
+                  <p className="text-xs text-primary">
+                    We will calculate what changed since your baseline.
+                  </p>
+                </div>
+              )}
+            </div>
+          )}
+        </div>
+      )}
 
       {/* Basic Panel */}
       {basicMarkers.length > 0 && (

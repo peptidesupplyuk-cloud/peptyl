@@ -141,9 +141,14 @@ const Dashboard = () => {
     (injectionId) => updateInjectionStatus.mutate({ id: injectionId, status: "skipped" })
   );
 
+  const [retestProtocolId, setRetestProtocolId] = useState<string | null>(null);
+  const [defaultIsRetest, setDefaultIsRetest] = useState(false);
+
   useEffect(() => {
     const tab = searchParams.get("tab");
     const peptide = searchParams.get("peptide") || sessionStorage.getItem("pending_peptide");
+    const retest = searchParams.get("retest");
+    const protocolIdParam = searchParams.get("protocolId");
     if (tab) {
       setActiveTab(tab);
     }
@@ -151,7 +156,13 @@ const Dashboard = () => {
       setInitialPeptide(peptide);
       sessionStorage.removeItem("pending_peptide");
     }
-    if (tab || peptide) {
+    if (retest === "true") {
+      setDefaultIsRetest(true);
+    }
+    if (protocolIdParam) {
+      setRetestProtocolId(protocolIdParam);
+    }
+    if (tab || peptide || retest || protocolIdParam) {
       setSearchParams({}, { replace: true });
     }
   }, []);
@@ -421,7 +432,7 @@ const Dashboard = () => {
                 <TabsContent value="bloodwork" className="space-y-6">
                   <div className="bg-card rounded-2xl border border-border p-5 sm:p-6">
                     <h2 className="font-heading font-semibold text-foreground mb-4">Enter Bloodwork Results</h2>
-                    <BloodworkForm onSaved={() => { refetchPanels(); setActiveTab("protocols"); }} filterCategories={["Metabolic", "Lipids", "Liver", "Kidney", "Inflammation", "Vitamins", "Hormones", "Thyroid"]} />
+                    <BloodworkForm onSaved={() => { refetchPanels(); setActiveTab("protocols"); }} filterCategories={["Metabolic", "Lipids", "Liver", "Kidney", "Inflammation", "Vitamins", "Hormones", "Thyroid"]} defaultProtocolId={retestProtocolId} defaultIsRetest={defaultIsRetest} />
                   </div>
 
                   <BiomarkerTrendChart panels={panels} filterCategories={["Metabolic", "Lipids", "Liver", "Kidney", "Inflammation", "Vitamins", "Hormones", "Thyroid"]} />
