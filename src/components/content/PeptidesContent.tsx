@@ -6,11 +6,14 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import PeptideCard from "@/components/PeptideCard";
+import CategoryGroup from "@/components/CategoryGroup";
 import PeptideActionBlock from "@/components/PeptideActionBlock";
 import { peptides as staticPeptides, categories } from "@/data/peptides";
 import { useEnrichedPeptides } from "@/hooks/use-enriched-peptides";
 import type { PeptideData } from "@/data/peptides";
 import { useAuth } from "@/contexts/AuthContext";
+
+const gradeOrder: Record<string, number> = { A: 0, B: 1, C: 2, D: 3 };
 
 const PeptidesContent = () => {
   const { t } = useTranslation();
@@ -47,8 +50,6 @@ const PeptidesContent = () => {
     });
   }, [enrichedPeptides]);
 
-  const gradeOrder: Record<string, number> = { A: 0, B: 1, C: 2, D: 3 };
-
   const filtered = peptides.filter((p) => {
     const matchesSearch =
       p.name.toLowerCase().includes(search.toLowerCase()) ||
@@ -58,6 +59,17 @@ const PeptidesContent = () => {
     const matchesGrade = selectedGrade === "All" || (p.evidenceGrade || "D") === selectedGrade;
     return matchesSearch && matchesCat && matchesGrade;
   }).sort((a, b) => (gradeOrder[a.evidenceGrade || "D"] ?? 3) - (gradeOrder[b.evidenceGrade || "D"] ?? 3));
+
+  // Group by category
+  const grouped = useMemo(() => {
+    const map = new Map<string, PeptideData[]>();
+    filtered.forEach((p) => {
+      const list = map.get(p.category) || [];
+      list.push(p);
+      map.set(p.category, list);
+    });
+    return Array.from(map.entries());
+  }, [filtered]);
 
   const handleCreateProtocol = () => {
     if (user) {
@@ -88,7 +100,7 @@ const PeptidesContent = () => {
         />
       </div>
 
-      <div className="flex flex-wrap items-center gap-3 mb-8">
+      <div className="flex flex-wrap items-center gap-3 mb-6">
         <Select value={selectedCategory} onValueChange={setSelectedCategory}>
           <SelectTrigger className="w-[200px]">
             <Filter className="h-4 w-4 mr-2 text-muted-foreground" />
@@ -120,16 +132,26 @@ const PeptidesContent = () => {
         </Button>
       </div>
 
-      <div className="space-y-4">
-        {filtered.map((peptide, pi) => (
-          <PeptideCard
-            key={peptide.name}
-            peptide={peptide}
-            index={pi}
-            userVotes={{}}
-            onVote={() => {}}
-          />
-        ))}
+      <div className="space-y-1">
+        {grouped.map(([category, items]) => {
+          const bestGrade = items.reduce((best, p) => {
+            const g = p.evidenceGrade || "D";
+            return (gradeOrder[g] ?? 3) < (gradeOrder[best] ?? 3) ? g : best;
+          }, "D");
+          return (
+            <CategoryGroup key={category} category={category} count={items.length} bestGrade={bestGrade}>
+              {items.map((peptide, pi) => (
+                <PeptideCard
+                  key={peptide.name}
+                  peptide={peptide}
+                  index={pi}
+                  userVotes={{}}
+                  onVote={() => {}}
+                />
+              ))}
+            </CategoryGroup>
+          );
+        })}
         {filtered.length === 0 && (
           <div className="text-center py-16 text-muted-foreground">
             <p className="text-lg">{t("peptidesPage.noResults")}</p>
