@@ -46,9 +46,10 @@ const Footer = () => {
             <div className="flex flex-col gap-2.5">
               <span className="text-sm text-primary-foreground/50">{t("footer.researchOnly")}</span>
               <Link to="/about" className="text-sm text-primary-foreground/50 hover:text-primary transition-colors">{t("footer.aboutUs")}</Link>
-              <Link to="/about" className="text-sm text-primary-foreground/50 hover:text-primary transition-colors">{t("footer.aboutUs")}</Link>
               <Link to="/privacy-policy" className="text-sm text-primary-foreground/50 hover:text-primary transition-colors">{t("footer.privacyPolicy")}</Link>
               <Link to="/terms-of-service" className="text-sm text-primary-foreground/50 hover:text-primary transition-colors">{t("footer.termsOfService")}</Link>
+              <Link to="/dna" className="text-sm text-primary-foreground/50 hover:text-primary transition-colors">DNA Data &amp; Privacy</Link>
+              <span className="text-xs text-primary-foreground/30">ICO Registration: Pending</span>
             </div>
           </div>
         </div>
@@ -63,7 +64,7 @@ const Footer = () => {
             </p>
           </div>
           <p className="text-[11px] text-primary-foreground/30 text-center leading-relaxed max-w-3xl mx-auto">
-            {t("footer.legalDisclaimer")}
+            Peptyl is an educational platform. Not medical advice. Research use only. Peptyl is not operated by medical professionals.
           </p>
         </div>
       </div>

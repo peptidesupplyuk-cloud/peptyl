@@ -405,18 +405,21 @@ export type Database = {
       }
       dna_consents: {
         Row: {
+          consent_version: string | null
           consented_at: string
           feature: string
           id: string
           user_id: string
         }
         Insert: {
+          consent_version?: string | null
           consented_at?: string
           feature?: string
           id?: string
           user_id: string
         }
         Update: {
+          consent_version?: string | null
           consented_at?: string
           feature?: string
           id?: string

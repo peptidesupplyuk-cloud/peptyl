@@ -1,5 +1,5 @@
 import { useState, useCallback } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import { FileText, Upload, Camera, MessageSquare, X, CheckCircle2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -38,7 +38,9 @@ const DNAUpload = () => {
   const [inputText, setInputText] = useState("");
   const [imageBase64, setImageBase64] = useState<string | null>(null);
   const [fileName, setFileName] = useState<string | null>(null);
-  const [consented, setConsented] = useState(false);
+  const [consent1, setConsent1] = useState(false);
+  const [consent2, setConsent2] = useState(false);
+  const [consent3, setConsent3] = useState(false);
   const [loading, setLoading] = useState(false);
 
   const handleFileUpload = useCallback(async (file: File) => {
@@ -87,7 +89,6 @@ const DNAUpload = () => {
       return;
     }
 
-    // Fallback: read as text
     const text = await file.text();
     setInputText(text);
   }, [method, toast]);
@@ -99,7 +100,9 @@ const DNAUpload = () => {
   }, [handleFileUpload]);
 
   const canSubmit =
-    consented &&
+    consent1 &&
+    consent2 &&
+    consent3 &&
     !loading &&
     (inputText.trim().length >= 10 || !!imageBase64);
 
@@ -112,13 +115,13 @@ const DNAUpload = () => {
       return;
     }
 
-    // Log consent
+    // Log consent with version
     await supabase.from("dna_consents").insert({
       user_id: user.id,
       feature: "dna_analysis",
-    });
+      consent_version: "2.0",
+    } as any);
 
-    // Navigate to analysing page with data in state
     navigate("/dna/analysing", {
       state: {
         inputText: method === "image" ? "" : inputText,
@@ -219,13 +222,38 @@ const DNAUpload = () => {
             </div>
           )}
 
-          {/* Consent */}
-          <label className="flex items-start gap-3 mt-6 cursor-pointer">
-            <Checkbox checked={consented} onCheckedChange={(v) => setConsented(!!v)} className="mt-0.5" />
-            <span className="text-sm text-muted-foreground leading-relaxed">
-              I understand my genetic data will be processed by AI to generate a health report, that no raw genetic data will be stored, and that this report is for educational purposes only.
-            </span>
-          </label>
+          {/* Triple Consent */}
+          <div className="mt-6 space-y-4">
+            <div>
+              <p className="font-semibold text-foreground text-sm">Before you continue</p>
+              <p className="text-xs text-muted-foreground">Your genetic data is sensitive. Please confirm you understand how it will be used.</p>
+            </div>
+
+            <label className="flex items-start gap-3 cursor-pointer">
+              <Checkbox checked={consent1} onCheckedChange={(v) => setConsent1(!!v)} className="mt-0.5" />
+              <span className="text-xs text-muted-foreground leading-relaxed">
+                I explicitly consent to my genetic data being processed by AI (GPT-4o, OpenAI) for the sole purpose of generating a personalised educational health report. I understand this is special category data under UK GDPR Article 9.
+              </span>
+            </label>
+
+            <label className="flex items-start gap-3 cursor-pointer">
+              <Checkbox checked={consent2} onCheckedChange={(v) => setConsent2(!!v)} className="mt-0.5" />
+              <span className="text-xs text-muted-foreground leading-relaxed">
+                I understand this report is for educational purposes only. It is not medical advice, a diagnosis, or a clinical assessment. Peptyl is not operated by medical professionals. I will not use this report to make decisions about medications, treatments, or clinical interventions without consulting a qualified healthcare professional.
+              </span>
+            </label>
+
+            <label className="flex items-start gap-3 cursor-pointer">
+              <Checkbox checked={consent3} onCheckedChange={(v) => setConsent3(!!v)} className="mt-0.5" />
+              <span className="text-xs text-muted-foreground leading-relaxed">
+                I have read and agree to the{" "}
+                <Link to="/privacy-policy" className="text-primary hover:underline">Privacy Policy</Link>
+                {" "}and{" "}
+                <Link to="/terms-of-service" className="text-primary hover:underline">Terms of Service</Link>
+                , and I understand I can delete my report at any time from my DNA dashboard.
+              </span>
+            </label>
+          </div>
 
           {/* Submit */}
           <Button

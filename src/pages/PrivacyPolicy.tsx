@@ -38,7 +38,7 @@ const PrivacyPolicy = () => {
         <div className="container mx-auto px-6">
           <div className="max-w-3xl mx-auto">
             <div className="text-sm text-muted-foreground bg-muted/50 rounded-xl px-5 py-3 mb-10 border border-border">
-              <strong className="text-foreground">Last Updated:</strong> February 5, 2026
+              <strong className="text-foreground">Last Updated:</strong> February 26, 2026
             </div>
 
             <div className="space-y-10 text-muted-foreground leading-relaxed">
@@ -47,6 +47,7 @@ const PrivacyPolicy = () => {
                 <p><strong className="text-foreground">Data Controller:</strong> Peptyl (peptyl.co.uk)</p>
                 <p><strong className="text-foreground">Contact:</strong> Available via our contact page</p>
                 <p><strong className="text-foreground">Jurisdiction:</strong> United Kingdom</p>
+                <p><strong className="text-foreground">ICO Registration:</strong> In progress — registration to be completed prior to paid services launching. ICO registration number will be added here upon completion.</p>
                 <p className="mt-3">We are the data controller responsible for your personal data. If you have any questions about this privacy policy or our data practices, please contact us.</p>
               </div>
 
@@ -78,6 +79,44 @@ const PrivacyPolicy = () => {
                   <li><strong className="text-foreground">Delivery services:</strong> Shipping updates and delivery confirmations</li>
                   <li><strong className="text-foreground">Fraud prevention services:</strong> Verification data to prevent fraudulent transactions</li>
                 </ul>
+              </div>
+
+              <div>
+                <h2 className="text-xl font-heading font-bold text-primary mb-4">2A. Special Category Data — Genetic Information</h2>
+
+                <h3 className="text-lg font-semibold text-foreground mt-6 mb-3">2A.1 What We Collect</h3>
+                <p>When you use the DNA Analysis feature, you upload genetic data. This is classified as special category data under UK GDPR Article 9 due to its sensitive nature.</p>
+
+                <h3 className="text-lg font-semibold text-foreground mt-6 mb-3">2A.2 How It Is Processed</h3>
+                <p>Your genetic data is processed as follows:</p>
+                <ul className="list-disc pl-6 mt-2 space-y-2">
+                  <li>You upload raw genetic data (23andMe file, PDF report, image, or text)</li>
+                  <li>Relevant genetic variants are extracted client-side in your browser</li>
+                  <li>The extracted variant data is transmitted to OpenAI's API (GPT-4o) for AI analysis</li>
+                  <li>A personalised health report is generated and stored in your Peptyl account</li>
+                  <li>Your raw genetic data is never stored on Peptyl's servers — only the processed report</li>
+                </ul>
+
+                <h3 className="text-lg font-semibold text-foreground mt-6 mb-3">2A.3 Legal Basis</h3>
+                <p>We process your genetic data under UK GDPR Article 9(2)(a): explicit consent. You provide this consent via the triple-checkbox consent form on the upload page. You may withdraw consent and request deletion of your report at any time.</p>
+
+                <h3 className="text-lg font-semibold text-foreground mt-6 mb-3">2A.4 Third-Party Processing</h3>
+                <p>Your genetic variant data is transmitted to OpenAI (US-based) for AI processing. This constitutes an international data transfer. OpenAI processes this data under their Data Processing Addendum. We have assessed this transfer as necessary and proportionate for the service provided.</p>
+
+                <h3 className="text-lg font-semibold text-foreground mt-6 mb-3">2A.5 Retention</h3>
+                <p>Processed DNA reports are retained until you delete them or close your account. Consent records (not the genetic data itself) are retained for 7 years for legal compliance.</p>
+
+                <h3 className="text-lg font-semibold text-foreground mt-6 mb-3">2A.6 Your Rights</h3>
+                <p>You have the right to:</p>
+                <ul className="list-disc pl-6 mt-2 space-y-2">
+                  <li>Access your stored report via your DNA dashboard</li>
+                  <li>Delete your report at any time (this is available directly in your dashboard)</li>
+                  <li>Withdraw consent (delete your report — this removes the processed data)</li>
+                  <li>Request a copy of the consent record we hold</li>
+                </ul>
+
+                <h3 className="text-lg font-semibold text-foreground mt-6 mb-3">2A.7 Sensitive Nature</h3>
+                <p>We recognise that genetic data is uniquely personal and potentially sensitive for you and your biological relatives. We do not share genetic data with third parties other than OpenAI for processing purposes. We do not use genetic data for advertising, profiling, or any purpose other than generating your personalised report.</p>
               </div>
 
               <div>
@@ -208,6 +247,8 @@ const PrivacyPolicy = () => {
                   <li><strong className="text-foreground">Website analytics:</strong> Up to 26 months</li>
                   <li><strong className="text-foreground">Customer service records:</strong> 3 years after last contact</li>
                   <li><strong className="text-foreground">Account data:</strong> Until account deletion or 3 years of inactivity</li>
+                  <li><strong className="text-foreground">DNA reports:</strong> Until you delete them or close your account</li>
+                  <li><strong className="text-foreground">Genetic data consent records:</strong> 7 years (legal compliance)</li>
                 </ul>
               </div>
 
