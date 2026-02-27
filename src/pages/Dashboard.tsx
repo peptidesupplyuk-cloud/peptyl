@@ -19,7 +19,7 @@ import { useCreateProtocol, useProtocols } from "@/hooks/use-protocols";
 import { useLogInjection, useUpdateInjectionStatus, useAllInjections, useTodayInjections } from "@/hooks/use-injections";
 import AdherenceTracker from "@/components/dashboard/AdherenceTracker";
 import { useProtocolNotifications, useNotificationActions } from "@/hooks/use-notifications";
-import { getRecommendations, getBiometricRecommendations, type Recommendation, type BiometricRecommendation } from "@/data/recommendation-rules";
+import { getUnifiedRecommendations, getBiometricRecommendations, type Recommendation, type BiometricRecommendation, type UnifiedRecommendation } from "@/data/recommendation-rules";
 import PopularProtocols from "@/components/dashboard/PopularProtocols";
 import { useToast } from "@/hooks/use-toast";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -27,7 +27,7 @@ import SEO from "@/components/SEO";
 import ExperienceChat from "@/components/dashboard/ExperienceChat";
 import ProtocolNudges from "@/components/dashboard/ProtocolNudges";
 
-import OnboardingRecommendations from "@/components/dashboard/OnboardingRecommendations";
+// OnboardingRecommendations removed — unified engine handles onboarding-based recs
 import MobileTabNav from "@/components/dashboard/MobileTabNav";
 import OptimizationScore from "@/components/dashboard/OptimizationScore";
 import AdherenceSummary from "@/components/dashboard/AdherenceSummary";
@@ -112,7 +112,7 @@ const Dashboard = () => {
     queryFn: async () => {
       const { data } = await supabase
         .from("dna_reports")
-        .select("id, created_at, overall_score, confidence")
+        .select("id, created_at, overall_score, confidence, report_json")
         .eq("user_id", user!.id)
         .order("created_at", { ascending: false })
         .limit(1);
@@ -120,6 +120,20 @@ const Dashboard = () => {
     },
   });
   const latestDnaReport = dnaReports[0] || null;
+
+  const { data: onboardingProfile } = useQuery({
+    queryKey: ["onboarding-profile", user?.id],
+    enabled: !!user,
+    staleTime: 1000 * 60 * 10,
+    queryFn: async () => {
+      const { data } = await supabase
+        .from("profiles")
+        .select("research_goal, experience_level, current_compounds, biomarker_availability, risk_tolerance")
+        .eq("user_id", user!.id)
+        .maybeSingle();
+      return data;
+    },
+  });
   const hasBloodwork = panels.length > 0;
   const hasDna = !!latestDnaReport;
 
@@ -233,7 +247,29 @@ const Dashboard = () => {
   const markerMap = latestPanel
     ? Object.fromEntries(latestPanel.markers.map((m) => [m.marker_name, m.value]))
     : {};
-  const recommendations = getRecommendations(markerMap);
+  const recommendations: Recommendation[] = useMemo(() => {
+    const unified = getUnifiedRecommendations({
+      markers: markerMap,
+      dnaReport: latestDnaReport?.report_json as any || null,
+      onboarding: onboardingProfile || null,
+    });
+    return unified.map((u) => ({
+      id: u.id,
+      protocolName: u.protocolName,
+      goal: u.goal,
+      triggerDescription: u.signalLabels?.[0] || "",
+      peptides: u.peptides,
+      supplements: u.supplements,
+      durationWeeks: u.durationWeeks,
+      retestWeeks: u.retestWeeks,
+      source: u.source,
+      beginner_safe: u.beginner_safe,
+      signalSources: u.signalSources,
+      signalLabels: u.signalLabels,
+      confidenceLevel: u.confidenceLevel,
+      type: u.type,
+    }));
+  }, [markerMap, latestDnaReport, onboardingProfile]);
 
   const handleActivateProtocol = async (rec: Recommendation) => {
     if (!disclaimerAccepted) {
@@ -524,10 +560,7 @@ const Dashboard = () => {
                         </div>
                       )}
 
-                      {/* C5 — Starting Plan (only if no active protocol) */}
-                      {!hasActiveProtocol && (
-                        <OnboardingRecommendations onNavigateToProtocols={() => setActiveTab("protocols")} />
-                      )}
+                      {/* OnboardingRecommendations removed — unified engine handles it */}
 
                       {/* C6 — WHOOP */}
                       <div className="bg-card rounded-2xl border border-border p-5 flex items-center gap-4">
@@ -605,10 +638,7 @@ const Dashboard = () => {
                     </div>
                   )}
 
-                  {/* C5 — Starting Plan (only if no active protocol) */}
-                  {!hasActiveProtocol && (
-                    <OnboardingRecommendations onNavigateToProtocols={() => setActiveTab("protocols")} />
-                  )}
+                  {/* OnboardingRecommendations removed — unified engine handles it */}
 
                   {/* C6 — WHOOP */}
                   <div className="bg-card rounded-2xl border border-border p-5 flex items-center gap-4">
@@ -721,6 +751,9 @@ const Dashboard = () => {
 
             {/* PROTOCOLS TAB */}
             <TabsContent value="protocols" className="space-y-6">
+              {/* ACTIVE PLAN — always first */}
+              <ActiveProtocols />
+
               {/* Disclaimer */}
               <div className="bg-yellow-500/5 border border-yellow-500/20 rounded-2xl p-5 space-y-3">
                 <div className="flex items-start gap-2">
@@ -744,14 +777,15 @@ const Dashboard = () => {
                 </div>
               </div>
 
-              {recommendations.length > 0 && (hasBloodwork || hasDna) ? (
+              {/* PERSONALISED RECOMMENDATIONS (unified engine) */}
+              {recommendations.length > 0 ? (
                 <div className="space-y-3">
                   <Carousel opts={{ align: "start", loop: false }} className="w-full">
                     <div className="flex items-center justify-between">
                       <div>
                         <h2 className="font-heading font-semibold text-foreground">Based on your results</h2>
                         <p className="text-xs text-muted-foreground mt-0.5">
-                          {hasBloodwork && hasDna ? "Based on your bloodwork and DNA report" : hasBloodwork ? "Based on your bloodwork results" : "Based on your DNA report"}
+                          {hasBloodwork && hasDna ? "Based on your bloodwork and DNA report" : hasBloodwork ? "Based on your bloodwork results" : hasDna ? "Based on your DNA report" : "Based on your profile"}
                         </p>
                       </div>
                       <div className="flex items-center gap-1">
@@ -778,15 +812,15 @@ const Dashboard = () => {
                 </div>
               )}
 
+              {/* SUPPLEMENT + PEPTIDE PROTOCOLS (split) */}
               <PopularProtocols
                 onActivate={handleActivateProtocol}
                 isActivating={activatingProtocol}
                 disclaimerAccepted={disclaimerAccepted}
               />
 
+              {/* CREATE CUSTOM */}
               <CreateProtocolForm disclaimerAccepted={disclaimerAccepted} initialPeptide={initialPeptide} onInitialPeptideConsumed={() => setInitialPeptide(null)} />
-
-              <ActiveProtocols />
             </TabsContent>
 
             {/* TRACKER TAB */}
