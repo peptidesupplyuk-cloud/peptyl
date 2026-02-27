@@ -9,7 +9,30 @@ const BeginnersGuide = () => (
     date="February 2026"
     slug="beginners-guide-peptides"
     description="Everything you need to know before starting peptide research. Storage, reconstitution, dosing, and safety guidelines for beginners."
+    faqs={[
+      {
+        q: "Are research peptides legal in the UK?",
+        a: "Research peptides are legal to purchase and possess in the UK as research chemicals. They are not licensed medicines and are not approved for human use by the MHRA. Selling them as supplements or for human consumption is not permitted. Always purchase from suppliers providing Certificates of Analysis (COAs)."
+      },
+      {
+        q: "What is the difference between a peptide and a protein?",
+        a: "Peptides are short chains of amino acids — typically 2 to 50 amino acids long. Proteins are longer chains (50+ amino acids) that fold into complex 3D structures. Most research peptides are 5-40 amino acids long, which makes them small enough to be synthesised in a lab and stable enough for research use."
+      },
+      {
+        q: "How do you store research peptides?",
+        a: "Lyophilised (freeze-dried) peptides should be stored in a freezer at -20°C away from light and moisture. Once reconstituted with bacteriostatic water, store in a refrigerator at 2-8°C and use within 28-30 days. Never refreeze reconstituted peptides."
+      },
+      {
+        q: "What is reconstitution and how do you do it?",
+        a: "Reconstitution is adding bacteriostatic water to lyophilised peptide powder to create an injectable solution. Typical steps: wipe the vial top with an alcohol swab, draw the required volume of bacteriostatic water into a syringe, inject slowly down the inside of the vial, gently swirl (never shake), and let dissolve completely."
+      }
+    ]}
   >
+    <div className="not-prose mb-8 p-4 rounded-xl border border-primary/20 bg-primary/5">
+      <p className="text-xs font-semibold text-primary uppercase tracking-wide mb-2">Quick Answer</p>
+      <p className="text-sm text-foreground leading-relaxed">Research peptides are short chains of amino acids used in scientific research. Common examples include BPC-157 (gut and tissue healing), CJC-1295 + Ipamorelin (growth hormone support), and Semax (cognitive function). They are research chemicals — not approved for human use by the MHRA — and are typically reconstituted from lyophilised powder and administered via subcutaneous injection.</p>
+    </div>
+
     <p>Starting your first peptide research project can feel overwhelming. With hundreds of peptides available and conflicting information online, where do you even begin?</p>
     <p>This comprehensive guide will walk you through everything you need to know as a complete beginner, from understanding what peptides are to safely handling and storing them.</p>
 
