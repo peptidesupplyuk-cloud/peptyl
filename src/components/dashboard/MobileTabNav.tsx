@@ -7,8 +7,8 @@ interface Props {
 }
 
 const tabs = [
-  { value: "overview", label: "Home", icon: LayoutDashboard },
-  { value: "biomarkers", label: "Biomarkers", icon: Activity },
+  { value: "overview", label: "Today", icon: LayoutDashboard },
+  { value: "biomarkers", label: "Results", icon: Activity },
   { value: "protocols", label: "Protocols", icon: FlaskConical },
   { value: "injections", label: "Tracker", icon: CalendarDays },
   { value: "journal", label: "Journal", icon: BookOpen },

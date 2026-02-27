@@ -15,6 +15,7 @@ import DoseCalendar from "./InjectionCalendar";
 
 interface TodaysPlanProps {
   onActivate?: () => void;
+  slim?: boolean; // When true, strips headers/progress — used by overview Zone B
 }
 
 /** Map a protocol goal string to a user-friendly label */
@@ -40,7 +41,7 @@ interface SupplementItem {
   drivenBy?: string[];
 }
 
-const TodaysPlan = ({ onActivate }: TodaysPlanProps) => {
+const TodaysPlan = ({ onActivate, slim = false }: TodaysPlanProps) => {
   const navigate = useNavigate();
   const { user } = useAuth();
   const { data: injections = [], isLoading } = useTodayInjections();
@@ -237,8 +238,9 @@ const TodaysPlan = ({ onActivate }: TodaysPlanProps) => {
     );
   }
 
-  // No active protocol → activation CTA
+  // No active protocol — if slim mode, render nothing (Zone A handles CTA)
   if (!hasActiveProtocol) {
+    if (slim) return null;
     return (
       <div className="bg-card rounded-2xl border border-border p-5 space-y-4">
         <div className="flex items-center gap-2">
@@ -278,8 +280,8 @@ const TodaysPlan = ({ onActivate }: TodaysPlanProps) => {
 
   return (
     <>
-      {/* Milestone celebration banners */}
-      {showMilestone30 && activeProtocol && (
+      {/* Milestone celebration banners — only in full mode */}
+      {!slim && showMilestone30 && activeProtocol && (
         <div className="bg-card rounded-2xl border border-[#00D4AA]/30 p-4 flex items-start gap-3 mb-4">
           <span className="text-lg">🎯</span>
           <div className="flex-1 min-w-0">
@@ -298,7 +300,7 @@ const TodaysPlan = ({ onActivate }: TodaysPlanProps) => {
           </button>
         </div>
       )}
-      {showMilestone90 && activeProtocol && (
+      {!slim && showMilestone90 && activeProtocol && (
         <div className="bg-card rounded-2xl border border-[#00D4AA]/30 p-4 flex items-start gap-3 mb-4">
           <span className="text-lg">🎯</span>
           <div className="flex-1 min-w-0">
@@ -319,19 +321,27 @@ const TodaysPlan = ({ onActivate }: TodaysPlanProps) => {
       )}
 
       <div className="bg-card rounded-2xl border border-border p-5 space-y-4">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <FlaskConical className="h-5 w-5 text-primary" />
-            <h2 className="font-heading font-semibold text-foreground">What To Do Today</h2>
+        {/* Header — only in full mode */}
+        {!slim && (
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <FlaskConical className="h-5 w-5 text-primary" />
+              <h2 className="font-heading font-semibold text-foreground">What To Do Today</h2>
+            </div>
+            <div className="flex items-center gap-3">
+              <DoseCalendar />
+              <span className="text-xs text-muted-foreground">{format(new Date(), "EEEE, MMM d")}</span>
+            </div>
           </div>
-          <div className="flex items-center gap-3">
-            <DoseCalendar />
-            <span className="text-xs text-muted-foreground">{format(new Date(), "EEEE, MMM d")}</span>
-          </div>
-        </div>
+        )}
 
-        {/* J2: Day X of N progress strip */}
-        {showProgressStrip && (
+        {/* Slim mode header */}
+        {slim && (
+          <p className="text-sm font-medium text-muted-foreground">Today's doses</p>
+        )}
+
+        {/* J2: Day X of N progress strip — only in full mode */}
+        {!slim && showProgressStrip && (
           <button
             onClick={() => dnaReportId && navigate(`/dna/report/${dnaReportId}`)}
             className="w-full bg-muted/30 rounded-xl px-4 py-3 flex items-center gap-4 text-left hover:bg-muted/50 transition-colors"
@@ -342,7 +352,7 @@ const TodaysPlan = ({ onActivate }: TodaysPlanProps) => {
               </p>
               <div className="w-full h-1 bg-muted rounded-full mt-1.5">
                 <div
-                  className="h-1 bg-[#00D4AA] rounded-full transition-all duration-500"
+                  className="h-1 bg-primary rounded-full transition-all duration-500"
                   style={{ width: `${progressPct}%` }}
                 />
               </div>
@@ -360,8 +370,8 @@ const TodaysPlan = ({ onActivate }: TodaysPlanProps) => {
           </button>
         )}
 
-        {/* Active goal summary + detected issues */}
-        {(activeGoals.length > 0 || detectedIssues.length > 0) && (
+        {/* Active goal summary + detected issues — only in full mode */}
+        {!slim && (activeGoals.length > 0 || detectedIssues.length > 0) && (
           <div className="flex flex-wrap items-center gap-1.5">
             {activeGoals.length > 0 && <Target className="h-3.5 w-3.5 text-primary/60" />}
             {activeGoals.map((goal) => (
