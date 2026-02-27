@@ -15,7 +15,34 @@ export function useSaveOnboarding() {
     if (!user || attempted.current) return;
 
     const raw = sessionStorage.getItem("onboarding_answers");
-    if (!raw) return;
+    if (!raw) {
+      // Fallback: for Google OAuth users, extract name from user metadata if profile is empty
+      attempted.current = true;
+      const meta = user.user_metadata;
+      if (meta?.full_name || meta?.name) {
+        const fullName = (meta.full_name || meta.name || "").trim();
+        const parts = fullName.split(" ");
+        const firstName = parts[0] || null;
+        const lastName = parts.slice(1).join(" ") || null;
+        if (firstName) {
+          supabase
+            .from("profiles")
+            .update({
+              first_name: firstName,
+              last_name: lastName,
+              country: meta.country || null,
+            })
+            .eq("user_id", user.id)
+            .is("first_name", null)
+            .then(({ error }) => {
+              if (!error) {
+                console.log("[onboarding] Profile backfilled from Google metadata");
+              }
+            });
+        }
+      }
+      return;
+    }
 
     attempted.current = true;
 
@@ -52,7 +79,6 @@ export function useSaveOnboarding() {
           console.log("[onboarding] Profile updated with onboarding data");
         } else {
           console.error("[onboarding] Failed to save onboarding data:", error.message);
-          // Allow retry on next mount
           attempted.current = false;
         }
       });
