@@ -31,15 +31,15 @@
   },
   "mission": {
     "title": "Pourquoi <1>Peptyl</1> ?",
-    "subtitle": "Nous avons créé Peptyl parce qu'il manquait un centre de recherche de confiance dans l'espace des peptides — un qui relie vos biomarqueurs à des données réelles, des informations communautaires et les outils dont les chercheurs ont vraiment besoin.",
+    "subtitle": "Nous avons créé Peptyl parce qu'aucune plateforme ne reliait biomarqueurs, données de recherche, retours communautaires et les outils dont les optimiseurs de santé ont vraiment besoin.",
     "communityFirst": "Communauté d'abord",
-    "communityFirstDesc": "Construit pour la communauté de recherche mondiale — avec des données transparentes et participatives et des conseils honnêtes.",
+    "communityFirstDesc": "Conçu pour une communauté mondiale de chercheurs, biohackers et optimiseurs de santé, avec des données transparentes et participatives et des conseils honnêtes.",
     "biomarkerDriven": "Guidé par les biomarqueurs",
-    "biomarkerDrivenDesc": "Téléchargez vos analyses sanguines et obtenez des informations personnalisées sur les peptides et compléments basées sur votre biologie.",
+    "biomarkerDrivenDesc": "Téléchargez vos analyses sanguines et obtenez des informations personnalisées sur les peptides, compléments et protocoles basées sur votre biologie.",
     "researchVerified": "Vérifié par la recherche",
     "researchVerifiedDesc": "Chaque composé dans notre base est appuyé par des recherches citées. Nous priorisons les preuves cliniques sur les anecdotes.",
     "educationTools": "Éducation & Outils",
-    "educationToolsDesc": "Calculateurs gratuits, guides de dosage et une base de connaissances en croissance — car les chercheurs informés obtiennent de meilleurs résultats."
+    "educationToolsDesc": "Calculateurs gratuits, guides de dosage et une base de connaissances en croissance, car des décisions éclairées mènent à de meilleurs résultats."
   },
   "features": {
     "title": "Tout ce dont vous avez besoin, <1>une seule plateforme</1>",
