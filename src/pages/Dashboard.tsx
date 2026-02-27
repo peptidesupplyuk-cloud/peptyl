@@ -1,9 +1,9 @@
 import { useState, useEffect, useMemo, useRef } from "react";
-import { useSearchParams } from "react-router-dom";
+import { useSearchParams, useNavigate } from "react-router-dom";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Carousel, CarouselContent, CarouselItem, CarouselPrevious, CarouselNext } from "@/components/ui/carousel";
-import { Activity, FlaskConical, LayoutDashboard, AlertTriangle, User, BookOpen, CalendarDays, BarChart3, Heart, Weight, Droplets, ExternalLink, CheckCircle2, Play, Eye, X, Dna } from "lucide-react";
-import { addWeeks, format } from "date-fns";
+import { Activity, FlaskConical, LayoutDashboard, AlertTriangle, User, BookOpen, CalendarDays, BarChart3, Heart, Weight, Droplets, ExternalLink, CheckCircle2, Play, Eye, X, Dna, Sparkles } from "lucide-react";
+import { addWeeks, format, differenceInCalendarDays, startOfDay, subDays, isSameDay } from "date-fns";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import BloodworkForm from "@/components/dashboard/BloodworkForm";
@@ -16,7 +16,7 @@ import CreateProtocolForm from "@/components/dashboard/CreateProtocolForm";
 import ProfileBiometrics from "@/components/dashboard/ProfileBiometrics";
 import { useBloodworkPanels } from "@/hooks/use-bloodwork";
 import { useCreateProtocol, useProtocols } from "@/hooks/use-protocols";
-import { useLogInjection, useUpdateInjectionStatus } from "@/hooks/use-injections";
+import { useLogInjection, useUpdateInjectionStatus, useAllInjections, useTodayInjections } from "@/hooks/use-injections";
 import AdherenceTracker from "@/components/dashboard/AdherenceTracker";
 import { useProtocolNotifications, useNotificationActions } from "@/hooks/use-notifications";
 import { getRecommendations, getBiometricRecommendations, type Recommendation, type BiometricRecommendation } from "@/data/recommendation-rules";
@@ -99,6 +99,7 @@ const Dashboard = () => {
   const [searchParams, setSearchParams] = useSearchParams();
   useSaveOnboarding();
   const { user } = useAuth();
+  const navigate = useNavigate();
 
   const ADMIN_EMAIL = "peptidesupplyuk@gmail.com";
   const isAdmin = user?.email === ADMIN_EMAIL;
@@ -121,6 +122,45 @@ const Dashboard = () => {
   const latestDnaReport = dnaReports[0] || null;
   const hasBloodwork = panels.length > 0;
   const hasDna = !!latestDnaReport;
+
+  // Hero status stats
+  const { data: allInjections = [] } = useAllInjections();
+  const { data: todayInjections = [] } = useTodayInjections();
+  const activeProtocol = protocols.find((p) => p.status === "active");
+  const hasActiveProtocol = !!activeProtocol;
+
+  const heroStats = useMemo(() => {
+    if (!hasActiveProtocol || allInjections.length === 0) return { rate: 0, streak: 0 };
+    const completed = allInjections.filter((i) => i.status === "completed").length;
+    const skipped = allInjections.filter((i) => i.status === "skipped").length;
+    const missed = allInjections.filter((i) => i.status !== "scheduled" ? false : new Date(i.scheduled_time) < new Date()).length;
+    const total = completed + skipped + missed;
+    const rate = total > 0 ? Math.round((completed / total) * 100) : 0;
+    let streak = 0;
+    const today = startOfDay(new Date());
+    for (let d = 0; d < 365; d++) {
+      const day = subDays(today, d);
+      const dayInj = allInjections.filter((i) => isSameDay(new Date(i.scheduled_time), day));
+      if (dayInj.length === 0) continue;
+      if (dayInj.every((i) => i.status === "completed")) streak++;
+      else break;
+    }
+    return { rate, streak };
+  }, [allInjections, hasActiveProtocol]);
+
+  const protocolStartDate = activeProtocol?.start_date;
+  const protocolEndDate = activeProtocol?.end_date;
+  const daysActive = protocolStartDate
+    ? Math.max(0, differenceInCalendarDays(new Date(), new Date(protocolStartDate)))
+    : 0;
+  const totalDays = protocolStartDate && protocolEndDate
+    ? Math.max(1, differenceInCalendarDays(new Date(protocolEndDate), new Date(protocolStartDate)))
+    : 90;
+  const progressPct = Math.min(100, Math.round((daysActive / totalDays) * 100));
+  const daysLeft = totalDays - daysActive;
+  const todayScheduled = todayInjections.filter((i) => i.status === "scheduled").length;
+  const todayCompleted = todayInjections.filter((i) => i.status === "completed").length;
+  const [showMore, setShowMore] = useState(false);
 
   // Check if WHOOP is already connected (admin only)
   const { data: whoopConnection } = useQuery({
@@ -263,7 +303,7 @@ const Dashboard = () => {
   return (
     <div className="min-h-screen bg-background">
       <SEO
-        title="My Plan | Daily Actions & Protocol Management"
+        title="My Health | Peptyl"
         description="See what to do today, track biomarkers, and manage your active peptide protocols."
         path="/dashboard"
       />
@@ -273,7 +313,7 @@ const Dashboard = () => {
           <div className="mb-8 flex items-start justify-between gap-4">
             <div>
               <h1 className="text-2xl sm:text-3xl font-heading font-bold text-foreground">
-                My <span className="text-gradient-teal">Plan</span>
+                My <span className="text-gradient-teal">Health</span>
               </h1>
               <p className="text-muted-foreground text-sm mt-1">
                 Your daily actions, biomarkers, and active protocols.
@@ -285,10 +325,10 @@ const Dashboard = () => {
           <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
             <TabsList className="hidden md:flex w-full overflow-x-auto max-w-3xl no-scrollbar">
               <TabsTrigger value="overview" className="text-xs sm:text-sm">
-                <LayoutDashboard className="h-4 w-4 mr-1.5" />Overview
+                <LayoutDashboard className="h-4 w-4 mr-1.5" />Today
               </TabsTrigger>
               <TabsTrigger value="biomarkers" className="text-xs sm:text-sm">
-                <Activity className="h-4 w-4 mr-1.5" />Biomarkers
+                <Activity className="h-4 w-4 mr-1.5" />Results
               </TabsTrigger>
               <TabsTrigger value="protocols" className="text-xs sm:text-sm">
                 <FlaskConical className="h-4 w-4 mr-1.5" />Protocols
@@ -297,7 +337,7 @@ const Dashboard = () => {
                 <CalendarDays className="h-4 w-4 mr-1.5" />Tracker
               </TabsTrigger>
               <TabsTrigger value="adherence" className="text-xs sm:text-sm">
-                <BarChart3 className="h-4 w-4 mr-1.5" />Adherence
+                <BarChart3 className="h-4 w-4 mr-1.5" />Progress
               </TabsTrigger>
               <TabsTrigger value="journal" className="text-xs sm:text-sm">
                 <BookOpen className="h-4 w-4 mr-1.5" />Journal
@@ -318,151 +358,278 @@ const Dashboard = () => {
             </TabsContent>
 
             {/* OVERVIEW TAB */}
-            <TabsContent value="overview" className="space-y-6">
-              {/* 1. Action card — today's doses or activation CTA */}
-              <TodaysPlan onActivate={() => setActiveTab("protocols")} />
-
-              {/* 1b. Adherence snapshot */}
-              <AdherenceSummary onNavigate={() => setActiveTab("adherence")} />
-
-              {/* 2. Protocol nudges */}
-              <ProtocolNudges onNavigate={setActiveTab} />
-
-              {/* 3. Your Data status card */}
-              <div className="bg-card rounded-2xl border border-border p-5">
-                <h3 className="text-sm font-heading font-semibold text-foreground mb-3">Your Data</h3>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  {/* Bloodwork status */}
-                  <div className="flex items-start gap-3">
-                    <div className="h-9 w-9 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
-                      <Droplets className="h-4 w-4 text-primary" />
+            <TabsContent value="overview" className="space-y-4">
+              {/* ═══ ZONE A — Hero Status ═══ */}
+              {hasActiveProtocol ? (
+                <div className="bg-card rounded-2xl border border-border p-5 sm:p-6">
+                  <div className="flex items-start gap-6">
+                    {/* Left: Day counter */}
+                    <div className="shrink-0">
+                      <p className="text-4xl font-heading font-bold text-foreground leading-none">Day {daysActive}</p>
+                      <p className="text-sm text-muted-foreground mt-1">of {totalDays}</p>
+                      <div className="h-1.5 bg-muted rounded-full mt-2 w-28">
+                        <div className="h-1.5 bg-primary rounded-full transition-all duration-500" style={{ width: `${progressPct}%` }} />
+                      </div>
                     </div>
-                    <div className="min-w-0">
-                      <div className="flex items-center gap-2">
-                        <span className="text-sm font-semibold text-foreground">Bloodwork</span>
-                        <span className={`text-[10px] rounded-full px-2 py-0.5 font-medium ${hasBloodwork ? "bg-primary/10 text-primary" : "bg-muted text-muted-foreground"}`}>
-                          {hasBloodwork ? "Active" : "Not logged"}
+                    {/* Right: stat pills */}
+                    <div className="flex flex-col gap-2 flex-1 min-w-0">
+                      <div className="flex items-center gap-2 text-sm">
+                        <span className="font-medium text-foreground">{heroStats.rate}%</span>
+                        <span className="text-muted-foreground">adherence</span>
+                      </div>
+                      <div className="flex items-center gap-2 text-sm">
+                        <span className={`font-medium ${heroStats.streak > 7 ? "text-green-500" : heroStats.streak > 0 ? "text-amber-400" : "text-muted-foreground"}`}>
+                          {heroStats.streak} day streak
                         </span>
                       </div>
-                      {hasBloodwork ? (
-                        <p className="text-xs text-muted-foreground">{panels.length} panel{panels.length !== 1 ? "s" : ""} logged · last {new Date(panels[0].test_date).toLocaleDateString()}</p>
-                      ) : (
-                        <button onClick={() => setActiveTab("biomarkers")} className="text-xs text-primary hover:underline">Log results →</button>
-                      )}
-                    </div>
-                  </div>
-                  {/* DNA status */}
-                  <div className="flex items-start gap-3">
-                    <div className="h-9 w-9 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
-                      <Dna className="h-4 w-4 text-primary" />
-                    </div>
-                    <div className="min-w-0">
-                      <div className="flex items-center gap-2">
-                        <span className="text-sm font-semibold text-foreground">DNA Report</span>
-                        <span className={`text-[10px] rounded-full px-2 py-0.5 font-medium ${hasDna ? "bg-primary/10 text-primary" : "bg-muted text-muted-foreground"}`}>
-                          {hasDna ? "Analysed" : "Not uploaded"}
-                        </span>
+                      <div className="flex items-center gap-2 text-sm">
+                        {todayScheduled > 0 ? (
+                          <span className="font-medium text-primary">{todayScheduled} left today</span>
+                        ) : (
+                          <span className="font-medium text-green-500">All done ✓</span>
+                        )}
                       </div>
-                      {hasDna ? (
-                        <a href={`/dna/report/${latestDnaReport.id}`} className="text-xs text-muted-foreground hover:underline">
-                          Score {latestDnaReport.overall_score}/100 · {new Date(latestDnaReport.created_at).toLocaleDateString()} — View report →
-                        </a>
-                      ) : (
-                        <a href="/dna/upload" className="text-xs text-primary hover:underline">Upload DNA →</a>
-                      )}
                     </div>
                   </div>
-                </div>
-              </div>
-
-              {/* 4. Biomarker grid — "What We're Fixing" */}
-              <BiomarkerSummary panels={panels} />
-
-              {/* 5. Active plan */}
-              <ActiveProtocols />
-
-              {/* 5. Health Direction Score */}
-              <OptimizationScore />
-
-              {/* WHOOP Integration */}
-              <div className="bg-card rounded-2xl border border-border p-5 flex items-center gap-4">
-                <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0">
-                  {whoopConnection ? (
-                    <CheckCircle2 className="h-5 w-5 text-primary" />
-                  ) : (
-                    <Activity className="h-5 w-5 text-primary" />
-                  )}
-                </div>
-                <div className="flex-1">
-                  <h3 className="font-heading font-semibold text-foreground text-sm">WHOOP Integration</h3>
-                  <p className="text-xs text-muted-foreground">
-                    {whoopConnection
-                      ? `Connected${whoopConnection.last_sync_at ? ` · Last sync: ${new Date(whoopConnection.last_sync_at).toLocaleDateString()}` : ""}`
-                      : "Auto-sync HRV, recovery, strain & sleep data from your WHOOP band."}
+                  {/* Protocol name line */}
+                  <p className="text-xs text-muted-foreground mt-3">
+                    {activeProtocol.name} · {daysLeft > 0 ? `${daysLeft} days remaining` : "Completing today"}
                   </p>
                 </div>
-                {isAdmin ? (
-                  whoopConnection ? (
-                    <span className="text-[10px] font-medium text-primary bg-primary/10 rounded-full px-2.5 py-1 whitespace-nowrap">Connected</span>
-                  ) : (
-                    <Button size="sm" variant="outline" onClick={handleConnectWhoop} className="gap-1.5 text-xs">
-                      <ExternalLink className="h-3 w-3" />
-                      Connect
-                    </Button>
-                  )
-                ) : (
-                  <span className="text-[10px] font-medium text-primary bg-primary/10 rounded-full px-2.5 py-1 whitespace-nowrap">Coming Soon</span>
-                )}
-              </div>
-
-              {/* 6. Onboarding recommendations */}
-              <OnboardingRecommendations onNavigateToProtocols={() => setActiveTab("protocols")} />
-
-              {recommendations.length > 0 && (hasBloodwork || hasDna) && (
-                <div className="space-y-3">
-                  <Carousel opts={{ align: "start", loop: false }} className="w-full">
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <h2 className="font-heading font-semibold text-foreground">🎯 Personalised Recommendations</h2>
-                        <p className="text-xs text-muted-foreground mt-0.5">
-                          {hasBloodwork && hasDna ? "Based on your bloodwork and DNA report" : hasBloodwork ? "Based on your bloodwork results" : "Based on your DNA report"}
-                        </p>
-                      </div>
-                      <div className="flex items-center gap-1">
-                        <CarouselPrevious className="static translate-y-0 h-7 w-7" />
-                        <CarouselNext className="static translate-y-0 h-7 w-7" />
-                      </div>
-                    </div>
-                    <CarouselContent className="-ml-3 mt-3">
-                      {recommendations.slice(0, 4).map((rec) => (
-                        <CarouselItem key={rec.id} className="pl-3 basis-full sm:basis-[70%] md:basis-1/2 lg:basis-[45%]">
-                          <RecommendationCard recommendation={rec} onActivate={handleActivateProtocol} isActivating={activatingProtocol} badge="Personalised" />
-                        </CarouselItem>
-                      ))}
-                    </CarouselContent>
-                  </Carousel>
+              ) : (
+                <div className="bg-card rounded-2xl border border-border p-6 text-center space-y-3">
+                  <Sparkles className="h-10 w-10 text-primary mx-auto" />
+                  <h2 className="font-heading font-bold text-xl text-foreground">Ready to start?</h2>
+                  <p className="text-sm text-muted-foreground">Choose a protocol or explore recommendations below</p>
+                  <div className="flex justify-center gap-3">
+                    <Button onClick={() => setActiveTab("protocols")}>Browse Protocols</Button>
+                    <Button variant="ghost" onClick={() => setActiveTab("biomarkers")}>View my data</Button>
+                  </div>
+                  {(hasBloodwork || hasDna) && (
+                    <p className="text-xs text-primary mt-2">
+                      You have {hasBloodwork && hasDna ? "bloodwork and DNA data" : hasBloodwork ? "bloodwork results" : "a DNA report"} — personalised recommendations are waiting.
+                    </p>
+                  )}
                 </div>
               )}
 
-              {bioRecs.length > 0 && (
-                <div className="space-y-4">
-                  <h2 className="font-heading font-semibold text-foreground">Supplement Suggestions (Based on Profile)</h2>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    {bioRecs.map((rec) => (
-                      <div key={rec.id} className="bg-card rounded-2xl border border-border p-5 space-y-3">
-                        <h3 className="font-heading font-semibold text-foreground">{rec.title}</h3>
-                        <p className="text-sm text-muted-foreground">{rec.description}</p>
-                        <div className="space-y-1.5">
-                          {rec.supplements.map((s) => (
-                            <div key={s.name} className="flex items-center justify-between text-xs bg-muted/50 rounded-lg px-3 py-2">
-                              <span className="font-medium text-foreground">{s.name}</span>
-                              <span className="text-muted-foreground">{s.dose} — {s.frequency}</span>
-                            </div>
-                          ))}
-                        </div>
-                        <p className="text-[10px] text-muted-foreground italic">Source: {rec.source}</p>
+              {/* ═══ ZONE B — Today's doses (active) OR Next step (inactive) ═══ */}
+              {hasActiveProtocol ? (
+                <TodaysPlan slim onActivate={() => setActiveTab("protocols")} />
+              ) : (
+                <div className="bg-card rounded-2xl border border-border p-5 space-y-3">
+                  {!hasBloodwork && !hasDna && (
+                    <>
+                      <h3 className="text-sm font-heading font-semibold text-foreground">Start with your data</h3>
+                      <div className="flex gap-3">
+                        <Button variant="outline" size="sm" className="flex-1" onClick={() => setActiveTab("biomarkers")}>
+                          <Droplets className="h-3.5 w-3.5 mr-1.5" /> Log bloodwork
+                        </Button>
+                        <Button variant="outline" size="sm" className="flex-1" onClick={() => navigate("/dna/upload")}>
+                          <Dna className="h-3.5 w-3.5 mr-1.5" /> Upload DNA
+                        </Button>
                       </div>
-                    ))}
+                    </>
+                  )}
+                  {hasBloodwork && !hasDna && (
+                    <div className="flex items-start gap-3">
+                      <Dna className="h-5 w-5 text-primary shrink-0 mt-0.5" />
+                      <div>
+                        <h3 className="text-sm font-heading font-semibold text-foreground">Add DNA for deeper insights</h3>
+                        <p className="text-xs text-muted-foreground mt-1">Your bloodwork is in. Upload your genetic data to get DNA-driven supplement recommendations.</p>
+                        <Button variant="link" size="sm" className="px-0 h-auto mt-1 text-xs" onClick={() => navigate("/dna/upload")}>Upload DNA →</Button>
+                      </div>
+                    </div>
+                  )}
+                  {hasDna && !hasBloodwork && (
+                    <div className="flex items-start gap-3">
+                      <Droplets className="h-5 w-5 text-primary shrink-0 mt-0.5" />
+                      <div>
+                        <h3 className="text-sm font-heading font-semibold text-foreground">Add bloodwork to personalise protocols</h3>
+                        <p className="text-xs text-muted-foreground mt-1">Your DNA report is ready. Add bloodwork results to unlock biomarker-triggered protocol recommendations.</p>
+                        <Button variant="link" size="sm" className="px-0 h-auto mt-1 text-xs" onClick={() => setActiveTab("biomarkers")}>Log bloodwork →</Button>
+                      </div>
+                    </div>
+                  )}
+                  {hasBloodwork && hasDna && (
+                    <div className="flex items-start gap-3">
+                      <CheckCircle2 className="h-5 w-5 text-primary shrink-0 mt-0.5" />
+                      <div>
+                        <h3 className="text-sm font-heading font-semibold text-foreground">Your data is ready</h3>
+                        <p className="text-xs text-muted-foreground mt-1">Browse protocols above to get started with a personalised plan.</p>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {/* ═══ ZONE C — Supporting context ═══ */}
+              {isMobile ? (
+                <div>
+                  <button
+                    onClick={() => setShowMore(!showMore)}
+                    className="text-xs text-primary font-medium hover:underline mb-3"
+                  >
+                    {showMore ? "Show less" : "Show more"}
+                  </button>
+                  {showMore && (
+                    <div className="space-y-4">
+                      {/* C1 — Biomarker summary */}
+                      {hasBloodwork && <BiomarkerSummary panels={panels} />}
+
+                      {/* C2 — Protocol nudges */}
+                      <ProtocolNudges onNavigate={setActiveTab} />
+
+                      {/* C3 — Data completeness row */}
+                      <div className="flex items-center gap-3 px-1 flex-wrap">
+                        <span className="text-xs text-muted-foreground">Your data:</span>
+                        <span className={`text-xs font-medium ${hasBloodwork ? "text-primary" : "text-muted-foreground"}`}>
+                          {hasBloodwork ? `✓ Bloodwork (${panels.length} panels)` : "○ No bloodwork yet"}
+                        </span>
+                        <span className={`text-xs font-medium ${hasDna ? "text-primary" : "text-muted-foreground"}`}>
+                          {hasDna ? `✓ DNA report (${latestDnaReport.overall_score}/100)` : "○ No DNA report"}
+                        </span>
+                        {(!hasBloodwork || !hasDna) && (
+                          <button onClick={() => !hasBloodwork ? setActiveTab("biomarkers") : navigate("/dna/upload")}
+                            className="text-xs text-primary hover:underline ml-auto">
+                            Add data →
+                          </button>
+                        )}
+                      </div>
+
+                      {/* C4 — Personalised recommendations */}
+                      {recommendations.length > 0 && (hasBloodwork || hasDna) && (
+                        <div className="space-y-3">
+                          <Carousel opts={{ align: "start", loop: false }} className="w-full">
+                            <div className="flex items-center justify-between">
+                              <div>
+                                <h2 className="font-heading font-semibold text-foreground">Based on your results</h2>
+                                <p className="text-xs text-muted-foreground mt-0.5">
+                                  {hasBloodwork && hasDna ? "Based on your bloodwork and DNA report" : hasBloodwork ? "Based on your bloodwork results" : "Based on your DNA report"}
+                                </p>
+                              </div>
+                              <div className="flex items-center gap-1">
+                                <CarouselPrevious className="static translate-y-0 h-7 w-7" />
+                                <CarouselNext className="static translate-y-0 h-7 w-7" />
+                              </div>
+                            </div>
+                            <CarouselContent className="-ml-3 mt-3">
+                              {recommendations.slice(0, 4).map((rec) => (
+                                <CarouselItem key={rec.id} className="pl-3 basis-full sm:basis-[70%] md:basis-1/2 lg:basis-[45%]">
+                                  <RecommendationCard recommendation={rec} onActivate={handleActivateProtocol} isActivating={activatingProtocol} badge="Personalised" />
+                                </CarouselItem>
+                              ))}
+                            </CarouselContent>
+                          </Carousel>
+                        </div>
+                      )}
+
+                      {/* C5 — Starting Plan (only if no active protocol) */}
+                      {!hasActiveProtocol && (
+                        <OnboardingRecommendations onNavigateToProtocols={() => setActiveTab("protocols")} />
+                      )}
+
+                      {/* C6 — WHOOP */}
+                      <div className="bg-card rounded-2xl border border-border p-5 flex items-center gap-4">
+                        <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0">
+                          {whoopConnection ? <CheckCircle2 className="h-5 w-5 text-primary" /> : <Activity className="h-5 w-5 text-primary" />}
+                        </div>
+                        <div className="flex-1">
+                          <h3 className="font-heading font-semibold text-foreground text-sm">WHOOP Integration</h3>
+                          <p className="text-xs text-muted-foreground">
+                            {whoopConnection ? `Connected${whoopConnection.last_sync_at ? ` · Last sync: ${new Date(whoopConnection.last_sync_at).toLocaleDateString()}` : ""}` : "Auto-sync HRV, recovery, strain & sleep data from your WHOOP band."}
+                          </p>
+                        </div>
+                        {isAdmin ? (
+                          whoopConnection ? (
+                            <span className="text-[10px] font-medium text-primary bg-primary/10 rounded-full px-2.5 py-1 whitespace-nowrap">Connected</span>
+                          ) : (
+                            <Button size="sm" variant="outline" onClick={handleConnectWhoop} className="gap-1.5 text-xs"><ExternalLink className="h-3 w-3" />Connect</Button>
+                          )
+                        ) : (
+                          <span className="text-[10px] font-medium text-primary bg-primary/10 rounded-full px-2.5 py-1 whitespace-nowrap">Coming Soon</span>
+                        )}
+                      </div>
+                    </div>
+                  )}
+                </div>
+              ) : (
+                <div className="space-y-4">
+                  {/* C1 — Biomarker summary */}
+                  {hasBloodwork && <BiomarkerSummary panels={panels} />}
+
+                  {/* C2 — Protocol nudges */}
+                  <ProtocolNudges onNavigate={setActiveTab} />
+
+                  {/* C3 — Data completeness row */}
+                  <div className="flex items-center gap-3 px-1 flex-wrap">
+                    <span className="text-xs text-muted-foreground">Your data:</span>
+                    <span className={`text-xs font-medium ${hasBloodwork ? "text-primary" : "text-muted-foreground"}`}>
+                      {hasBloodwork ? `✓ Bloodwork (${panels.length} panels)` : "○ No bloodwork yet"}
+                    </span>
+                    <span className={`text-xs font-medium ${hasDna ? "text-primary" : "text-muted-foreground"}`}>
+                      {hasDna ? `✓ DNA report (${latestDnaReport.overall_score}/100)` : "○ No DNA report"}
+                    </span>
+                    {(!hasBloodwork || !hasDna) && (
+                      <button onClick={() => !hasBloodwork ? setActiveTab("biomarkers") : navigate("/dna/upload")}
+                        className="text-xs text-primary hover:underline ml-auto">
+                        Add data →
+                      </button>
+                    )}
+                  </div>
+
+                  {/* C4 — Personalised recommendations */}
+                  {recommendations.length > 0 && (hasBloodwork || hasDna) && (
+                    <div className="space-y-3">
+                      <Carousel opts={{ align: "start", loop: false }} className="w-full">
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <h2 className="font-heading font-semibold text-foreground">Based on your results</h2>
+                            <p className="text-xs text-muted-foreground mt-0.5">
+                              {hasBloodwork && hasDna ? "Based on your bloodwork and DNA report" : hasBloodwork ? "Based on your bloodwork results" : "Based on your DNA report"}
+                            </p>
+                          </div>
+                          <div className="flex items-center gap-1">
+                            <CarouselPrevious className="static translate-y-0 h-7 w-7" />
+                            <CarouselNext className="static translate-y-0 h-7 w-7" />
+                          </div>
+                        </div>
+                        <CarouselContent className="-ml-3 mt-3">
+                          {recommendations.slice(0, 4).map((rec) => (
+                            <CarouselItem key={rec.id} className="pl-3 basis-full sm:basis-[70%] md:basis-1/2 lg:basis-[45%]">
+                              <RecommendationCard recommendation={rec} onActivate={handleActivateProtocol} isActivating={activatingProtocol} badge="Personalised" />
+                            </CarouselItem>
+                          ))}
+                        </CarouselContent>
+                      </Carousel>
+                    </div>
+                  )}
+
+                  {/* C5 — Starting Plan (only if no active protocol) */}
+                  {!hasActiveProtocol && (
+                    <OnboardingRecommendations onNavigateToProtocols={() => setActiveTab("protocols")} />
+                  )}
+
+                  {/* C6 — WHOOP */}
+                  <div className="bg-card rounded-2xl border border-border p-5 flex items-center gap-4">
+                    <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0">
+                      {whoopConnection ? <CheckCircle2 className="h-5 w-5 text-primary" /> : <Activity className="h-5 w-5 text-primary" />}
+                    </div>
+                    <div className="flex-1">
+                      <h3 className="font-heading font-semibold text-foreground text-sm">WHOOP Integration</h3>
+                      <p className="text-xs text-muted-foreground">
+                        {whoopConnection ? `Connected${whoopConnection.last_sync_at ? ` · Last sync: ${new Date(whoopConnection.last_sync_at).toLocaleDateString()}` : ""}` : "Auto-sync HRV, recovery, strain & sleep data from your WHOOP band."}
+                      </p>
+                    </div>
+                    {isAdmin ? (
+                      whoopConnection ? (
+                        <span className="text-[10px] font-medium text-primary bg-primary/10 rounded-full px-2.5 py-1 whitespace-nowrap">Connected</span>
+                      ) : (
+                        <Button size="sm" variant="outline" onClick={handleConnectWhoop} className="gap-1.5 text-xs"><ExternalLink className="h-3 w-3" />Connect</Button>
+                      )
+                    ) : (
+                      <span className="text-[10px] font-medium text-primary bg-primary/10 rounded-full px-2.5 py-1 whitespace-nowrap">Coming Soon</span>
+                    )}
                   </div>
                 </div>
               )}
@@ -582,7 +749,7 @@ const Dashboard = () => {
                   <Carousel opts={{ align: "start", loop: false }} className="w-full">
                     <div className="flex items-center justify-between">
                       <div>
-                        <h2 className="font-heading font-semibold text-foreground">🎯 Personalised Recommendations</h2>
+                        <h2 className="font-heading font-semibold text-foreground">Based on your results</h2>
                         <p className="text-xs text-muted-foreground mt-0.5">
                           {hasBloodwork && hasDna ? "Based on your bloodwork and DNA report" : hasBloodwork ? "Based on your bloodwork results" : "Based on your DNA report"}
                         </p>
