@@ -31,13 +31,21 @@ const ProtocolNudges = ({ onNavigate }: { onNavigate?: (tab: string) => void }) 
   const today = new Date();
 
   for (const p of protocols) {
-    if (p.status !== "active") {
-      // Only check ended nudge for active protocols with past end_date
-      if (p.status === "active" && p.end_date) {
-        // handled below
+    // Handle completed/ended protocols first
+    if (p.status === "completed" && p.end_date) {
+      const endedDaysAgo = differenceInDays(today, new Date(p.end_date));
+      if (endedDaysAgo >= 0 && endedDaysAgo <= 7) {
+        nudges.push({
+          id: `ended-${p.id}`,
+          type: "ended",
+          protocolName: p.name,
+          protocolId: p.id,
+          message: `Your "${p.name}" protocol has ended. How did it go?`,
+        });
       }
       continue;
     }
+    if (p.status !== "active") continue;
 
     const daysActive = differenceInDays(today, new Date(p.start_date));
 

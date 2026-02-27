@@ -227,7 +227,7 @@ export const RECOMMENDATION_RULES: Rule[] = [
     },
   },
   {
-    marker: "thyroid_tsh",
+    marker: "tsh",
     condition: (v) => v > 4.0,
     recommendation: {
       id: "thyroid_support",
@@ -290,7 +290,7 @@ export const RECOMMENDATION_RULES: Rule[] = [
     },
   },
   {
-    marker: "ldl_cholesterol",
+    marker: "ldl",
     condition: (v) => v > 160,
     recommendation: {
       id: "lipid_optimisation",

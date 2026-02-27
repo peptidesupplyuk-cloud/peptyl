@@ -1,20 +1,22 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { Menu, X, ShoppingBag, LogOut, User } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useTranslation } from "react-i18next";
+import { useQuery } from "@tanstack/react-query";
 import Logo from "./Logo";
 import { Button } from "./ui/button";
 import { useAuth } from "@/contexts/AuthContext";
+import { supabase } from "@/integrations/supabase/client";
 import LanguageToggle from "./LanguageToggle";
 import ThemeToggle from "./ThemeToggle";
 
 const ADMIN_EMAIL = "peptidesupplyuk@gmail.com";
 
-const navItems = [
+const BASE_NAV_ITEMS = [
   { labelKey: "nav.myHealth", href: "/dashboard" },
   { labelKey: "nav.improve", href: "/improve" },
-  { labelKey: "nav.dna", href: "/dna" },
+  { labelKey: "nav.dna", href: "/dna", dynamic: true },
   { labelKey: "nav.learn", href: "/education" },
   { labelKey: "nav.shop", href: "/shop" },
   { labelKey: "nav.testing", href: "/testing" },
@@ -29,6 +31,31 @@ const Header = () => {
   const navigate = useNavigate();
   const { user, signOut } = useAuth();
   const { t } = useTranslation();
+
+  // Check if user has DNA reports for context-aware nav
+  const { data: hasDnaReports } = useQuery({
+    queryKey: ["has-dna-reports", user?.id],
+    enabled: !!user,
+    staleTime: 1000 * 60 * 10,
+    queryFn: async () => {
+      const { count } = await supabase
+        .from("dna_reports")
+        .select("id", { count: "exact", head: true })
+        .eq("user_id", user!.id);
+      return (count ?? 0) > 0;
+    },
+  });
+
+  const navItems = useMemo(() =>
+    BASE_NAV_ITEMS.map((item) => {
+      if (item.dynamic && item.labelKey === "nav.dna") {
+        if (!user) return { ...item, href: "/dna" };
+        return { ...item, href: hasDnaReports ? "/dna/dashboard" : "/dna/upload" };
+      }
+      return item;
+    }),
+    [user, hasDnaReports]
+  );
 
   useEffect(() => {
     const handleScroll = () => setScrolled(window.scrollY > 20);

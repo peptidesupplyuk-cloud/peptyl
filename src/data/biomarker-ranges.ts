@@ -38,6 +38,9 @@ export const BIOMARKERS: BiomarkerDef[] = [
   { name: "Free T4", key: "free_t4", unit: "ng/dL", optimalMin: 1.0, optimalMax: 1.5, refMin: 0.8, refMax: 1.8, panel: "advanced", category: "Thyroid" },
   { name: "Fasting Insulin", key: "fasting_insulin", unit: "µIU/mL", optimalMin: 3, optimalMax: 8, refMin: 2, refMax: 20, panel: "advanced", category: "Metabolic" },
   { name: "Homocysteine", key: "homocysteine", unit: "µmol/L", optimalMin: 5, optimalMax: 9, refMin: 4, refMax: 15, panel: "advanced", category: "Inflammation" },
+  { name: "Ferritin", key: "ferritin", unit: "µg/L", optimalMin: 30, optimalMax: 150, refMin: 15, refMax: 300, panel: "advanced", category: "Iron" },
+  { name: "Cortisol (AM)", key: "cortisol_am", unit: "nmol/L", optimalMin: 350, optimalMax: 700, refMin: 200, refMax: 900, panel: "advanced", category: "Hormones" },
+  { name: "DHEA-S", key: "dhea_s", unit: "µmol/L", optimalMin: 5, optimalMax: 12, refMin: 2, refMax: 15, panel: "advanced", category: "Hormones" },
 
   // Body Metrics
   { name: "Age", key: "age", unit: "yrs", optimalMin: 18, optimalMax: 100, refMin: 0, refMax: 120, panel: "basic", category: "Body Composition" },

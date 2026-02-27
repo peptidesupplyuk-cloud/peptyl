@@ -49,7 +49,7 @@ const Auth = () => {
   ];
 
   if (user) {
-    return <Navigate to="/peptides" replace />;
+    return <Navigate to="/dashboard" replace />;
   }
 
   const handleForgotPassword = async (e: React.FormEvent) => {
@@ -140,7 +140,7 @@ const Auth = () => {
             setError(error.message);
           }
         } else {
-          // Auto-confirm is enabled, user is immediately signed in
+          // New signup → peptides for discovery
           navigate("/peptides", { replace: true });
         }
       } else {
@@ -152,7 +152,13 @@ const Auth = () => {
             setError(error.message);
           }
         } else {
-          navigate("/peptides", { replace: true });
+          // Returning user: check for active protocols
+          const { data: activeProtocols } = await supabase
+            .from("protocols")
+            .select("id")
+            .eq("status", "active")
+            .limit(1);
+          navigate(activeProtocols && activeProtocols.length > 0 ? "/dashboard" : "/peptides", { replace: true });
         }
       }
     } catch {
