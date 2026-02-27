@@ -14,6 +14,7 @@ import BiomarkerTrendChart from "@/components/dashboard/BiomarkerTrendChart";
 import ActiveProtocols from "@/components/dashboard/ActiveProtocols";
 import CreateProtocolForm from "@/components/dashboard/CreateProtocolForm";
 import ProfileBiometrics from "@/components/dashboard/ProfileBiometrics";
+import WhoopSection from "@/components/dashboard/WhoopSection";
 import { useBloodworkPanels } from "@/hooks/use-bloodwork";
 import { useCreateProtocol, useProtocols } from "@/hooks/use-protocols";
 import { useLogInjection, useUpdateInjectionStatus, useAllInjections, useTodayInjections } from "@/hooks/use-injections";
@@ -417,6 +418,7 @@ const Dashboard = () => {
             {/* PROFILE TAB */}
             <TabsContent value="profile" className="space-y-6">
               <ProfileBiometrics onUpdate={(bio) => setBioRecs(getBiometricRecommendations(bio))} />
+              <WhoopSection />
             </TabsContent>
 
             {/* OVERVIEW TAB */}
