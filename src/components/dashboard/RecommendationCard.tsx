@@ -36,6 +36,10 @@ const RecommendationCard = ({ recommendation: initialRec, onActivate, isActivati
     }));
   };
 
+  // Check for unified recommendation signal data
+  const signalLabels = (rec as any).signalLabels as string[] | undefined;
+  const confidenceLevel = (rec as any).confidenceLevel as string | undefined;
+
   return (
     <div className="bg-card rounded-2xl border border-border p-5 space-y-4">
       <div className="flex items-start justify-between">
@@ -49,6 +53,22 @@ const RecommendationCard = ({ recommendation: initialRec, onActivate, isActivati
             )}
           </div>
           <p className="text-sm text-muted-foreground mt-0.5">{rec.goal}</p>
+
+          {/* Signal source badges */}
+          {signalLabels && signalLabels.length > 0 && (
+            <div className="flex flex-wrap gap-1 mt-1.5">
+              {signalLabels.slice(0, 3).map((label) => (
+                <span key={label} className="text-[10px] px-2 py-0.5 rounded-full bg-primary/10 text-primary font-medium">
+                  {label}
+                </span>
+              ))}
+              {confidenceLevel === "high" && (
+                <span className="text-[10px] px-2 py-0.5 rounded-full bg-green-500/10 text-green-600 font-medium">
+                  High confidence
+                </span>
+              )}
+            </div>
+          )}
         </div>
         <div className="flex items-center gap-1">
           <button
@@ -146,7 +166,14 @@ const RecommendationCard = ({ recommendation: initialRec, onActivate, isActivati
           </p>
           {rec.supplements.map((s, i) => (
             <div key={i} className="flex items-center justify-between text-sm bg-accent/30 rounded-lg px-3 py-2">
-              <span className="font-medium text-foreground">{s.name}</span>
+              <div>
+                <span className="font-medium text-foreground">{s.name}</span>
+                {(s as any).driven_by && (s as any).driven_by.length > 0 && (
+                  <span className="text-[9px] text-primary/70 ml-1.5">
+                    ({(s as any).driven_by[0]})
+                  </span>
+                )}
+              </div>
               <span className="text-muted-foreground text-xs">{s.dose} · {s.frequency}</span>
             </div>
           ))}
@@ -162,7 +189,6 @@ const RecommendationCard = ({ recommendation: initialRec, onActivate, isActivati
       <div className="flex items-center gap-2">
         <Button size="sm" onClick={() => {
           setEditing(false);
-          // Check dose escalation before activating
           const allExistingPeptides = existingProtocols
             .filter((p) => p.status === "active" || p.status === "paused")
             .flatMap((p) => p.peptides.map((pp) => ({
