@@ -2,7 +2,7 @@ import { useState, useEffect, useMemo, useRef } from "react";
 import { useSearchParams } from "react-router-dom";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Carousel, CarouselContent, CarouselItem, CarouselPrevious, CarouselNext } from "@/components/ui/carousel";
-import { Activity, FlaskConical, LayoutDashboard, AlertTriangle, User, BookOpen, CalendarDays, BarChart3, Heart, Weight, Droplets, ExternalLink, CheckCircle2, Play, Eye, X } from "lucide-react";
+import { Activity, FlaskConical, LayoutDashboard, AlertTriangle, User, BookOpen, CalendarDays, BarChart3, Heart, Weight, Droplets, ExternalLink, CheckCircle2, Play, Eye, X, Dna } from "lucide-react";
 import { addWeeks, format } from "date-fns";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
@@ -26,7 +26,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import SEO from "@/components/SEO";
 import ExperienceChat from "@/components/dashboard/ExperienceChat";
 import ProtocolNudges from "@/components/dashboard/ProtocolNudges";
-import CollaborativeRecommendations from "@/components/dashboard/CollaborativeRecommendations";
+
 import OnboardingRecommendations from "@/components/dashboard/OnboardingRecommendations";
 import MobileTabNav from "@/components/dashboard/MobileTabNav";
 import OptimizationScore from "@/components/dashboard/OptimizationScore";
@@ -102,6 +102,25 @@ const Dashboard = () => {
 
   const ADMIN_EMAIL = "peptidesupplyuk@gmail.com";
   const isAdmin = user?.email === ADMIN_EMAIL;
+
+  // DNA reports for overview data status card
+  const { data: dnaReports = [] } = useQuery({
+    queryKey: ["dna-reports-overview", user?.id],
+    enabled: !!user,
+    staleTime: 1000 * 60 * 5,
+    queryFn: async () => {
+      const { data } = await supabase
+        .from("dna_reports")
+        .select("id, created_at, overall_score, confidence")
+        .eq("user_id", user!.id)
+        .order("created_at", { ascending: false })
+        .limit(1);
+      return data || [];
+    },
+  });
+  const latestDnaReport = dnaReports[0] || null;
+  const hasBloodwork = panels.length > 0;
+  const hasDna = !!latestDnaReport;
 
   // Check if WHOOP is already connected (admin only)
   const { data: whoopConnection } = useQuery({
@@ -309,10 +328,57 @@ const Dashboard = () => {
               {/* 2. Protocol nudges */}
               <ProtocolNudges onNavigate={setActiveTab} />
 
-              {/* 3. Biomarker grid — "What We're Fixing" */}
+              {/* 3. Your Data status card */}
+              <div className="bg-card rounded-2xl border border-border p-5">
+                <h3 className="text-sm font-heading font-semibold text-foreground mb-3">Your Data</h3>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  {/* Bloodwork status */}
+                  <div className="flex items-start gap-3">
+                    <div className="h-9 w-9 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
+                      <Droplets className="h-4 w-4 text-primary" />
+                    </div>
+                    <div className="min-w-0">
+                      <div className="flex items-center gap-2">
+                        <span className="text-sm font-semibold text-foreground">Bloodwork</span>
+                        <span className={`text-[10px] rounded-full px-2 py-0.5 font-medium ${hasBloodwork ? "bg-primary/10 text-primary" : "bg-muted text-muted-foreground"}`}>
+                          {hasBloodwork ? "Active" : "Not logged"}
+                        </span>
+                      </div>
+                      {hasBloodwork ? (
+                        <p className="text-xs text-muted-foreground">{panels.length} panel{panels.length !== 1 ? "s" : ""} logged · last {new Date(panels[0].test_date).toLocaleDateString()}</p>
+                      ) : (
+                        <button onClick={() => setActiveTab("biomarkers")} className="text-xs text-primary hover:underline">Log results →</button>
+                      )}
+                    </div>
+                  </div>
+                  {/* DNA status */}
+                  <div className="flex items-start gap-3">
+                    <div className="h-9 w-9 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
+                      <Dna className="h-4 w-4 text-primary" />
+                    </div>
+                    <div className="min-w-0">
+                      <div className="flex items-center gap-2">
+                        <span className="text-sm font-semibold text-foreground">DNA Report</span>
+                        <span className={`text-[10px] rounded-full px-2 py-0.5 font-medium ${hasDna ? "bg-primary/10 text-primary" : "bg-muted text-muted-foreground"}`}>
+                          {hasDna ? "Analysed" : "Not uploaded"}
+                        </span>
+                      </div>
+                      {hasDna ? (
+                        <a href={`/dna/report/${latestDnaReport.id}`} className="text-xs text-muted-foreground hover:underline">
+                          Score {latestDnaReport.overall_score}/100 · {new Date(latestDnaReport.created_at).toLocaleDateString()} — View report →
+                        </a>
+                      ) : (
+                        <a href="/dna/upload" className="text-xs text-primary hover:underline">Upload DNA →</a>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* 4. Biomarker grid — "What We're Fixing" */}
               <BiomarkerSummary panels={panels} />
 
-              {/* 4. Active plan */}
+              {/* 5. Active plan */}
               <ActiveProtocols />
 
               {/* 5. Health Direction Score */}
@@ -352,11 +418,16 @@ const Dashboard = () => {
               {/* 6. Onboarding recommendations */}
               <OnboardingRecommendations onNavigateToProtocols={() => setActiveTab("protocols")} />
 
-              {recommendations.length > 0 && (
+              {recommendations.length > 0 && (hasBloodwork || hasDna) && (
                 <div className="space-y-3">
                   <Carousel opts={{ align: "start", loop: false }} className="w-full">
                     <div className="flex items-center justify-between">
-                      <h2 className="font-heading font-semibold text-foreground">🎯 Personalised Recommendations</h2>
+                      <div>
+                        <h2 className="font-heading font-semibold text-foreground">🎯 Personalised Recommendations</h2>
+                        <p className="text-xs text-muted-foreground mt-0.5">
+                          {hasBloodwork && hasDna ? "Based on your bloodwork and DNA report" : hasBloodwork ? "Based on your bloodwork results" : "Based on your DNA report"}
+                        </p>
+                      </div>
                       <div className="flex items-center gap-1">
                         <CarouselPrevious className="static translate-y-0 h-7 w-7" />
                         <CarouselNext className="static translate-y-0 h-7 w-7" />
@@ -396,23 +467,6 @@ const Dashboard = () => {
                 </div>
               )}
 
-              <CollaborativeRecommendations />
-
-              {/* 7. Biomarker Trends — bottom */}
-              <BiomarkerTrendChart panels={panels} />
-
-              {panels.length === 0 && (
-                <div className="bg-card rounded-2xl border border-border p-8 text-center">
-                  <Activity className="h-10 w-10 text-primary mx-auto mb-3" />
-                  <h3 className="font-heading font-semibold text-foreground mb-1">Get Started</h3>
-                  <p className="text-sm text-muted-foreground mb-4">
-                    Upload your bloodwork to receive personalised peptide and supplement recommendations.
-                  </p>
-                  <button onClick={() => setActiveTab("biomarkers")} className="text-sm text-primary font-medium hover:underline">
-                    Upload Bloodwork →
-                  </button>
-                </div>
-              )}
             </TabsContent>
 
             {/* BIOMARKERS TAB */}
@@ -523,14 +577,16 @@ const Dashboard = () => {
                 </div>
               </div>
 
-              {recommendations.length > 0 ? (
+              {recommendations.length > 0 && (hasBloodwork || hasDna) ? (
                 <div className="space-y-3">
                   <Carousel opts={{ align: "start", loop: false }} className="w-full">
                     <div className="flex items-center justify-between">
-                      <h2 className="font-heading font-semibold text-foreground flex items-center gap-2">
-                        🎯 Personalised Recommendations
-                        <span className="text-xs font-normal text-muted-foreground">Based on your bloodwork</span>
-                      </h2>
+                      <div>
+                        <h2 className="font-heading font-semibold text-foreground">🎯 Personalised Recommendations</h2>
+                        <p className="text-xs text-muted-foreground mt-0.5">
+                          {hasBloodwork && hasDna ? "Based on your bloodwork and DNA report" : hasBloodwork ? "Based on your bloodwork results" : "Based on your DNA report"}
+                        </p>
+                      </div>
                       <div className="flex items-center gap-1">
                         <CarouselPrevious className="static translate-y-0 h-7 w-7" />
                         <CarouselNext className="static translate-y-0 h-7 w-7" />
@@ -550,7 +606,7 @@ const Dashboard = () => {
                   <FlaskConical className="h-10 w-10 text-primary mx-auto mb-3" />
                   <h3 className="font-heading font-semibold text-foreground mb-1">No Personalised Recommendations Yet</h3>
                   <p className="text-sm text-muted-foreground">
-                    Upload bloodwork to get personalised protocol recommendations based on your biomarkers.
+                    Upload bloodwork or DNA data to get personalised protocol recommendations.
                   </p>
                 </div>
               )}

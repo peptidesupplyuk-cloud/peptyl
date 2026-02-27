@@ -23,6 +23,35 @@ const RISK_LABELS: Record<string, { label: string; icon: typeof Shield }> = {
   aggressive: { label: "Aggressive", icon: Zap },
 };
 
+const WHY_LABEL: Record<string, Record<string, string>> = {
+  healing: {
+    healing: "Matches your healing goal",
+    immune: "Supports tissue repair and immune resilience",
+    "anti-aging": "Addresses cellular repair relevant to healing",
+  },
+  fat_loss: {
+    "fat-loss": "Targets your fat loss goal directly",
+    performance: "Supports body composition alongside fat loss",
+  },
+  longevity: {
+    "anti-aging": "Aligns with your longevity goal",
+    immune: "Immune health is central to longevity",
+  },
+  cognitive: {
+    cognitive: "Directly addresses your cognitive goal",
+    "anti-aging": "Neuroprotection supports long-term cognition",
+  },
+  muscle: {
+    performance: "Supports muscle recovery and growth",
+    healing: "Tissue repair underpins muscle development",
+  },
+  general: {
+    healing: "Well-studied and widely used",
+    "anti-aging": "Broadly applicable to general health",
+    immune: "Foundational immune support",
+  },
+};
+
 const OnboardingRecommendations = ({ onNavigateToProtocols }: OnboardingRecommendationsProps) => {
   const { user } = useAuth();
 
@@ -47,6 +76,7 @@ const OnboardingRecommendations = ({ onNavigateToProtocols }: OnboardingRecommen
 
   const experience = profile.experience_level || "beginner";
   const risk = profile.risk_tolerance || "moderate";
+  const goalKey = profile.research_goal || "general";
 
   return (
     <div className="bg-card rounded-2xl border border-border p-5 space-y-4">
@@ -79,21 +109,21 @@ const OnboardingRecommendations = ({ onNavigateToProtocols }: OnboardingRecommen
             key={protocol.id}
             className="bg-muted/50 rounded-xl p-4 space-y-3 border border-border/50"
           >
-            <div className="flex items-start justify-between gap-2">
-              <div className="space-y-1">
-                <h3 className="text-sm font-semibold text-foreground">{protocol.protocolName}</h3>
-                <span className={`text-[10px] px-2 py-0.5 rounded-full font-medium ${CATEGORY_COLORS[protocol.category]}`}>
-                  {CATEGORY_LABELS[protocol.category]}
-                </span>
-              </div>
-              <div className="flex gap-0.5">
-                {Array.from({ length: protocol.popularity }).map((_, i) => (
-                  <span key={i} className="text-yellow-500 text-xs">★</span>
-                ))}
-              </div>
+            <div className="space-y-1">
+              <h3 className="text-sm font-semibold text-foreground">{protocol.protocolName}</h3>
+              <span className={`text-[10px] px-2 py-0.5 rounded-full font-medium ${CATEGORY_COLORS[protocol.category]}`}>
+                {CATEGORY_LABELS[protocol.category]}
+              </span>
             </div>
 
             <p className="text-xs text-muted-foreground leading-relaxed">{protocol.description}</p>
+
+            {WHY_LABEL[goalKey]?.[protocol.category] && (
+              <p className="text-[10px] text-primary/70 flex items-center gap-1">
+                <Sparkles className="h-2.5 w-2.5" />
+                {WHY_LABEL[goalKey][protocol.category]}
+              </p>
+            )}
 
             <div className="space-y-1.5">
               {protocol.peptides.map((p) => (

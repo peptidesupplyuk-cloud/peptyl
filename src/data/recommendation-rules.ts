@@ -297,6 +297,7 @@ export interface PopularProtocol {
   retestWeeks: number;
   source?: string;
   popularity: number; // 1-5 stars
+  beginner_safe: boolean;
 }
 
 export const POPULAR_PROTOCOLS: PopularProtocol[] = [
@@ -319,6 +320,7 @@ export const POPULAR_PROTOCOLS: PopularProtocol[] = [
     retestWeeks: 8,
     source: "Community-verified protocol",
     popularity: 5,
+    beginner_safe: false,
   },
   {
     id: "wolverine_stack",
@@ -338,6 +340,7 @@ export const POPULAR_PROTOCOLS: PopularProtocol[] = [
     retestWeeks: 6,
     source: "Widely documented healing protocol",
     popularity: 5,
+    beginner_safe: true,
   },
   {
     id: "gh_secretagogue",
@@ -357,6 +360,7 @@ export const POPULAR_PROTOCOLS: PopularProtocol[] = [
     retestWeeks: 8,
     source: "Clinical GH research protocols",
     popularity: 5,
+    beginner_safe: true,
   },
   {
     id: "fat_loss_stack",
@@ -376,6 +380,7 @@ export const POPULAR_PROTOCOLS: PopularProtocol[] = [
     retestWeeks: 8,
     source: "Metabolic & body composition research",
     popularity: 4,
+    beginner_safe: false,
   },
   {
     id: "cognitive_stack",
@@ -396,6 +401,7 @@ export const POPULAR_PROTOCOLS: PopularProtocol[] = [
     retestWeeks: 8,
     source: "Nootropic research & Russian clinical data",
     popularity: 4,
+    beginner_safe: true,
   },
   {
     id: "immune_stack",
@@ -416,6 +422,7 @@ export const POPULAR_PROTOCOLS: PopularProtocol[] = [
     retestWeeks: 8,
     source: "Immunology & thymic peptide research",
     popularity: 4,
+    beginner_safe: true,
   },
   {
     id: "gut_repair",
@@ -436,6 +443,7 @@ export const POPULAR_PROTOCOLS: PopularProtocol[] = [
     retestWeeks: 8,
     source: "GI repair & gut permeability research",
     popularity: 4,
+    beginner_safe: true,
   },
   {
     id: "longevity_stack",
@@ -457,6 +465,7 @@ export const POPULAR_PROTOCOLS: PopularProtocol[] = [
     retestWeeks: 12,
     source: "Longevity & senescence research",
     popularity: 3,
+    beginner_safe: false,
   },
   {
     id: "performance_stack",
@@ -478,6 +487,7 @@ export const POPULAR_PROTOCOLS: PopularProtocol[] = [
     retestWeeks: 8,
     source: "Sports performance & recovery research",
     popularity: 4,
+    beginner_safe: false,
   },
 ];
 
@@ -622,7 +632,7 @@ export function getOnboardingRecommendations(profile: OnboardingProfile): Popula
 
   // For beginners/none, prefer simpler protocols (fewer peptides)
   if (experience === "none" || experience === "beginner") {
-    matched = matched.filter(p => p.peptides.length <= 2);
+    matched = matched.filter(p => p.beginner_safe === true);
   }
 
   // For conservative risk, only show protocols with ≤ maxPeptides
