@@ -20,7 +20,7 @@ const About = () => {
   const { t } = useTranslation();
 
   const stats = [
-    { labelKey: "aboutPage.statPeptides", value: "56+", icon: Beaker },
+    { labelKey: "aboutPage.statIndependent", value: "0", icon: Beaker },
     { labelKey: "aboutPage.statAI", value: "6+", icon: Rocket },
     { labelKey: "aboutPage.statBiohacking", value: "5+", icon: Brain },
     { labelKey: "aboutPage.statGlobal", value: "🌍", icon: Globe },
