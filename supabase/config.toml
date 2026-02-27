@@ -47,3 +47,6 @@ verify_jwt = false
 
 [functions.audit-knowledge-base]
 verify_jwt = false
+
+[functions.geo-check]
+verify_jwt = false

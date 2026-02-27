@@ -11,6 +11,7 @@ import SignupBanner from "@/components/SignupBanner";
 import FeedbackBanner from "@/components/FeedbackBanner";
 import SitewideDisclaimer from "@/components/SitewideDisclaimer";
 import ScrollToTop from "@/components/ScrollToTop";
+import GeoGate from "@/components/GeoGate";
 import Index from "./pages/Index";
 import Auth from "./pages/Auth";
 const ResetPassword = lazy(() => import("./pages/ResetPassword"));
@@ -61,6 +62,7 @@ const DNADashboard = lazy(() => import("./pages/dna/DNADashboard"));
 const queryClient = new QueryClient();
 
 const App = () => (
+  <GeoGate>
   <QueryClientProvider client={queryClient}>
     <AuthProvider>
       <TooltipProvider>
@@ -127,6 +129,7 @@ const App = () => (
       </TooltipProvider>
     </AuthProvider>
   </QueryClientProvider>
+  </GeoGate>
 );
 
 export default App;
