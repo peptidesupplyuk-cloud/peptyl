@@ -25,19 +25,20 @@ const Footer = () => {
           <div>
             <h4 className="font-heading font-semibold text-sm text-primary-foreground mb-4">{t("footer.platform")}</h4>
             <div className="flex flex-col gap-2.5">
-              <Link to="/peptides" className="text-sm text-primary-foreground/50 hover:text-primary transition-colors">{t("footer.peptideDb")}</Link>
-              <Link to="/calculators" className="text-sm text-primary-foreground/50 hover:text-primary transition-colors">{t("nav.calculators")}</Link>
-              <Link to="/education" className="text-sm text-primary-foreground/50 hover:text-primary transition-colors">{t("nav.education")}</Link>
+              <Link to="/improve" className="text-sm text-primary-foreground/50 hover:text-primary transition-colors">{t("footer.peptideDb")}</Link>
+              <Link to="/improve?tab=calculators" className="text-sm text-primary-foreground/50 hover:text-primary transition-colors">{t("footer.calculators")}</Link>
+              <Link to="/education" className="text-sm text-primary-foreground/50 hover:text-primary transition-colors">{t("nav.learn")}</Link>
               <Link to="/shop" className="text-sm text-primary-foreground/50 hover:text-primary transition-colors">{t("nav.shop")}</Link>
+              <Link to="/dna" className="text-sm text-primary-foreground/50 hover:text-primary transition-colors">{t("nav.dna")}</Link>
             </div>
           </div>
 
           <div>
             <h4 className="font-heading font-semibold text-sm text-primary-foreground mb-4">{t("footer.tools")}</h4>
             <div className="flex flex-col gap-2.5">
-              <Link to="/calculators" className="text-sm text-primary-foreground/50 hover:text-primary transition-colors">{t("footer.reconCalc")}</Link>
-              <Link to="/calculators" className="text-sm text-primary-foreground/50 hover:text-primary transition-colors">{t("footer.doseCalc")}</Link>
-              <Link to="/peptides" className="text-sm text-primary-foreground/50 hover:text-primary transition-colors">{t("footer.communityFeedback")}</Link>
+              <Link to="/improve?tab=calculators" className="text-sm text-primary-foreground/50 hover:text-primary transition-colors">{t("footer.reconCalc")}</Link>
+              <Link to="/improve?tab=calculators" className="text-sm text-primary-foreground/50 hover:text-primary transition-colors">{t("footer.doseCalc")}</Link>
+              <Link to="/testing" className="text-sm text-primary-foreground/50 hover:text-primary transition-colors">{t("nav.testing")}</Link>
             </div>
           </div>
 
