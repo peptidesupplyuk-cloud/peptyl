@@ -93,7 +93,7 @@ const About = () => {
                 variants={fadeUp}
                 className="bg-card rounded-2xl border border-border p-6 text-center shadow-sm"
               >
-                <stat.icon className="h-6 w-6 text-primary mx-auto mb-3" />
+                
                 <p className="text-3xl font-heading font-bold text-foreground">{stat.value}</p>
                 <p className="text-xs text-muted-foreground mt-1">{t(stat.labelKey)}</p>
               </motion.div>
