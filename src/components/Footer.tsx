@@ -25,20 +25,20 @@ const Footer = () => {
           <div>
             <h4 className="font-heading font-semibold text-sm text-primary-foreground mb-4">{t("footer.platform")}</h4>
             <div className="flex flex-col gap-2.5">
-              <Link to="/improve" className="text-sm text-primary-foreground/50 hover:text-primary transition-colors">{t("footer.peptideDb")}</Link>
-              <Link to="/improve?tab=calculators" className="text-sm text-primary-foreground/50 hover:text-primary transition-colors">{t("footer.calculators")}</Link>
-              <Link to="/education" className="text-sm text-primary-foreground/50 hover:text-primary transition-colors">{t("nav.learn")}</Link>
+              <Link to="/dashboard" className="text-sm text-primary-foreground/50 hover:text-primary transition-colors">{t("nav.myHealth")}</Link>
               <Link to="/shop" className="text-sm text-primary-foreground/50 hover:text-primary transition-colors">{t("nav.shop")}</Link>
               <Link to="/dna" className="text-sm text-primary-foreground/50 hover:text-primary transition-colors">{t("nav.dna")}</Link>
+              <Link to="/testing" className="text-sm text-primary-foreground/50 hover:text-primary transition-colors">{t("nav.testing")}</Link>
             </div>
           </div>
 
           <div>
-            <h4 className="font-heading font-semibold text-sm text-primary-foreground mb-4">{t("footer.tools")}</h4>
+            <h4 className="font-heading font-semibold text-sm text-primary-foreground mb-4">{t("nav.learn")}</h4>
             <div className="flex flex-col gap-2.5">
-              <Link to="/improve?tab=calculators" className="text-sm text-primary-foreground/50 hover:text-primary transition-colors">{t("footer.reconCalc")}</Link>
-              <Link to="/improve?tab=calculators" className="text-sm text-primary-foreground/50 hover:text-primary transition-colors">{t("footer.doseCalc")}</Link>
-              <Link to="/testing" className="text-sm text-primary-foreground/50 hover:text-primary transition-colors">{t("nav.testing")}</Link>
+              <Link to="/improve" className="text-sm text-primary-foreground/50 hover:text-primary transition-colors">Peptides</Link>
+              <Link to="/improve?tab=supplements" className="text-sm text-primary-foreground/50 hover:text-primary transition-colors">Supplements</Link>
+              <Link to="/improve?tab=calculators" className="text-sm text-primary-foreground/50 hover:text-primary transition-colors">{t("footer.calculators")}</Link>
+              <Link to="/education" className="text-sm text-primary-foreground/50 hover:text-primary transition-colors">Articles</Link>
             </div>
           </div>
 
