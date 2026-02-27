@@ -564,6 +564,90 @@ export type Database = {
         }
         Relationships: []
       }
+      fitbit_connections: {
+        Row: {
+          access_token: string | null
+          created_at: string
+          expires_at: string | null
+          fitbit_user_id: string | null
+          id: string
+          last_sync_at: string | null
+          refresh_token: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          access_token?: string | null
+          created_at?: string
+          expires_at?: string | null
+          fitbit_user_id?: string | null
+          id?: string
+          last_sync_at?: string | null
+          refresh_token?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          access_token?: string | null
+          created_at?: string
+          expires_at?: string | null
+          fitbit_user_id?: string | null
+          id?: string
+          last_sync_at?: string | null
+          refresh_token?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      fitbit_daily_metrics: {
+        Row: {
+          active_zone_minutes: number | null
+          calories_burned: number | null
+          created_at: string
+          date: string
+          hrv: number | null
+          id: string
+          raw_json: Json | null
+          resting_heart_rate: number | null
+          sleep_duration_minutes: number | null
+          sleep_score: number | null
+          steps: number | null
+          stress_score: number | null
+          user_id: string
+        }
+        Insert: {
+          active_zone_minutes?: number | null
+          calories_burned?: number | null
+          created_at?: string
+          date: string
+          hrv?: number | null
+          id?: string
+          raw_json?: Json | null
+          resting_heart_rate?: number | null
+          sleep_duration_minutes?: number | null
+          sleep_score?: number | null
+          steps?: number | null
+          stress_score?: number | null
+          user_id: string
+        }
+        Update: {
+          active_zone_minutes?: number | null
+          calories_burned?: number | null
+          created_at?: string
+          date?: string
+          hrv?: number | null
+          id?: string
+          raw_json?: Json | null
+          resting_heart_rate?: number | null
+          sleep_duration_minutes?: number | null
+          sleep_score?: number | null
+          steps?: number | null
+          stress_score?: number | null
+          user_id?: string
+        }
+        Relationships: []
+      }
       injection_logs: {
         Row: {
           completed_at: string | null
@@ -1767,6 +1851,33 @@ export type Database = {
           experience_key: string | null
           peptide_name: string | null
           upvotes: number | null
+        }
+        Relationships: []
+      }
+      fitbit_connections_safe: {
+        Row: {
+          created_at: string | null
+          fitbit_user_id: string | null
+          id: string | null
+          last_sync_at: string | null
+          updated_at: string | null
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          fitbit_user_id?: string | null
+          id?: string | null
+          last_sync_at?: string | null
+          updated_at?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          fitbit_user_id?: string | null
+          id?: string | null
+          last_sync_at?: string | null
+          updated_at?: string | null
+          user_id?: string | null
         }
         Relationships: []
       }
