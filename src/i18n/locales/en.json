@@ -31,15 +31,15 @@
   },
   "mission": {
     "title": "Why <1>Peptyl</1>?",
-    "subtitle": "We built Peptyl because the UK peptide space lacked a single trusted research hub — one that connects your biomarkers to real data, community insights, and the tools researchers actually need.",
+    "subtitle": "We built Peptyl because there was no single platform connecting biomarkers, research data, community insights, and the tools health optimisers actually need.",
     "communityFirst": "Community First",
-    "communityFirstDesc": "Built for the global research community — with transparent, crowd-sourced data and honest guidance.",
+    "communityFirstDesc": "Built for a global community of researchers, biohackers, and health optimisers, with transparent, crowd-sourced data and honest guidance.",
     "biomarkerDriven": "Biomarker Driven",
-    "biomarkerDrivenDesc": "Upload your bloodwork and get personalised peptide and supplement insights based on your actual biology.",
+    "biomarkerDrivenDesc": "Upload your bloodwork and get personalised peptide, supplement, and protocol insights based on your actual biology.",
     "researchVerified": "Research Verified",
     "researchVerifiedDesc": "Every compound in our database is backed by cited research. We prioritise clinical evidence over anecdote.",
     "educationTools": "Education & Tools",
-    "educationToolsDesc": "Free calculators, dosing guides, and an ever-growing knowledge base — because informed researchers get better results."
+    "educationToolsDesc": "Free calculators, dosing guides, and an ever-growing knowledge base, because informed decisions lead to better outcomes."
   },
   "features": {
     "title": "Everything You Need, <1>One Platform</1>",
