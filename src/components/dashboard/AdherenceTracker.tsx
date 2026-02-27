@@ -1,5 +1,6 @@
 import { useMemo, useState } from "react";
 import { useAllInjections, useUpdateInjectionStatus } from "@/hooks/use-injections";
+import { useProtocols } from "@/hooks/use-protocols";
 import { format, subDays, isSameDay, startOfDay } from "date-fns";
 import { toast } from "sonner";
 import { CalendarDays, TrendingUp, TrendingDown, CheckCircle2, XCircle, SkipForward, ChevronLeft, ChevronRight } from "lucide-react";
@@ -9,10 +10,16 @@ const STATUS_OPTIONS = ["completed", "skipped", "missed"] as const;
 
 const AdherenceTracker = () => {
   const { data: injections = [], isLoading } = useAllInjections();
+  const { data: protocols = [] } = useProtocols();
   const updateStatus = useUpdateInjectionStatus();
   const [logPage, setLogPage] = useState(0);
   const [editingId, setEditingId] = useState<string | null>(null);
   const LOG_PAGE_SIZE = 15;
+
+  const activeProtocol = protocols.find((p) => p.status === "active");
+  const protocolStart = activeProtocol?.start_date
+    ? startOfDay(new Date(activeProtocol.start_date))
+    : null;
 
   const handleStatusChange = (id: string, newStatus: string) => {
     updateStatus.mutate({ id, status: newStatus }, {
@@ -28,21 +35,26 @@ const AdherenceTracker = () => {
   const stats = useMemo(() => {
     if (injections.length === 0) return null;
 
-    const completed = injections.filter((i) => i.status === "completed").length;
-    const skipped = injections.filter((i) => i.status === "skipped").length;
-    const missed = injections.filter((i) => {
-      if (i.status !== "scheduled") return false;
-      return new Date(i.scheduled_time) < new Date();
-    }).length;
+    // Filter to current protocol if available
+    const scoped = protocolStart
+      ? injections.filter((i) => new Date(i.scheduled_time) >= protocolStart)
+      : injections;
+
+    const completed = scoped.filter((i) => i.status === "completed").length;
+    const skipped = scoped.filter((i) => i.status === "skipped").length;
+    const missed = scoped.filter((i) =>
+      i.status === "scheduled" && new Date(i.scheduled_time) < new Date()
+    ).length;
     const total = completed + skipped + missed;
     const rate = total > 0 ? Math.round((completed / total) * 100) : 0;
 
-    // Streak
+    // Streak (scoped to current protocol)
     let streak = 0;
     const today = startOfDay(new Date());
     for (let d = 0; d < 365; d++) {
       const day = subDays(today, d);
-      const dayInj = injections.filter((i) => isSameDay(new Date(i.scheduled_time), day));
+      if (protocolStart && day < protocolStart) break;
+      const dayInj = scoped.filter((i) => isSameDay(new Date(i.scheduled_time), day));
       if (dayInj.length === 0) continue;
       const allDone = dayInj.every((i) => i.status === "completed");
       if (allDone) streak++;
@@ -60,7 +72,7 @@ const AdherenceTracker = () => {
     }
 
     return { completed, skipped, missed, total, rate, streak, byPeptide };
-  }, [injections]);
+  }, [injections, protocolStart]);
 
   // === Heatmap (last 90 days) ===
   const heatmapData = useMemo(() => {

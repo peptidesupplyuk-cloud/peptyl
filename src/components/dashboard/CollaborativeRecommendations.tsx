@@ -52,7 +52,7 @@ const CollaborativeRecommendations = () => {
         .neq("user_id", user!.id)
         .limit(50);
 
-      if (!similarProfiles?.length) return [];
+      if (!similarProfiles?.length || similarProfiles.length < 3) return [];
 
       const similarUserIds = similarProfiles.map((p) => p.user_id);
 
@@ -99,6 +99,7 @@ const CollaborativeRecommendations = () => {
           avg_dose_mcg: Math.round(stats.totalDose / stats.count),
           common_goal: stats.goals[0] || null,
         }))
+        .filter((rec) => rec.usage_count >= 3)
         .sort((a, b) => b.usage_count - a.usage_count)
         .slice(0, 4);
     },
