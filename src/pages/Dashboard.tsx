@@ -15,6 +15,8 @@ import ActiveProtocols from "@/components/dashboard/ActiveProtocols";
 import CreateProtocolForm from "@/components/dashboard/CreateProtocolForm";
 import ProfileBiometrics from "@/components/dashboard/ProfileBiometrics";
 import WhoopSection from "@/components/dashboard/WhoopSection";
+import FitbitSection from "@/components/dashboard/FitbitSection";
+import WearableSummary from "@/components/dashboard/WearableSummary";
 import { useBloodworkPanels } from "@/hooks/use-bloodwork";
 import { useCreateProtocol, useProtocols } from "@/hooks/use-protocols";
 import { useLogInjection, useUpdateInjectionStatus, useAllInjections, useTodayInjections } from "@/hooks/use-injections";
@@ -203,36 +205,7 @@ const Dashboard = () => {
 
   const [showMore, setShowMore] = useState(false);
 
-  // Check if WHOOP is already connected (admin only)
-  const { data: whoopConnection } = useQuery({
-    queryKey: ["whoop-connection", user?.id],
-    queryFn: async () => {
-      const { data } = await supabase
-        .from("whoop_connections_safe" as any)
-        .select("id, last_sync_at, whoop_user_id")
-        .eq("user_id", user!.id)
-        .maybeSingle();
-      return data as unknown as { id: string; last_sync_at: string | null; whoop_user_id: string | null } | null;
-    },
-    enabled: isAdmin && !!user,
-  });
 
-  const handleConnectWhoop = async () => {
-    if (!user) return;
-    try {
-      const { data: { session } } = await supabase.auth.getSession();
-      if (!session?.access_token) {
-        toast({ title: "WHOOP Error", description: "You must be logged in to connect WHOOP", variant: "destructive" });
-        return;
-      }
-      // Open in a new top-level window to escape iframe context
-      // The edge function returns a 302 redirect to WHOOP's login page
-      const functionUrl = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/whoop-authorize?token=${encodeURIComponent(session.access_token)}`;
-      window.open(functionUrl, "_blank");
-    } catch (err: any) {
-      toast({ title: "WHOOP Error", description: err?.message || "Failed to start WHOOP connect", variant: "destructive" });
-    }
-  };
 
   // Schedule local notifications for protocol doses
   useProtocolNotifications();
@@ -419,6 +392,7 @@ const Dashboard = () => {
             <TabsContent value="profile" className="space-y-6">
               <ProfileBiometrics onUpdate={(bio) => setBioRecs(getBiometricRecommendations(bio))} />
               <WhoopSection />
+              <FitbitSection />
             </TabsContent>
 
             {/* OVERVIEW TAB */}
@@ -454,7 +428,10 @@ const Dashboard = () => {
                         )}
                       </div>
                     </div>
-                  </div>
+              </div>
+
+              {/* Wearable Summary — shown if user has wearable data */}
+              <WearableSummary />
                   {/* Protocol name line */}
                   <p className="text-xs text-muted-foreground mt-3">
                     {activeProtocol.name} · {daysLeft > 0 ? `${daysLeft} days remaining` : "Completing today"}
@@ -589,28 +566,6 @@ const Dashboard = () => {
                       )}
 
                       {/* OnboardingRecommendations removed — unified engine handles it */}
-
-                      {/* C6 — WHOOP */}
-                      <div className="bg-card rounded-2xl border border-border p-5 flex items-center gap-4">
-                        <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0">
-                          {whoopConnection ? <CheckCircle2 className="h-5 w-5 text-primary" /> : <Activity className="h-5 w-5 text-primary" />}
-                        </div>
-                        <div className="flex-1">
-                          <h3 className="font-heading font-semibold text-foreground text-sm">WHOOP Integration</h3>
-                          <p className="text-xs text-muted-foreground">
-                            {whoopConnection ? `Connected${whoopConnection.last_sync_at ? ` · Last sync: ${new Date(whoopConnection.last_sync_at).toLocaleDateString()}` : ""}` : "Auto-sync HRV, recovery, strain & sleep data from your WHOOP band."}
-                          </p>
-                        </div>
-                        {isAdmin ? (
-                          whoopConnection ? (
-                            <span className="text-[10px] font-medium text-primary bg-primary/10 rounded-full px-2.5 py-1 whitespace-nowrap">Connected</span>
-                          ) : (
-                            <Button size="sm" variant="outline" onClick={handleConnectWhoop} className="gap-1.5 text-xs"><ExternalLink className="h-3 w-3" />Connect</Button>
-                          )
-                        ) : (
-                          <span className="text-[10px] font-medium text-primary bg-primary/10 rounded-full px-2.5 py-1 whitespace-nowrap">Coming Soon</span>
-                        )}
-                      </div>
                     </div>
                   )}
                 </div>
@@ -667,28 +622,6 @@ const Dashboard = () => {
                   )}
 
                   {/* OnboardingRecommendations removed — unified engine handles it */}
-
-                  {/* C6 — WHOOP */}
-                  <div className="bg-card rounded-2xl border border-border p-5 flex items-center gap-4">
-                    <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0">
-                      {whoopConnection ? <CheckCircle2 className="h-5 w-5 text-primary" /> : <Activity className="h-5 w-5 text-primary" />}
-                    </div>
-                    <div className="flex-1">
-                      <h3 className="font-heading font-semibold text-foreground text-sm">WHOOP Integration</h3>
-                      <p className="text-xs text-muted-foreground">
-                        {whoopConnection ? `Connected${whoopConnection.last_sync_at ? ` · Last sync: ${new Date(whoopConnection.last_sync_at).toLocaleDateString()}` : ""}` : "Auto-sync HRV, recovery, strain & sleep data from your WHOOP band."}
-                      </p>
-                    </div>
-                    {isAdmin ? (
-                      whoopConnection ? (
-                        <span className="text-[10px] font-medium text-primary bg-primary/10 rounded-full px-2.5 py-1 whitespace-nowrap">Connected</span>
-                      ) : (
-                        <Button size="sm" variant="outline" onClick={handleConnectWhoop} className="gap-1.5 text-xs"><ExternalLink className="h-3 w-3" />Connect</Button>
-                      )
-                    ) : (
-                      <span className="text-[10px] font-medium text-primary bg-primary/10 rounded-full px-2.5 py-1 whitespace-nowrap">Coming Soon</span>
-                    )}
-                  </div>
                 </div>
               )}
 

@@ -50,3 +50,12 @@ verify_jwt = false
 
 [functions.geo-check]
 verify_jwt = false
+
+[functions.fitbit-authorize]
+verify_jwt = false
+
+[functions.fitbit-oauth-callback]
+verify_jwt = false
+
+[functions.fitbit-sync]
+verify_jwt = false

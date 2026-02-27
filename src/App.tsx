@@ -53,6 +53,7 @@ const GutHealthPeptides = lazy(() => import("./pages/articles/GutHealthPeptides"
 const EuropeanPeptideGuide = lazy(() => import("./pages/articles/EuropeanPeptideGuide"));
 const CampaignPage = lazy(() => import("./pages/CampaignPage"));
 const WhoopCallback = lazy(() => import("./pages/WhoopCallback"));
+const FitbitCallback = lazy(() => import("./pages/FitbitCallback"));
 const DNALanding = lazy(() => import("./pages/dna/DNALanding"));
 const DNAUpload = lazy(() => import("./pages/dna/DNAUpload"));
 const DNAAnalysing = lazy(() => import("./pages/dna/DNAAnalysing"));
@@ -111,6 +112,7 @@ const App = () => (
               <Route path="/education/gut-health-peptides" element={<GutHealthPeptides />} />
               <Route path="/education/peptide-research-europe-guide" element={<EuropeanPeptideGuide />} />
               <Route path="/whoop-callback" element={<WhoopCallback />} />
+              <Route path="/fitbit-callback" element={<FitbitCallback />} />
               <Route path="/start/:slug" element={<CampaignPage />} />
               <Route path="/dna" element={<DNALanding />} />
               <Route path="/dna/upload" element={<ProtectedRoute><DNAUpload /></ProtectedRoute>} />
