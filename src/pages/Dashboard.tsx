@@ -17,6 +17,7 @@ import ProfileBiometrics from "@/components/dashboard/ProfileBiometrics";
 import { useBloodworkPanels } from "@/hooks/use-bloodwork";
 import { useCreateProtocol, useProtocols } from "@/hooks/use-protocols";
 import { useLogInjection, useUpdateInjectionStatus, useAllInjections, useTodayInjections } from "@/hooks/use-injections";
+import { useTodaySupplementLogs } from "@/hooks/use-supplement-logs";
 import AdherenceTracker from "@/components/dashboard/AdherenceTracker";
 import { useProtocolNotifications, useNotificationActions } from "@/hooks/use-notifications";
 import { getUnifiedRecommendations, getBiometricRecommendations, type Recommendation, type BiometricRecommendation, type UnifiedRecommendation } from "@/data/recommendation-rules";
@@ -145,22 +146,34 @@ const Dashboard = () => {
 
   const heroStats = useMemo(() => {
     if (!hasActiveProtocol || allInjections.length === 0) return { rate: 0, streak: 0 };
-    const completed = allInjections.filter((i) => i.status === "completed").length;
-    const skipped = allInjections.filter((i) => i.status === "skipped").length;
-    const missed = allInjections.filter((i) => i.status !== "scheduled" ? false : new Date(i.scheduled_time) < new Date()).length;
+
+    const protocolStart = activeProtocol?.start_date
+      ? startOfDay(new Date(activeProtocol.start_date))
+      : null;
+    const protocolInjections = protocolStart
+      ? allInjections.filter((i) => new Date(i.scheduled_time) >= protocolStart)
+      : allInjections;
+
+    const completed = protocolInjections.filter((i) => i.status === "completed").length;
+    const skipped = protocolInjections.filter((i) => i.status === "skipped").length;
+    const missed = protocolInjections.filter((i) =>
+      i.status === "scheduled" && new Date(i.scheduled_time) < new Date()
+    ).length;
     const total = completed + skipped + missed;
     const rate = total > 0 ? Math.round((completed / total) * 100) : 0;
+
     let streak = 0;
     const today = startOfDay(new Date());
     for (let d = 0; d < 365; d++) {
       const day = subDays(today, d);
-      const dayInj = allInjections.filter((i) => isSameDay(new Date(i.scheduled_time), day));
+      if (protocolStart && day < protocolStart) break;
+      const dayInj = protocolInjections.filter((i) => isSameDay(new Date(i.scheduled_time), day));
       if (dayInj.length === 0) continue;
       if (dayInj.every((i) => i.status === "completed")) streak++;
       else break;
     }
     return { rate, streak };
-  }, [allInjections, hasActiveProtocol]);
+  }, [allInjections, hasActiveProtocol, activeProtocol?.start_date]);
 
   const protocolStartDate = activeProtocol?.start_date;
   const protocolEndDate = activeProtocol?.end_date;
@@ -174,6 +187,19 @@ const Dashboard = () => {
   const daysLeft = totalDays - daysActive;
   const todayScheduled = todayInjections.filter((i) => i.status === "scheduled").length;
   const todayCompleted = todayInjections.filter((i) => i.status === "completed").length;
+
+  // Supplement-aware "all done" check
+  const { data: supplementLogs = [] } = useTodaySupplementLogs();
+  const completedOrSkippedSupplements = new Set(supplementLogs.map((l) => l.item));
+  const activeSupplements = protocols
+    .filter((p) => p.status === "active")
+    .flatMap((p) => (p.supplements || []) as Array<{ name: string }>)
+    .filter((s, i, arr) => arr.findIndex(x => x.name === s.name) === i);
+  const todayPendingSupplements = activeSupplements.filter(
+    (s) => !completedOrSkippedSupplements.has(s.name)
+  ).length;
+  const todayRemaining = todayScheduled + todayPendingSupplements;
+
   const [showMore, setShowMore] = useState(false);
 
   // Check if WHOOP is already connected (admin only)
@@ -415,14 +441,14 @@ const Dashboard = () => {
                       </div>
                       <div className="flex items-center gap-2 text-sm">
                         <span className={`font-medium ${heroStats.streak > 7 ? "text-green-500" : heroStats.streak > 0 ? "text-amber-400" : "text-muted-foreground"}`}>
-                          {heroStats.streak} day streak
+                         {heroStats.streak} day streak this protocol
                         </span>
                       </div>
                       <div className="flex items-center gap-2 text-sm">
-                        {todayScheduled > 0 ? (
-                          <span className="font-medium text-primary">{todayScheduled} left today</span>
+                        {todayRemaining > 0 ? (
+                          <span className="font-medium text-primary">{todayRemaining} left today</span>
                         ) : (
-                          <span className="font-medium text-green-500">All done ✓</span>
+                          <span className="font-medium text-green-500">Today complete ✓</span>
                         )}
                       </div>
                     </div>
