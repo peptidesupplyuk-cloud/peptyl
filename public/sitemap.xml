@@ -69,6 +69,42 @@
 
   <!-- Education Articles -->
   <url>
+    <loc>https://peptyl.co.uk/education/bloodwork-comes-first</loc>
+    <lastmod>2026-02-27</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://peptyl.co.uk/education/gut-health-peptides</loc>
+    <lastmod>2026-02-27</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://peptyl.co.uk/education/nad-longevity-stack</loc>
+    <lastmod>2026-02-27</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://peptyl.co.uk/education/peptide-cycling-guide</loc>
+    <lastmod>2026-02-27</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://peptyl.co.uk/education/thymosin-alpha-1-immune-peptide</loc>
+    <lastmod>2026-02-27</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://peptyl.co.uk/education/peptide-research-europe-guide</loc>
+    <lastmod>2026-02-27</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
     <loc>https://peptyl.co.uk/education/beginners-guide-peptides</loc>
     <lastmod>2026-02-23</lastmod>
     <changefreq>monthly</changefreq>

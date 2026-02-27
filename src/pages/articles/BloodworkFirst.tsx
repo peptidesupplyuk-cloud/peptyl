@@ -8,7 +8,26 @@ const BloodworkFirst = () => (
     date="February 2026"
     slug="bloodwork-comes-first"
     description="The case for baseline bloodwork before touching any peptide or supplement, and why flying blind is the single biggest mistake in self-directed research."
+    faqs={[
+      {
+        q: "What blood tests should I get before starting a peptide protocol?",
+        a: "At minimum: IGF-1 (especially if using GH secretagogues), hsCRP (inflammation baseline), HbA1c and fasting glucose (metabolic baseline), total and free testosterone, Vitamin D, full blood count, and a liver panel (ALT, AST). If budget allows, also add: fasting insulin, ferritin, TSH, and cortisol."
+      },
+      {
+        q: "Where can I get bloodwork done in the UK without a GP referral?",
+        a: "Private testing services including Medichecks, Thriva, and Randox Health offer self-referral blood tests in the UK. Most offer home finger-prick tests or phlebotomy appointments. Costs range from £30 for basic panels to £200+ for comprehensive hormone panels. Results are typically returned in 2-5 working days."
+      },
+      {
+        q: "How soon after starting a protocol should I retest?",
+        a: "For most peptide protocols, retest at 8-12 weeks. GH secretagogue protocols (CJC-1295, Ipamorelin) should retest IGF-1 at 8 weeks. Anti-inflammatory protocols (BPC-157) should retest hsCRP at 6 weeks. GLP-1 protocols should retest HbA1c and fasting glucose at 12 weeks."
+      }
+    ]}
   >
+    <div className="not-prose mb-8 p-4 rounded-xl border border-primary/20 bg-primary/5">
+      <p className="text-xs font-semibold text-primary uppercase tracking-wide mb-2">Quick Answer</p>
+      <p className="text-sm text-foreground leading-relaxed">Baseline bloodwork before starting any peptide protocol is essential for two reasons: safety (checking for pre-existing conditions that could be affected) and measurement (you cannot quantify what changed without a before snapshot). The minimum recommended panel includes IGF-1, hsCRP, HbA1c, full testosterone panel, Vitamin D, and a standard metabolic panel.</p>
+    </div>
+
     <p>
       Every week, someone asks "what peptide should I start with?" and almost nobody asks "what do my bloods look like first?" That's the problem. Peptides and supplements aren't magic. They're tools. And tools without a diagnostic baseline are just guesswork with needles.
     </p>

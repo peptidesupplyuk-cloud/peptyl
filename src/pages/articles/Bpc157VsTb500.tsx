@@ -9,7 +9,30 @@ const Bpc157VsTb500 = () => (
     date="February 2026"
     slug="bpc157-vs-tb500"
     description="Compare BPC-157 and TB-500: mechanisms, dosing, research applications. Detailed analysis of both healing peptides."
+    faqs={[
+      {
+        q: "Can you stack BPC-157 and TB-500 together?",
+        a: "Yes. BPC-157 and TB-500 are one of the most well-documented research stacks. BPC-157 acts locally at injury sites while TB-500 promotes systemic tissue repair and reduces inflammation. A common research combination is 250-500mcg of each, administered subcutaneously, 5 days on / 2 days off."
+      },
+      {
+        q: "Which is better for gut healing — BPC-157 or TB-500?",
+        a: "BPC-157 is significantly better for gut healing specifically. When taken orally it survives stomach acid and acts directly on the gut lining. It was originally derived from gastric juice and has the strongest evidence for gut repair. TB-500 has minimal gut-specific research."
+      },
+      {
+        q: "What is the typical research dose for BPC-157?",
+        a: "The most commonly researched dose range for BPC-157 is 200-500mcg per day. For gut-specific research, oral administration at the same dose range is used. For localised tissue research, subcutaneous or intramuscular injection near the target area is more common."
+      },
+      {
+        q: "How long does a BPC-157 and TB-500 research cycle last?",
+        a: "Most research protocols run 4-8 weeks. A typical acute injury protocol is 4 weeks at daily dosing, followed by a 4-week break. For ongoing tissue maintenance research, some protocols use 5 days on / 2 days off for up to 12 weeks."
+      }
+    ]}
   >
+    <div className="not-prose mb-8 p-4 rounded-xl border border-primary/20 bg-primary/5">
+      <p className="text-xs font-semibold text-primary uppercase tracking-wide mb-2">Quick Answer</p>
+      <p className="text-sm text-foreground leading-relaxed">BPC-157 and TB-500 are both healing peptides but work differently. BPC-157 (Body Protection Compound) is stomach-derived and works locally — best for gut healing, tendons, and ligaments. TB-500 is derived from thymosin beta-4 and works systemically — best for muscle repair and systemic inflammation. They are frequently stacked together for synergistic healing effects.</p>
+    </div>
+
     <p>BPC-157 and TB-500 are two of the most researched peptides in the healing and recovery category. While both show promise in tissue repair research, they work through different mechanisms and have distinct applications.</p>
 
     <h2>Quick Comparison Table</h2>

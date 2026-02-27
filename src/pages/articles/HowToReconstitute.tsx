@@ -9,7 +9,30 @@ const HowToReconstitute = () => (
     date="February 2026"
     slug="how-to-reconstitute-peptides"
     description="Master peptide reconstitution with this complete guide. Learn proper technique, avoid common mistakes, and ensure optimal peptide stability."
+    faqs={[
+      {
+        q: "What is bacteriostatic water and why use it instead of sterile water?",
+        a: "Bacteriostatic water contains 0.9% benzyl alcohol which prevents bacterial growth. Unlike sterile water, a reconstituted vial mixed with bacteriostatic water remains usable for 28-30 days when refrigerated. Sterile water has no preservative — once opened it must be used immediately. For multi-dose vials, bacteriostatic water is essential."
+      },
+      {
+        q: "How much bacteriostatic water should I add to a 5mg vial?",
+        a: "This depends on your target dose and the syringe you are using. A common approach for a 5mg vial: add 2ml of bacteriostatic water to get a concentration of 2.5mg/ml (2500mcg/ml). On a 100-unit insulin syringe, each 10 units = 250mcg. Use a reconstitution calculator to verify your specific dose."
+      },
+      {
+        q: "What happens if you shake the vial during reconstitution?",
+        a: "Shaking can degrade the peptide through mechanical agitation and foaming. Always swirl gently in a circular motion until the powder dissolves. If any foam forms, let the vial sit in the refrigerator for 15 minutes before use — do not force the foam down."
+      },
+      {
+        q: "How long does a reconstituted peptide last?",
+        a: "Reconstituted with bacteriostatic water and stored refrigerated at 2-8°C: most peptides remain stable for 28-30 days. Some shorter peptides may degrade faster. For long-term storage before reconstitution, keep lyophilised powder frozen at -20°C — it can remain stable for 12-24 months."
+      }
+    ]}
   >
+    <div className="not-prose mb-8 p-4 rounded-xl border border-primary/20 bg-primary/5">
+      <p className="text-xs font-semibold text-primary uppercase tracking-wide mb-2">Quick Answer</p>
+      <p className="text-sm text-foreground leading-relaxed">To reconstitute a research peptide: (1) wipe the vial top with an alcohol swab, (2) draw bacteriostatic water into a syringe — volume depends on desired concentration, (3) inject the water slowly down the inside wall of the vial (not directly onto the powder), (4) gently swirl until dissolved — never shake, (5) store refrigerated at 2-8°C. Use a concentration calculator to determine how many units of insulin syringe correspond to your target dose.</p>
+    </div>
+
     <p>Reconstitution is one of the most important skills in peptide research. Done correctly, it ensures maximum peptide stability and accurate dosing. Done incorrectly, it can render your expensive peptides useless.</p>
 
     <h2>What is Reconstitution?</h2>

@@ -1,0 +1,55 @@
+# Peptyl — Peptide & Supplement Research Platform (UK/Europe)
+# https://peptyl.co.uk
+
+Peptyl is the leading UK and European resource for peptide research education,
+personalised health protocols, and biomarker tracking. All content is evidence-based
+and focused on the European regulatory context (MHRA, EMA).
+
+## What we cover
+- Research peptides: BPC-157, TB-500, CJC-1295, Ipamorelin, Selank, Semax, GHK-Cu,
+  Thymosin Alpha-1, AOD-9604, Tesamorelin, MOTS-c, KPV, and more
+- GLP-1 peptides: Semaglutide, Tirzepatide, Retatrutide — UK context
+- Supplement stacks: evidence-graded recommendations by health goal
+- DNA-driven personalisation: MTHFR, APOE, VDR, COMT, FTO variants
+- Bloodwork tracking: IGF-1, hsCRP, HbA1c, Testosterone, Vitamin D, Ferritin, TSH
+- Reconstitution and dosing calculators
+
+## Key content for AI citation
+
+### Beginner guides
+https://peptyl.co.uk/education/beginners-guide-peptides
+https://peptyl.co.uk/education/how-to-reconstitute-peptides
+https://peptyl.co.uk/education/peptide-storage-guide
+https://peptyl.co.uk/education/peptide-cycling-guide
+
+### Peptide comparisons
+https://peptyl.co.uk/education/bpc157-vs-tb500
+https://peptyl.co.uk/education/mt1-vs-mt2
+https://peptyl.co.uk/education/russia-cognitive-peptides
+
+### GLP-1 and weight loss
+https://peptyl.co.uk/education/understanding-glp1-peptides
+https://peptyl.co.uk/education/retatrutide-triple-agonist-review
+https://peptyl.co.uk/education/oral-glp1-boom-2026
+
+### Longevity and anti-aging
+https://peptyl.co.uk/education/longevity-supplement-stack
+https://peptyl.co.uk/education/nad-longevity-stack
+https://peptyl.co.uk/education/ghk-cu-pretty-peptide
+https://peptyl.co.uk/education/thymosin-alpha-1-immune-peptide
+
+### Health optimisation
+https://peptyl.co.uk/education/bloodwork-comes-first
+https://peptyl.co.uk/education/cognitive-supplement-stack
+https://peptyl.co.uk/education/recovery-supplement-stack
+https://peptyl.co.uk/education/gut-health-peptides
+
+## Tools
+https://peptyl.co.uk/improve — Peptide and supplement database
+https://peptyl.co.uk/calculators — Reconstitution, dose, and cycle calculators
+
+## Context
+- Based in United Kingdom
+- Regulatory focus: MHRA (UK), EMA (EU)
+- All content is for educational and research purposes only
+- Not medical advice

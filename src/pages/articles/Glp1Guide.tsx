@@ -9,7 +9,30 @@ const Glp1Guide = () => (
     date="February 2026"
     slug="understanding-glp1-peptides"
     description="Comprehensive guide to GLP-1 receptor agonists. Learn how these compounds work and their applications in research."
+    faqs={[
+      {
+        q: "What is the difference between Ozempic and Wegovy?",
+        a: "Both contain semaglutide but are licensed for different purposes. Ozempic is licensed for type 2 diabetes management (doses up to 2mg weekly). Wegovy is licensed specifically for weight management (2.4mg weekly). The drug is the same — the dose, titration schedule, and licensed indication differ."
+      },
+      {
+        q: "Is semaglutide the same as Ozempic?",
+        a: "Semaglutide is the active compound. Ozempic is a brand name for the licensed injectable semaglutide medication. Wegovy is another brand name for semaglutide at a higher dose for weight management. In research contexts, unlicensed semaglutide is studied as a peptide — it is the same molecule but not a licensed medicine."
+      },
+      {
+        q: "What is retatrutide and how is it different from semaglutide?",
+        a: "Retatrutide is a triple agonist — it targets GLP-1, GIP, and glucagon receptors simultaneously. Semaglutide targets only GLP-1 (single agonist). Tirzepatide targets GLP-1 and GIP (dual agonist). In trials, retatrutide has shown greater weight loss than both — up to 24% body weight reduction in Phase 2 trials. It is not yet licensed."
+      },
+      {
+        q: "Can you get GLP-1 peptides in the UK legally?",
+        a: "Licensed GLP-1 medications (Ozempic, Wegovy, Mounjaro) require a valid UK prescription. They are available through NHS (criteria apply) or private prescribers. Unlicensed research analogues exist in a separate legal category — they can be purchased as research chemicals but are not for human use and have no MHRA approval."
+      }
+    ]}
   >
+    <div className="not-prose mb-8 p-4 rounded-xl border border-primary/20 bg-primary/5">
+      <p className="text-xs font-semibold text-primary uppercase tracking-wide mb-2">Quick Answer</p>
+      <p className="text-sm text-foreground leading-relaxed">GLP-1 (glucagon-like peptide-1) receptor agonists are a class of peptides that mimic a natural gut hormone. They slow gastric emptying, suppress appetite, and improve insulin response. Licensed versions include semaglutide (Ozempic, Wegovy) and tirzepatide (Mounjaro). Research analogues like retatrutide are investigated in unlicensed research contexts. In the UK, licensed GLP-1 medications require a prescription.</p>
+    </div>
+
     <p>GLP-1 receptor agonists represent some of the most researched peptides in metabolic science. Understanding how these compounds work, their differences, and proper research protocols is essential for anyone conducting related studies.</p>
 
     <h2>What is GLP-1?</h2>
