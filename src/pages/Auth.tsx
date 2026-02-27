@@ -169,8 +169,23 @@ const Auth = () => {
   };
 
   const handleGoogleSignIn = async () => {
-    setGoogleLoading(true);
     setError("");
+    // If in signup mode, enforce mandatory fields before OAuth redirect
+    if (isSignUp) {
+      if (!firstName.trim()) {
+        setError("Please enter your first name before continuing with Google.");
+        return;
+      }
+      if (!lastName.trim()) {
+        setError("Please enter your last name before continuing with Google.");
+        return;
+      }
+      if (!country) {
+        setError("Please select your country before continuing with Google.");
+        return;
+      }
+    }
+    setGoogleLoading(true);
     // Persist form fields to sessionStorage so they survive the OAuth redirect
     const onboardingRaw = sessionStorage.getItem("onboarding_answers");
     const existing = onboardingRaw ? JSON.parse(onboardingRaw) : {};
