@@ -159,12 +159,13 @@ const TodaysPlan = ({ onActivate }: TodaysPlanProps) => {
     if (protocol.supplements && protocol.supplements.length > 0) {
       for (const supp of protocol.supplements) {
         if (!supplements.find((s) => s.name === supp.name)) {
+          const isDnaGoal = protocol.goal && /dna/i.test(protocol.goal);
           supplements.push({
             name: supp.name,
             dose: supp.dose,
             frequency: supp.frequency,
             protocolName: protocol.name,
-            goal: protocol.goal ? formatGoalLabel(protocol.goal) : "",
+            goal: protocol.goal && !isDnaGoal ? formatGoalLabel(protocol.goal) : "",
             drivenBy: (supp as any).drivenBy || [],
           });
         }
