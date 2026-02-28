@@ -51,6 +51,7 @@ const ThymosinAlpha1 = lazy(() => import("./pages/articles/ThymosinAlpha1"));
 const PeptideCycling = lazy(() => import("./pages/articles/PeptideCycling"));
 const GutHealthPeptides = lazy(() => import("./pages/articles/GutHealthPeptides"));
 const EuropeanPeptideGuide = lazy(() => import("./pages/articles/EuropeanPeptideGuide"));
+const PeptidesCancer2026 = lazy(() => import("./pages/articles/PeptidesCancer2026"));
 const CampaignPage = lazy(() => import("./pages/CampaignPage"));
 const WhoopCallback = lazy(() => import("./pages/WhoopCallback"));
 const FitbitCallback = lazy(() => import("./pages/FitbitCallback"));
@@ -111,6 +112,7 @@ const App = () => (
               <Route path="/education/peptide-cycling-guide" element={<PeptideCycling />} />
               <Route path="/education/gut-health-peptides" element={<GutHealthPeptides />} />
               <Route path="/education/peptide-research-europe-guide" element={<EuropeanPeptideGuide />} />
+              <Route path="/education/peptides-cancer-therapy-2026" element={<PeptidesCancer2026 />} />
               <Route path="/whoop-callback" element={<WhoopCallback />} />
               <Route path="/fitbit-callback" element={<FitbitCallback />} />
               <Route path="/start/:slug" element={<CampaignPage />} />

@@ -168,4 +168,12 @@ export const blogPosts: BlogPost[] = [
     readTime: "8 min read",
     date: "February 2026",
   },
+  {
+    slug: "peptides-cancer-therapy-2026",
+    title: "Could Peptides Be the Next Big Thing in Cancer Therapy? (2026 Update)",
+    category: "Deep Dive",
+    excerpt: "From peptide-drug conjugates to IL-15 immune activators like Anktiva, peptides are emerging as targeted, low-toxicity cancer-fighting agents. Here's what the science says.",
+    readTime: "12 min read",
+    date: "February 2026",
+  },
 ];
