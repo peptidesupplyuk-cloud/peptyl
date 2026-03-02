@@ -57,7 +57,7 @@ Deno.serve(async (req) => {
       body: JSON.stringify({
         billing_requests: {
           payment_request: {
-            amount: 1999,
+            amount: 2999,
             currency: "GBP",
             description: "Peptyl DNA Assessment",
           },
