@@ -38,6 +38,27 @@ Deno.serve(async (req) => {
     const userId = claimsData.claims.sub as string;
     const userEmail = claimsData.claims.email as string;
 
+    // Parse product from request body (default: dna_assessment)
+    let product = "dna_assessment";
+    try {
+      const body = await req.json();
+      if (body?.product) product = body.product;
+    } catch { /* no body is fine, default to dna_assessment */ }
+
+    const productConfig: Record<string, { amount: number; description: string }> = {
+      dna_assessment: { amount: 2999, description: "Peptyl DNA Assessment" },
+      subscription_individual: { amount: 499, description: "Peptyl Individual Plan" },
+      subscription_coach: { amount: 4999, description: "Peptyl Coach Plan" },
+    };
+
+    const config = productConfig[product];
+    if (!config) {
+      return new Response(JSON.stringify({ error: "Invalid product" }), {
+        status: 400,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
     const gcToken = Deno.env.get("GOCARDLESS_ACCESS_TOKEN");
     if (!gcToken) {
       return new Response(JSON.stringify({ error: "Payment not configured" }), {
@@ -57,13 +78,13 @@ Deno.serve(async (req) => {
       body: JSON.stringify({
         billing_requests: {
           payment_request: {
-            amount: 2999,
+            amount: config.amount,
             currency: "GBP",
-            description: "Peptyl DNA Assessment",
+            description: config.description,
           },
           metadata: {
             user_id: userId,
-            product: "dna_assessment",
+            product,
           },
         },
       }),
