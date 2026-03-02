@@ -13,8 +13,4 @@ createRoot(document.getElementById("root")!).render(
   </HelmetProvider>
 );
 
-if ('serviceWorker' in navigator) {
-  window.addEventListener('load', () => {
-    navigator.serviceWorker.register('/sw.js');
-  });
-}
+// PWA registration handled by vite-plugin-pwa
