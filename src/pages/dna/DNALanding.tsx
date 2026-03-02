@@ -91,7 +91,7 @@ const DNALanding = () => {
                 {purchasing ? (
                   <><Loader2 className="mr-2 h-5 w-5 animate-spin" /> Processing…</>
                 ) : (
-                  <>Unlock DNA Assessment — £19.99 <ArrowRight className="ml-2 h-5 w-5" /></>
+                  <>Unlock DNA Assessment — £29.99 <ArrowRight className="ml-2 h-5 w-5" /></>
                 )}
               </Button>
             )}
@@ -158,7 +158,7 @@ const DNALanding = () => {
                 {purchasing ? (
                   <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Processing…</>
                 ) : (
-                  <>Unlock DNA Assessment — £19.99 <ArrowRight className="ml-2 h-4 w-4" /></>
+                  <>Unlock DNA Assessment — £29.99 <ArrowRight className="ml-2 h-4 w-4" /></>
                 )}
               </Button>
             )}
