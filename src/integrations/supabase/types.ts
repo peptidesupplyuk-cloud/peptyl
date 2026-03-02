@@ -1139,6 +1139,7 @@ export type Database = {
           country: string | null
           created_at: string
           current_compounds: string | null
+          dna_assessment_unlocked: boolean | null
           experience_level: string | null
           first_name: string | null
           gender: string | null
@@ -1168,6 +1169,7 @@ export type Database = {
           country?: string | null
           created_at?: string
           current_compounds?: string | null
+          dna_assessment_unlocked?: boolean | null
           experience_level?: string | null
           first_name?: string | null
           gender?: string | null
@@ -1197,6 +1199,7 @@ export type Database = {
           country?: string | null
           created_at?: string
           current_compounds?: string | null
+          dna_assessment_unlocked?: boolean | null
           experience_level?: string | null
           first_name?: string | null
           gender?: string | null

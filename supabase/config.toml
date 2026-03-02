@@ -1,5 +1,8 @@
 project_id = "wmdudifpbrtojkmtczaq"
 
+[functions.create-gocardless-payment]
+verify_jwt = false
+
 [functions.peptide-chat]
 verify_jwt = false
 

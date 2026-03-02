@@ -1,0 +1,1 @@
+ALTER TABLE public.profiles ADD COLUMN IF NOT EXISTS dna_assessment_unlocked boolean DEFAULT false;
