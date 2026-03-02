@@ -51,7 +51,7 @@ const Logo = ({ className, size = "md", variant = "full", inverted = false }: Lo
           <span className={cn(
             "font-heading font-bold tracking-tight",
             s.text,
-            inverted ? "text-primary-foreground" : "text-foreground"
+            "text-foreground"
           )}>
             Pep<span className="text-gradient-teal">tyl</span>
           </span>

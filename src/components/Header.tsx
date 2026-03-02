@@ -79,7 +79,7 @@ const Header = () => {
       <div
         className={`hidden md:flex items-center gap-1 mt-3 px-2 py-1.5 rounded-2xl border pointer-events-auto transition-all duration-300 ${
           !scrolled && isHeroPage
-            ? "bg-primary-foreground/10 backdrop-blur-xl border-primary-foreground/15 shadow-lg"
+            ? "bg-navy/80 backdrop-blur-xl border-primary-foreground/20 shadow-lg"
             : "bg-card/90 backdrop-blur-xl border-border shadow-md"
         }`}
       >
