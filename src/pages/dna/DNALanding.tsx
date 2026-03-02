@@ -1,10 +1,14 @@
+import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
-import { Dna, Activity, FlaskConical, AlertTriangle, Shield, ArrowRight } from "lucide-react";
+import { Dna, Activity, FlaskConical, AlertTriangle, Shield, ArrowRight, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import SEO from "@/components/SEO";
 import AnimatedDNA from "@/components/dna/AnimatedDNA";
+import { useAuth } from "@/contexts/AuthContext";
+import { supabase } from "@/integrations/supabase/client";
+import { useToast } from "@/hooks/use-toast";
 
 const outcomes = [
   { icon: Activity, title: "Health Score", desc: "A weighted 0–100 score across genetics, biomarkers, and lifestyle" },
@@ -14,6 +18,42 @@ const outcomes = [
 ];
 
 const DNALanding = () => {
+  const { user } = useAuth();
+  const { toast } = useToast();
+  const [unlocked, setUnlocked] = useState<boolean | null>(null);
+  const [purchasing, setPurchasing] = useState(false);
+
+  useEffect(() => {
+    if (!user) { setUnlocked(false); return; }
+    supabase
+      .from("profiles")
+      .select("dna_assessment_unlocked")
+      .eq("user_id", user.id)
+      .single()
+      .then(({ data }) => {
+        setUnlocked(!!(data as any)?.dna_assessment_unlocked);
+      });
+  }, [user]);
+
+  const handlePurchase = async () => {
+    if (!user) {
+      toast({ title: "Sign in required", description: "Please sign in to purchase.", variant: "destructive" });
+      return;
+    }
+    setPurchasing(true);
+    try {
+      const { data, error } = await supabase.functions.invoke("create-gocardless-payment");
+      if (error || !data?.authorisation_url) {
+        throw new Error(error?.message || "No authorisation URL returned");
+      }
+      window.location.href = data.authorisation_url;
+    } catch (err: any) {
+      console.error(err);
+      toast({ title: "Payment error", description: err.message || "Could not start payment.", variant: "destructive" });
+      setPurchasing(false);
+    }
+  };
+
   return (
     <>
       <SEO
@@ -35,11 +75,26 @@ const DNALanding = () => {
             <p className="text-lg text-primary-foreground/70 mb-8 max-w-xl mx-auto">
               Upload your genetic data from 23andMe, AncestryDNA, or a lab report. Our AI analyses your variants and builds a personalised supplement protocol.
             </p>
-            <Link to="/dna/upload">
-              <Button size="lg" className="shadow-brand text-base px-8 py-6">
-                Start Your Analysis <ArrowRight className="ml-2 h-5 w-5" />
+            {unlocked ? (
+              <Link to="/dna/upload">
+                <Button size="lg" className="shadow-brand text-base px-8 py-6">
+                  Start Your Analysis <ArrowRight className="ml-2 h-5 w-5" />
+                </Button>
+              </Link>
+            ) : (
+              <Button
+                size="lg"
+                className="shadow-brand text-base px-8 py-6"
+                onClick={handlePurchase}
+                disabled={purchasing}
+              >
+                {purchasing ? (
+                  <><Loader2 className="mr-2 h-5 w-5 animate-spin" /> Processing…</>
+                ) : (
+                  <>Unlock DNA Assessment — £19.99 <ArrowRight className="ml-2 h-5 w-5" /></>
+                )}
               </Button>
-            </Link>
+            )}
             <p className="text-xs text-primary-foreground/50 mt-3 text-center">
               For educational purposes only. Not medical advice. We are not medical professionals.
             </p>
@@ -87,11 +142,26 @@ const DNALanding = () => {
         {/* CTA */}
         <section className="py-16 bg-background">
           <div className="container mx-auto px-6 text-center">
-            <Link to="/dna/upload">
-              <Button size="lg" className="shadow-brand">
-                Upload Your Data <ArrowRight className="ml-2 h-4 w-4" />
+            {unlocked ? (
+              <Link to="/dna/upload">
+                <Button size="lg" className="shadow-brand">
+                  Upload Your Data <ArrowRight className="ml-2 h-4 w-4" />
+                </Button>
+              </Link>
+            ) : (
+              <Button
+                size="lg"
+                className="shadow-brand"
+                onClick={handlePurchase}
+                disabled={purchasing}
+              >
+                {purchasing ? (
+                  <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Processing…</>
+                ) : (
+                  <>Unlock DNA Assessment — £19.99 <ArrowRight className="ml-2 h-4 w-4" /></>
+                )}
               </Button>
-            </Link>
+            )}
           </div>
         </section>
       </main>
