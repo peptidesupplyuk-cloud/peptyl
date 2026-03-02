@@ -2,7 +2,7 @@ import { useTranslation } from "react-i18next";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import ReconstitutionCalculator from "@/components/calculators/ReconstitutionCalculator";
-import DoseCalculator from "@/components/calculators/DoseCalculator";
+
 import CycleOrderCalculator from "@/components/calculators/CycleOrderCalculator";
 import SEO from "@/components/SEO";
 
@@ -30,7 +30,6 @@ const CalculatorsPage = () => {
 
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
             <ReconstitutionCalculator />
-            <DoseCalculator />
             <CycleOrderCalculator />
           </div>
 

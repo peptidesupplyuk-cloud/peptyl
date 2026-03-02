@@ -1,6 +1,6 @@
 import { useTranslation } from "react-i18next";
 import ReconstitutionCalculator from "@/components/calculators/ReconstitutionCalculator";
-import DoseCalculator from "@/components/calculators/DoseCalculator";
+
 import CycleOrderCalculator from "@/components/calculators/CycleOrderCalculator";
 
 const CalculatorsContent = () => {
@@ -18,8 +18,7 @@ const CalculatorsContent = () => {
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-        <ReconstitutionCalculator />
-        <DoseCalculator />
+      <ReconstitutionCalculator />
         <CycleOrderCalculator />
       </div>
 
