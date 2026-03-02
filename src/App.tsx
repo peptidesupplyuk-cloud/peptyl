@@ -8,6 +8,7 @@ import { AuthProvider } from "@/contexts/AuthContext";
 import ProtectedRoute from "@/components/ProtectedRoute";
 import PeptideChat from "@/components/PeptideChat";
 import SignupBanner from "@/components/SignupBanner";
+import PWAUpdatePrompt from "@/components/PWAUpdatePrompt";
 
 import SitewideDisclaimer from "@/components/SitewideDisclaimer";
 import ScrollToTop from "@/components/ScrollToTop";
@@ -129,6 +130,7 @@ const App = () => (
           <SignupBanner />
           
           <SitewideDisclaimer />
+          <PWAUpdatePrompt />
         </BrowserRouter>
       </TooltipProvider>
     </AuthProvider>
