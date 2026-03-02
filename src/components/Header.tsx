@@ -1,6 +1,6 @@
 import { useState, useEffect, useMemo } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
-import { Menu, X, ShoppingBag, LogOut, User } from "lucide-react";
+import { Menu, X, ShoppingBag, LogOut, Heart, Zap, Dna, BookOpen, Store, Info, Shield } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useTranslation } from "react-i18next";
 import { useQuery } from "@tanstack/react-query";
@@ -14,14 +14,13 @@ import ThemeToggle from "./ThemeToggle";
 const ADMIN_EMAIL = "peptidesupplyuk@gmail.com";
 
 const BASE_NAV_ITEMS = [
-  { labelKey: "nav.myHealth", href: "/dashboard" },
-  { labelKey: "nav.improve", href: "/improve" },
-  { labelKey: "nav.dna", href: "/dna", dynamic: true },
-  { labelKey: "nav.learn", href: "/education" },
-  { labelKey: "nav.shop", href: "/shop" },
-  { labelKey: "nav.testing", href: "/testing" },
-  { labelKey: "nav.about", href: "/about" },
-  { labelKey: "nav.admin", href: "/admin/dashboard", adminOnly: true },
+  { labelKey: "nav.myHealth", href: "/dashboard", icon: Heart },
+  { labelKey: "nav.improve", href: "/improve", icon: Zap },
+  { labelKey: "nav.dna", href: "/dna", dynamic: true, icon: Dna },
+  { labelKey: "nav.learn", href: "/education", icon: BookOpen },
+  { labelKey: "nav.shop", href: "/shop", icon: Store },
+  { labelKey: "nav.about", href: "/about", icon: Info },
+  { labelKey: "nav.admin", href: "/admin/dashboard", adminOnly: true, icon: Shield },
 ];
 
 const Header = () => {
@@ -32,7 +31,6 @@ const Header = () => {
   const { user, signOut } = useAuth();
   const { t } = useTranslation();
 
-  // Check if user has DNA reports for context-aware nav
   const { data: hasDnaReports } = useQuery({
     queryKey: ["has-dna-reports", user?.id],
     enabled: !!user,
@@ -70,120 +68,146 @@ const Header = () => {
     navigate("/");
   };
 
+  const isActive = (href: string) => {
+    if (href === "/improve") return location.pathname === "/improve" || location.pathname === "/calculators" || location.pathname === "/testing";
+    return location.pathname === href;
+  };
+
   return (
-    <header
-      className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
-        !scrolled && isHeroPage ? "dark-section" : ""
-      } ${
-        scrolled
-          ? "bg-card/90 backdrop-blur-xl border-b border-border shadow-sm"
-          : isHeroPage
-          ? "bg-transparent"
-          : "bg-card/90 backdrop-blur-xl"
-      }`}
-    >
-      <div className="container mx-auto px-6 h-16 flex items-center justify-between">
-        <Link to="/">
+    <header className="fixed top-0 left-0 right-0 z-50 flex justify-center pointer-events-none">
+      {/* Desktop floating pill nav */}
+      <div
+        className={`hidden md:flex items-center gap-1 mt-3 px-2 py-1.5 rounded-2xl border pointer-events-auto transition-all duration-300 ${
+          !scrolled && isHeroPage
+            ? "bg-primary-foreground/10 backdrop-blur-xl border-primary-foreground/15 shadow-lg"
+            : "bg-card/90 backdrop-blur-xl border-border shadow-md"
+        }`}
+      >
+        <Link to="/" className="px-3 py-1.5 mr-1">
           <Logo size="sm" inverted={!scrolled && isHeroPage} />
         </Link>
 
-        {/* Desktop nav */}
-        <nav className="hidden md:flex items-center gap-1">
-          {navItems.filter(item => !item.adminOnly || user?.email === ADMIN_EMAIL).map((item) => (
+        {navItems.filter(item => !item.adminOnly || user?.email === ADMIN_EMAIL).map((item) => {
+          const Icon = item.icon;
+          const active = isActive(item.href);
+          return (
             <Link
               key={item.href}
               to={item.href}
-              className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
-                location.pathname === item.href
-                  ? "text-primary bg-accent"
-                  : scrolled || !isHeroPage
-                  ? "text-muted-foreground hover:text-foreground hover:bg-muted"
-                  : "text-primary-foreground/70 hover:text-primary-foreground hover:bg-primary-foreground/10"
+              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-sm font-medium transition-all duration-200 ${
+                active
+                  ? "bg-primary text-primary-foreground shadow-sm"
+                  : !scrolled && isHeroPage
+                  ? "text-primary-foreground/70 hover:text-primary-foreground hover:bg-primary-foreground/10"
+                  : "text-muted-foreground hover:text-foreground hover:bg-muted"
               }`}
             >
+              <Icon className="h-3.5 w-3.5" />
               {t(item.labelKey)}
             </Link>
-          ))}
-        </nav>
+          );
+        })}
 
-        <div className="hidden md:flex items-center gap-3">
-          <LanguageToggle className={!scrolled && isHeroPage ? "text-primary-foreground/70 hover:text-primary-foreground" : ""} />
-          <ThemeToggle className={!scrolled && isHeroPage ? "text-primary-foreground/70 hover:text-primary-foreground" : ""} />
-          <Button variant="ghost" size="icon" className={!scrolled && isHeroPage ? "text-primary-foreground/70 hover:text-primary-foreground" : ""}>
-            <ShoppingBag className="h-5 w-5" />
-          </Button>
-          {user ? (
-            <div className="flex items-center gap-2">
-              <span className={`text-xs font-medium truncate max-w-[120px] ${!scrolled && isHeroPage ? "text-primary-foreground/70" : "text-muted-foreground"}`}>
-                {user.email}
-              </span>
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={handleSignOut}
-                className={!scrolled && isHeroPage ? "text-primary-foreground/70 hover:text-primary-foreground" : ""}
-              >
-                <LogOut className="h-4 w-4" />
-              </Button>
-            </div>
-          ) : (
-            <Link to="/auth">
-              <Button variant="default" size="sm" className="shadow-brand">
-                {t("nav.signIn")}
-              </Button>
-            </Link>
-          )}
+        <div className="w-px h-6 mx-1 bg-border/50" />
+
+        <div className="flex items-center gap-0.5">
+          <LanguageToggle className={`h-8 w-8 ${!scrolled && isHeroPage ? "text-primary-foreground/70 hover:text-primary-foreground" : ""}`} />
+          <ThemeToggle className={`h-8 w-8 ${!scrolled && isHeroPage ? "text-primary-foreground/70 hover:text-primary-foreground" : ""}`} />
         </div>
 
-        {/* Mobile toggle */}
-        <button
-          onClick={() => setIsOpen(!isOpen)}
-          className={`md:hidden p-2 ${!scrolled && isHeroPage ? "text-primary-foreground" : "text-foreground"}`}
-        >
-          {isOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
-        </button>
+        {user ? (
+          <div className="flex items-center gap-1 ml-1">
+            <span className={`text-xs font-medium truncate max-w-[100px] ${!scrolled && isHeroPage ? "text-primary-foreground/70" : "text-muted-foreground"}`}>
+              {user.email}
+            </span>
+            <Button
+              variant="ghost"
+              size="icon"
+              className={`h-8 w-8 ${!scrolled && isHeroPage ? "text-primary-foreground/70 hover:text-primary-foreground" : ""}`}
+              onClick={handleSignOut}
+            >
+              <LogOut className="h-3.5 w-3.5" />
+            </Button>
+          </div>
+        ) : (
+          <Link to="/auth">
+            <Button size="sm" className="shadow-brand ml-1 h-8 text-xs">
+              {t("nav.signIn")}
+            </Button>
+          </Link>
+        )}
       </div>
 
-      {/* Mobile menu */}
-      <AnimatePresence>
-        {isOpen && (
-          <motion.div
-            initial={{ opacity: 0, height: 0 }}
-            animate={{ opacity: 1, height: "auto" }}
-            exit={{ opacity: 0, height: 0 }}
-            className="md:hidden bg-card/95 backdrop-blur-xl border-b border-border"
+      {/* Mobile header */}
+      <div
+        className={`md:hidden w-full pointer-events-auto transition-all duration-300 ${
+          scrolled
+            ? "bg-card/90 backdrop-blur-xl border-b border-border shadow-sm"
+            : isHeroPage
+            ? "bg-transparent"
+            : "bg-card/90 backdrop-blur-xl"
+        } ${!scrolled && isHeroPage ? "dark-section" : ""}`}
+      >
+        <div className="container mx-auto px-6 h-16 flex items-center justify-between">
+          <Link to="/">
+            <Logo size="sm" inverted={!scrolled && isHeroPage} />
+          </Link>
+          <button
+            onClick={() => setIsOpen(!isOpen)}
+            className={`p-2 ${!scrolled && isHeroPage ? "text-primary-foreground" : "text-foreground"}`}
           >
-            <nav className="container mx-auto px-6 py-4 flex flex-col gap-1">
-              {navItems.filter(item => !item.adminOnly || user?.email === ADMIN_EMAIL).map((item) => (
-                <Link
-                  key={item.href}
-                  to={item.href}
-                  onClick={() => setIsOpen(false)}
-                  className="px-4 py-3 rounded-lg text-sm font-medium text-foreground hover:bg-muted transition-colors"
-                >
-                  {t(item.labelKey)}
-                </Link>
-              ))}
-              <div className="px-4 py-2 flex items-center gap-2">
-                <LanguageToggle />
-                <ThemeToggle />
-              </div>
-              {user ? (
-                <button
-                  onClick={() => { handleSignOut(); setIsOpen(false); }}
-                  className="px-4 py-3 rounded-lg text-sm font-medium text-foreground hover:bg-muted transition-colors text-left flex items-center gap-2"
-                >
-                  <LogOut className="h-4 w-4" /> {t("nav.signOut")}
-                </button>
-              ) : (
-                <Link to="/auth" onClick={() => setIsOpen(false)}>
-                  <Button className="mt-3 shadow-brand w-full">{t("nav.signIn")}</Button>
-                </Link>
-              )}
-            </nav>
-          </motion.div>
-        )}
-      </AnimatePresence>
+            {isOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
+          </button>
+        </div>
+
+        <AnimatePresence>
+          {isOpen && (
+            <motion.div
+              initial={{ opacity: 0, height: 0 }}
+              animate={{ opacity: 1, height: "auto" }}
+              exit={{ opacity: 0, height: 0 }}
+              className="bg-card/95 backdrop-blur-xl border-b border-border"
+            >
+              <nav className="container mx-auto px-6 py-4 flex flex-col gap-1">
+                {navItems.filter(item => !item.adminOnly || user?.email === ADMIN_EMAIL).map((item) => {
+                  const Icon = item.icon;
+                  return (
+                    <Link
+                      key={item.href}
+                      to={item.href}
+                      onClick={() => setIsOpen(false)}
+                      className={`px-4 py-3 rounded-lg text-sm font-medium transition-colors flex items-center gap-2.5 ${
+                        isActive(item.href)
+                          ? "text-primary bg-accent"
+                          : "text-foreground hover:bg-muted"
+                      }`}
+                    >
+                      <Icon className="h-4 w-4" />
+                      {t(item.labelKey)}
+                    </Link>
+                  );
+                })}
+                <div className="px-4 py-2 flex items-center gap-2">
+                  <LanguageToggle />
+                  <ThemeToggle />
+                </div>
+                {user ? (
+                  <button
+                    onClick={() => { handleSignOut(); setIsOpen(false); }}
+                    className="px-4 py-3 rounded-lg text-sm font-medium text-foreground hover:bg-muted transition-colors text-left flex items-center gap-2"
+                  >
+                    <LogOut className="h-4 w-4" /> {t("nav.signOut")}
+                  </button>
+                ) : (
+                  <Link to="/auth" onClick={() => setIsOpen(false)}>
+                    <Button className="mt-3 shadow-brand w-full">{t("nav.signIn")}</Button>
+                  </Link>
+                )}
+              </nav>
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </div>
     </header>
   );
 };
