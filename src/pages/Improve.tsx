@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useSearchParams } from "react-router-dom";
-import { Database, Calculator, Pill } from "lucide-react";
+import { BookOpen, Pill, Calculator, Droplets } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
@@ -8,11 +8,15 @@ import PeptidesContent from "@/components/content/PeptidesContent";
 import SupplementsContent from "@/components/content/SupplementsContent";
 import CalculatorsContent from "@/components/content/CalculatorsContent";
 import SEO from "@/components/SEO";
+import { lazy, Suspense } from "react";
+
+const TestingContent = lazy(() => import("@/pages/Testing").then(m => ({ default: m.TestingContent })));
 
 const TABS = [
-  { value: "peptides", label: "Peptides", icon: Database },
+  { value: "peptides", label: "Peptides", icon: BookOpen },
   { value: "supplements", label: "Supplements", icon: Pill },
   { value: "calculators", label: "Calculators", icon: Calculator },
+  { value: "testing", label: "Testing", icon: Droplets },
 ] as const;
 
 const ImprovePage = () => {
@@ -28,15 +32,15 @@ const ImprovePage = () => {
   return (
     <div className="min-h-screen bg-background">
       <SEO
-        title="Improve: Peptides & Calculators | Peptyl"
-        description="Browse our peptide database and use precision calculators for reconstitution, dosing, and cycle planning."
+        title="Improve: Peptide & Supplement Knowledge Base | Peptyl"
+        description="Browse our peptide and supplement knowledge base and use precision calculators for reconstitution, dosing, and cycle planning."
         path="/improve"
       />
       <Header />
       <main className="pt-24 pb-16">
         <div className="container mx-auto px-6">
           <Tabs value={activeTab} onValueChange={handleTabChange}>
-             <TabsList className="mb-8 w-full max-w-sm">
+             <TabsList className="mb-8 w-full max-w-lg">
               {TABS.map(({ value, label, icon: Icon }) => (
                 <TabsTrigger key={value} value={value} className="flex items-center gap-2 flex-1">
                   <Icon className="h-4 w-4" />
@@ -52,6 +56,11 @@ const ImprovePage = () => {
             </TabsContent>
             <TabsContent value="calculators">
               <CalculatorsContent />
+            </TabsContent>
+            <TabsContent value="testing">
+              <Suspense fallback={<div className="min-h-[400px]" />}>
+                <TestingContent />
+              </Suspense>
             </TabsContent>
           </Tabs>
         </div>
