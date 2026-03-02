@@ -76,15 +76,9 @@ const Header = () => {
   return (
     <header className="fixed top-0 left-0 right-0 z-50 flex justify-center pointer-events-none">
       {/* Desktop floating pill nav */}
-      <div
-        className={`hidden md:flex items-center gap-1 mt-3 px-2 py-1.5 rounded-2xl border pointer-events-auto transition-all duration-300 ${
-          !scrolled && isHeroPage
-            ? "bg-navy/80 backdrop-blur-xl border-primary-foreground/20 shadow-lg"
-            : "bg-card/90 backdrop-blur-xl border-border shadow-md"
-        }`}
-      >
+      <div className="hidden md:flex items-center gap-1 mt-3 px-2 py-1.5 rounded-2xl border border-border bg-card/95 backdrop-blur-xl shadow-md pointer-events-auto transition-all duration-300">
         <Link to="/" className="px-3 py-1.5 mr-1">
-          <Logo size="sm" inverted={!scrolled && isHeroPage} />
+          <Logo size="sm" />
         </Link>
 
         {navItems.filter(item => !item.adminOnly || user?.email === ADMIN_EMAIL).map((item) => {
@@ -97,9 +91,7 @@ const Header = () => {
               className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-sm font-medium transition-all duration-200 ${
                 active
                   ? "bg-primary text-primary-foreground shadow-sm"
-                  : !scrolled && isHeroPage
-                  ? "text-primary-foreground/70 hover:text-primary-foreground hover:bg-primary-foreground/10"
-                  : "text-muted-foreground hover:text-foreground hover:bg-muted"
+                  : "text-foreground/80 hover:text-foreground hover:bg-muted"
               }`}
             >
               <Icon className="h-3.5 w-3.5" />
@@ -111,19 +103,19 @@ const Header = () => {
         <div className="w-px h-6 mx-1 bg-border/50" />
 
         <div className="flex items-center gap-0.5">
-          <LanguageToggle className={`h-8 w-8 ${!scrolled && isHeroPage ? "text-primary-foreground/70 hover:text-primary-foreground" : ""}`} />
-          <ThemeToggle className={`h-8 w-8 ${!scrolled && isHeroPage ? "text-primary-foreground/70 hover:text-primary-foreground" : ""}`} />
+          <LanguageToggle className="h-8 w-8" />
+          <ThemeToggle className="h-8 w-8" />
         </div>
 
         {user ? (
           <div className="flex items-center gap-1 ml-1">
-            <span className={`text-xs font-medium truncate max-w-[100px] ${!scrolled && isHeroPage ? "text-primary-foreground/70" : "text-muted-foreground"}`}>
+            <span className="text-xs font-medium truncate max-w-[100px] text-muted-foreground">
               {user.email}
             </span>
             <Button
               variant="ghost"
               size="icon"
-              className={`h-8 w-8 ${!scrolled && isHeroPage ? "text-primary-foreground/70 hover:text-primary-foreground" : ""}`}
+              className="h-8 w-8"
               onClick={handleSignOut}
             >
               <LogOut className="h-3.5 w-3.5" />
