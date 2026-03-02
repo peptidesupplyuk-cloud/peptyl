@@ -983,6 +983,42 @@ export type Database = {
           },
         ]
       }
+      payment_events: {
+        Row: {
+          amount: number | null
+          created_at: string
+          currency: string | null
+          event_type: string | null
+          gocardless_event_id: string | null
+          id: string
+          payment_id: string | null
+          product: string | null
+          user_id: string | null
+        }
+        Insert: {
+          amount?: number | null
+          created_at?: string
+          currency?: string | null
+          event_type?: string | null
+          gocardless_event_id?: string | null
+          id?: string
+          payment_id?: string | null
+          product?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          amount?: number | null
+          created_at?: string
+          currency?: string | null
+          event_type?: string | null
+          gocardless_event_id?: string | null
+          id?: string
+          payment_id?: string | null
+          product?: string | null
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       peptide_experience_votes: {
         Row: {
           created_at: string
@@ -1152,6 +1188,9 @@ export type Database = {
           notify_whatsapp: boolean
           research_goal: string | null
           risk_tolerance: string | null
+          subscription_end: string | null
+          subscription_start: string | null
+          subscription_tier: string | null
           updated_at: string
           user_id: string
           username: string | null
@@ -1182,6 +1221,9 @@ export type Database = {
           notify_whatsapp?: boolean
           research_goal?: string | null
           risk_tolerance?: string | null
+          subscription_end?: string | null
+          subscription_start?: string | null
+          subscription_tier?: string | null
           updated_at?: string
           user_id: string
           username?: string | null
@@ -1212,6 +1254,9 @@ export type Database = {
           notify_whatsapp?: boolean
           research_goal?: string | null
           risk_tolerance?: string | null
+          subscription_end?: string | null
+          subscription_start?: string | null
+          subscription_tier?: string | null
           updated_at?: string
           user_id?: string
           username?: string | null
