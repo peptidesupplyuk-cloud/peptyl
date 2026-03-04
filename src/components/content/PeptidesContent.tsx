@@ -83,7 +83,7 @@ const PeptidesContent = () => {
     <>
       <div className="max-w-2xl mb-8">
         <h2 className="text-2xl sm:text-3xl font-heading font-bold text-foreground mb-3">
-          {t("peptidesPage.title")} <span className="text-gradient-teal">{t("peptidesPage.titleHighlight")}</span>
+          Peptide <span className="text-gradient-teal">Knowledge Base</span>
         </h2>
         <p className="text-muted-foreground text-lg">
           {t("peptidesPage.subtitleDb", { count: filtered.length })}
