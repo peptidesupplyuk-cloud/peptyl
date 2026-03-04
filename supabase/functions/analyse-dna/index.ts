@@ -428,6 +428,12 @@ async function saveReport(fullContent: string, method: string, userId: string | 
   } else {
     console.log("Report saved:", data.id);
 
+    // Consume the DNA assessment credit so user must pay again for next analysis
+    await supabase
+      .from("profiles")
+      .update({ dna_assessment_unlocked: false } as any)
+      .eq("user_id", userId);
+
     // Send push notification via OneSignal
     try {
       const onesignalKey = Deno.env.get("ONESIGNAL_REST_API_KEY");
