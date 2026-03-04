@@ -200,6 +200,7 @@ export const syringeTypes: SyringeType[] = [
   { label: "U-100 · 0.3mL (30 unit) insulin syringe", shortLabel: "U-100 0.3mL", multiplier: 100, capacityMl: 0.3, type: "insulin" },
   { label: "U-40 · 1mL (40 unit) insulin syringe", shortLabel: "U-40 1mL", multiplier: 40, capacityMl: 1, type: "insulin" },
   { label: "Tuberculin · 1mL syringe", shortLabel: "Tuberculin 1mL", multiplier: 1, capacityMl: 1, type: "tuberculin" },
+  { label: "Easy Pen · 60 click (0.6mL)", shortLabel: "60-click Pen", multiplier: 100, capacityMl: 0.6, type: "insulin" },
 ];
 
 export const dosingFrequencies = [
