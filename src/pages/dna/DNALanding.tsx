@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
-import { Dna, Activity, FlaskConical, AlertTriangle, Shield, ArrowRight, Loader2 } from "lucide-react";
+import { Dna, Activity, FlaskConical, AlertTriangle, Shield, ArrowRight, Loader2, History } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
@@ -21,18 +21,32 @@ const DNALanding = () => {
   const { user } = useAuth();
   const { toast } = useToast();
   const [unlocked, setUnlocked] = useState<boolean | null>(null);
+  const [hasReports, setHasReports] = useState(false);
   const [purchasing, setPurchasing] = useState(false);
 
   useEffect(() => {
-    if (!user) { setUnlocked(false); return; }
-    supabase
-      .from("profiles")
-      .select("dna_assessment_unlocked")
-      .eq("user_id", user.id)
-      .single()
-      .then(({ data }) => {
-        setUnlocked(!!(data as any)?.dna_assessment_unlocked);
-      });
+    if (!user) {
+      setUnlocked(false);
+      setHasReports(false);
+      return;
+    }
+
+    // Fetch profile + check for existing reports in parallel
+    Promise.all([
+      supabase
+        .from("profiles")
+        .select("dna_assessment_unlocked")
+        .eq("user_id", user.id)
+        .single(),
+      supabase
+        .from("dna_reports")
+        .select("id")
+        .eq("user_id", user.id)
+        .limit(1),
+    ]).then(([profileRes, reportsRes]) => {
+      setUnlocked(!!(profileRes.data as any)?.dna_assessment_unlocked);
+      setHasReports((reportsRes.data?.length ?? 0) > 0);
+    });
   }, [user]);
 
   const handlePurchase = async () => {
@@ -42,7 +56,9 @@ const DNALanding = () => {
     }
     setPurchasing(true);
     try {
-      const { data, error } = await supabase.functions.invoke("create-gocardless-payment");
+      const { data, error } = await supabase.functions.invoke("create-gocardless-payment", {
+        body: { product: "dna_assessment" },
+      });
       if (error || !data?.authorisation_url) {
         throw new Error(error?.message || "No authorisation URL returned");
       }
@@ -52,6 +68,37 @@ const DNALanding = () => {
       toast({ title: "Payment error", description: err.message || "Could not start payment.", variant: "destructive" });
       setPurchasing(false);
     }
+  };
+
+  const renderCTA = (size: "lg" | "default" = "lg") => {
+    const sizeClasses = size === "lg" ? "text-base px-8 py-6" : "";
+
+    // Has an unused credit — go straight to upload
+    if (unlocked) {
+      return (
+        <Link to="/dna/upload">
+          <Button size={size} className={`shadow-brand ${sizeClasses}`}>
+            Start Your Analysis <ArrowRight className="ml-2 h-5 w-5" />
+          </Button>
+        </Link>
+      );
+    }
+
+    // Needs to pay for a new analysis
+    return (
+      <Button
+        size={size}
+        className={`shadow-brand ${sizeClasses}`}
+        onClick={handlePurchase}
+        disabled={purchasing}
+      >
+        {purchasing ? (
+          <><Loader2 className="mr-2 h-5 w-5 animate-spin" /> Processing…</>
+        ) : (
+          <>Unlock DNA Assessment — £29.99 <ArrowRight className="ml-2 h-5 w-5" /></>
+        )}
+      </Button>
+    );
   };
 
   return (
@@ -75,26 +122,18 @@ const DNALanding = () => {
             <p className="text-lg text-primary-foreground/70 mb-8 max-w-xl mx-auto">
               Upload your genetic data from 23andMe, AncestryDNA, or a lab report. Our AI analyses your variants and builds a personalised supplement protocol.
             </p>
-            {unlocked ? (
-              <Link to="/dna/upload">
-                <Button size="lg" className="shadow-brand text-base px-8 py-6">
-                  Start Your Analysis <ArrowRight className="ml-2 h-5 w-5" />
-                </Button>
-              </Link>
-            ) : (
-              <Button
-                size="lg"
-                className="shadow-brand text-base px-8 py-6"
-                onClick={handlePurchase}
-                disabled={purchasing}
-              >
-                {purchasing ? (
-                  <><Loader2 className="mr-2 h-5 w-5 animate-spin" /> Processing…</>
-                ) : (
-                  <>Unlock DNA Assessment — £29.99 <ArrowRight className="ml-2 h-5 w-5" /></>
-                )}
-              </Button>
+            {renderCTA("lg")}
+
+            {/* Link to previous reports */}
+            {hasReports && (
+              <div className="mt-4">
+                <Link to="/dna/dashboard" className="inline-flex items-center gap-1.5 text-sm text-primary-foreground/60 hover:text-primary-foreground/90 transition-colors underline underline-offset-2">
+                  <History className="h-4 w-4" />
+                  View your previous reports
+                </Link>
+              </div>
             )}
+
             <p className="text-xs text-primary-foreground/50 mt-3 text-center">
               For educational purposes only. Not medical advice. We are not medical professionals.
             </p>
@@ -142,25 +181,14 @@ const DNALanding = () => {
         {/* CTA */}
         <section className="py-16 bg-background">
           <div className="container mx-auto px-6 text-center">
-            {unlocked ? (
-              <Link to="/dna/upload">
-                <Button size="lg" className="shadow-brand">
-                  Upload Your Data <ArrowRight className="ml-2 h-4 w-4" />
-                </Button>
-              </Link>
-            ) : (
-              <Button
-                size="lg"
-                className="shadow-brand"
-                onClick={handlePurchase}
-                disabled={purchasing}
-              >
-                {purchasing ? (
-                  <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Processing…</>
-                ) : (
-                  <>Unlock DNA Assessment — £29.99 <ArrowRight className="ml-2 h-4 w-4" /></>
-                )}
-              </Button>
+            {renderCTA("lg")}
+            {hasReports && (
+              <div className="mt-4">
+                <Link to="/dna/dashboard" className="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors underline underline-offset-2">
+                  <History className="h-4 w-4" />
+                  View your previous reports
+                </Link>
+              </div>
             )}
           </div>
         </section>
