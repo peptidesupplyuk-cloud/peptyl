@@ -105,8 +105,25 @@ const TodaysPlan = ({ onActivate, slim = false }: TodaysPlanProps) => {
     : 90;
   const progressPct = Math.min(100, Math.round((daysActive / totalDays) * 100));
 
-  // Extract action_plan from DNA report
-  const actionPlan = (dnaReport?.report_json as any)?.action_plan as
+  // Fetch the user's latest DNA report (independent of outcome record)
+  const { data: latestDnaReport } = useQuery({
+    queryKey: ["latest-dna-report", user?.id],
+    enabled: !!user,
+    queryFn: async () => {
+      const { data } = await supabase
+        .from("dna_reports")
+        .select("id, report_json, created_at, assessment_tier")
+        .eq("user_id", user!.id)
+        .order("created_at", { ascending: false })
+        .limit(1)
+        .maybeSingle();
+      return data;
+    },
+  });
+
+  // Extract action_plan from DNA report (prefer latest, fallback to outcome-linked)
+  const reportForPlan = latestDnaReport || dnaReport;
+  const actionPlan = (reportForPlan?.report_json as any)?.action_plan as
     | { immediate?: string[]; "30_days"?: string[]; "90_days"?: string[] }
     | undefined;
 
@@ -392,7 +409,36 @@ const TodaysPlan = ({ onActivate, slim = false }: TodaysPlanProps) => {
           </div>
         )}
 
-        {/* Complete All button */}
+        {/* 90-Day Action Plan from latest DNA report */}
+        {!slim && actionPlan?.["90_days"] && actionPlan["90_days"].length > 0 && reportForPlan && (
+          <div className="bg-muted/30 rounded-xl px-4 py-3 space-y-2">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <Dna className="h-3.5 w-3.5 text-primary" />
+                <span className="text-xs font-semibold text-foreground">90-Day Plan</span>
+                {(reportForPlan as any).assessment_tier === "advanced" && (
+                  <span className="text-[9px] px-1.5 py-0.5 rounded bg-primary/10 text-primary border border-primary/20 font-medium">Advanced</span>
+                )}
+                {(reportForPlan as any).assessment_tier !== "advanced" && (
+                  <span className="text-[9px] px-1.5 py-0.5 rounded bg-muted text-muted-foreground border border-border font-medium">Standard</span>
+                )}
+              </div>
+              <span className="text-[10px] text-muted-foreground">
+                {format(new Date((reportForPlan as any).created_at), "d MMM yyyy")}
+              </span>
+            </div>
+            <ul className="space-y-1">
+              {actionPlan["90_days"].map((item, i) => (
+                <li key={i} className="text-xs text-muted-foreground flex items-start gap-2">
+                  <span className="text-primary mt-0.5 shrink-0">&#8226;</span>
+                  <span>{item}</span>
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
+
+
         {remainingScheduled > 1 && (
           <Button
             variant="outline"
