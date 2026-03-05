@@ -275,11 +275,15 @@ const TodaysPlan = ({ onActivate, slim = false }: TodaysPlanProps) => {
     );
   }
 
-  // Compute 90-day progress from latest DNA report date
-  const dnaReportDate = latestDnaReport?.created_at ? new Date(latestDnaReport.created_at) : null;
-  const dna90DaysElapsed = dnaReportDate ? Math.max(0, differenceInCalendarDays(new Date(), dnaReportDate)) : 0;
+  // Compute 90-day progress from plan_start_date or created_at
+  const planStartStr = (latestDnaReport as any)?.plan_start_date;
+  const dnaStartDate = planStartStr
+    ? new Date(planStartStr + "T00:00:00")
+    : latestDnaReport?.created_at ? new Date(latestDnaReport.created_at) : null;
+  const dna90DaysElapsed = dnaStartDate ? Math.max(0, differenceInCalendarDays(new Date(), dnaStartDate)) : 0;
   const dna90ProgressPct = Math.min(100, Math.round((dna90DaysElapsed / 90) * 100));
-  const dna90EndDate = dnaReportDate ? new Date(dnaReportDate.getTime() + 90 * 24 * 60 * 60 * 1000) : null;
+  const dna90EndDate = dnaStartDate ? new Date(dnaStartDate.getTime() + 90 * 24 * 60 * 60 * 1000) : null;
+  const hasStarted = dnaStartDate ? dnaStartDate <= new Date() : true;
 
   // No active protocol — if slim mode, render nothing (Zone A handles CTA)
   if (!hasActiveProtocol) {
