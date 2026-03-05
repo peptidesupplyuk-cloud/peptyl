@@ -536,6 +536,20 @@ const Dashboard = () => {
                 </div>
               )}
 
+              {/* Notification permission banner */}
+              {!Capacitor.isNativePlatform() && shouldAsk && !notifDismissed && (
+                <div className="flex items-center justify-between gap-3 bg-primary/10 border border-primary/20 rounded-xl px-4 py-3">
+                  <div className="flex items-center gap-3">
+                    <Activity className="h-4 w-4 text-primary shrink-0" />
+                    <p className="text-sm text-foreground">Enable notifications for dose reminders</p>
+                  </div>
+                  <div className="flex items-center gap-2 shrink-0">
+                    <button onClick={requestPermission} className="text-xs font-semibold bg-primary text-primary-foreground px-3 py-1.5 rounded-lg">Enable</button>
+                    <button onClick={() => setNotifDismissed(true)} className="text-xs text-muted-foreground px-2">✕</button>
+                  </div>
+                </div>
+              )}
+
               {/* ═══ ZONE B — Today's doses (active) OR Next step (inactive) ═══ */}
               {hasActiveProtocol ? (
                 <TodaysPlan slim onActivate={() => setActiveTab("protocols")} />
