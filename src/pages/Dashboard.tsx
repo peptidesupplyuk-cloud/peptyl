@@ -22,7 +22,8 @@ import { useCreateProtocol, useProtocols } from "@/hooks/use-protocols";
 import { useLogInjection, useUpdateInjectionStatus, useAllInjections, useTodayInjections } from "@/hooks/use-injections";
 import { useTodaySupplementLogs } from "@/hooks/use-supplement-logs";
 import ResultsTab from "@/components/dashboard/ResultsTab";
-import { useProtocolNotifications, useNotificationActions } from "@/hooks/use-notifications";
+import { useProtocolNotifications, useNotificationActions, useRequestNotificationPermission } from "@/hooks/use-notifications";
+import { Capacitor } from "@capacitor/core";
 import { getUnifiedRecommendations, getBiometricRecommendations, type Recommendation, type BiometricRecommendation, type UnifiedRecommendation } from "@/data/recommendation-rules";
 import PopularProtocols from "@/components/dashboard/PopularProtocols";
 import { useToast } from "@/hooks/use-toast";
@@ -204,6 +205,8 @@ const Dashboard = () => {
   const todayRemaining = todayScheduled + todayPendingSupplements;
 
   const [showMore, setShowMore] = useState(false);
+  const { shouldAsk, requestPermission } = useRequestNotificationPermission();
+  const [notifDismissed, setNotifDismissed] = useState(false);
 
 
 
@@ -531,6 +534,20 @@ const Dashboard = () => {
                       You have {hasBloodwork && hasDna ? "bloodwork and DNA data" : hasBloodwork ? "bloodwork results" : "a DNA report"} — personalised recommendations are waiting.
                     </p>
                   )}
+                </div>
+              )}
+
+              {/* Notification permission banner */}
+              {!Capacitor.isNativePlatform() && shouldAsk && !notifDismissed && (
+                <div className="flex items-center justify-between gap-3 bg-primary/10 border border-primary/20 rounded-xl px-4 py-3">
+                  <div className="flex items-center gap-3">
+                    <Activity className="h-4 w-4 text-primary shrink-0" />
+                    <p className="text-sm text-foreground">Enable notifications for dose reminders</p>
+                  </div>
+                  <div className="flex items-center gap-2 shrink-0">
+                    <button onClick={requestPermission} className="text-xs font-semibold bg-primary text-primary-foreground px-3 py-1.5 rounded-lg">Enable</button>
+                    <button onClick={() => setNotifDismissed(true)} className="text-xs text-muted-foreground px-2">✕</button>
+                  </div>
                 </div>
               )}
 

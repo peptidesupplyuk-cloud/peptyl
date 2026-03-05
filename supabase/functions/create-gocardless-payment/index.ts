@@ -83,10 +83,10 @@ Deno.serve(async (req) => {
             amount: config.amount,
             currency: "GBP",
             description: config.description,
-          },
-          metadata: {
-            user_id: userId,
-            product,
+            metadata: {
+              user_id: userId,
+              product,
+            },
           },
         },
       }),

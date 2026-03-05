@@ -78,7 +78,8 @@ Deno.serve(async (req) => {
             .single();
 
           if (!profile) continue;
-          if (!profile.notify_email && !profile.notify_whatsapp) continue;
+          // Always try push; email/WhatsApp have their own guards below
+          if (!profile.notify_email && !profile.notify_whatsapp && !onesignalApiKey) continue;
 
           const { data: authUser } = await supabase.auth.admin.getUserById(userId);
           const userEmail = authUser?.user?.email;
