@@ -14,7 +14,7 @@ const STATUS_MESSAGES = [
 const DNAAnalysing = () => {
   const location = useLocation();
   const navigate = useNavigate();
-  const { inputText, imageBase64, method, userId } = (location.state || {}) as any;
+  const { inputText, imageBase64, method, userId, tier, lifestyleContext } = (location.state || {}) as any;
   const [statusIndex, setStatusIndex] = useState(0);
   const [_streamText, setStreamText] = useState("");
   const [error, setError] = useState<string | null>(null);
@@ -57,7 +57,7 @@ const DNAAnalysing = () => {
             "Content-Type": "application/json",
             Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
           },
-          body: JSON.stringify({ inputText, imageBase64, method, userId }),
+          body: JSON.stringify({ inputText, imageBase64, method, userId, tier: tier ?? "standard", lifestyleContext: lifestyleContext ?? null }),
           signal: controller.signal,
         });
 
