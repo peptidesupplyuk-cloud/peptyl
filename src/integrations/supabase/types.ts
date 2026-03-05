@@ -437,6 +437,7 @@ export type Database = {
           lifestyle_context: Json | null
           narrative: string | null
           overall_score: number | null
+          plan_start_date: string | null
           report_json: Json
           updated_at: string
           user_id: string
@@ -450,6 +451,7 @@ export type Database = {
           lifestyle_context?: Json | null
           narrative?: string | null
           overall_score?: number | null
+          plan_start_date?: string | null
           report_json: Json
           updated_at?: string
           user_id: string
@@ -463,6 +465,7 @@ export type Database = {
           lifestyle_context?: Json | null
           narrative?: string | null
           overall_score?: number | null
+          plan_start_date?: string | null
           report_json?: Json
           updated_at?: string
           user_id?: string
