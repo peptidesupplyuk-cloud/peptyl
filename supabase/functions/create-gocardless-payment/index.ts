@@ -6,6 +6,14 @@ const corsHeaders = {
     "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
 };
 
+const productConfig: Record<string, { amount: number; description: string; redirectPath: string }> = {
+  dna_assessment: { amount: 2999, description: "Peptyl DNA Assessment", redirectPath: "/dna" },
+  dna_standard: { amount: 1999, description: "Peptyl DNA Standard Assessment", redirectPath: "/dna/upload?tier=standard" },
+  dna_advanced: { amount: 3999, description: "Peptyl DNA Advanced Assessment", redirectPath: "/dna/upload?tier=advanced" },
+  subscription_individual: { amount: 499, description: "Peptyl Individual Plan", redirectPath: "/dashboard" },
+  subscription_coach: { amount: 4999, description: "Peptyl Coach Plan", redirectPath: "/dashboard" },
+};
+
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
@@ -38,18 +46,12 @@ Deno.serve(async (req) => {
     const userId = claimsData.claims.sub as string;
     const userEmail = claimsData.claims.email as string;
 
-    // Parse product from request body (default: dna_assessment)
-    let product = "dna_assessment";
+    // Parse product from request body (default: dna_standard)
+    let product = "dna_standard";
     try {
       const body = await req.json();
       if (body?.product) product = body.product;
-    } catch { /* no body is fine, default to dna_assessment */ }
-
-    const productConfig: Record<string, { amount: number; description: string }> = {
-      dna_assessment: { amount: 2999, description: "Peptyl DNA Assessment" },
-      subscription_individual: { amount: 499, description: "Peptyl Individual Plan" },
-      subscription_coach: { amount: 4999, description: "Peptyl Coach Plan" },
-    };
+    } catch { /* no body is fine */ }
 
     const config = productConfig[product];
     if (!config) {
@@ -112,7 +114,7 @@ Deno.serve(async (req) => {
       },
       body: JSON.stringify({
         billing_request_flows: {
-          redirect_uri: "https://peptyl.co.uk/dna",
+          redirect_uri: `https://peptyl.co.uk${config.redirectPath}`,
           links: {
             billing_request: billingRequestId,
           },

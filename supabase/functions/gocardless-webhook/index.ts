@@ -113,6 +113,16 @@ Deno.serve(async (req) => {
           .from("profiles")
           .update({ dna_assessment_unlocked: true } as any)
           .eq("user_id", userId);
+      } else if (product === "dna_standard") {
+        await supabase
+          .from("profiles")
+          .update({ dna_standard_unlocked: true } as any)
+          .eq("user_id", userId);
+      } else if (product === "dna_advanced") {
+        await supabase
+          .from("profiles")
+          .update({ dna_advanced_unlocked: true } as any)
+          .eq("user_id", userId);
       } else if (product === "subscription_individual") {
         await supabase
           .from("profiles")
