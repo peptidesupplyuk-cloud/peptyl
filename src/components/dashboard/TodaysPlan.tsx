@@ -118,7 +118,7 @@ const TodaysPlan = ({ onActivate, slim = false }: TodaysPlanProps) => {
     queryFn: async () => {
       const { data } = await supabase
         .from("dna_reports")
-        .select("id, report_json, created_at, assessment_tier")
+        .select("id, report_json, created_at, assessment_tier, plan_start_date")
         .eq("user_id", user!.id)
         .order("created_at", { ascending: false })
         .limit(1)
@@ -127,7 +127,21 @@ const TodaysPlan = ({ onActivate, slim = false }: TodaysPlanProps) => {
     },
   });
 
-  // Extract action_plan from DNA report (prefer latest, fallback to outcome-linked)
+  // Handle updating plan start date
+  const handleSetPlanStartDate = async (date: Date | undefined) => {
+    if (!latestDnaReport?.id || !date) return;
+    const dateStr = format(date, "yyyy-MM-dd");
+    const { error } = await supabase
+      .from("dna_reports")
+      .update({ plan_start_date: dateStr } as any)
+      .eq("id", latestDnaReport.id);
+    if (error) {
+      toast({ title: "Error", description: "Could not update start date.", variant: "destructive" });
+    } else {
+      toast({ title: "Updated", description: `Plan starts ${format(date, "d MMM yyyy")}` });
+      queryClient.invalidateQueries({ queryKey: ["latest-dna-report"] });
+    }
+  };
   const reportForPlan = latestDnaReport || dnaReport;
   const actionPlan = (reportForPlan?.report_json as any)?.action_plan as
     | { immediate?: string[]; "30_days"?: string[]; "90_days"?: string[] }
