@@ -11,6 +11,9 @@ import GeneCards from "@/components/dna/GeneCards";
 import BiomarkerBars from "@/components/dna/BiomarkerBars";
 import DrugInteractionPanel from "@/components/dna/DrugInteractionPanel";
 import SupplementTable from "@/components/dna/SupplementTable";
+import PersonalisationCard from "@/components/dna/PersonalisationCard";
+import PeptideProtocolPanel from "@/components/dna/PeptideProtocolPanel";
+import GLP1AssessmentPanel from "@/components/dna/GLP1AssessmentPanel";
 import ActionPlan from "@/components/dna/ActionPlan";
 import LegalDisclaimer from "@/components/dna/LegalDisclaimer";
 import ReportReview from "@/components/dna/ReportReview";
@@ -68,6 +71,7 @@ const DNAReport = () => {
   }
 
   const r = report.report_json || {};
+  const isAdvanced = report.assessment_tier === "advanced";
 
   const buildGenotypeKey = (geneResults: any[]) => {
     if (!geneResults?.length) return null;
@@ -85,6 +89,17 @@ const DNAReport = () => {
       <Header />
       <main className="min-h-screen pt-24 pb-16 bg-background">
         <div className="container mx-auto px-6 max-w-4xl space-y-8">
+          {/* Tier badge */}
+          <div className="flex items-center gap-2">
+            <span className={`text-xs font-semibold px-3 py-1 rounded-full ${
+              isAdvanced
+                ? "bg-primary/10 text-primary"
+                : "bg-muted text-muted-foreground"
+            }`}>
+              {isAdvanced ? "Advanced ✦" : "Standard"}
+            </span>
+          </div>
+
           <ReportHeader
             healthScore={r.health_score}
             meta={r.meta}
@@ -95,6 +110,16 @@ const DNAReport = () => {
           <BiomarkerBars biomarkers={r.biomarker_results} />
           <DrugInteractionPanel interactions={r.drug_interactions} />
           <SupplementTable supplements={r.supplement_protocol} />
+
+          {/* Advanced-only sections */}
+          {isAdvanced && (
+            <>
+              <PersonalisationCard data={r.personalisation} />
+              <PeptideProtocolPanel peptides={r.peptide_protocol} />
+              <GLP1AssessmentPanel glp1={r.glp1_assessment} />
+            </>
+          )}
+
           <ActionPlan plan={r.action_plan} />
           <OutcomeInsights reportId={id!} genotypeKey={buildGenotypeKey(r.gene_results)} />
           {r.supplement_protocol?.length > 0 && (
