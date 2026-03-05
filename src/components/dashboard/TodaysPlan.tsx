@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Check, SkipForward, Clock, FlaskConical, ArrowRight, Target, Pill, CheckCheck, Dna, X } from "lucide-react";
+import { Check, SkipForward, Clock, FlaskConical, ArrowRight, Target, Pill, CheckCheck, Dna, X, CalendarIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useTodayInjections, useUpdateInjectionStatus } from "@/hooks/use-injections";
 import { useProtocols, type ProtocolSupplement } from "@/hooks/use-protocols";
@@ -10,7 +10,11 @@ import { BIOMARKERS, getMarkerStatus } from "@/data/biomarker-ranges";
 import { format, differenceInDays, differenceInCalendarDays } from "date-fns";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { Calendar } from "@/components/ui/calendar";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { cn } from "@/lib/utils";
+import { useToast } from "@/hooks/use-toast";
 import DoseCalendar from "./InjectionCalendar";
 
 interface TodaysPlanProps {
@@ -44,6 +48,8 @@ interface SupplementItem {
 const TodaysPlan = ({ onActivate, slim = false }: TodaysPlanProps) => {
   const navigate = useNavigate();
   const { user } = useAuth();
+  const { toast } = useToast();
+  const queryClient = useQueryClient();
   const { data: injections = [], isLoading } = useTodayInjections();
   const updateStatus = useUpdateInjectionStatus();
   const { data: protocols = [] } = useProtocols();
@@ -112,7 +118,7 @@ const TodaysPlan = ({ onActivate, slim = false }: TodaysPlanProps) => {
     queryFn: async () => {
       const { data } = await supabase
         .from("dna_reports")
-        .select("id, report_json, created_at, assessment_tier")
+        .select("id, report_json, created_at, assessment_tier, plan_start_date")
         .eq("user_id", user!.id)
         .order("created_at", { ascending: false })
         .limit(1)
@@ -121,7 +127,21 @@ const TodaysPlan = ({ onActivate, slim = false }: TodaysPlanProps) => {
     },
   });
 
-  // Extract action_plan from DNA report (prefer latest, fallback to outcome-linked)
+  // Handle updating plan start date
+  const handleSetPlanStartDate = async (date: Date | undefined) => {
+    if (!latestDnaReport?.id || !date) return;
+    const dateStr = format(date, "yyyy-MM-dd");
+    const { error } = await supabase
+      .from("dna_reports")
+      .update({ plan_start_date: dateStr } as any)
+      .eq("id", latestDnaReport.id);
+    if (error) {
+      toast({ title: "Error", description: "Could not update start date.", variant: "destructive" });
+    } else {
+      toast({ title: "Updated", description: `Plan starts ${format(date, "d MMM yyyy")}` });
+      queryClient.invalidateQueries({ queryKey: ["latest-dna-report"] });
+    }
+  };
   const reportForPlan = latestDnaReport || dnaReport;
   const actionPlan = (reportForPlan?.report_json as any)?.action_plan as
     | { immediate?: string[]; "30_days"?: string[]; "90_days"?: string[] }
@@ -255,11 +275,15 @@ const TodaysPlan = ({ onActivate, slim = false }: TodaysPlanProps) => {
     );
   }
 
-  // Compute 90-day progress from latest DNA report date
-  const dnaReportDate = latestDnaReport?.created_at ? new Date(latestDnaReport.created_at) : null;
-  const dna90DaysElapsed = dnaReportDate ? Math.max(0, differenceInCalendarDays(new Date(), dnaReportDate)) : 0;
+  // Compute 90-day progress from plan_start_date or created_at
+  const planStartStr = (latestDnaReport as any)?.plan_start_date;
+  const dnaStartDate = planStartStr
+    ? new Date(planStartStr + "T00:00:00")
+    : latestDnaReport?.created_at ? new Date(latestDnaReport.created_at) : null;
+  const dna90DaysElapsed = dnaStartDate ? Math.max(0, differenceInCalendarDays(new Date(), dnaStartDate)) : 0;
   const dna90ProgressPct = Math.min(100, Math.round((dna90DaysElapsed / 90) * 100));
-  const dna90EndDate = dnaReportDate ? new Date(dnaReportDate.getTime() + 90 * 24 * 60 * 60 * 1000) : null;
+  const dna90EndDate = dnaStartDate ? new Date(dnaStartDate.getTime() + 90 * 24 * 60 * 60 * 1000) : null;
+  const hasStarted = dnaStartDate ? dnaStartDate <= new Date() : true;
 
   // No active protocol — if slim mode, render nothing (Zone A handles CTA)
   if (!hasActiveProtocol) {
@@ -284,15 +308,28 @@ const TodaysPlan = ({ onActivate, slim = false }: TodaysPlanProps) => {
                   <span className="text-[9px] px-1.5 py-0.5 rounded bg-muted text-muted-foreground border border-border font-medium">Standard</span>
                 )}
               </div>
-              <span className="text-[10px] text-muted-foreground">
-                {format(new Date((reportForPlan as any).created_at), "d MMM yyyy")}
-              </span>
+              <Popover>
+                <PopoverTrigger asChild>
+                  <button className="flex items-center gap-1 text-[10px] text-muted-foreground hover:text-foreground transition-colors">
+                    <CalendarIcon className="h-3 w-3" />
+                    <span>{dnaStartDate ? format(dnaStartDate, "d MMM yyyy") : "Set start"}</span>
+                  </button>
+                </PopoverTrigger>
+                <PopoverContent className="w-auto p-0" align="end">
+                  <Calendar
+                    mode="single"
+                    selected={dnaStartDate || undefined}
+                    onSelect={handleSetPlanStartDate}
+                    className={cn("p-3 pointer-events-auto")}
+                  />
+                </PopoverContent>
+              </Popover>
             </div>
             {/* Progress bar */}
-            {dnaReportDate && (
+            {dnaStartDate && (
               <div className="space-y-1">
                 <div className="flex items-center justify-between text-[10px] text-muted-foreground">
-                  <span>Day {dna90DaysElapsed} of 90</span>
+                  <span>{hasStarted ? `Day ${dna90DaysElapsed} of 90` : `Starts ${format(dnaStartDate, "d MMM")}`}</span>
                   <span>{dna90EndDate ? format(dna90EndDate, "d MMM yyyy") : ""}</span>
                 </div>
                 <div className="w-full h-1.5 bg-muted rounded-full">
@@ -472,15 +509,28 @@ const TodaysPlan = ({ onActivate, slim = false }: TodaysPlanProps) => {
                   <span className="text-[9px] px-1.5 py-0.5 rounded bg-muted text-muted-foreground border border-border font-medium">Standard</span>
                 )}
               </div>
-              <span className="text-[10px] text-muted-foreground">
-                {format(new Date((reportForPlan as any).created_at), "d MMM yyyy")}
-              </span>
+              <Popover>
+                <PopoverTrigger asChild>
+                  <button className="flex items-center gap-1 text-[10px] text-muted-foreground hover:text-foreground transition-colors">
+                    <CalendarIcon className="h-3 w-3" />
+                    <span>{dnaStartDate ? format(dnaStartDate, "d MMM yyyy") : "Set start"}</span>
+                  </button>
+                </PopoverTrigger>
+                <PopoverContent className="w-auto p-0" align="end">
+                  <Calendar
+                    mode="single"
+                    selected={dnaStartDate || undefined}
+                    onSelect={handleSetPlanStartDate}
+                    className={cn("p-3 pointer-events-auto")}
+                  />
+                </PopoverContent>
+              </Popover>
             </div>
             {/* Progress bar */}
-            {dnaReportDate && (
+            {dnaStartDate && (
               <div className="space-y-1">
                 <div className="flex items-center justify-between text-[10px] text-muted-foreground">
-                  <span>Day {dna90DaysElapsed} of 90</span>
+                  <span>{hasStarted ? `Day ${dna90DaysElapsed} of 90` : `Starts ${format(dnaStartDate, "d MMM")}`}</span>
                   <span>{dna90EndDate ? format(dna90EndDate, "d MMM yyyy") : ""}</span>
                 </div>
                 <div className="w-full h-1.5 bg-muted rounded-full">
