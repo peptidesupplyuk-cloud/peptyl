@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
-import { Dna, Activity, FlaskConical, AlertTriangle, Shield, ArrowRight, Loader2, History, Check, Sparkles, Upload, FileText, Zap, ChevronDown } from "lucide-react";
+import { Dna, Activity, FlaskConical, AlertTriangle, Shield, ArrowRight, Loader2, History, Check, Sparkles, Upload, FileText, Zap, ChevronDown, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import Header from "@/components/Header";
@@ -82,12 +82,12 @@ const DNALanding = () => {
             <div className="flex justify-center gap-3 flex-wrap">
               <Link to="/dna/upload?tier=standard">
                 <Button size="lg" variant="outline" className="border-primary-foreground/20 text-primary-foreground hover:bg-primary-foreground/10 px-8 py-6 text-base">
-                  Start Standard — £19.99
+                  Start Standard £19.99
                 </Button>
               </Link>
               <Link to="/dna/upload?tier=advanced">
                 <Button size="lg" className="shadow-brand px-8 py-6 text-base">
-                  Go Advanced — £39.99 <ArrowRight className="ml-2 h-5 w-5" />
+                  Go Advanced £39.99 <ArrowRight className="ml-2 h-5 w-5" />
                 </Button>
               </Link>
             </div>
@@ -163,9 +163,42 @@ const DNALanding = () => {
                   Peptide recommendations are for research purposes only. Not medical advice.
                 </p>
               </div>
+          </div>
+
+          {/* Quick VS Table */}
+          <div className="mt-12 max-w-2xl mx-auto">
+            <h3 className="text-sm font-heading font-semibold text-muted-foreground text-center mb-4 uppercase tracking-wider">At a Glance</h3>
+            <div className="bg-card border border-border rounded-xl overflow-hidden text-sm">
+              <div className="grid grid-cols-3 items-center px-4 py-2.5 border-b border-border bg-muted/50">
+                <span className="text-muted-foreground font-medium">Feature</span>
+                <span className="text-center text-muted-foreground font-medium">Standard</span>
+                <span className="text-center text-muted-foreground font-medium">Advanced</span>
+              </div>
+              {[
+                { feature: "Health Score", standard: true, advanced: true },
+                { feature: "Supplement Protocol", standard: true, advanced: true },
+                { feature: "Drug Interaction Flags", standard: true, advanced: true },
+                { feature: "Biomarker Interpretation", standard: true, advanced: true },
+                { feature: "SNP Panel", standard: "15", advanced: "25" },
+                { feature: "Peptide Protocol", standard: false, advanced: true },
+                { feature: "GLP-1 Assessment", standard: false, advanced: true },
+                { feature: "Genetic Archetype", standard: false, advanced: true },
+                { feature: "GP Talking Points", standard: false, advanced: true },
+              ].map((row, i) => (
+                <div key={row.feature} className={`grid grid-cols-3 items-center px-4 py-2.5 ${i % 2 === 0 ? "bg-muted/30" : ""}`}>
+                  <span className="text-foreground font-medium">{row.feature}</span>
+                  <span className="text-center">
+                    {row.standard === true ? <Check className="h-4 w-4 text-primary mx-auto" /> : row.standard === false ? <X className="h-4 w-4 text-muted-foreground/40 mx-auto" /> : <span className="text-muted-foreground">{row.standard}</span>}
+                  </span>
+                  <span className="text-center">
+                    {row.advanced === true ? <Check className="h-4 w-4 text-primary mx-auto" /> : row.advanced === false ? <X className="h-4 w-4 text-muted-foreground/40 mx-auto" /> : <span className="text-muted-foreground">{row.advanced}</span>}
+                  </span>
+                </div>
+              ))}
             </div>
           </div>
-        </section>
+        </div>
+      </section>
 
         {/* How It Works */}
         <section className="py-16 bg-muted/30">
@@ -225,10 +258,10 @@ const DNALanding = () => {
           <div className="container mx-auto px-6 text-center">
             <div className="flex justify-center gap-3 flex-wrap">
               <Link to="/dna/upload?tier=standard">
-                <Button size="lg" variant="outline" className="px-8 py-6 text-base">Standard — £19.99</Button>
+                <Button size="lg" variant="outline" className="px-8 py-6 text-base">Standard £19.99</Button>
               </Link>
               <Link to="/dna/upload?tier=advanced">
-                <Button size="lg" className="shadow-brand px-8 py-6 text-base">Advanced — £39.99</Button>
+                <Button size="lg" className="shadow-brand px-8 py-6 text-base">Advanced £39.99</Button>
               </Link>
             </div>
             {hasReports && (
