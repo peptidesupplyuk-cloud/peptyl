@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Check, SkipForward, Clock, FlaskConical, ArrowRight, Target, Pill, CheckCheck, Dna, X } from "lucide-react";
+import { Check, SkipForward, Clock, FlaskConical, ArrowRight, Target, Pill, CheckCheck, Dna, X, CalendarIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useTodayInjections, useUpdateInjectionStatus } from "@/hooks/use-injections";
 import { useProtocols, type ProtocolSupplement } from "@/hooks/use-protocols";
@@ -10,7 +10,11 @@ import { BIOMARKERS, getMarkerStatus } from "@/data/biomarker-ranges";
 import { format, differenceInDays, differenceInCalendarDays } from "date-fns";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { Calendar } from "@/components/ui/calendar";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { cn } from "@/lib/utils";
+import { useToast } from "@/hooks/use-toast";
 import DoseCalendar from "./InjectionCalendar";
 
 interface TodaysPlanProps {
