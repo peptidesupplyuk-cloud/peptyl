@@ -387,9 +387,11 @@ const Dashboard = () => {
 
             {/* PROFILE TAB */}
             <TabsContent value="profile" className="space-y-6">
-              {/* Biomarkers section */}
-              <Tabs defaultValue="bloodwork" className="space-y-4">
-                <TabsList className="w-full grid grid-cols-3">
+              <Tabs defaultValue="profile-info" className="space-y-4">
+                <TabsList className="w-full grid grid-cols-4">
+                  <TabsTrigger value="profile-info" className="text-xs sm:text-sm gap-1.5">
+                    <User className="h-3.5 w-3.5" />Profile
+                  </TabsTrigger>
                   <TabsTrigger value="bloodwork" className="text-xs sm:text-sm gap-1.5">
                     <Droplets className="h-3.5 w-3.5" />Bloodwork
                   </TabsTrigger>
@@ -401,6 +403,14 @@ const Dashboard = () => {
                   </TabsTrigger>
                 </TabsList>
 
+                {/* PROFILE SUB-TAB */}
+                <TabsContent value="profile-info" className="space-y-6">
+                  <ProfileBiometrics onUpdate={(bio) => setBioRecs(getBiometricRecommendations(bio))} />
+                  <WhoopSection />
+                  <FitbitSection />
+                </TabsContent>
+
+                {/* BLOODWORK SUB-TAB */}
                 <TabsContent value="bloodwork" className="space-y-6">
                   {(() => {
                     const retestPanels = panels.filter(p => p.panel_type?.startsWith('retest') && p.protocol_id);
@@ -445,6 +455,7 @@ const Dashboard = () => {
                   )}
                 </TabsContent>
 
+                {/* BODY SUB-TAB */}
                 <TabsContent value="body" className="space-y-6">
                   <div className="bg-card rounded-2xl border border-border p-5 sm:p-6">
                     <h2 className="font-heading font-semibold text-foreground mb-4">Body Composition</h2>
@@ -453,6 +464,7 @@ const Dashboard = () => {
                   <BiomarkerTrendChart panels={panels} filterCategories={["Body Composition"]} />
                 </TabsContent>
 
+                {/* CARDIOVASCULAR SUB-TAB */}
                 <TabsContent value="cardio" className="space-y-6">
                   <div className="bg-card rounded-2xl border border-border p-5 sm:p-6">
                     <h2 className="font-heading font-semibold text-foreground mb-4">Cardiovascular</h2>
@@ -461,10 +473,6 @@ const Dashboard = () => {
                   <BiomarkerTrendChart panels={panels} filterCategories={["Cardiovascular"]} />
                 </TabsContent>
               </Tabs>
-
-              <ProfileBiometrics onUpdate={(bio) => setBioRecs(getBiometricRecommendations(bio))} />
-              <WhoopSection />
-              <FitbitSection />
             </TabsContent>
 
             {/* OVERVIEW TAB */}
