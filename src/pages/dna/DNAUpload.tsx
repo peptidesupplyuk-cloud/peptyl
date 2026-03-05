@@ -1,8 +1,11 @@
-import { useState, useCallback } from "react";
-import { useNavigate, Link } from "react-router-dom";
-import { FileText, Upload, Camera, MessageSquare, X, CheckCircle2 } from "lucide-react";
+import { useState, useCallback, useEffect } from "react";
+import { useNavigate, Link, useSearchParams } from "react-router-dom";
+import { FileText, Upload, Camera, MessageSquare, X, CheckCircle2, Loader2, ChevronDown, ChevronUp, CreditCard } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import SEO from "@/components/SEO";
@@ -11,14 +14,31 @@ import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 
 const TARGET_RSIDS = new Set([
+  // Original SNPs
   "rs429358", "rs7412",
   "rs1801133", "rs1801131",
   "rs731236", "rs1544410", "rs2228570",
   "rs3892097",
+  "rs1056836",
   "rs4680",
   "rs9939609",
   "rs12934922", "rs7501331",
   "rs7903146", "rs4880", "rs1695",
+  // NEW: Metabolic / GLP-1
+  "rs6923761",
+  "rs10305420",
+  "rs17782313",
+  "rs1137101",
+  "rs10423928",
+  // NEW: Tissue Repair / Peptide
+  "rs1800012",
+  "rs12722",
+  "rs1815739",
+  "rs35767",
+  "rs1800795",
+  "rs1800629",
+  "rs2070744",
+  "rs2010963",
 ]);
 
 type Method = "pdf" | "raw23andme" | "text" | "image";
@@ -30,10 +50,22 @@ const tabs: { id: Method; label: string; icon: any }[] = [
   { id: "text", label: "Paste Text", icon: MessageSquare },
 ];
 
+const goalOptions = [
+  "General wellness",
+  "Weight management",
+  "Athletic performance",
+  "Longevity",
+  "Recovery",
+  "Hormonal health",
+];
+
 const DNAUpload = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
   const { toast } = useToast();
+  const [searchParams] = useSearchParams();
+  const tier = (searchParams.get("tier") ?? "standard") as "standard" | "advanced";
+
   const [method, setMethod] = useState<Method>("pdf");
   const [inputText, setInputText] = useState("");
   const [imageBase64, setImageBase64] = useState<string | null>(null);
@@ -42,6 +74,72 @@ const DNAUpload = () => {
   const [consent2, setConsent2] = useState(false);
   const [consent3, setConsent3] = useState(false);
   const [loading, setLoading] = useState(false);
+
+  // Payment gate
+  const [checkingUnlock, setCheckingUnlock] = useState(true);
+  const [isUnlocked, setIsUnlocked] = useState(false);
+  const [purchasing, setPurchasing] = useState(false);
+
+  // Lifestyle context
+  const [showLifestyle, setShowLifestyle] = useState(false);
+  const [age, setAge] = useState("");
+  const [sex, setSex] = useState("");
+  const [heightCm, setHeightCm] = useState("");
+  const [weightKg, setWeightKg] = useState("");
+  const [bp, setBp] = useState("");
+  const [primaryGoal, setPrimaryGoal] = useState("");
+  const [medications, setMedications] = useState("");
+
+  // Check unlock status
+  useEffect(() => {
+    if (!user) {
+      setCheckingUnlock(false);
+      setIsUnlocked(false);
+      return;
+    }
+    const checkUnlock = async () => {
+      const { data: profile } = await supabase
+        .from("profiles")
+        .select("dna_standard_unlocked, dna_advanced_unlocked, height_cm, weight_kg")
+        .eq("user_id", user.id)
+        .single();
+
+      const unlocked = tier === "advanced"
+        ? !!(profile as any)?.dna_advanced_unlocked
+        : !!(profile as any)?.dna_standard_unlocked;
+      setIsUnlocked(unlocked);
+
+      // Pre-fill from profile
+      if ((profile as any)?.height_cm) setHeightCm(String((profile as any).height_cm));
+      if ((profile as any)?.weight_kg) setWeightKg(String((profile as any).weight_kg));
+
+      setCheckingUnlock(false);
+    };
+    checkUnlock();
+  }, [user, tier]);
+
+  const handlePurchase = async () => {
+    if (!user) {
+      toast({ title: "Sign in required", description: "Please sign in to purchase.", variant: "destructive" });
+      navigate("/auth");
+      return;
+    }
+    setPurchasing(true);
+    try {
+      const product = tier === "advanced" ? "dna_advanced" : "dna_standard";
+      const { data, error } = await supabase.functions.invoke("create-gocardless-payment", {
+        body: { product },
+      });
+      if (error || !data?.authorisation_url) {
+        throw new Error(error?.message || "No authorisation URL returned");
+      }
+      window.location.href = data.authorisation_url;
+    } catch (err: any) {
+      console.error(err);
+      toast({ title: "Payment error", description: err.message || "Could not start payment.", variant: "destructive" });
+      setPurchasing(false);
+    }
+  };
 
   const handleFileUpload = useCallback(async (file: File) => {
     setFileName(file.name);
@@ -106,6 +204,24 @@ const DNAUpload = () => {
     !loading &&
     (inputText.trim().length >= 10 || !!imageBase64);
 
+  const buildLifestyleContext = () => {
+    const h = parseFloat(heightCm);
+    const w = parseFloat(weightKg);
+    const bmi = h && w ? (w / ((h / 100) ** 2)).toFixed(1) : undefined;
+
+    const ctx: any = {};
+    if (age) ctx.age = parseInt(age);
+    if (sex) ctx.sex = sex;
+    if (h) ctx.height_cm = h;
+    if (w) ctx.weight_kg = w;
+    if (bmi) ctx.bmi = parseFloat(bmi);
+    if (bp) ctx.bp = bp;
+    if (primaryGoal) ctx.primary_goal = primaryGoal;
+    if (medications) ctx.medications = medications;
+
+    return Object.keys(ctx).length > 0 ? ctx : null;
+  };
+
   const handleSubmit = async () => {
     if (!canSubmit) return;
 
@@ -122,12 +238,16 @@ const DNAUpload = () => {
       consent_version: "2.0",
     } as any);
 
+    const lifestyleContext = buildLifestyleContext();
+
     navigate("/dna/analysing", {
       state: {
         inputText: method === "image" ? "" : inputText,
         imageBase64: method === "image" ? imageBase64 : null,
         method,
         userId: user.id,
+        tier,
+        lifestyleContext,
       },
     });
   };
@@ -138,12 +258,119 @@ const DNAUpload = () => {
     setImageBase64(null);
   };
 
+  const tierLabel = tier === "advanced" ? "Advanced" : "Standard";
+  const tierPrice = tier === "advanced" ? "£39.99" : "£19.99";
+
+  // Show loading while checking
+  if (checkingUnlock) {
+    return (
+      <>
+        <Header />
+        <main className="min-h-screen pt-24 flex items-center justify-center bg-background">
+          <Loader2 className="h-6 w-6 animate-spin text-primary" />
+        </main>
+      </>
+    );
+  }
+
+  // Paywall
+  if (!isUnlocked && user) {
+    return (
+      <>
+        <SEO title={`Unlock ${tierLabel} DNA Assessment | Peptyl`} description="Purchase your DNA health assessment." path="/dna/upload" />
+        <Header />
+        <main className="min-h-screen pt-24 pb-16 bg-background">
+          <div className="container mx-auto px-6 max-w-md text-center">
+            <div className="bg-card border border-border rounded-2xl p-8">
+              <h1 className="text-2xl font-heading font-bold text-foreground mb-2">
+                Unlock Your {tierLabel} Report
+              </h1>
+              <div className="text-4xl font-heading font-bold text-primary my-4">{tierPrice}</div>
+              <ul className="text-sm text-muted-foreground space-y-2 text-left mb-6">
+                {tier === "advanced" ? (
+                  <>
+                    <li className="flex items-start gap-2"><CheckCircle2 className="h-4 w-4 text-primary mt-0.5 shrink-0" /> Full supplement + peptide protocol</li>
+                    <li className="flex items-start gap-2"><CheckCircle2 className="h-4 w-4 text-primary mt-0.5 shrink-0" /> GLP-1 weight management assessment</li>
+                    <li className="flex items-start gap-2"><CheckCircle2 className="h-4 w-4 text-primary mt-0.5 shrink-0" /> Deep personalisation + GP talking points</li>
+                  </>
+                ) : (
+                  <>
+                    <li className="flex items-start gap-2"><CheckCircle2 className="h-4 w-4 text-primary mt-0.5 shrink-0" /> Health score + gene variant analysis</li>
+                    <li className="flex items-start gap-2"><CheckCircle2 className="h-4 w-4 text-primary mt-0.5 shrink-0" /> Personalised supplement protocol</li>
+                    <li className="flex items-start gap-2"><CheckCircle2 className="h-4 w-4 text-primary mt-0.5 shrink-0" /> Drug interaction flags + action plan</li>
+                  </>
+                )}
+              </ul>
+              <Button
+                onClick={handlePurchase}
+                disabled={purchasing}
+                className="w-full shadow-brand py-6 text-base"
+                size="lg"
+              >
+                {purchasing ? (
+                  <><Loader2 className="mr-2 h-5 w-5 animate-spin" /> Processing...</>
+                ) : (
+                  <><CreditCard className="mr-2 h-5 w-5" /> Pay with GoCardless</>
+                )}
+              </Button>
+              <button
+                onClick={() => window.location.reload()}
+                className="text-xs text-muted-foreground mt-3 underline underline-offset-2 hover:text-foreground"
+              >
+                Already paid? Refresh this page
+              </button>
+              <p className="text-xs text-muted-foreground mt-3">Secure payment via GoCardless. One-time charge.</p>
+            </div>
+            <Link to="/dna" className="text-xs text-muted-foreground mt-4 inline-block underline underline-offset-2 hover:text-foreground">
+              Change tier
+            </Link>
+          </div>
+        </main>
+        <Footer />
+      </>
+    );
+  }
+
+  // Auth gate
+  if (!user) {
+    return (
+      <>
+        <SEO title="Upload DNA Data | Peptyl" description="Sign in to upload your genetic data." path="/dna/upload" />
+        <Header />
+        <main className="min-h-screen pt-24 pb-16 bg-background">
+          <div className="container mx-auto px-6 max-w-md text-center">
+            <h1 className="text-2xl font-heading font-bold text-foreground mb-4">Sign in to continue</h1>
+            <p className="text-muted-foreground text-sm mb-6">You need an account to run a DNA analysis.</p>
+            <Link to="/auth">
+              <Button className="shadow-brand">Sign In / Sign Up</Button>
+            </Link>
+          </div>
+        </main>
+        <Footer />
+      </>
+    );
+  }
+
   return (
     <>
       <SEO title="Upload DNA Data | Peptyl" description="Upload your genetic data for AI-powered health analysis." path="/dna/upload" />
       <Header />
       <main className="min-h-screen pt-24 pb-16 bg-background">
         <div className="container mx-auto px-6 max-w-2xl">
+          {/* Tier badge */}
+          <div className="flex items-center gap-3 mb-6">
+            <span className={`inline-flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-full ${
+              tier === "advanced"
+                ? "bg-primary/10 text-primary"
+                : "bg-muted text-muted-foreground"
+            }`}>
+              {tier === "advanced" ? `Advanced Assessment — ${tierPrice} ✦` : `Standard Assessment — ${tierPrice}`}
+            </span>
+            <Link to="/dna" className="text-xs text-muted-foreground underline underline-offset-2 hover:text-foreground">
+              Change tier
+            </Link>
+          </div>
+
           <h1 className="text-3xl font-heading font-bold text-foreground mb-2">Upload Your Data</h1>
           <p className="text-muted-foreground mb-8">Choose how you'd like to provide your genetic or health data.</p>
 
@@ -210,17 +437,83 @@ const DNAUpload = () => {
             />
           )}
 
-          {/* Character count */}
           {inputText && (
             <p className="text-xs text-muted-foreground mt-2">{inputText.length} characters</p>
           )}
 
-          {/* Image warning */}
           {method === "image" && imageBase64 && (
             <div className="mt-3 bg-accent/50 border border-accent-foreground/10 rounded-lg px-4 py-2 text-xs text-accent-foreground">
-              ⚠️ Results parsed from images should be verified manually for accuracy.
+              Results parsed from images should be verified manually for accuracy.
             </div>
           )}
+
+          {/* Lifestyle Context (optional) */}
+          <div className="mt-6 bg-card border border-border rounded-xl overflow-hidden">
+            <button
+              onClick={() => setShowLifestyle(!showLifestyle)}
+              className="w-full flex items-center justify-between px-4 py-3 text-sm font-medium text-foreground hover:bg-muted/30 transition-colors"
+            >
+              <span>Add health context for a more complete assessment (optional)</span>
+              {showLifestyle ? <ChevronUp className="h-4 w-4 text-muted-foreground" /> : <ChevronDown className="h-4 w-4 text-muted-foreground" />}
+            </button>
+            {showLifestyle && (
+              <div className="px-4 pb-4 space-y-4">
+                <p className="text-xs text-muted-foreground">
+                  This context helps us generate more relevant recommendations.
+                  {tier === "advanced" && " Advanced tier uses this for the GLP-1 assessment and personalisation layer."}
+                </p>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div>
+                    <label className="text-xs text-muted-foreground mb-1 block">Age</label>
+                    <Input type="number" placeholder="e.g. 35" value={age} onChange={(e) => setAge(e.target.value)} />
+                  </div>
+                  <div>
+                    <label className="text-xs text-muted-foreground mb-1 block">Biological sex</label>
+                    <Select value={sex} onValueChange={setSex}>
+                      <SelectTrigger><SelectValue placeholder="Select..." /></SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="male">Male</SelectItem>
+                        <SelectItem value="female">Female</SelectItem>
+                        <SelectItem value="prefer_not_to_say">Prefer not to say</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div>
+                    <label className="text-xs text-muted-foreground mb-1 block">Height (cm)</label>
+                    <Input type="number" placeholder="e.g. 175" value={heightCm} onChange={(e) => setHeightCm(e.target.value)} />
+                  </div>
+                  <div>
+                    <label className="text-xs text-muted-foreground mb-1 block">Weight (kg)</label>
+                    <Input type="number" placeholder="e.g. 80" value={weightKg} onChange={(e) => setWeightKg(e.target.value)} />
+                  </div>
+                  <div>
+                    <label className="text-xs text-muted-foreground mb-1 block">Blood pressure (optional)</label>
+                    <Input placeholder="e.g. 135/85" value={bp} onChange={(e) => setBp(e.target.value)} />
+                  </div>
+                  <div>
+                    <label className="text-xs text-muted-foreground mb-1 block">Primary health goal</label>
+                    <Select value={primaryGoal} onValueChange={setPrimaryGoal}>
+                      <SelectTrigger><SelectValue placeholder="Select..." /></SelectTrigger>
+                      <SelectContent>
+                        {goalOptions.map((g) => (
+                          <SelectItem key={g} value={g}>{g}</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
+                <div>
+                  <label className="text-xs text-muted-foreground mb-1 block">Current medications (optional)</label>
+                  <Textarea rows={2} placeholder="e.g. Metformin, Atorvastatin" value={medications} onChange={(e) => setMedications(e.target.value)} />
+                </div>
+                {heightCm && weightKg && (
+                  <p className="text-xs text-muted-foreground">
+                    Calculated BMI: <span className="font-medium text-foreground">{(parseFloat(weightKg) / ((parseFloat(heightCm) / 100) ** 2)).toFixed(1)}</span>
+                  </p>
+                )}
+              </div>
+            )}
+          </div>
 
           {/* Triple Consent */}
           <div className="mt-6 space-y-4">
@@ -262,7 +555,7 @@ const DNAUpload = () => {
             className="w-full mt-6 shadow-brand py-6 text-base"
             size="lg"
           >
-            {loading ? "Processing…" : "Analyse My Data"}
+            {loading ? "Processing..." : "Analyse My Data"}
           </Button>
         </div>
       </main>

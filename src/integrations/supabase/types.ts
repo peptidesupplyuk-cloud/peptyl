@@ -429,10 +429,12 @@ export type Database = {
       }
       dna_reports: {
         Row: {
+          assessment_tier: string | null
           confidence: string | null
           created_at: string
           id: string
           input_method: string
+          lifestyle_context: Json | null
           narrative: string | null
           overall_score: number | null
           report_json: Json
@@ -440,10 +442,12 @@ export type Database = {
           user_id: string
         }
         Insert: {
+          assessment_tier?: string | null
           confidence?: string | null
           created_at?: string
           id?: string
           input_method: string
+          lifestyle_context?: Json | null
           narrative?: string | null
           overall_score?: number | null
           report_json: Json
@@ -451,10 +455,12 @@ export type Database = {
           user_id: string
         }
         Update: {
+          assessment_tier?: string | null
           confidence?: string | null
           created_at?: string
           id?: string
           input_method?: string
+          lifestyle_context?: Json | null
           narrative?: string | null
           overall_score?: number | null
           report_json?: Json
@@ -1175,7 +1181,9 @@ export type Database = {
           country: string | null
           created_at: string
           current_compounds: string | null
+          dna_advanced_unlocked: boolean | null
           dna_assessment_unlocked: boolean | null
+          dna_standard_unlocked: boolean | null
           experience_level: string | null
           first_name: string | null
           gender: string | null
@@ -1208,7 +1216,9 @@ export type Database = {
           country?: string | null
           created_at?: string
           current_compounds?: string | null
+          dna_advanced_unlocked?: boolean | null
           dna_assessment_unlocked?: boolean | null
+          dna_standard_unlocked?: boolean | null
           experience_level?: string | null
           first_name?: string | null
           gender?: string | null
@@ -1241,7 +1251,9 @@ export type Database = {
           country?: string | null
           created_at?: string
           current_compounds?: string | null
+          dna_advanced_unlocked?: boolean | null
           dna_assessment_unlocked?: boolean | null
+          dna_standard_unlocked?: boolean | null
           experience_level?: string | null
           first_name?: string | null
           gender?: string | null
