@@ -9,6 +9,14 @@ export interface BlogPost {
 
 export const blogPosts: BlogPost[] = [
   {
+    slug: "peptide-craze-biohacking",
+    title: "Inside the Peptide Craze Sweeping the Biohacking World",
+    category: "Deep Dive",
+    excerpt: "From TikTok stacks to FDA crackdowns, the peptide boom of 2025-2026 is reshaping wellness culture. We examine the science, the risks, and why education must come before experimentation.",
+    readTime: "14 min read",
+    date: "March 2026",
+  },
+  {
     slug: "what-is-peptyl",
     title: "What Is Peptyl? The Free Research Platform Built for the Global Peptide Community",
     category: "Platform",
