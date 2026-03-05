@@ -308,15 +308,28 @@ const TodaysPlan = ({ onActivate, slim = false }: TodaysPlanProps) => {
                   <span className="text-[9px] px-1.5 py-0.5 rounded bg-muted text-muted-foreground border border-border font-medium">Standard</span>
                 )}
               </div>
-              <span className="text-[10px] text-muted-foreground">
-                {format(new Date((reportForPlan as any).created_at), "d MMM yyyy")}
-              </span>
+              <Popover>
+                <PopoverTrigger asChild>
+                  <button className="flex items-center gap-1 text-[10px] text-muted-foreground hover:text-foreground transition-colors">
+                    <CalendarIcon className="h-3 w-3" />
+                    <span>{dnaStartDate ? format(dnaStartDate, "d MMM yyyy") : "Set start"}</span>
+                  </button>
+                </PopoverTrigger>
+                <PopoverContent className="w-auto p-0" align="end">
+                  <Calendar
+                    mode="single"
+                    selected={dnaStartDate || undefined}
+                    onSelect={handleSetPlanStartDate}
+                    className={cn("p-3 pointer-events-auto")}
+                  />
+                </PopoverContent>
+              </Popover>
             </div>
             {/* Progress bar */}
-            {dnaReportDate && (
+            {dnaStartDate && (
               <div className="space-y-1">
                 <div className="flex items-center justify-between text-[10px] text-muted-foreground">
-                  <span>Day {dna90DaysElapsed} of 90</span>
+                  <span>{hasStarted ? `Day ${dna90DaysElapsed} of 90` : `Starts ${format(dnaStartDate, "d MMM")}`}</span>
                   <span>{dna90EndDate ? format(dna90EndDate, "d MMM yyyy") : ""}</span>
                 </div>
                 <div className="w-full h-1.5 bg-muted rounded-full">
