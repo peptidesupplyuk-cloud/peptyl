@@ -364,7 +364,7 @@ const Dashboard = () => {
                 <LayoutDashboard className="h-4 w-4 mr-1.5" />Today
               </TabsTrigger>
               <TabsTrigger value="biomarkers" className="text-xs sm:text-sm">
-                <Activity className="h-4 w-4 mr-1.5" />Results
+                <Activity className="h-4 w-4 mr-1.5" />Biomarkers
               </TabsTrigger>
               <TabsTrigger value="protocols" className="text-xs sm:text-sm">
                 <FlaskConical className="h-4 w-4 mr-1.5" />Protocols
@@ -390,6 +390,81 @@ const Dashboard = () => {
 
             {/* PROFILE TAB */}
             <TabsContent value="profile" className="space-y-6">
+              {/* Biomarkers section */}
+              <Tabs defaultValue="bloodwork" className="space-y-4">
+                <TabsList className="w-full grid grid-cols-3">
+                  <TabsTrigger value="bloodwork" className="text-xs sm:text-sm gap-1.5">
+                    <Droplets className="h-3.5 w-3.5" />Bloodwork
+                  </TabsTrigger>
+                  <TabsTrigger value="body" className="text-xs sm:text-sm gap-1.5">
+                    <Weight className="h-3.5 w-3.5" />Body
+                  </TabsTrigger>
+                  <TabsTrigger value="cardio" className="text-xs sm:text-sm gap-1.5">
+                    <Heart className="h-3.5 w-3.5" />Cardiovascular
+                  </TabsTrigger>
+                </TabsList>
+
+                <TabsContent value="bloodwork" className="space-y-6">
+                  {(() => {
+                    const retestPanels = panels.filter(p => p.panel_type?.startsWith('retest') && p.protocol_id);
+                    if (retestPanels.length === 0) return null;
+                    return (
+                      <div className="space-y-4 mb-2">
+                        <h3 className="font-heading font-semibold text-foreground text-sm">Protocol Results</h3>
+                        {retestPanels.map(retest => {
+                          const baseline = panels.find(p => p.protocol_id === retest.protocol_id && !p.panel_type?.startsWith('retest'));
+                          const protocol = protocols.find(p => p.id === retest.protocol_id);
+                          if (!baseline) return null;
+                          return <ProtocolOutcomeCard key={retest.id} baselinePanel={baseline} retestPanel={retest} protocolName={protocol?.name ?? 'Protocol'} />;
+                        })}
+                      </div>
+                    );
+                  })()}
+
+                  <div className="bg-card rounded-2xl border border-border p-5 sm:p-6">
+                    <h2 className="font-heading font-semibold text-foreground mb-4">Enter Bloodwork Results</h2>
+                    <BloodworkForm onSaved={() => { refetchPanels(); setActiveTab("protocols"); }} filterCategories={["Metabolic", "Lipids", "Liver", "Kidney", "Inflammation", "Vitamins", "Hormones", "Thyroid"]} defaultProtocolId={retestProtocolId} defaultIsRetest={defaultIsRetest} />
+                  </div>
+
+                  <BiomarkerTrendChart panels={panels} filterCategories={["Metabolic", "Lipids", "Liver", "Kidney", "Inflammation", "Vitamins", "Hormones", "Thyroid"]} />
+
+                  {panels.length > 0 && (
+                    <div className="bg-card rounded-2xl border border-border p-5">
+                      <h3 className="font-heading font-semibold text-foreground mb-3">Previous Tests</h3>
+                      <div className="space-y-2">
+                        {panels.map((p) => (
+                          <div key={p.id} className="flex items-center justify-between bg-muted/50 rounded-lg px-4 py-2.5">
+                            <div>
+                              <span className="text-sm font-medium text-foreground">
+                                {new Date(p.test_date).toLocaleDateString()}
+                              </span>
+                              <span className="text-xs text-muted-foreground ml-2 capitalize">{p.panel_type} panel</span>
+                            </div>
+                            <span className="text-xs text-muted-foreground">{p.markers.length} markers</span>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </TabsContent>
+
+                <TabsContent value="body" className="space-y-6">
+                  <div className="bg-card rounded-2xl border border-border p-5 sm:p-6">
+                    <h2 className="font-heading font-semibold text-foreground mb-4">Body Composition</h2>
+                    <BloodworkForm onSaved={() => refetchPanels()} filterCategories={["Body Composition"]} />
+                  </div>
+                  <BiomarkerTrendChart panels={panels} filterCategories={["Body Composition"]} />
+                </TabsContent>
+
+                <TabsContent value="cardio" className="space-y-6">
+                  <div className="bg-card rounded-2xl border border-border p-5 sm:p-6">
+                    <h2 className="font-heading font-semibold text-foreground mb-4">Cardiovascular</h2>
+                    <BloodworkForm onSaved={() => refetchPanels()} filterCategories={["Cardiovascular"]} />
+                  </div>
+                  <BiomarkerTrendChart panels={panels} filterCategories={["Cardiovascular"]} />
+                </TabsContent>
+              </Tabs>
+
               <ProfileBiometrics onUpdate={(bio) => setBioRecs(getBiometricRecommendations(bio))} />
               <WhoopSection />
               <FitbitSection />
