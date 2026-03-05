@@ -48,6 +48,8 @@ interface SupplementItem {
 const TodaysPlan = ({ onActivate, slim = false }: TodaysPlanProps) => {
   const navigate = useNavigate();
   const { user } = useAuth();
+  const { toast } = useToast();
+  const queryClient = useQueryClient();
   const { data: injections = [], isLoading } = useTodayInjections();
   const updateStatus = useUpdateInjectionStatus();
   const { data: protocols = [] } = useProtocols();
