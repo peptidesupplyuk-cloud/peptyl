@@ -255,6 +255,12 @@ const TodaysPlan = ({ onActivate, slim = false }: TodaysPlanProps) => {
     );
   }
 
+  // Compute 90-day progress from latest DNA report date
+  const dnaReportDate = latestDnaReport?.created_at ? new Date(latestDnaReport.created_at) : null;
+  const dna90DaysElapsed = dnaReportDate ? Math.max(0, differenceInCalendarDays(new Date(), dnaReportDate)) : 0;
+  const dna90ProgressPct = Math.min(100, Math.round((dna90DaysElapsed / 90) * 100));
+  const dna90EndDate = dnaReportDate ? new Date(dnaReportDate.getTime() + 90 * 24 * 60 * 60 * 1000) : null;
+
   // No active protocol — if slim mode, render nothing (Zone A handles CTA)
   if (!hasActiveProtocol) {
     if (slim) return null;
@@ -264,6 +270,50 @@ const TodaysPlan = ({ onActivate, slim = false }: TodaysPlanProps) => {
           <FlaskConical className="h-5 w-5 text-primary" />
           <h2 className="font-heading font-semibold text-foreground">What To Do Today</h2>
         </div>
+
+        {/* 90-Day Plan from latest DNA report even without active protocol */}
+        {actionPlan?.["90_days"] && actionPlan["90_days"].length > 0 && reportForPlan && (
+          <div className="bg-muted/30 rounded-xl px-4 py-3 space-y-3">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <Dna className="h-3.5 w-3.5 text-primary" />
+                <span className="text-xs font-semibold text-foreground">90-Day Plan</span>
+                {(reportForPlan as any).assessment_tier === "advanced" ? (
+                  <span className="text-[9px] px-1.5 py-0.5 rounded bg-primary/10 text-primary border border-primary/20 font-medium">Advanced</span>
+                ) : (
+                  <span className="text-[9px] px-1.5 py-0.5 rounded bg-muted text-muted-foreground border border-border font-medium">Standard</span>
+                )}
+              </div>
+              <span className="text-[10px] text-muted-foreground">
+                {format(new Date((reportForPlan as any).created_at), "d MMM yyyy")}
+              </span>
+            </div>
+            {/* Progress bar */}
+            {dnaReportDate && (
+              <div className="space-y-1">
+                <div className="flex items-center justify-between text-[10px] text-muted-foreground">
+                  <span>Day {dna90DaysElapsed} of 90</span>
+                  <span>{dna90EndDate ? format(dna90EndDate, "d MMM yyyy") : ""}</span>
+                </div>
+                <div className="w-full h-1.5 bg-muted rounded-full">
+                  <div
+                    className={`h-1.5 rounded-full transition-all duration-500 ${dna90DaysElapsed >= 90 ? "bg-primary" : "bg-primary/70"}`}
+                    style={{ width: `${dna90ProgressPct}%` }}
+                  />
+                </div>
+              </div>
+            )}
+            <ul className="space-y-1">
+              {actionPlan["90_days"].map((item, i) => (
+                <li key={i} className="text-xs text-muted-foreground flex items-start gap-2">
+                  <span className="text-primary mt-0.5 shrink-0">&#8226;</span>
+                  <span>{item}</span>
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
+
         <p className="text-sm text-muted-foreground">
           Tell us your goal — injury recovery, weight management, longevity, or something else — and we'll build your personalised daily plan.
         </p>
