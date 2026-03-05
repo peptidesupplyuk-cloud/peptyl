@@ -22,7 +22,7 @@ import { useCreateProtocol, useProtocols } from "@/hooks/use-protocols";
 import { useLogInjection, useUpdateInjectionStatus, useAllInjections, useTodayInjections } from "@/hooks/use-injections";
 import { useTodaySupplementLogs } from "@/hooks/use-supplement-logs";
 import ResultsTab from "@/components/dashboard/ResultsTab";
-import { useProtocolNotifications, useNotificationActions } from "@/hooks/use-notifications";
+import { useProtocolNotifications, useNotificationActions, useRequestNotificationPermission } from "@/hooks/use-notifications";
 import { getUnifiedRecommendations, getBiometricRecommendations, type Recommendation, type BiometricRecommendation, type UnifiedRecommendation } from "@/data/recommendation-rules";
 import PopularProtocols from "@/components/dashboard/PopularProtocols";
 import { useToast } from "@/hooks/use-toast";
@@ -204,6 +204,8 @@ const Dashboard = () => {
   const todayRemaining = todayScheduled + todayPendingSupplements;
 
   const [showMore, setShowMore] = useState(false);
+  const { shouldAsk, requestPermission } = useRequestNotificationPermission();
+  const [notifDismissed, setNotifDismissed] = useState(false);
 
 
 
