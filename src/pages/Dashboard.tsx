@@ -21,7 +21,7 @@ import { useBloodworkPanels } from "@/hooks/use-bloodwork";
 import { useCreateProtocol, useProtocols } from "@/hooks/use-protocols";
 import { useLogInjection, useUpdateInjectionStatus, useAllInjections, useTodayInjections } from "@/hooks/use-injections";
 import { useTodaySupplementLogs } from "@/hooks/use-supplement-logs";
-import AdherenceTracker from "@/components/dashboard/AdherenceTracker";
+import ResultsTab from "@/components/dashboard/ResultsTab";
 import { useProtocolNotifications, useNotificationActions } from "@/hooks/use-notifications";
 import { getUnifiedRecommendations, getBiometricRecommendations, type Recommendation, type BiometricRecommendation, type UnifiedRecommendation } from "@/data/recommendation-rules";
 import PopularProtocols from "@/components/dashboard/PopularProtocols";
@@ -372,8 +372,8 @@ const Dashboard = () => {
               <TabsTrigger value="injections" className="text-xs sm:text-sm">
                 <CalendarDays className="h-4 w-4 mr-1.5" />Tracker
               </TabsTrigger>
-              <TabsTrigger value="adherence" className="text-xs sm:text-sm">
-                <BarChart3 className="h-4 w-4 mr-1.5" />Progress
+              <TabsTrigger value="results" className="text-xs sm:text-sm">
+                <BarChart3 className="h-4 w-4 mr-1.5" />Results
               </TabsTrigger>
               <TabsTrigger value="journal" className="text-xs sm:text-sm">
                 <BookOpen className="h-4 w-4 mr-1.5" />Journal
@@ -790,9 +790,9 @@ const Dashboard = () => {
               <ActiveProtocols />
             </TabsContent>
 
-            {/* ADHERENCE TAB */}
-            <TabsContent value="adherence" className="space-y-6">
-              <AdherenceTracker />
+            {/* RESULTS TAB */}
+            <TabsContent value="results" className="space-y-6">
+              <ResultsTab />
             </TabsContent>
           </Tabs>
           <MobileTabNav activeTab={activeTab} onTabChange={setActiveTab} />
