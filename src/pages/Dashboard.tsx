@@ -516,7 +516,7 @@ const Dashboard = () => {
                   <p className="text-sm text-muted-foreground">Choose a protocol or explore recommendations below</p>
                   <div className="flex justify-center gap-3">
                     <Button onClick={() => setActiveTab("protocols")}>Browse Protocols</Button>
-                    <Button variant="ghost" onClick={() => setActiveTab("biomarkers")}>View my data</Button>
+                    <Button variant="ghost" onClick={() => setActiveTab("profile")}>View my data</Button>
                   </div>
                   {(hasBloodwork || hasDna) && (
                     <p className="text-xs text-primary mt-2">
@@ -535,7 +535,7 @@ const Dashboard = () => {
                     <>
                       <h3 className="text-sm font-heading font-semibold text-foreground">Start with your data</h3>
                       <div className="flex gap-3">
-                        <Button variant="outline" size="sm" className="flex-1" onClick={() => setActiveTab("biomarkers")}>
+                        <Button variant="outline" size="sm" className="flex-1" onClick={() => setActiveTab("profile")}>
                           <Droplets className="h-3.5 w-3.5 mr-1.5" /> Log bloodwork
                         </Button>
                         <Button variant="outline" size="sm" className="flex-1" onClick={() => navigate("/dna/upload")}>
@@ -560,7 +560,7 @@ const Dashboard = () => {
                       <div>
                         <h3 className="text-sm font-heading font-semibold text-foreground">Add bloodwork to personalise protocols</h3>
                         <p className="text-xs text-muted-foreground mt-1">Your DNA report is ready. Add bloodwork results to unlock biomarker-triggered protocol recommendations.</p>
-                        <Button variant="link" size="sm" className="px-0 h-auto mt-1 text-xs" onClick={() => setActiveTab("biomarkers")}>Log bloodwork →</Button>
+                        <Button variant="link" size="sm" className="px-0 h-auto mt-1 text-xs" onClick={() => setActiveTab("profile")}>Log bloodwork →</Button>
                       </div>
                     </div>
                   )}
@@ -603,7 +603,7 @@ const Dashboard = () => {
                           {hasDna ? `✓ DNA report (${latestDnaReport.overall_score}/100)` : "○ No DNA report"}
                         </span>
                         {(!hasBloodwork || !hasDna) && (
-                          <button onClick={() => !hasBloodwork ? setActiveTab("biomarkers") : navigate("/dna/upload")}
+                          <button onClick={() => !hasBloodwork ? setActiveTab("profile") : navigate("/dna/upload")}
                             className="text-xs text-primary hover:underline ml-auto">
                             Add data →
                           </button>
@@ -659,7 +659,7 @@ const Dashboard = () => {
                       {hasDna ? `✓ DNA report (${latestDnaReport.overall_score}/100)` : "○ No DNA report"}
                     </span>
                     {(!hasBloodwork || !hasDna) && (
-                      <button onClick={() => !hasBloodwork ? setActiveTab("biomarkers") : navigate("/dna/upload")}
+                      <button onClick={() => !hasBloodwork ? setActiveTab("profile") : navigate("/dna/upload")}
                         className="text-xs text-primary hover:underline ml-auto">
                         Add data →
                       </button>
