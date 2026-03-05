@@ -870,12 +870,12 @@ const PaymentsTab = () => {
       <div className="bg-card border border-border rounded-xl p-5">
         <h3 className="font-heading font-semibold text-foreground text-sm mb-3">Sales by Product</h3>
         <div className="flex flex-wrap gap-2">
-          {Object.entries(productCounts).sort(([,a],[,b]) => b - a).map(([product, count]) => (
+          {Object.entries(productCounts).sort(([,a],[,b]) => (b as number) - (a as number)).map(([product, count]) => (
             <div key={product} className="flex items-center gap-2 bg-muted/50 rounded-lg px-3 py-2">
               <Badge variant="outline" className={`text-[10px] ${PRODUCT_COLORS[product] || ""}`}>
                 {PRODUCT_LABELS[product] || product}
               </Badge>
-              <span className="text-sm font-semibold text-foreground">{count}</span>
+              <span className="text-sm font-semibold text-foreground">{count as number}</span>
             </div>
           ))}
         </div>
