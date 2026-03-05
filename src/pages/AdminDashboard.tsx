@@ -13,7 +13,7 @@ import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
 import {
   AlertTriangle, Users, Globe, Mail, Activity, FlaskConical, Droplets, Loader2,
-  Upload, CheckCircle, XCircle, Clock, FileText, ExternalLink, Twitter, BarChart3, Target, Sparkles, Megaphone, Search, Copy, Link as LinkIcon, MessageSquare, Trash2, BookOpen, TrendingUp,
+  Upload, CheckCircle, XCircle, Clock, FileText, ExternalLink, Twitter, BarChart3, Target, Sparkles, Megaphone, Search, Copy, Link as LinkIcon, MessageSquare, Trash2, BookOpen, TrendingUp, CreditCard, Star, Dna,
 } from "lucide-react";
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from "recharts";
 import MonitoredAccounts from "@/components/admin/MonitoredAccounts";
@@ -798,6 +798,143 @@ const FeedbackTab = () => {
   );
 };
 
+/* ========== PAYMENTS TAB ========== */
+
+const PRODUCT_LABELS: Record<string, string> = {
+  dna_standard: "DNA Standard",
+  dna_advanced: "DNA Advanced",
+  dna_assessment: "DNA Assessment",
+  subscription_individual: "Individual Plan",
+  subscription_coach: "Coach Plan",
+};
+
+const PRODUCT_COLORS: Record<string, string> = {
+  dna_standard: "bg-muted text-muted-foreground border-border",
+  dna_advanced: "bg-primary/10 text-primary border-primary/20",
+  dna_assessment: "bg-blue-500/10 text-blue-600 border-blue-500/20",
+  subscription_individual: "bg-purple-500/10 text-purple-600 border-purple-500/20",
+  subscription_coach: "bg-amber-500/10 text-amber-600 border-amber-500/20",
+};
+
+const PaymentsTab = () => {
+  const { data: payments = [], isLoading } = useQuery({
+    queryKey: ["admin-payments"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("payment_events")
+        .select("*")
+        .order("created_at", { ascending: false })
+        .limit(100);
+      if (error) throw error;
+      return data as any[];
+    },
+  });
+
+  const { data: reviews = [] } = useQuery({
+    queryKey: ["admin-dna-reviews"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("dna_reviews" as any)
+        .select("*")
+        .order("created_at", { ascending: false })
+        .limit(100);
+      if (error) throw error;
+      return data as any[];
+    },
+  });
+
+  const totalRevenue = payments.reduce((sum: number, p: any) => sum + (p.amount || 0), 0);
+  const productCounts = payments.reduce((acc: Record<string, number>, p: any) => {
+    const key = p.product || "unknown";
+    acc[key] = (acc[key] || 0) + 1;
+    return acc;
+  }, {});
+
+  const avgRating = reviews.length > 0
+    ? (reviews.reduce((sum: number, r: any) => sum + r.rating, 0) / reviews.length).toFixed(1)
+    : "N/A";
+
+  if (isLoading) return <div className="flex items-center justify-center py-12"><Loader2 className="h-6 w-6 animate-spin text-muted-foreground" /></div>;
+
+  return (
+    <div className="space-y-6">
+      {/* Summary stats */}
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+        <StatCard icon={CreditCard} label="Total Payments" value={payments.length} />
+        <StatCard icon={CreditCard} label="Revenue" value={`£${(totalRevenue / 100).toFixed(2)}`} />
+        <StatCard icon={Star} label="Avg Rating" value={avgRating} />
+        <StatCard icon={Dna} label="Reviews" value={reviews.length} />
+      </div>
+
+      {/* Product breakdown */}
+      <div className="bg-card border border-border rounded-xl p-5">
+        <h3 className="font-heading font-semibold text-foreground text-sm mb-3">Sales by Product</h3>
+        <div className="flex flex-wrap gap-2">
+          {Object.entries(productCounts).sort(([,a],[,b]) => b - a).map(([product, count]) => (
+            <div key={product} className="flex items-center gap-2 bg-muted/50 rounded-lg px-3 py-2">
+              <Badge variant="outline" className={`text-[10px] ${PRODUCT_COLORS[product] || ""}`}>
+                {PRODUCT_LABELS[product] || product}
+              </Badge>
+              <span className="text-sm font-semibold text-foreground">{count}</span>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* DNA Reviews */}
+      {reviews.length > 0 && (
+        <div className="bg-card border border-border rounded-xl p-5">
+          <h3 className="font-heading font-semibold text-foreground text-sm mb-3 flex items-center gap-2">
+            <Star className="h-4 w-4 text-primary" /> DNA Report Reviews
+          </h3>
+          <div className="space-y-2 max-h-[300px] overflow-y-auto">
+            {reviews.map((r: any) => (
+              <div key={r.id} className="border border-border/50 rounded-lg p-3">
+                <div className="flex items-center justify-between mb-1">
+                  <div className="flex items-center gap-1">
+                    {[1, 2, 3, 4, 5].map((s) => (
+                      <Star key={s} className={`h-3.5 w-3.5 ${s <= r.rating ? "fill-primary text-primary" : "text-muted-foreground/30"}`} />
+                    ))}
+                    <span className="text-xs text-muted-foreground ml-2">{r.rating}/5</span>
+                  </div>
+                  <span className="text-[10px] text-muted-foreground">{new Date(r.created_at).toLocaleDateString()}</span>
+                </div>
+                {r.note && <p className="text-xs text-muted-foreground mt-1">{r.note}</p>}
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Recent payments list */}
+      <div className="bg-card border border-border rounded-xl p-5">
+        <h3 className="font-heading font-semibold text-foreground text-sm mb-3">Recent Payments</h3>
+        <div className="space-y-2 max-h-[400px] overflow-y-auto">
+          {payments.map((p: any) => (
+            <div key={p.id} className="flex items-center justify-between border border-border/50 rounded-lg px-3 py-2.5">
+              <div className="flex items-center gap-3">
+                <Badge variant="outline" className={`text-[10px] ${PRODUCT_COLORS[p.product] || ""}`}>
+                  {PRODUCT_LABELS[p.product] || p.product || "Unknown"}
+                </Badge>
+                <span className="text-sm font-medium text-foreground">
+                  {p.amount ? `£${(p.amount / 100).toFixed(2)}` : "N/A"}
+                </span>
+              </div>
+              <div className="flex items-center gap-2">
+                <Badge variant="outline" className="text-[10px] bg-green-500/10 text-green-600 border-green-500/20">
+                  {p.event_type || "confirmed"}
+                </Badge>
+                <span className="text-[10px] text-muted-foreground">{new Date(p.created_at).toLocaleDateString()}</span>
+              </div>
+            </div>
+          ))}
+          {payments.length === 0 && <p className="text-xs text-muted-foreground text-center py-4">No payments yet.</p>}
+        </div>
+      </div>
+    </div>
+  );
+};
+
 /* ========== KNOWLEDGE BASE TAB ========== */
 
 const KnowledgeBaseTab = () => {
@@ -1317,6 +1454,9 @@ const AdminDashboard = () => {
               <TabsTrigger value="analytics" className="gap-1.5">
                 <BarChart3 className="h-4 w-4" /> Analytics
               </TabsTrigger>
+              <TabsTrigger value="payments" className="gap-1.5">
+                <CreditCard className="h-4 w-4" /> Payments
+              </TabsTrigger>
               <TabsTrigger value="content" className="gap-1.5">
                 <FileText className="h-4 w-4" /> Content
               </TabsTrigger>
@@ -1333,6 +1473,9 @@ const AdminDashboard = () => {
 
             <TabsContent value="analytics">
               <AnalyticsTab />
+            </TabsContent>
+            <TabsContent value="payments">
+              <PaymentsTab />
             </TabsContent>
             <TabsContent value="content">
               <ContentTab />

@@ -105,8 +105,25 @@ const TodaysPlan = ({ onActivate, slim = false }: TodaysPlanProps) => {
     : 90;
   const progressPct = Math.min(100, Math.round((daysActive / totalDays) * 100));
 
-  // Extract action_plan from DNA report
-  const actionPlan = (dnaReport?.report_json as any)?.action_plan as
+  // Fetch the user's latest DNA report (independent of outcome record)
+  const { data: latestDnaReport } = useQuery({
+    queryKey: ["latest-dna-report", user?.id],
+    enabled: !!user,
+    queryFn: async () => {
+      const { data } = await supabase
+        .from("dna_reports")
+        .select("id, report_json, created_at, assessment_tier")
+        .eq("user_id", user!.id)
+        .order("created_at", { ascending: false })
+        .limit(1)
+        .maybeSingle();
+      return data;
+    },
+  });
+
+  // Extract action_plan from DNA report (prefer latest, fallback to outcome-linked)
+  const reportForPlan = latestDnaReport || dnaReport;
+  const actionPlan = (reportForPlan?.report_json as any)?.action_plan as
     | { immediate?: string[]; "30_days"?: string[]; "90_days"?: string[] }
     | undefined;
 
