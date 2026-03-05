@@ -163,9 +163,42 @@ const DNALanding = () => {
                   Peptide recommendations are for research purposes only. Not medical advice.
                 </p>
               </div>
+          </div>
+
+          {/* Quick VS Table */}
+          <div className="mt-12 max-w-2xl mx-auto">
+            <h3 className="text-sm font-heading font-semibold text-muted-foreground text-center mb-4 uppercase tracking-wider">At a Glance</h3>
+            <div className="bg-card border border-border rounded-xl overflow-hidden text-sm">
+              <div className="grid grid-cols-3 items-center px-4 py-2.5 border-b border-border bg-muted/50">
+                <span className="text-muted-foreground font-medium">Feature</span>
+                <span className="text-center text-muted-foreground font-medium">Standard</span>
+                <span className="text-center text-muted-foreground font-medium">Advanced</span>
+              </div>
+              {[
+                { feature: "Health Score", standard: true, advanced: true },
+                { feature: "Supplement Protocol", standard: true, advanced: true },
+                { feature: "Drug Interaction Flags", standard: true, advanced: true },
+                { feature: "Biomarker Interpretation", standard: true, advanced: true },
+                { feature: "SNP Panel", standard: "15", advanced: "25" },
+                { feature: "Peptide Protocol", standard: false, advanced: true },
+                { feature: "GLP-1 Assessment", standard: false, advanced: true },
+                { feature: "Genetic Archetype", standard: false, advanced: true },
+                { feature: "GP Talking Points", standard: false, advanced: true },
+              ].map((row, i) => (
+                <div key={row.feature} className={`grid grid-cols-3 items-center px-4 py-2.5 ${i % 2 === 0 ? "bg-muted/30" : ""}`}>
+                  <span className="text-foreground font-medium">{row.feature}</span>
+                  <span className="text-center">
+                    {row.standard === true ? <Check className="h-4 w-4 text-primary mx-auto" /> : row.standard === false ? <X className="h-4 w-4 text-muted-foreground/40 mx-auto" /> : <span className="text-muted-foreground">{row.standard}</span>}
+                  </span>
+                  <span className="text-center">
+                    {row.advanced === true ? <Check className="h-4 w-4 text-primary mx-auto" /> : row.advanced === false ? <X className="h-4 w-4 text-muted-foreground/40 mx-auto" /> : <span className="text-muted-foreground">{row.advanced}</span>}
+                  </span>
+                </div>
+              ))}
             </div>
           </div>
-        </section>
+        </div>
+      </section>
 
         {/* How It Works */}
         <section className="py-16 bg-muted/30">
