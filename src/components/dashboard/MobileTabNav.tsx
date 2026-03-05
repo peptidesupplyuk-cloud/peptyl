@@ -1,4 +1,4 @@
-import { LayoutDashboard, Activity, FlaskConical, CalendarDays, User, BookOpen } from "lucide-react";
+import { LayoutDashboard, Activity, FlaskConical, CalendarDays, User, BookOpen, BarChart3 } from "lucide-react";
 import { useIsMobile } from "@/hooks/use-mobile";
 
 interface Props {
@@ -8,10 +8,10 @@ interface Props {
 
 const tabs = [
   { value: "overview", label: "Today", icon: LayoutDashboard },
-  { value: "biomarkers", label: "Results", icon: Activity },
+  { value: "biomarkers", label: "Biomarkers", icon: Activity },
   { value: "protocols", label: "Protocols", icon: FlaskConical },
+  { value: "results", label: "Results", icon: BarChart3 },
   { value: "injections", label: "Tracker", icon: CalendarDays },
-  { value: "journal", label: "Journal", icon: BookOpen },
   { value: "profile", label: "Profile", icon: User },
 ];
 
