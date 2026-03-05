@@ -461,15 +461,14 @@ const TodaysPlan = ({ onActivate, slim = false }: TodaysPlanProps) => {
 
         {/* 90-Day Action Plan from latest DNA report */}
         {!slim && actionPlan?.["90_days"] && actionPlan["90_days"].length > 0 && reportForPlan && (
-          <div className="bg-muted/30 rounded-xl px-4 py-3 space-y-2">
+          <div className="bg-muted/30 rounded-xl px-4 py-3 space-y-3">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
                 <Dna className="h-3.5 w-3.5 text-primary" />
                 <span className="text-xs font-semibold text-foreground">90-Day Plan</span>
-                {(reportForPlan as any).assessment_tier === "advanced" && (
+                {(reportForPlan as any).assessment_tier === "advanced" ? (
                   <span className="text-[9px] px-1.5 py-0.5 rounded bg-primary/10 text-primary border border-primary/20 font-medium">Advanced</span>
-                )}
-                {(reportForPlan as any).assessment_tier !== "advanced" && (
+                ) : (
                   <span className="text-[9px] px-1.5 py-0.5 rounded bg-muted text-muted-foreground border border-border font-medium">Standard</span>
                 )}
               </div>
@@ -477,6 +476,21 @@ const TodaysPlan = ({ onActivate, slim = false }: TodaysPlanProps) => {
                 {format(new Date((reportForPlan as any).created_at), "d MMM yyyy")}
               </span>
             </div>
+            {/* Progress bar */}
+            {dnaReportDate && (
+              <div className="space-y-1">
+                <div className="flex items-center justify-between text-[10px] text-muted-foreground">
+                  <span>Day {dna90DaysElapsed} of 90</span>
+                  <span>{dna90EndDate ? format(dna90EndDate, "d MMM yyyy") : ""}</span>
+                </div>
+                <div className="w-full h-1.5 bg-muted rounded-full">
+                  <div
+                    className={`h-1.5 rounded-full transition-all duration-500 ${dna90DaysElapsed >= 90 ? "bg-primary" : "bg-primary/70"}`}
+                    style={{ width: `${dna90ProgressPct}%` }}
+                  />
+                </div>
+              </div>
+            )}
             <ul className="space-y-1">
               {actionPlan["90_days"].map((item, i) => (
                 <li key={i} className="text-xs text-muted-foreground flex items-start gap-2">
