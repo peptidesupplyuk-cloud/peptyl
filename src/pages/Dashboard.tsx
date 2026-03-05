@@ -23,6 +23,7 @@ import { useLogInjection, useUpdateInjectionStatus, useAllInjections, useTodayIn
 import { useTodaySupplementLogs } from "@/hooks/use-supplement-logs";
 import ResultsTab from "@/components/dashboard/ResultsTab";
 import { useProtocolNotifications, useNotificationActions, useRequestNotificationPermission } from "@/hooks/use-notifications";
+import { Capacitor } from "@capacitor/core";
 import { getUnifiedRecommendations, getBiometricRecommendations, type Recommendation, type BiometricRecommendation, type UnifiedRecommendation } from "@/data/recommendation-rules";
 import PopularProtocols from "@/components/dashboard/PopularProtocols";
 import { useToast } from "@/hooks/use-toast";
