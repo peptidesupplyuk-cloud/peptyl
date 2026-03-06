@@ -54,7 +54,7 @@ const PersonalisationCard = ({ data }: Props) => {
       </div>
 
       {/* Lifestyle Interactions */}
-      {data.lifestyle_interactions && data.lifestyle_interactions.length > 0 && (
+      {Array.isArray(data.lifestyle_interactions) && data.lifestyle_interactions.length > 0 && (
         <div>
           <h3 className="text-sm font-heading font-semibold text-foreground mb-3">Genetic Lifestyle Interactions</h3>
           <div className="space-y-3">
