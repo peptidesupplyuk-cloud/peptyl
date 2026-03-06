@@ -117,13 +117,14 @@ const DNAUpload = () => {
     const checkUnlock = async () => {
       const { data: profile } = await supabase
         .from("profiles")
-        .select("dna_standard_unlocked, dna_advanced_unlocked, height_cm, weight_kg")
+        .select("dna_standard_unlocked, dna_advanced_unlocked, dna_assessment_unlocked, height_cm, weight_kg")
         .eq("user_id", user.id)
         .single();
 
-      const unlocked = tier === "advanced"
+      const hasPermanentUnlock = !!(profile as any)?.dna_assessment_unlocked;
+      const unlocked = hasPermanentUnlock || (tier === "advanced"
         ? !!(profile as any)?.dna_advanced_unlocked
-        : !!(profile as any)?.dna_standard_unlocked;
+        : !!(profile as any)?.dna_standard_unlocked);
       setIsUnlocked(unlocked);
 
       // Pre-fill from profile
