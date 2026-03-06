@@ -41,7 +41,7 @@ const SupplementTable = ({ supplements }: Props) => {
                 <td className="py-3 px-3">
                   <p className="font-medium text-foreground">{s.supplement}</p>
                   <div className="flex flex-wrap gap-1 mt-1">
-                    {s.driven_by?.map((d) => (
+                    {(Array.isArray(s.driven_by) ? s.driven_by : typeof s.driven_by === 'string' ? [s.driven_by] : []).map((d) => (
                       <span key={d} className="text-[10px] bg-muted text-muted-foreground px-1.5 py-0.5 rounded">{d}</span>
                     ))}
                   </div>
