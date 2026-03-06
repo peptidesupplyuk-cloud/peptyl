@@ -227,15 +227,40 @@ serve(async (req) => {
     }
 
     // Build user message based on method
+    const schemaReminder = tier === "advanced"
+      ? `CRITICAL INSTRUCTIONS:
+1. Output ONLY raw JSON (NO markdown fences, NO preamble) then ---NARRATIVE--- then bullet points starting with •.
+2. Your JSON MUST use the EXACT key names and structure from the FULL JSON EXAMPLE in the system prompt.
+3. health_score MUST be an object: { "overall": <number 1-100>, "genetics_score": <number>, "biomarker_score": <number>, "lifestyle_score": <number>, "label": "<string>", "summary": "<string>" }. overall MUST be a calculated number, NEVER null or 0.
+4. gene_results MUST be an ARRAY of objects with keys: gene, rsid, variant, risk_level, score, clinical_summary, action.
+5. biomarker_results MUST be an ARRAY of objects with keys: marker, value, unit, status, optimal_range, action, gene_interaction.
+6. supplement_protocol MUST be an ARRAY of objects with keys: supplement, dose, timing, evidence_grade, driven_by, caution, peptyl_product_tag.
+7. peptide_protocol MUST be an ARRAY of objects (not a single object).
+8. action_plan MUST have keys: immediate, 30_days, 90_days, gp_conversations — each an ARRAY of strings.
+9. diet_recommendations MUST be an object with keys: approach, rationale, key_foods (array), avoid (array), timing.
+10. training_recommendations MUST be an object with keys: approach, rationale, weekly_structure (array), recovery_protocol (array), avoid (array).
+11. personalisation MUST include genetic_archetype, priority_insight, biggest_lever, goal_alignment, lifestyle_interactions.
+12. Narrative MUST be 5-7 bullet points starting with • and an emoji. NO prose paragraphs.
+DO NOT deviate from this structure. Follow the example EXACTLY.`
+      : `CRITICAL INSTRUCTIONS:
+1. Output ONLY raw JSON (NO markdown fences, NO preamble) then ---NARRATIVE--- then bullet points starting with •.
+2. health_score MUST be an object: { "overall": <number 1-100>, "genetics_score": <number>, "biomarker_score": <number>, "lifestyle_score": <number>, "label": "<string>", "summary": "<string>" }. overall MUST be a calculated number, NEVER null or 0.
+3. gene_results MUST be an ARRAY of objects with keys: gene, rsid, variant, risk_level, score, clinical_summary, action.
+4. biomarker_results MUST be an ARRAY of objects with keys: marker, value, unit, status, optimal_range, action, gene_interaction.
+5. supplement_protocol MUST be an ARRAY of objects.
+6. action_plan MUST have keys: immediate, 30_days, 90_days — each an ARRAY of strings.
+7. Narrative MUST be 4-5 bullet points starting with • and an emoji. NO prose paragraphs.
+Standard tier: omit peptide_protocol, diet_recommendations, training_recommendations, glp1_assessment, personalisation.`;
+
     let userContent: any;
     if (method === "image" && imageBase64) {
       userContent = [
         { type: "image_url", image_url: { url: imageBase64 } },
-        { type: "text", text: `${tierPrefix}Extract all genetic variants and biomarker values from this image. Then generate the full health assessment JSON followed by ---NARRATIVE--- and narrative text.${lifestyleStr}` },
+        { type: "text", text: `${tierPrefix}${schemaReminder}\n\nExtract all genetic variants and biomarker values from this image.${lifestyleStr}` },
       ];
     } else {
       const methodLabel = method === "pdf" ? "PDF lab report" : method === "raw23andme" ? "23andMe raw file" : "free text";
-      userContent = `${tierPrefix}The following is genetic/health data from a ${methodLabel}. Parse it and generate the full health assessment JSON followed by ---NARRATIVE--- and narrative text.${lifestyleStr}\n\n${inputText}`;
+      userContent = `${tierPrefix}${schemaReminder}\n\nGenetic/health data from ${methodLabel}:${lifestyleStr}\n\n${inputText}`;
     }
 
     const response = await fetch("https://api.openai.com/v1/chat/completions", {
