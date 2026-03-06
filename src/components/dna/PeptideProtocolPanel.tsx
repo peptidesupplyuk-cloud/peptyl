@@ -28,7 +28,8 @@ const gradeStyle: Record<string, string> = {
 };
 
 const PeptideProtocolPanel = ({ peptides }: Props) => {
-  if (!peptides || peptides.length === 0) return null;
+  const items = Array.isArray(peptides) ? peptides : [];
+  if (items.length === 0) return null;
 
   return (
     <div className="space-y-4">
@@ -39,7 +40,7 @@ const PeptideProtocolPanel = ({ peptides }: Props) => {
         </span>
       </div>
 
-      {peptides.map((p, i) => (
+      {items.map((p, i) => (
         <PeptideCard key={i} peptide={p} />
       ))}
 
