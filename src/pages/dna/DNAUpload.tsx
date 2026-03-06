@@ -221,6 +221,19 @@ const DNAUpload = () => {
     !loading &&
     (inputText.trim().length >= 10 || !!imageBase64);
 
+  const buildBloodworkContext = (panel: typeof latestPanel) => {
+    if (!panel || panel.markers.length === 0) return null;
+    const ctx: Record<string, { value: number; unit: string; name: string }> = {};
+    for (const m of panel.markers) {
+      ctx[m.marker_name] = { value: m.value, unit: m.unit, name: m.marker_name };
+    }
+    return {
+      test_date: panel.test_date,
+      panel_type: panel.panel_type,
+      markers: ctx,
+    };
+  };
+
   const buildLifestyleContext = () => {
     const h = parseFloat(heightCm);
     const w = parseFloat(weightKg);
@@ -236,7 +249,40 @@ const DNAUpload = () => {
     if (primaryGoal) ctx.primary_goal = primaryGoal;
     if (medications) ctx.medications = medications;
 
+    // Attach bloodwork if available
+    const bloodwork = buildBloodworkContext(latestPanel);
+    if (bloodwork) ctx.bloodwork = bloodwork;
+
     return Object.keys(ctx).length > 0 ? ctx : null;
+  };
+
+  const handleSaveQuickBloodwork = async () => {
+    const markers = BIOMARKERS
+      .filter((m) => m.panel === "basic")
+      .filter((m) => bloodworkValues[m.key] && !isNaN(parseFloat(bloodworkValues[m.key])))
+      .map((m) => ({
+        marker_name: m.key,
+        value: parseFloat(bloodworkValues[m.key]),
+        unit: m.unit,
+      }));
+
+    if (markers.length === 0) {
+      setShowBloodworkEntry(false);
+      return;
+    }
+
+    try {
+      await saveBloodwork.mutateAsync({
+        testDate: new Date().toISOString().split("T")[0],
+        panelType: "basic",
+        markers,
+      });
+      setBloodworkSaved(true);
+      setShowBloodworkEntry(false);
+      toast({ title: "Bloodwork saved", description: "Your results will be included in the assessment." });
+    } catch {
+      toast({ title: "Could not save bloodwork", variant: "destructive" });
+    }
   };
 
   const handleSubmit = async () => {
