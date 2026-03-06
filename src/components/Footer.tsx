@@ -67,6 +67,9 @@ const Footer = () => {
           <p className="text-[11px] text-primary-foreground/30 text-center leading-relaxed max-w-3xl mx-auto">
             Peptyl is an educational platform. Not medical advice. Research use only. Peptyl is not operated by medical professionals.
           </p>
+          <p className="text-[11px] text-primary-foreground/30 text-center leading-relaxed mt-2">
+            © {new Date().getFullYear()} Peptyl Ltd. All rights reserved. All content, design, and intellectual property on this site is owned by Peptyl Ltd and protected under UK and international copyright law. Unauthorised reproduction or distribution is prohibited and subject to DMCA takedown.
+          </p>
         </div>
       </div>
     </footer>

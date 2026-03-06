@@ -85,6 +85,15 @@
     </noscript>
     <script type="module" src="/src/main.tsx"></script>
     <script>
+      // Anti-copy protection
+      document.addEventListener('contextmenu', function(e) { e.preventDefault(); });
+      document.addEventListener('keydown', function(e) {
+        if ((e.ctrlKey || e.metaKey) && (e.key === 'u' || e.key === 'U' || e.key === 's' || e.key === 'S')) {
+          e.preventDefault();
+        }
+      });
+    </script>
+    <script>
       window.OneSignalDeferred = window.OneSignalDeferred || [];
       OneSignalDeferred.push(async function(OneSignal) {
         await OneSignal.init({
