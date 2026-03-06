@@ -121,49 +121,6 @@ const DNAReport = () => {
     );
   }
 
-  const handleDownloadPDF = useCallback(async () => {
-    setGeneratingPdf(true);
-    try {
-      const { default: html2canvas } = await import("html2canvas");
-      const { default: jsPDF } = await import("jspdf");
-
-      const el = reportRef.current;
-      if (!el) return;
-
-      const canvas = await html2canvas(el, {
-        scale: 2,
-        useCORS: true,
-        backgroundColor: "#070B14",
-      });
-
-      const imgData = canvas.toDataURL("image/png");
-      const pdfWidth = 210;
-      const pdfHeight = (canvas.height * pdfWidth) / canvas.width;
-      const pdf = new jsPDF("p", "mm", "a4");
-
-      let heightLeft = pdfHeight;
-      let position = 0;
-      const pageHeight = 297;
-
-      pdf.addImage(imgData, "PNG", 0, position, pdfWidth, pdfHeight);
-      heightLeft -= pageHeight;
-
-      while (heightLeft > 0) {
-        position -= pageHeight;
-        pdf.addPage();
-        pdf.addImage(imgData, "PNG", 0, position, pdfWidth, pdfHeight);
-        heightLeft -= pageHeight;
-      }
-
-      const tierLabel = isAdvanced ? "Advanced" : "Standard";
-      pdf.save(`Peptyl_DNA_Report_${tierLabel}_${new Date().toISOString().slice(0, 10)}.pdf`);
-    } catch (err) {
-      console.error("PDF generation error:", err);
-    } finally {
-      setGeneratingPdf(false);
-    }
-  }, [isAdvanced]);
-
   const buildGenotypeKey = (geneResults: any[]) => {
     if (!geneResults?.length) return null;
     const priority = ['MTHFR', 'APOE', 'VDR'];
