@@ -185,3 +185,73 @@
     padding-top: env(safe-area-inset-top, 0px);
   }
 }
+
+@media print {
+  header,
+  footer,
+  [data-hide-print="true"] {
+    display: none !important;
+  }
+
+  body,
+  main,
+  .bg-background,
+  .bg-card,
+  [class*="bg-card"],
+  [class*="bg-background"],
+  [class*="bg-muted"] {
+    background: white !important;
+    background-color: white !important;
+  }
+
+  [class*="text-foreground"],
+  [class*="text-muted-foreground"],
+  h1, h2, h3, h4, p, span, li {
+    color: #111827 !important;
+  }
+
+  [class*="text-primary"] {
+    color: #0d9488 !important;
+  }
+
+  [class*="border-border"],
+  [class*="border-primary"] {
+    border-color: #e5e7eb !important;
+  }
+
+  .rounded-xl,
+  .rounded-2xl,
+  [class*="rounded-xl"],
+  [class*="rounded-2xl"] {
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
+
+  * {
+    box-shadow: none !important;
+    text-shadow: none !important;
+  }
+
+  .container,
+  [class*="max-w-4xl"],
+  [class*="max-w-"] {
+    max-width: 100% !important;
+    padding-left: 0 !important;
+    padding-right: 0 !important;
+  }
+
+  svg text {
+    fill: #111827 !important;
+  }
+
+  [class*="bg-primary"]:not(body):not(main) {
+    background-color: #0d9488 !important;
+    print-color-adjust: exact;
+    -webkit-print-color-adjust: exact;
+  }
+
+  @page {
+    margin: 15mm 12mm;
+    size: A4 portrait;
+  }
+}
