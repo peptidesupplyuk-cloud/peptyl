@@ -14,6 +14,8 @@ import SupplementTable from "@/components/dna/SupplementTable";
 import PersonalisationCard from "@/components/dna/PersonalisationCard";
 import PeptideProtocolPanel from "@/components/dna/PeptideProtocolPanel";
 import GLP1AssessmentPanel from "@/components/dna/GLP1AssessmentPanel";
+import DietRecommendations from "@/components/dna/DietRecommendations";
+import TrainingRecommendations from "@/components/dna/TrainingRecommendations";
 import ActionPlan from "@/components/dna/ActionPlan";
 import LegalDisclaimer from "@/components/dna/LegalDisclaimer";
 import ReportReview from "@/components/dna/ReportReview";
@@ -117,6 +119,8 @@ const DNAReport = () => {
               <PersonalisationCard data={r.personalisation} />
               <PeptideProtocolPanel peptides={r.peptide_protocol} />
               <GLP1AssessmentPanel glp1={r.glp1_assessment} />
+              <DietRecommendations data={r.diet_recommendations} />
+              <TrainingRecommendations data={r.training_recommendations} />
             </>
           )}
 

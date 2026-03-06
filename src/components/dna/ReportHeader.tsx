@@ -99,7 +99,34 @@ const ReportHeader = ({ healthScore, meta, narrative }: Props) => {
 
       {narrative && (
         <div className="mt-6 pt-6 border-t border-border">
-          <p className="text-sm text-foreground leading-relaxed">{narrative}</p>
+          <h3 className="text-sm font-heading font-semibold text-foreground mb-3">Key Insights</h3>
+          {narrative.includes("•") ? (
+            <ul className="space-y-3">
+              {narrative
+                .split("\n")
+                .filter((line) => line.trim().startsWith("•"))
+                .map((line, i) => {
+                  const text = line.replace(/^•\s*/, "");
+                  const parts = text.split(/\*\*([^*]+)\*\*/g);
+                  return (
+                    <li key={i} className="flex items-start gap-3 text-sm text-foreground">
+                      <span className="text-primary mt-0.5 shrink-0 text-base">●</span>
+                      <span className="leading-relaxed">
+                        {parts.map((part, j) =>
+                          j % 2 === 1 ? (
+                            <strong key={j} className="font-semibold text-foreground">{part}</strong>
+                          ) : (
+                            <span key={j}>{part}</span>
+                          )
+                        )}
+                      </span>
+                    </li>
+                  );
+                })}
+            </ul>
+          ) : (
+            <p className="text-sm text-foreground leading-relaxed">{narrative}</p>
+          )}
         </div>
       )}
     </div>
