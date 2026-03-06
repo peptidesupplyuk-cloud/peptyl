@@ -4,8 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import SEO from "@/components/SEO";
-import { Loader2, Download } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { Loader2 } from "lucide-react";
 import ReportHeader from "@/components/dna/ReportHeader";
 import FlagsPanel from "@/components/dna/FlagsPanel";
 import GeneCards from "@/components/dna/GeneCards";
@@ -31,7 +30,7 @@ const DNAReport = () => {
   const [report, setReport] = useState<any>(null);
   const [review, setReview] = useState<{ rating: number; note: string | null } | null | undefined>(undefined);
   const [loading, setLoading] = useState(true);
-  const [generatingPdf, setGeneratingPdf] = useState(false);
+  
   const reportRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
