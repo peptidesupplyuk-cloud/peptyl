@@ -1,10 +1,11 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef, useCallback } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import SEO from "@/components/SEO";
-import { Loader2 } from "lucide-react";
+import { Loader2, Download } from "lucide-react";
+import { Button } from "@/components/ui/button";
 import ReportHeader from "@/components/dna/ReportHeader";
 import FlagsPanel from "@/components/dna/FlagsPanel";
 import GeneCards from "@/components/dna/GeneCards";
@@ -30,6 +31,8 @@ const DNAReport = () => {
   const [report, setReport] = useState<any>(null);
   const [review, setReview] = useState<{ rating: number; note: string | null } | null | undefined>(undefined);
   const [loading, setLoading] = useState(true);
+  const [generatingPdf, setGeneratingPdf] = useState(false);
+  const reportRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const fetchReport = async () => {
@@ -61,6 +64,52 @@ const DNAReport = () => {
     fetchReport();
   }, [id, user]);
 
+  const r = report?.report_json || {};
+  const isAdvanced = report?.assessment_tier === "advanced";
+
+  const handleDownloadPDF = useCallback(async () => {
+    setGeneratingPdf(true);
+    try {
+      const { default: html2canvas } = await import("html2canvas");
+      const { default: jsPDF } = await import("jspdf");
+
+      const el = reportRef.current;
+      if (!el) return;
+
+      const canvas = await html2canvas(el, {
+        scale: 2,
+        useCORS: true,
+        backgroundColor: "#070B14",
+      });
+
+      const imgData = canvas.toDataURL("image/png");
+      const pdfWidth = 210;
+      const pdfHeight = (canvas.height * pdfWidth) / canvas.width;
+      const pdf = new jsPDF("p", "mm", "a4");
+
+      let heightLeft = pdfHeight;
+      let position = 0;
+      const pageHeight = 297;
+
+      pdf.addImage(imgData, "PNG", 0, position, pdfWidth, pdfHeight);
+      heightLeft -= pageHeight;
+
+      while (heightLeft > 0) {
+        position -= pageHeight;
+        pdf.addPage();
+        pdf.addImage(imgData, "PNG", 0, position, pdfWidth, pdfHeight);
+        heightLeft -= pageHeight;
+      }
+
+      const tierLabel = isAdvanced ? "Advanced" : "Standard";
+      pdf.save(`Peptyl_DNA_Report_${tierLabel}_${new Date().toISOString().slice(0, 10)}.pdf`);
+    } catch (err) {
+      console.error("PDF generation error:", err);
+    } finally {
+      setGeneratingPdf(false);
+    }
+  }, [isAdvanced]);
+
   if (loading) {
     return (
       <>
@@ -71,9 +120,6 @@ const DNAReport = () => {
       </>
     );
   }
-
-  const r = report.report_json || {};
-  const isAdvanced = report.assessment_tier === "advanced";
 
   const buildGenotypeKey = (geneResults: any[]) => {
     if (!geneResults?.length) return null;
@@ -90,9 +136,9 @@ const DNAReport = () => {
       <SEO title="Your DNA Report | Peptyl" description="Personalised genetic health assessment report." path={`/dna/report/${id}`} />
       <Header />
       <main className="min-h-screen pt-24 pb-16 bg-background">
-        <div className="container mx-auto px-6 max-w-4xl space-y-8">
-          {/* Tier badge */}
-          <div className="flex items-center gap-2">
+        <div className="container mx-auto px-6 max-w-4xl space-y-8" ref={reportRef}>
+          {/* Tier badge + PDF button */}
+          <div className="flex items-center justify-between">
             <span className={`text-xs font-semibold px-3 py-1 rounded-full ${
               isAdvanced
                 ? "bg-primary/10 text-primary"
@@ -100,6 +146,16 @@ const DNAReport = () => {
             }`}>
               {isAdvanced ? "Advanced ✦" : "Standard"}
             </span>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={handleDownloadPDF}
+              disabled={generatingPdf}
+              className="gap-2 print:hidden"
+            >
+              {generatingPdf ? <Loader2 className="h-4 w-4 animate-spin" /> : <Download className="h-4 w-4" />}
+              {generatingPdf ? "Generating…" : "Download PDF"}
+            </Button>
           </div>
 
           <ReportHeader
