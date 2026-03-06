@@ -1,6 +1,6 @@
 import { useState, useCallback, useEffect } from "react";
 import { useNavigate, Link, useSearchParams } from "react-router-dom";
-import { FileText, Upload, Camera, MessageSquare, X, CheckCircle2, Loader2, ChevronDown, ChevronUp, CreditCard } from "lucide-react";
+import { FileText, Upload, Camera, MessageSquare, X, CheckCircle2, Loader2, ChevronDown, ChevronUp, CreditCard, FlaskConical, AlertCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
@@ -12,6 +12,8 @@ import SEO from "@/components/SEO";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+import { useBloodworkPanels, useSaveBloodwork } from "@/hooks/use-bloodwork";
+import { BIOMARKERS } from "@/data/biomarker-ranges";
 
 const TARGET_RSIDS = new Set([
   // Original SNPs
@@ -89,6 +91,21 @@ const DNAUpload = () => {
   const [bp, setBp] = useState("");
   const [primaryGoal, setPrimaryGoal] = useState("");
   const [medications, setMedications] = useState("");
+
+  // Bloodwork integration
+  const { data: panels = [] } = useBloodworkPanels();
+  const saveBloodwork = useSaveBloodwork();
+  const [showBloodworkEntry, setShowBloodworkEntry] = useState(false);
+  const [bloodworkValues, setBloodworkValues] = useState<Record<string, string>>({});
+  const [bloodworkSaved, setBloodworkSaved] = useState(false);
+  const [showBloodworkDetails, setShowBloodworkDetails] = useState(false);
+
+  const latestPanel = panels[0] ?? null;
+  const latestPanelDate = latestPanel?.test_date
+    ? new Date(latestPanel.test_date).toLocaleDateString("en-GB", {
+        day: "numeric", month: "short", year: "numeric",
+      })
+    : null;
 
   // Check unlock status
   useEffect(() => {
