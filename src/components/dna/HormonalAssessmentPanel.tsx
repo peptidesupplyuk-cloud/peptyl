@@ -1,96 +1,149 @@
-import { Activity, AlertTriangle } from "lucide-react";
+import { Activity, FlaskConical, Eye, TestTube } from "lucide-react";
 
-interface HormonalData {
-  triggered?: boolean;
-  trigger_reason?: string;
-  testosterone_status?: {
-    value: number | null;
-    unit: string | null;
-    status: string;
-  };
-  recommendations?: string[];
-  genetic_signals?: string[];
-  goal_relevance?: string;
+interface HormonalAssessment {
+  triggered: boolean;
+  sex?: string;
+  age?: number;
+  testosterone_value?: number;
+  testosterone_unit?: string;
+  testosterone_status?: "optimal" | "suboptimal" | "action_required" | "not_provided";
+  testosterone_range_note?: string;
+  summary?: string;
+  optimisation_recommendations?: string[];
+  watch_for?: string;
+  bloodwork_to_add?: string[];
+  peptide_consideration?: string;
 }
 
 interface Props {
-  data?: HormonalData;
+  hormonal: HormonalAssessment | undefined;
 }
 
-const HormonalAssessmentPanel = ({ data }: Props) => {
-  if (!data?.triggered) return null;
+const statusStyle: Record<string, { bg: string; text: string; badge: string; label: string }> = {
+  optimal: {
+    bg: "bg-primary/5 border-primary/20",
+    text: "text-primary",
+    badge: "bg-primary/10 text-primary",
+    label: "Optimal",
+  },
+  suboptimal: {
+    bg: "bg-amber-500/5 border-amber-500/20",
+    text: "text-amber-500",
+    badge: "bg-amber-500/10 text-amber-600",
+    label: "Suboptimal",
+  },
+  action_required: {
+    bg: "bg-red-500/5 border-red-500/20",
+    text: "text-red-500",
+    badge: "bg-red-500/10 text-red-500",
+    label: "Action Required",
+  },
+  not_provided: {
+    bg: "bg-muted/50 border-border",
+    text: "text-muted-foreground",
+    badge: "bg-muted text-muted-foreground",
+    label: "Not Tested",
+  },
+};
 
-  const tStatus = data.testosterone_status;
-  const statusColor = tStatus?.status === "not_tested"
-    ? "bg-yellow-500/10 text-yellow-600"
-    : tStatus?.value && tStatus.value < 8
-      ? "bg-destructive/10 text-destructive"
-      : tStatus?.value && tStatus.value < 15
-        ? "bg-yellow-500/10 text-yellow-600"
-        : "bg-primary/10 text-primary";
+const HormonalAssessmentPanel = ({ hormonal }: Props) => {
+  if (!hormonal || !hormonal.triggered) return null;
+
+  const status = hormonal.testosterone_status ?? "not_provided";
+  const style = statusStyle[status] ?? statusStyle.not_provided;
 
   return (
-    <div className="bg-card border border-border rounded-2xl p-6 space-y-5">
-      <div className="flex items-center gap-3">
-        <div className="w-9 h-9 rounded-xl bg-orange-500/10 flex items-center justify-center shrink-0">
-          <Activity className="h-5 w-5 text-orange-500" />
-        </div>
-        <div className="flex-1 min-w-0">
+    <div className={`border rounded-2xl p-6 space-y-5 ${style.bg}`}>
+      {/* Header */}
+      <div className="flex items-center gap-3 flex-wrap">
+        <div className="flex items-center gap-2">
+          <Activity className="h-5 w-5 text-foreground" />
           <h2 className="text-xl font-heading font-bold text-foreground">Hormonal Assessment</h2>
-          <span className="text-xs text-muted-foreground">{data.trigger_reason}</span>
         </div>
+        {hormonal.sex && hormonal.age && (
+          <span className="text-xs text-muted-foreground">
+            {hormonal.sex.charAt(0).toUpperCase() + hormonal.sex.slice(1)}, age {hormonal.age}
+          </span>
+        )}
       </div>
 
-      {/* Testosterone status */}
-      {tStatus && (
-        <div className="bg-muted/40 rounded-xl px-4 py-3">
-          <div className="flex items-center justify-between mb-2">
-            <span className="text-sm font-medium text-foreground">Testosterone</span>
-            <span className={`text-xs font-medium px-2.5 py-1 rounded-full ${statusColor}`}>
-              {tStatus.status === "not_tested"
-                ? "Not Tested"
-                : `${tStatus.value} ${tStatus.unit || "nmol/L"}`}
-            </span>
-          </div>
-          {tStatus.status === "not_tested" && (
-            <div className="flex items-start gap-2 mt-2">
-              <AlertTriangle className="h-3.5 w-3.5 text-yellow-600 mt-0.5 shrink-0" />
-              <p className="text-xs text-muted-foreground">
-                No testosterone data on file. Consider adding this to your next bloodwork panel.
-              </p>
-            </div>
+      {/* Testosterone value */}
+      <div className="flex items-center justify-between gap-4 flex-wrap">
+        <div>
+          <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider mb-1">Testosterone</p>
+          {hormonal.testosterone_value ? (
+            <p className="text-3xl font-bold text-foreground">
+              {hormonal.testosterone_value}
+              <span className="text-base font-normal text-muted-foreground ml-1">{hormonal.testosterone_unit ?? "ng/dL"}</span>
+            </p>
+          ) : (
+            <p className="text-lg font-semibold text-muted-foreground">Not tested</p>
+          )}
+          {hormonal.testosterone_range_note && (
+            <p className="text-xs text-muted-foreground mt-1">{hormonal.testosterone_range_note}</p>
           )}
         </div>
+        <span className={`text-xs font-semibold px-3 py-1.5 rounded-full ${style.badge}`}>
+          {style.label}
+        </span>
+      </div>
+
+      {/* Summary */}
+      {hormonal.summary && (
+        <p className="text-sm text-foreground leading-relaxed">{hormonal.summary}</p>
       )}
 
-      {/* Recommendations */}
-      {data.recommendations && data.recommendations.length > 0 && (
+      {/* Optimisation recommendations */}
+      {hormonal.optimisation_recommendations && hormonal.optimisation_recommendations.length > 0 && (
         <div>
-          <span className="text-sm font-heading font-semibold text-foreground mb-3 block">Recommendations</span>
-          <ul className="space-y-2.5">
-            {data.recommendations.map((rec, i) => (
-              <li key={i} className="flex items-start gap-2.5 text-sm text-foreground">
-                <span className="text-orange-500 shrink-0 mt-1.5 text-[8px]">●</span>
-                <span className="leading-relaxed">{rec}</span>
+          <h3 className="text-sm font-semibold text-foreground mb-2 flex items-center gap-2">
+            <FlaskConical className="h-4 w-4" />
+            Optimisation Recommendations
+          </h3>
+          <ul className="space-y-2">
+            {hormonal.optimisation_recommendations.map((rec, i) => (
+              <li key={i} className="flex items-start gap-2 text-sm text-foreground">
+                <span className={`mt-1.5 h-1.5 w-1.5 rounded-full shrink-0 ${style.text.replace("text-", "bg-")}`} />
+                {rec}
               </li>
             ))}
           </ul>
         </div>
       )}
 
-      {/* Genetic signals */}
-      {data.genetic_signals && data.genetic_signals.length > 0 && (
-        <div className="flex flex-wrap gap-1.5">
-          {data.genetic_signals.map((s, i) => (
-            <span key={i} className="text-xs bg-orange-500/10 text-orange-600 px-2 py-0.5 rounded-md">{s}</span>
-          ))}
+      {/* Watch for */}
+      {hormonal.watch_for && (
+        <div className="bg-background/60 border border-border rounded-xl p-4 flex items-start gap-3">
+          <Eye className="h-4 w-4 text-muted-foreground mt-0.5 shrink-0" />
+          <div>
+            <p className="text-xs font-semibold text-foreground mb-1">Watch For</p>
+            <p className="text-xs text-muted-foreground leading-relaxed">{hormonal.watch_for}</p>
+          </div>
         </div>
       )}
 
-      {/* Goal relevance */}
-      {data.goal_relevance && (
-        <div className="bg-primary/5 border border-primary/20 rounded-xl p-3">
-          <p className="text-xs text-foreground leading-relaxed">{data.goal_relevance}</p>
+      {/* Bloodwork to add */}
+      {hormonal.bloodwork_to_add && hormonal.bloodwork_to_add.length > 0 && (
+        <div>
+          <h3 className="text-sm font-semibold text-foreground mb-2 flex items-center gap-2">
+            <TestTube className="h-4 w-4" />
+            Recommended Bloodwork Additions
+          </h3>
+          <div className="flex flex-wrap gap-2">
+            {hormonal.bloodwork_to_add.map((marker, i) => (
+              <span key={i} className="text-xs px-2.5 py-1 rounded-full bg-background border border-border text-foreground">
+                {marker}
+              </span>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Peptide consideration */}
+      {hormonal.peptide_consideration && (
+        <div className="bg-primary/5 border border-primary/15 rounded-xl p-4">
+          <p className="text-xs font-semibold text-primary mb-1">Research Consideration</p>
+          <p className="text-xs text-foreground leading-relaxed">{hormonal.peptide_consideration}</p>
         </div>
       )}
     </div>

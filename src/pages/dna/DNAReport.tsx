@@ -144,7 +144,7 @@ const DNAReport = () => {
           {isAdvanced && (
             <>
               <PersonalisationCard data={r.personalisation} />
-              <HormonalAssessmentPanel data={r.hormonal_assessment} />
+              <HormonalAssessmentPanel hormonal={r.hormonal_assessment} />
               <PeptideProtocolPanel peptides={r.peptide_protocol} />
               <GLP1AssessmentPanel glp1={r.glp1_assessment} />
               <DietRecommendations data={r.diet_recommendations} />
