@@ -211,7 +211,20 @@ serve(async (req) => {
     }
 
     const tierPrefix = `[TIER: ${tier}]\n\n`;
-    const lifestyleStr = lifestyleContext ? `\n\nLifestyle context: ${JSON.stringify(lifestyleContext)}` : "";
+    let lifestyleStr = "";
+    if (lifestyleContext) {
+      const { bloodwork, ...rest } = lifestyleContext;
+      if (Object.keys(rest).length > 0) {
+        lifestyleStr += `\n\nLifestyle context: ${JSON.stringify(rest)}`;
+      }
+      if (bloodwork?.markers && Object.keys(bloodwork.markers).length > 0) {
+        const bwLines = Object.entries(bloodwork.markers)
+          .map(([key, m]: [string, any]) => `  ${m.name ?? key}: ${m.value} ${m.unit}`)
+          .join("\n");
+        lifestyleStr += `\n\nCONFIRMED BLOODWORK (test date: ${bloodwork.test_date ?? "recent"}, panel: ${bloodwork.panel_type ?? "basic"}):\n${bwLines}`;
+        lifestyleStr += `\n\nIMPORTANT: Use these confirmed biomarker values directly in your biomarker_results output and cross-reference them with genetic variants to generate precise, personalised recommendations. Do not estimate values that are provided above.`;
+      }
+    }
 
     // Build user message based on method
     let userContent: any;
