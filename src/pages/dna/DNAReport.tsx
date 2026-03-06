@@ -16,6 +16,8 @@ import PeptideProtocolPanel from "@/components/dna/PeptideProtocolPanel";
 import GLP1AssessmentPanel from "@/components/dna/GLP1AssessmentPanel";
 import DietRecommendations from "@/components/dna/DietRecommendations";
 import TrainingRecommendations from "@/components/dna/TrainingRecommendations";
+import HormonalAssessmentPanel from "@/components/dna/HormonalAssessmentPanel";
+import ProtocolCrossReference from "@/components/dna/ProtocolCrossReference";
 import ActionPlan from "@/components/dna/ActionPlan";
 import LegalDisclaimer from "@/components/dna/LegalDisclaimer";
 import ReportReview from "@/components/dna/ReportReview";
@@ -142,6 +144,7 @@ const DNAReport = () => {
           {isAdvanced && (
             <>
               <PersonalisationCard data={r.personalisation} />
+              <HormonalAssessmentPanel data={r.hormonal_assessment} />
               <PeptideProtocolPanel peptides={r.peptide_protocol} />
               <GLP1AssessmentPanel glp1={r.glp1_assessment} />
               <DietRecommendations data={r.diet_recommendations} />
@@ -149,15 +152,22 @@ const DNAReport = () => {
             </>
           )}
 
+          {/* Protocol cross-reference (if user has active protocols) */}
+          {r.protocol_cross_reference && (
+            <ProtocolCrossReference data={r.protocol_cross_reference} />
+          )}
+
           <ActionPlan plan={r.action_plan} />
           <div data-hide-print="true">
             <OutcomeInsights reportId={id!} genotypeKey={buildGenotypeKey(r.gene_results)} />
           </div>
-          {r.supplement_protocol?.length > 0 && (
+          {(r.supplement_protocol?.length > 0 || r.peptide_protocol?.length > 0) && (
             <div data-hide-print="true">
               <CreateProtocolFromReport
-                supplements={r.supplement_protocol}
+                supplements={r.supplement_protocol || []}
+                peptides={r.peptide_protocol || []}
                 reportId={id!}
+                geneticArchetype={r.personalisation?.genetic_archetype}
               />
             </div>
           )}
