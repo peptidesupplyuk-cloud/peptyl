@@ -40,7 +40,7 @@ const PeptideProtocolPanel = ({ peptides }: Props) => {
         </span>
       </div>
 
-      {peptides.map((p, i) => (
+      {items.map((p, i) => (
         <PeptideCard key={i} peptide={p} />
       ))}
 
