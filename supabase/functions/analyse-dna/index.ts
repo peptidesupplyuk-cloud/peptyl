@@ -147,7 +147,7 @@ IGF1 TT: anabolic-responsive — prioritise progressive overload resistance trai
 7. Narrative MUST be 5–7 bullet points starting with • and an emoji — NO prose paragraphs.
 8. Never diagnose. Use "associated with", "may indicate", "suggests monitoring".
 9. UK/EU context — metric units, NHS-aligned ranges.
-10. peptide_protocol MUST be included for Advanced if ANY of these genes present: COL1A1, COL5A1, IL6, TNF-a, IGF1, ACTN3. Max 3 peptides, each must list driven_by genes.
+10. peptide_protocol MUST be included for Advanced if ANY of these genes present: COL1A1, COL5A1, IL6, TNF-a, IGF1, ACTN3, SOD2, NOS3. If ACTN3 XX is detected, BPC-157 is appropriate for recovery support. If IL6 or TNF-a high-risk alleles detected, BPC-157 addresses chronic inflammation. Max 3 peptides, each must list driven_by genes. If no tissue repair SNPs are present at all, include an empty array [] — do not omit the field.
 11. Every biomarker_result MUST include gene_interaction field linking it to the relevant variant.
 12. Every supplement in supplement_protocol MUST include driven_by array with gene names AND biomarker values.
 
@@ -175,8 +175,10 @@ The following outputs are UNACCEPTABLE and will be rejected:
 ❌ BAD biomarker gene_interaction: absent or missing
 ✅ GOOD gene_interaction: "VDR Taq1 tt (rs731236) — reduced receptor binding efficiency means standard D3 intake achieves lower serum levels than average; you need 2-3x typical dose to reach optimal range"
 
-❌ BAD: No peptide_protocol in Advanced report when COL1A1 or IL6 variants detected
-✅ GOOD: Include BPC-157 with driven_by: ["COL1A1 rs1800012 GT — elevated soft tissue vulnerability", "IL6 rs1800795 GG — chronic inflammatory signal"]
+❌ BAD: No peptide_protocol field at all in Advanced report
+✅ GOOD: Always include peptide_protocol — use [] if no signals present, or include BPC-157 with driven_by: ["COL1A1 rs1800012 GT — elevated soft tissue vulnerability", "IL6 rs1800795 GG — chronic inflammatory signal"]
+❌ BAD: No peptide in Advanced report when ACTN3 XX detected
+✅ GOOD: ACTN3 XX means slow muscle recovery — BPC-157 supports tissue repair and recovery between sessions
 
 ---
 
