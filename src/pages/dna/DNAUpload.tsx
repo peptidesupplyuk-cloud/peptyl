@@ -341,7 +341,7 @@ const DNAUpload = () => {
   if (!isUnlocked && user) {
     return (
       <>
-        <SEO title={`Unlock ${tierLabel} DNA Assessment | Peptyl`} description="Purchase your DNA health assessment." path="/dna/upload" />
+        <SEO title={`Unlock ${tierLabel} Health Assessment | Peptyl`} description="Purchase your holistic health assessment." path="/dna/upload" />
         <Header />
         <main className="min-h-screen pt-24 pb-16 bg-background">
           <div className="container mx-auto px-6 max-w-md text-center">

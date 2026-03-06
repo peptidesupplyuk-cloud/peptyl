@@ -50,7 +50,7 @@ const DNADashboard = () => {
 
   return (
     <>
-      <SEO title="Your DNA Reports | Peptyl" description="View and manage your DNA health assessment reports." path="/dna/dashboard" />
+      <SEO title="Your Health Reports | Peptyl" description="View and manage your holistic health assessment reports." path="/dna/dashboard" />
       <Header />
       <main className="min-h-screen pt-24 pb-16 bg-background">
         <div className="container mx-auto px-6 max-w-3xl">
