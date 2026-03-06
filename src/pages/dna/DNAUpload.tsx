@@ -1,6 +1,6 @@
 import { useState, useCallback, useEffect } from "react";
 import { useNavigate, Link, useSearchParams } from "react-router-dom";
-import { FileText, Upload, Camera, MessageSquare, X, CheckCircle2, Loader2, ChevronDown, ChevronUp, CreditCard } from "lucide-react";
+import { FileText, Upload, Camera, MessageSquare, X, CheckCircle2, Loader2, ChevronDown, ChevronUp, CreditCard, FlaskConical, AlertCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
@@ -12,6 +12,8 @@ import SEO from "@/components/SEO";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+import { useBloodworkPanels, useSaveBloodwork } from "@/hooks/use-bloodwork";
+import { BIOMARKERS } from "@/data/biomarker-ranges";
 
 const TARGET_RSIDS = new Set([
   // Original SNPs
@@ -89,6 +91,21 @@ const DNAUpload = () => {
   const [bp, setBp] = useState("");
   const [primaryGoal, setPrimaryGoal] = useState("");
   const [medications, setMedications] = useState("");
+
+  // Bloodwork integration
+  const { data: panels = [] } = useBloodworkPanels();
+  const saveBloodwork = useSaveBloodwork();
+  const [showBloodworkEntry, setShowBloodworkEntry] = useState(false);
+  const [bloodworkValues, setBloodworkValues] = useState<Record<string, string>>({});
+  const [bloodworkSaved, setBloodworkSaved] = useState(false);
+  const [showBloodworkDetails, setShowBloodworkDetails] = useState(false);
+
+  const latestPanel = panels[0] ?? null;
+  const latestPanelDate = latestPanel?.test_date
+    ? new Date(latestPanel.test_date).toLocaleDateString("en-GB", {
+        day: "numeric", month: "short", year: "numeric",
+      })
+    : null;
 
   // Check unlock status
   useEffect(() => {
@@ -204,6 +221,19 @@ const DNAUpload = () => {
     !loading &&
     (inputText.trim().length >= 10 || !!imageBase64);
 
+  const buildBloodworkContext = (panel: typeof latestPanel) => {
+    if (!panel || panel.markers.length === 0) return null;
+    const ctx: Record<string, { value: number; unit: string; name: string }> = {};
+    for (const m of panel.markers) {
+      ctx[m.marker_name] = { value: m.value, unit: m.unit, name: m.marker_name };
+    }
+    return {
+      test_date: panel.test_date,
+      panel_type: panel.panel_type,
+      markers: ctx,
+    };
+  };
+
   const buildLifestyleContext = () => {
     const h = parseFloat(heightCm);
     const w = parseFloat(weightKg);
@@ -219,7 +249,40 @@ const DNAUpload = () => {
     if (primaryGoal) ctx.primary_goal = primaryGoal;
     if (medications) ctx.medications = medications;
 
+    // Attach bloodwork if available
+    const bloodwork = buildBloodworkContext(latestPanel);
+    if (bloodwork) ctx.bloodwork = bloodwork;
+
     return Object.keys(ctx).length > 0 ? ctx : null;
+  };
+
+  const handleSaveQuickBloodwork = async () => {
+    const markers = BIOMARKERS
+      .filter((m) => m.panel === "basic")
+      .filter((m) => bloodworkValues[m.key] && !isNaN(parseFloat(bloodworkValues[m.key])))
+      .map((m) => ({
+        marker_name: m.key,
+        value: parseFloat(bloodworkValues[m.key]),
+        unit: m.unit,
+      }));
+
+    if (markers.length === 0) {
+      setShowBloodworkEntry(false);
+      return;
+    }
+
+    try {
+      await saveBloodwork.mutateAsync({
+        testDate: new Date().toISOString().split("T")[0],
+        panelType: "basic",
+        markers,
+      });
+      setBloodworkSaved(true);
+      setShowBloodworkEntry(false);
+      toast({ title: "Bloodwork saved", description: "Your results will be included in the assessment." });
+    } catch {
+      toast({ title: "Could not save bloodwork", variant: "destructive" });
+    }
   };
 
   const handleSubmit = async () => {
@@ -370,6 +433,139 @@ const DNAUpload = () => {
               Change tier
             </Link>
           </div>
+
+          {/* ── BLOODWORK INTEGRATION SECTION ── */}
+          {latestPanel && latestPanel.markers.length > 0 ? (
+            <div className="mb-6 bg-card border border-primary/20 rounded-xl overflow-hidden">
+              <button
+                onClick={() => setShowBloodworkDetails(!showBloodworkDetails)}
+                className="w-full flex items-center justify-between px-4 py-3 hover:bg-muted/20 transition-colors"
+              >
+                <div className="flex items-center gap-3">
+                  <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
+                    <FlaskConical className="h-4 w-4 text-primary" />
+                  </div>
+                  <div className="text-left">
+                    <p className="text-sm font-medium text-foreground">
+                      Bloodwork included ✓
+                    </p>
+                    <p className="text-xs text-muted-foreground">
+                      {latestPanel.markers.length} markers from {latestPanelDate} · improves recommendation accuracy
+                    </p>
+                  </div>
+                </div>
+                <div className="flex items-center gap-2 shrink-0">
+                  <span className="text-xs font-medium text-primary bg-primary/10 px-2.5 py-0.5 rounded-full">
+                    Active
+                  </span>
+                  {showBloodworkDetails
+                    ? <ChevronUp className="h-4 w-4 text-muted-foreground" />
+                    : <ChevronDown className="h-4 w-4 text-muted-foreground" />
+                  }
+                </div>
+              </button>
+              {showBloodworkDetails && (
+                <div className="px-4 pb-4 border-t border-border/50">
+                  <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 mt-3">
+                    {latestPanel.markers.map((m) => {
+                      const def = BIOMARKERS.find((b) => b.key === m.marker_name);
+                      return (
+                        <div key={m.marker_name} className="bg-muted/30 rounded-lg px-3 py-2">
+                          <p className="text-xs text-muted-foreground truncate">
+                            {def?.name ?? m.marker_name}
+                          </p>
+                          <p className="text-sm font-semibold text-foreground">
+                            {m.value} <span className="text-xs font-normal text-muted-foreground">{m.unit}</span>
+                          </p>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
+            </div>
+          ) : bloodworkSaved ? (
+            <div className="mb-6 flex items-center gap-3 bg-primary/10 border border-primary/20 rounded-xl px-4 py-3">
+              <CheckCircle2 className="h-4 w-4 text-primary shrink-0" />
+              <p className="text-sm text-foreground">Bloodwork saved and included in your assessment.</p>
+            </div>
+          ) : showBloodworkEntry ? (
+            <div className="mb-6 bg-card border border-border rounded-xl overflow-hidden">
+              <div className="flex items-center justify-between px-4 py-3 border-b border-border">
+                <div className="flex items-center gap-2">
+                  <FlaskConical className="h-4 w-4 text-primary" />
+                  <p className="text-sm font-medium text-foreground">Enter key blood results</p>
+                </div>
+                <button
+                  onClick={() => setShowBloodworkEntry(false)}
+                  className="text-muted-foreground hover:text-foreground"
+                >
+                  <X className="h-4 w-4" />
+                </button>
+              </div>
+              <div className="p-4">
+                <p className="text-xs text-muted-foreground mb-4">
+                  Enter any values you have. Leave blank what you don't.
+                  Results will be saved to your profile and included in this assessment.
+                </p>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  {BIOMARKERS.filter((m) => m.panel === "basic" && m.category !== "Body Composition" && m.category !== "Cardiovascular").map((m) => (
+                    <div key={m.key}>
+                      <label className="text-xs text-muted-foreground mb-1 block">
+                        {m.name} <span className="text-muted-foreground/60">({m.unit})</span>
+                      </label>
+                      <Input
+                        type="number"
+                        step="any"
+                        placeholder={`e.g. ${m.optimalMin}`}
+                        value={bloodworkValues[m.key] ?? ""}
+                        onChange={(e) => setBloodworkValues((prev) => ({ ...prev, [m.key]: e.target.value }))}
+                      />
+                    </div>
+                  ))}
+                </div>
+                <div className="flex gap-2 mt-4">
+                  <Button
+                    onClick={handleSaveQuickBloodwork}
+                    disabled={saveBloodwork.isPending}
+                    className="flex-1"
+                    size="sm"
+                  >
+                    {saveBloodwork.isPending ? "Saving..." : "Save & Include"}
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setShowBloodworkEntry(false)}
+                  >
+                    Skip
+                  </Button>
+                </div>
+              </div>
+            </div>
+          ) : (
+            <div className="mb-6 bg-card border border-amber-500/20 rounded-xl px-4 py-3">
+              <div className="flex items-start gap-3">
+                <AlertCircle className="h-4 w-4 text-amber-500 mt-0.5 shrink-0" />
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-medium text-foreground">
+                    No bloodwork on file
+                  </p>
+                  <p className="text-xs text-muted-foreground mt-0.5">
+                    DNA + bloodwork together produce significantly more accurate protocols.
+                    Genetic variants only tell half the story — your current biomarkers
+                    confirm whether those variants are actively affecting you.
+                  </p>
+                  <button
+                    onClick={() => setShowBloodworkEntry(true)}
+                    className="text-xs text-primary font-medium mt-2 hover:underline"
+                  >
+                    + Add blood results now (optional)
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
 
           <h1 className="text-3xl font-heading font-bold text-foreground mb-2">Upload Your Data</h1>
           <p className="text-muted-foreground mb-8">Choose how you'd like to provide your genetic or health data.</p>
