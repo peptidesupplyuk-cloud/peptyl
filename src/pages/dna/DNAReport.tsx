@@ -1,11 +1,10 @@
-import { useEffect, useState, useRef, useCallback } from "react";
+import { useEffect, useState, useRef } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import SEO from "@/components/SEO";
-import { Loader2, Download } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { Loader2 } from "lucide-react";
 import ReportHeader from "@/components/dna/ReportHeader";
 import FlagsPanel from "@/components/dna/FlagsPanel";
 import GeneCards from "@/components/dna/GeneCards";
@@ -31,7 +30,7 @@ const DNAReport = () => {
   const [report, setReport] = useState<any>(null);
   const [review, setReview] = useState<{ rating: number; note: string | null } | null | undefined>(undefined);
   const [loading, setLoading] = useState(true);
-  const [generatingPdf, setGeneratingPdf] = useState(false);
+  
   const reportRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -67,48 +66,6 @@ const DNAReport = () => {
   const r = report?.report_json || {};
   const isAdvanced = report?.assessment_tier === "advanced";
 
-  const handleDownloadPDF = useCallback(async () => {
-    setGeneratingPdf(true);
-    try {
-      const { default: html2canvas } = await import("html2canvas");
-      const { default: jsPDF } = await import("jspdf");
-
-      const el = reportRef.current;
-      if (!el) return;
-
-      const canvas = await html2canvas(el, {
-        scale: 2,
-        useCORS: true,
-        backgroundColor: "#070B14",
-      });
-
-      const imgData = canvas.toDataURL("image/png");
-      const pdfWidth = 210;
-      const pdfHeight = (canvas.height * pdfWidth) / canvas.width;
-      const pdf = new jsPDF("p", "mm", "a4");
-
-      let heightLeft = pdfHeight;
-      let position = 0;
-      const pageHeight = 297;
-
-      pdf.addImage(imgData, "PNG", 0, position, pdfWidth, pdfHeight);
-      heightLeft -= pageHeight;
-
-      while (heightLeft > 0) {
-        position -= pageHeight;
-        pdf.addPage();
-        pdf.addImage(imgData, "PNG", 0, position, pdfWidth, pdfHeight);
-        heightLeft -= pageHeight;
-      }
-
-      const tierLabel = isAdvanced ? "Advanced" : "Standard";
-      pdf.save(`Peptyl_DNA_Report_${tierLabel}_${new Date().toISOString().slice(0, 10)}.pdf`);
-    } catch (err) {
-      console.error("PDF generation error:", err);
-    } finally {
-      setGeneratingPdf(false);
-    }
-  }, [isAdvanced]);
 
   if (loading) {
     return (
@@ -136,9 +93,22 @@ const DNAReport = () => {
       <SEO title="Your DNA Report | Peptyl" description="Personalised genetic health assessment report." path={`/dna/report/${id}`} />
       <Header />
       <main className="min-h-screen pt-24 pb-16 bg-background">
+        {/* Print-only header */}
+        <div className="hidden print:block mb-6 pb-4 border-b border-gray-200 container mx-auto px-6 max-w-4xl">
+          <div className="flex items-center justify-between">
+            <div>
+              <h1 className="text-2xl font-bold text-gray-900">Peptyl DNA Health Report</h1>
+              <p className="text-sm text-gray-500 mt-1">
+                {isAdvanced ? "Advanced Assessment" : "Standard Assessment"} · Generated {new Date(report.created_at || Date.now()).toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' })}
+              </p>
+            </div>
+            <p className="text-xs text-gray-400">peptyl.co.uk · For research and educational purposes only</p>
+          </div>
+        </div>
+
         <div className="container mx-auto px-6 max-w-4xl space-y-8" ref={reportRef}>
           {/* Tier badge + PDF button */}
-          <div className="flex items-center justify-between">
+          <div className="flex items-center justify-between" data-hide-print="true">
             <span className={`text-xs font-semibold px-3 py-1 rounded-full ${
               isAdvanced
                 ? "bg-primary/10 text-primary"
@@ -146,16 +116,15 @@ const DNAReport = () => {
             }`}>
               {isAdvanced ? "Advanced ✦" : "Standard"}
             </span>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={handleDownloadPDF}
-              disabled={generatingPdf}
-              className="gap-2 print:hidden"
+            <button
+              onClick={() => window.print()}
+              className="flex items-center gap-2 text-xs font-medium text-muted-foreground hover:text-foreground border border-border rounded-lg px-3 py-2 hover:bg-muted/30 transition-colors"
             >
-              {generatingPdf ? <Loader2 className="h-4 w-4 animate-spin" /> : <Download className="h-4 w-4" />}
-              {generatingPdf ? "Generating…" : "Download PDF"}
-            </Button>
+              <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M6 9V2h12v7"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect width="12" height="8" x="6" y="14"/>
+              </svg>
+              Save as PDF
+            </button>
           </div>
 
           <ReportHeader
@@ -181,16 +150,24 @@ const DNAReport = () => {
           )}
 
           <ActionPlan plan={r.action_plan} />
-          <OutcomeInsights reportId={id!} genotypeKey={buildGenotypeKey(r.gene_results)} />
+          <div data-hide-print="true">
+            <OutcomeInsights reportId={id!} genotypeKey={buildGenotypeKey(r.gene_results)} />
+          </div>
           {r.supplement_protocol?.length > 0 && (
-            <CreateProtocolFromReport
-              supplements={r.supplement_protocol}
-              reportId={id!}
-            />
+            <div data-hide-print="true">
+              <CreateProtocolFromReport
+                supplements={r.supplement_protocol}
+                reportId={id!}
+              />
+            </div>
           )}
-          <LegalDisclaimer />
+          <div data-hide-print="true">
+            <LegalDisclaimer />
+          </div>
           {review !== undefined && (
-            <ReportReview reportId={id!} existingReview={review} />
+            <div data-hide-print="true">
+              <ReportReview reportId={id!} existingReview={review} />
+            </div>
           )}
         </div>
       </main>
