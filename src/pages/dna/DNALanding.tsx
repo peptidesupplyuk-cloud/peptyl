@@ -61,8 +61,8 @@ const DNALanding = () => {
   return (
     <>
       <SEO
-        title="DNA Health Assessment | Peptyl"
-        description="Upload your genetic data and get a personalised health report with supplement and peptide recommendations. Standard or Advanced tier."
+        title="Holistic Health Assessment | Peptyl"
+        description="Upload your DNA, bloodwork, or lab results and get a personalised health report with supplement and peptide recommendations. Standard or Advanced tier."
         path="/dna"
       />
       <Header />

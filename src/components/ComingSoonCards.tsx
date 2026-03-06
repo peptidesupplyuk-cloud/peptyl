@@ -5,7 +5,7 @@ import { Link } from "react-router-dom";
 const ComingSoonCards = () => {
   return (
     <div className="flex flex-col gap-4">
-      {/* DNA Health Assessment — NOW LIVE */}
+      {/* Holistic Health Assessment — NOW LIVE */}
       <Link to="/dna">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -19,7 +19,7 @@ const ComingSoonCards = () => {
               Now Live
             </span>
             <h3 className="text-lg sm:text-xl font-heading font-bold text-primary-foreground mb-1.5">
-              DNA Health Assessment
+              Holistic Health Assessment
             </h3>
             <p className="text-sm text-primary-foreground/50 leading-relaxed mb-4 max-w-sm">
               Upload your 23andMe or lab results. Get a personalised health score and supplement protocol in minutes.
