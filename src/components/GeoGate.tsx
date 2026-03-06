@@ -1,42 +1,51 @@
 import { useEffect, useState } from "react";
-import { supabase } from "@/integrations/supabase/client";
 import RegionBlocked from "@/pages/RegionBlocked";
+
+const BLOCKED_COUNTRIES = ["US"];
 
 const GeoGate = ({ children }: { children: React.ReactNode }) => {
   const [status, setStatus] = useState<"checking" | "allowed" | "blocked">("checking");
 
   useEffect(() => {
-    const checkGeo = async () => {
-      try {
-        const { data, error } = await supabase.functions.invoke("geo-check");
-        if (error) {
-          // Fail open
-          setStatus("allowed");
-          return;
-        }
-        setStatus(data?.blocked ? "blocked" : "allowed");
-      } catch {
-        setStatus("allowed");
-      }
-    };
-
-    // Check sessionStorage to avoid re-checking on every navigation
     const cached = sessionStorage.getItem("geo-status");
     if (cached === "allowed" || cached === "blocked") {
-      setStatus(cached);
+      setStatus(cached as "allowed" | "blocked");
       return;
     }
 
-    checkGeo().then(() => {
-      // Cache after state updates via effect below
+    const checkGeo = async () => {
+      try {
+        // Primary: client-side geo check (no edge function IP issues)
+        const res = await fetch("https://ipapi.co/json/", { signal: AbortSignal.timeout(4000) });
+        if (res.ok) {
+          const geo = await res.json();
+          const country = geo.country_code || geo.country || "";
+          return BLOCKED_COUNTRIES.includes(country) ? "blocked" : "allowed";
+        }
+      } catch {
+        // Primary failed, try fallback
+      }
+
+      try {
+        // Fallback: different provider
+        const res2 = await fetch("https://freeipapi.com/api/json", { signal: AbortSignal.timeout(4000) });
+        if (res2.ok) {
+          const geo2 = await res2.json();
+          const country2 = geo2.countryCode || "";
+          return BLOCKED_COUNTRIES.includes(country2) ? "blocked" : "allowed";
+        }
+      } catch {
+        // Both failed — fail open
+      }
+
+      return "allowed";
+    };
+
+    checkGeo().then((result) => {
+      setStatus(result);
+      sessionStorage.setItem("geo-status", result);
     });
   }, []);
-
-  useEffect(() => {
-    if (status !== "checking") {
-      sessionStorage.setItem("geo-status", status);
-    }
-  }, [status]);
 
   if (status === "checking") {
     return <div className="min-h-screen bg-background" />;
