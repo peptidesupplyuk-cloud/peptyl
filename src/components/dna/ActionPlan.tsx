@@ -109,7 +109,7 @@ const ActionPlan = ({ plan }: Props) => {
               {/* Items — short, action-first */}
               <ul className="space-y-2.5 flex-1">
                 {items.map((item, i) => {
-                  const short = tightenItem(item);
+                  const short = isGP ? item : tightenItem(item);
                   return (
                     <li key={i} className="flex items-start gap-2">
                       {isGP ? (
