@@ -531,7 +531,7 @@ const Dashboard = () => {
                     </div>
 
                     {/* Wearable Summary */}
-                    <WearableSummary />
+                    <WearableSummary selectedDate={selectedDate} />
                   </div>
                 </div>
               ) : (
