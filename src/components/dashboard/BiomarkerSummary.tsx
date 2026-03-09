@@ -3,7 +3,7 @@ import { BIOMARKERS, getMarkerStatus, type BiomarkerDef, type MarkerStatus } fro
 import { cn } from "@/lib/utils";
 import type { BloodworkPanel } from "@/hooks/use-bloodwork";
 import { formatDistanceToNow } from "date-fns";
-import { ArrowUp, ArrowDown, ChevronRight } from "lucide-react";
+import { ArrowUp, ArrowDown, ChevronRight, Info } from "lucide-react";
 import { Drawer, DrawerContent, DrawerTrigger, DrawerTitle } from "@/components/ui/drawer";
 import BiomarkerTrendChart from "./BiomarkerTrendChart";
 
