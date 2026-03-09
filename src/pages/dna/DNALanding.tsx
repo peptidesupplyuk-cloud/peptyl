@@ -73,11 +73,14 @@ const DNALanding = () => {
             <AnimatedDNA />
             <div className="mt-8" />
             <h1 className="text-4xl md:text-5xl lg:text-6xl font-heading font-bold text-primary-foreground mb-6 tracking-tight">
-              Your Health.<br />
-              <span className="text-gradient-teal">Your Protocol.</span>
+              Stop Guessing.<br />
+              <span className="text-gradient-teal">Start Knowing.</span>
             </h1>
-            <p className="text-lg text-primary-foreground/70 mb-8 max-w-xl mx-auto">
-              Upload your genetic data from 23andMe, AncestryDNA, or a lab report. Choose Standard for your personalised supplement stack, or Advanced for peptide protocols, GLP-1 insights, and deep personalisation.
+            <p className="text-lg text-primary-foreground/70 mb-4 max-w-xl mx-auto">
+              Generic protocols ignore what makes you unique. Upload your DNA, bloodwork, or both — and get a personalised supplement, peptide, and lifestyle plan built from <em>your</em> biology.
+            </p>
+            <p className="text-sm text-primary-foreground/50 mb-8 max-w-md mx-auto">
+              Best results come from combining genetic data (23andMe / AncestryDNA) with recent blood panels. You can start with either.
             </p>
             <div className="flex justify-center gap-3 flex-wrap">
               <Link to="/dna/upload?tier=standard">
