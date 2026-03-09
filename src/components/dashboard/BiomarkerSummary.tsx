@@ -9,7 +9,10 @@ import BiomarkerTrendChart from "./BiomarkerTrendChart";
 
 /* ── config ─────────────────────────────────────────────── */
 
-const KEY_MARKERS = [
+const MAX_SUMMARY_MARKERS = 6;
+
+/** Fallback markers if everything is optimal — the "core health panel" */
+const CORE_MARKERS = [
   "igf1", "total_testosterone", "hscrp", "hba1c", "vitamin_d", "fasting_glucose",
 ];
 
