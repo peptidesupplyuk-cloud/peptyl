@@ -278,17 +278,7 @@ const BiomarkerSummary = ({ panels }: BiomarkerSummaryProps) => {
                   vs {timeLabel} ago · {improvingCount} improving
                 </p>
               )}
-              <div className="flex gap-1.5 flex-wrap">
-                {statuses.map((s, i) => (
-                  <div
-                    key={i}
-                    className={cn(
-                      "h-1.5 flex-1 rounded-full min-w-[16px]",
-                      s === "optimal" ? "bg-primary" : s === "suboptimal" ? "bg-[hsl(var(--warm))]" : "bg-destructive"
-                    )}
-                  />
-                ))}
-              </div>
+              
             </div>
           </div>
         </div>
