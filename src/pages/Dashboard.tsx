@@ -45,6 +45,68 @@ import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { useQuery } from "@tanstack/react-query";
 
+/* ─── Compact Journal for Overview ─── */
+const CompactJournal = ({ onExpandJournal }: { onExpandJournal: () => void }) => {
+  const [note, setNote] = useState("");
+  const addEntry = useAddJournalEntry();
+  const { data: journal = [] } = useJournalEntries();
+  const { toast } = useToast();
+
+  const submit = async () => {
+    if (note.trim().length < 10) return;
+    try {
+      await addEntry.mutateAsync({ content: note.trim(), peptides: [], summary: null, evidence_quality: null, findings_count: 0 });
+      toast({ title: "Saved", description: "Journal entry logged." });
+      setNote("");
+    } catch {
+      toast({ title: "Error", description: "Could not save entry.", variant: "destructive" });
+    }
+  };
+
+  return (
+    <div className="bg-card rounded-2xl border border-border p-4 space-y-3">
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-2">
+          <BookOpen className="h-4 w-4 text-primary" />
+          <h3 className="text-sm font-heading font-semibold text-foreground">Quick Journal</h3>
+        </div>
+        <button onClick={onExpandJournal} className="text-xs text-primary hover:underline">
+          View all →
+        </button>
+      </div>
+
+      <div className="flex gap-2">
+        <input
+          value={note}
+          onChange={(e) => setNote(e.target.value)}
+          placeholder="Log an observation, side effect, or note…"
+          className="flex-1 min-w-0 bg-muted/50 border border-border rounded-lg px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-primary"
+          onKeyDown={(e) => e.key === "Enter" && submit()}
+        />
+        <Button
+          size="sm"
+          onClick={submit}
+          disabled={note.trim().length < 10 || addEntry.isPending}
+          className="shrink-0"
+        >
+          {addEntry.isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
+        </Button>
+      </div>
+
+      {journal.length > 0 && (
+        <div className="space-y-1.5 max-h-32 overflow-y-auto">
+          {journal.slice(0, 3).map((entry) => (
+            <div key={entry.id} className="flex items-start gap-2 text-xs">
+              <span className="text-muted-foreground shrink-0">{new Date(entry.created_at).toLocaleDateString()}</span>
+              <span className="text-foreground line-clamp-1">{entry.content}</span>
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+};
+
 const VideoHelpButton = () => {
   const [open, setOpen] = useState(false);
   const tracked = useRef(false);
