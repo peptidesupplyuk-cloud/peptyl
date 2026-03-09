@@ -88,7 +88,11 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         current_compounds: meta.current_compounds || null,
         biomarker_availability: meta.biomarker_availability || null,
         risk_tolerance: meta.risk_tolerance || null,
-      }).eq("user_id", data.user.id);
+        ...(meta.age ? { age: meta.age } : {}),
+        ...(meta.gender ? { gender: meta.gender } : {}),
+        ...(meta.height_cm ? { height_cm: meta.height_cm } : {}),
+        ...(meta.weight_kg ? { weight_kg: meta.weight_kg } : {}),
+      } as any).eq("user_id", data.user.id);
     }
     return { error: error ? new Error(error.message) : null };
   };

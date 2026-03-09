@@ -134,6 +134,10 @@ const Auth = () => {
           current_compounds: onboarding.compounds || undefined,
           biomarker_availability: onboarding.biomarkers || undefined,
           risk_tolerance: onboarding.risk || undefined,
+          age: signupAge ? parseInt(signupAge) : undefined,
+          gender: signupGender || undefined,
+          height_cm: signupHeight ? parseFloat(signupHeight) : undefined,
+          weight_kg: signupWeight ? parseFloat(signupWeight) : undefined,
         });
         
         // Don't clear sessionStorage here — the useSaveOnboarding hook handles it reliably
