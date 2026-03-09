@@ -400,10 +400,7 @@ const BiomarkerSummary = ({ panels }: BiomarkerSummaryProps) => {
     ? `Showing ${needsAttentionCount} marker${needsAttentionCount > 1 ? "s" : ""} that need${needsAttentionCount === 1 ? "s" : ""} attention from your latest bloodwork`
     : "All tracked markers are in the optimal range";
 
-  // All available markers (drawer)
-  const allMarkers = BIOMARKERS.filter(
-    (b) => ALL_TRACKED.includes(b.key) && latestMap[b.key] !== undefined
-  );
+  const allMarkers = allWithData;
   const grouped: Record<string, typeof allMarkers> = {};
   for (const m of allMarkers) {
     const g = CATEGORY_GROUP[m.category] || m.category;
