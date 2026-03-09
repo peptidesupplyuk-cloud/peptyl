@@ -163,7 +163,7 @@ const PeptideChat = () => {
             className="fixed bottom-20 right-4 z-50 h-11 w-11 rounded-full bg-primary text-primary-foreground shadow-brand flex items-center justify-center hover:opacity-90 transition-opacity"
             aria-label="Open chat"
           >
-            <MessageCircle className="h-6 w-6" />
+            <MessageCircle className="h-5 w-5" />
           </motion.button>
         )}
       </AnimatePresence>
