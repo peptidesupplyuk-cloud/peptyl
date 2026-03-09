@@ -650,8 +650,8 @@ const Dashboard = () => {
                         )}
                       </div>
 
-                      {/* C4 — Personalised recommendations */}
-                      {recommendations.length > 0 && (hasBloodwork || hasDna) && (
+                      {/* C4 — Personalised recommendations — only when NO active protocol */}
+                      {!hasActiveProtocol && recommendations.length > 0 && (hasBloodwork || hasDna) && (
                         <div className="space-y-3">
                           <Carousel opts={{ align: "start", loop: false }} className="w-full">
                             <div className="flex items-center justify-between">
@@ -677,7 +677,8 @@ const Dashboard = () => {
                         </div>
                       )}
 
-                      {/* OnboardingRecommendations removed — unified engine handles it */}
+                      {/* C5 — Quick journal */}
+                      <CompactJournal onExpandJournal={() => setActiveTab("journal")} />
                     </div>
                   )}
                 </div>
@@ -706,8 +707,8 @@ const Dashboard = () => {
                     )}
                   </div>
 
-                  {/* C4 — Personalised recommendations */}
-                  {recommendations.length > 0 && (hasBloodwork || hasDna) && (
+                  {/* C4 — Personalised recommendations — only when NO active protocol */}
+                  {!hasActiveProtocol && recommendations.length > 0 && (hasBloodwork || hasDna) && (
                     <div className="space-y-3">
                       <Carousel opts={{ align: "start", loop: false }} className="w-full">
                         <div className="flex items-center justify-between">
@@ -733,7 +734,8 @@ const Dashboard = () => {
                     </div>
                   )}
 
-                  {/* OnboardingRecommendations removed — unified engine handles it */}
+                  {/* C5 — Quick journal */}
+                  <CompactJournal onExpandJournal={() => setActiveTab("journal")} />
                 </div>
               )}
 
