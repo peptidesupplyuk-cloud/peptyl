@@ -206,6 +206,7 @@ const Dashboard = () => {
   const todayRemaining = todayScheduled + todayPendingSupplements;
 
   const [showMore, setShowMore] = useState(false);
+  const [selectedDate, setSelectedDate] = useState(new Date());
   const { shouldAsk, requestPermission } = useRequestNotificationPermission();
   const [notifDismissed, setNotifDismissed] = useState(false);
 
