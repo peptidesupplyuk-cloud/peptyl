@@ -31,9 +31,9 @@ const advancedExtras = [
 ];
 
 const steps = [
-  { icon: Sparkles, title: "Choose your tier and pay", desc: "Standard or Advanced, one-time payment." },
-  { icon: Upload, title: "Upload your DNA file, lab report, or photo", desc: "We accept 23andMe, AncestryDNA, PDFs, images, or paste text." },
-  { icon: Zap, title: "Receive your personalised report in under 60 seconds", desc: "AI-powered analysis with evidence-graded recommendations." },
+  { icon: Sparkles, title: "Choose your tier and pay", desc: "Standard or Advanced — one-time payment, no subscription." },
+  { icon: Upload, title: "Upload your DNA, bloodwork, or both", desc: "23andMe, AncestryDNA, PDF lab reports, photos, or paste text. Combining DNA + bloods gives the most accurate results." },
+  { icon: Zap, title: "Get your personalised protocol in under 60 seconds", desc: "AI-powered supplement, peptide, and lifestyle recommendations grounded in your biology." },
 ];
 
 const faqs = [
@@ -61,8 +61,8 @@ const DNALanding = () => {
   return (
     <>
       <SEO
-        title="Holistic Health Assessment | Peptyl"
-        description="Upload your DNA, bloodwork, or lab results and get a personalised health report with supplement and peptide recommendations. Standard or Advanced tier."
+        title="Stop Guessing. Start Knowing | Peptyl"
+        description="Upload your DNA and bloodwork to get a personalised supplement, peptide, and lifestyle protocol built from your biology. Standard or Advanced tier."
         path="/dna"
       />
       <Header />
@@ -73,11 +73,14 @@ const DNALanding = () => {
             <AnimatedDNA />
             <div className="mt-8" />
             <h1 className="text-4xl md:text-5xl lg:text-6xl font-heading font-bold text-primary-foreground mb-6 tracking-tight">
-              Your Health.<br />
-              <span className="text-gradient-teal">Your Protocol.</span>
+              Stop Guessing.<br />
+              <span className="text-gradient-teal">Start Knowing.</span>
             </h1>
-            <p className="text-lg text-primary-foreground/70 mb-8 max-w-xl mx-auto">
-              Upload your genetic data from 23andMe, AncestryDNA, or a lab report. Choose Standard for your personalised supplement stack, or Advanced for peptide protocols, GLP-1 insights, and deep personalisation.
+            <p className="text-lg text-primary-foreground/70 mb-4 max-w-xl mx-auto">
+              Generic protocols ignore what makes you unique. Upload your DNA, bloodwork, or both — and get a personalised supplement, peptide, and lifestyle plan built from <em>your</em> biology.
+            </p>
+            <p className="text-sm text-primary-foreground/50 mb-8 max-w-md mx-auto">
+              Best results come from combining genetic data (23andMe / AncestryDNA) with recent blood panels. You can start with either.
             </p>
             <div className="flex justify-center gap-3 flex-wrap">
               <Link to="/dna/upload?tier=standard">
@@ -110,10 +113,10 @@ const DNALanding = () => {
         <section className="py-20 bg-background">
           <div className="container mx-auto px-6">
             <h2 className="text-2xl md:text-3xl font-heading font-bold text-foreground text-center mb-4">
-              Choose Your Assessment
+              Choose Your Depth
             </h2>
             <p className="text-muted-foreground text-center mb-12 max-w-lg mx-auto">
-              Both tiers use the same AI engine and genetic parsing. Advanced adds peptide science and deep personalisation.
+              Both tiers analyse your DNA and bloodwork with the same AI engine. Advanced unlocks peptide science, GLP-1 insights, and a deeper personalisation layer.
             </p>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-4xl mx-auto">
               {/* Standard */}
