@@ -93,34 +93,62 @@ const MarkerPill = ({
 }: {
   marker: BiomarkerDef; value: number; status: MarkerStatus;
   delta: ReturnType<typeof getDelta>;
-}) => (
-  <div className="flex items-center justify-between gap-2 py-2 border-b border-border/50 last:border-b-0">
-    <div className="flex items-center gap-2 min-w-0">
-      <div className={cn(
-        "h-2 w-2 rounded-full shrink-0",
-        status === "optimal" ? "bg-primary" : status === "suboptimal" ? "bg-[hsl(var(--warm))]" : "bg-destructive"
-      )} />
-      <span className="text-xs text-muted-foreground truncate">{marker.name}</span>
+}) => {
+  const pos = rangePosition(value, marker);
+  const optLeft = ((marker.optimalMin - marker.refMin) / (marker.refMax - marker.refMin)) * 100;
+  const optWidth = ((marker.optimalMax - marker.optimalMin) / (marker.refMax - marker.refMin)) * 100;
+
+  return (
+    <div className="py-3 border-b border-border/50 last:border-b-0 space-y-1.5">
+      <div className="flex items-center justify-between gap-2">
+        <div className="flex items-center gap-2 min-w-0">
+          <div className={cn(
+            "h-2 w-2 rounded-full shrink-0",
+            status === "optimal" ? "bg-primary" : status === "suboptimal" ? "bg-[hsl(var(--warm))]" : "bg-destructive"
+          )} />
+          <span className="text-xs font-medium text-foreground truncate">{marker.name}</span>
+        </div>
+        <div className="flex items-center gap-2 shrink-0">
+          <span className={cn(
+            "text-sm font-heading font-bold",
+            status === "optimal" ? "text-primary" : status === "suboptimal" ? "text-[hsl(var(--warm))]" : "text-destructive"
+          )}>
+            {value}
+          </span>
+          <span className="text-[10px] text-muted-foreground">{marker.unit}</span>
+          {delta && delta.diff !== 0 && (
+            <span className={cn(
+              "flex items-center gap-0.5 text-[10px] font-semibold",
+              delta.improving ? "text-primary" : "text-destructive"
+            )}>
+              {delta.diff > 0 ? <ArrowUp className="h-2.5 w-2.5" /> : <ArrowDown className="h-2.5 w-2.5" />}
+              {delta.label}
+            </span>
+          )}
+        </div>
+      </div>
+      {/* Range bar */}
+      <div className="relative h-2 bg-muted/60 rounded-full overflow-hidden">
+        <div
+          className="absolute top-0 h-full rounded-full bg-primary/15"
+          style={{ left: `${optLeft}%`, width: `${optWidth}%` }}
+        />
+        <div
+          className={cn(
+            "absolute top-1/2 -translate-y-1/2 h-3 w-3 rounded-full border-2 border-card shadow-sm",
+            status === "optimal" ? "bg-primary" : status === "suboptimal" ? "bg-[hsl(var(--warm))]" : "bg-destructive"
+          )}
+          style={{ left: `calc(${pos}% - 6px)` }}
+        />
+      </div>
+      <div className="flex justify-between text-[9px] text-muted-foreground px-0.5">
+        <span>{marker.refMin}</span>
+        <span className="text-primary/70">{marker.optimalMin}–{marker.optimalMax}</span>
+        <span>{marker.refMax}</span>
+      </div>
     </div>
-    <div className="flex items-center gap-2 shrink-0">
-      <span className={cn(
-        "text-sm font-heading font-bold",
-        status === "optimal" ? "text-primary" : status === "suboptimal" ? "text-[hsl(var(--warm))]" : "text-destructive"
-      )}>
-        {value}
-      </span>
-      {delta && delta.diff !== 0 && (
-        <span className={cn(
-          "flex items-center gap-0.5 text-[10px] font-semibold",
-          delta.improving ? "text-primary" : "text-destructive"
-        )}>
-          {delta.diff > 0 ? <ArrowUp className="h-2.5 w-2.5" /> : <ArrowDown className="h-2.5 w-2.5" />}
-          {delta.label}
-        </span>
-      )}
-    </div>
-  </div>
-);
+  );
+};
 
 /* ── full bloodwork row inside drawer ───────────────────── */
 
@@ -250,17 +278,7 @@ const BiomarkerSummary = ({ panels }: BiomarkerSummaryProps) => {
                   vs {timeLabel} ago · {improvingCount} improving
                 </p>
               )}
-              <div className="flex gap-1.5 flex-wrap">
-                {statuses.map((s, i) => (
-                  <div
-                    key={i}
-                    className={cn(
-                      "h-1.5 flex-1 rounded-full min-w-[16px]",
-                      s === "optimal" ? "bg-primary" : s === "suboptimal" ? "bg-[hsl(var(--warm))]" : "bg-destructive"
-                    )}
-                  />
-                ))}
-              </div>
+              
             </div>
           </div>
         </div>
