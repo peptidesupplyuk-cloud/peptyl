@@ -2,6 +2,7 @@ import { Heart, Moon, Footprints, Activity, Zap } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { useQuery } from "@tanstack/react-query";
+import { format, isSameDay, isFuture } from "date-fns";
 
 interface MetricCardProps {
   icon: React.ReactNode;
@@ -25,38 +26,43 @@ const MetricCard = ({ icon, label, value, unit, color }: MetricCardProps) => (
   </div>
 );
 
-const WearableSummary = () => {
-  const { user } = useAuth();
+interface WearableSummaryProps {
+  selectedDate?: Date;
+}
 
-  // Fetch latest WHOOP metrics
+const WearableSummary = ({ selectedDate }: WearableSummaryProps) => {
+  const { user } = useAuth();
+  const targetDate = selectedDate || new Date();
+  const dateStr = format(targetDate, "yyyy-MM-dd");
+  const isFutureDate = isFuture(targetDate) && !isSameDay(targetDate, new Date());
+
+  // Fetch WHOOP metrics for selected date
   const { data: whoopMetrics } = useQuery({
-    queryKey: ["whoop-latest-metric", user?.id],
-    enabled: !!user,
+    queryKey: ["whoop-date-metric", user?.id, dateStr],
+    enabled: !!user && !isFutureDate,
     staleTime: 1000 * 60 * 5,
     queryFn: async () => {
       const { data } = await supabase
         .from("whoop_daily_metrics")
         .select("hrv, resting_heart_rate, recovery_score, strain, sleep_score, date")
         .eq("user_id", user!.id)
-        .order("date", { ascending: false })
-        .limit(1)
+        .eq("date", dateStr)
         .maybeSingle();
       return data;
     },
   });
 
-  // Fetch latest Fitbit metrics
+  // Fetch Fitbit metrics for selected date
   const { data: fitbitMetrics } = useQuery({
-    queryKey: ["fitbit-latest-metric", user?.id],
-    enabled: !!user,
+    queryKey: ["fitbit-date-metric", user?.id, dateStr],
+    enabled: !!user && !isFutureDate,
     staleTime: 1000 * 60 * 5,
     queryFn: async () => {
       const { data } = await supabase
         .from("fitbit_daily_metrics" as any)
         .select("hrv, resting_heart_rate, sleep_score, steps, active_zone_minutes, calories_burned, date")
         .eq("user_id", user!.id)
-        .order("date", { ascending: false })
-        .limit(1)
+        .eq("date", dateStr)
         .maybeSingle();
       return data as unknown as {
         hrv: number | null;
@@ -73,9 +79,16 @@ const WearableSummary = () => {
   const hasWhoop = !!whoopMetrics;
   const hasFitbit = !!fitbitMetrics;
 
+  if (isFutureDate) {
+    return (
+      <div className="bg-muted/30 rounded-xl px-4 py-3 mt-2">
+        <p className="text-xs text-muted-foreground text-center">No wearable data for future dates</p>
+      </div>
+    );
+  }
+
   if (!hasWhoop && !hasFitbit) return null;
 
-  // Merge: prefer WHOOP for shared metrics, add Fitbit-specific ones
   const hrv = whoopMetrics?.hrv ?? fitbitMetrics?.hrv ?? null;
   const rhr = whoopMetrics?.resting_heart_rate ?? fitbitMetrics?.resting_heart_rate ?? null;
   const sleepScore = whoopMetrics?.sleep_score ?? fitbitMetrics?.sleep_score ?? null;
@@ -84,70 +97,35 @@ const WearableSummary = () => {
   const activeMinutes = fitbitMetrics?.active_zone_minutes ?? null;
 
   const sources = [hasWhoop && "WHOOP", hasFitbit && "Fitbit"].filter(Boolean).join(" + ");
-  const latestDate = whoopMetrics?.date || fitbitMetrics?.date;
 
   return (
-    <div className="bg-card rounded-2xl border border-border p-4 sm:p-5">
+    <div className="bg-card rounded-2xl border border-border p-4 sm:p-5 mt-2">
       <div className="flex items-center justify-between mb-3">
         <h3 className="text-xs font-heading font-semibold text-muted-foreground uppercase tracking-wider">
           Wearable Summary
         </h3>
         <span className="text-[10px] text-muted-foreground">
-          {sources} · {latestDate ? new Date(latestDate).toLocaleDateString() : ""}
+          {sources} · {dateStr}
         </span>
       </div>
       <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3 sm:gap-4">
         {hrv != null && (
-          <MetricCard
-            icon={<Activity className="h-4 w-4 text-primary" />}
-            label="HRV"
-            value={Math.round(hrv)}
-            unit="ms"
-            color="bg-primary/10"
-          />
+          <MetricCard icon={<Activity className="h-4 w-4 text-primary" />} label="HRV" value={Math.round(hrv)} unit="ms" color="bg-primary/10" />
         )}
         {rhr != null && (
-          <MetricCard
-            icon={<Heart className="h-4 w-4 text-red-400" />}
-            label="Resting HR"
-            value={Math.round(rhr)}
-            unit="bpm"
-            color="bg-red-500/10"
-          />
+          <MetricCard icon={<Heart className="h-4 w-4 text-red-400" />} label="Resting HR" value={Math.round(rhr)} unit="bpm" color="bg-red-500/10" />
         )}
         {sleepScore != null && (
-          <MetricCard
-            icon={<Moon className="h-4 w-4 text-indigo-400" />}
-            label="Sleep"
-            value={Math.round(sleepScore)}
-            unit="%"
-            color="bg-indigo-500/10"
-          />
+          <MetricCard icon={<Moon className="h-4 w-4 text-indigo-400" />} label="Sleep" value={Math.round(sleepScore)} unit="%" color="bg-indigo-500/10" />
         )}
         {recovery != null && (
-          <MetricCard
-            icon={<Zap className="h-4 w-4 text-emerald-400" />}
-            label="Recovery"
-            value={`${Math.round(recovery)}%`}
-            color="bg-emerald-500/10"
-          />
+          <MetricCard icon={<Zap className="h-4 w-4 text-emerald-400" />} label="Recovery" value={`${Math.round(recovery)}%`} color="bg-emerald-500/10" />
         )}
         {steps != null && (
-          <MetricCard
-            icon={<Footprints className="h-4 w-4 text-amber-400" />}
-            label="Steps"
-            value={steps.toLocaleString()}
-            color="bg-amber-500/10"
-          />
+          <MetricCard icon={<Footprints className="h-4 w-4 text-amber-400" />} label="Steps" value={steps.toLocaleString()} color="bg-amber-500/10" />
         )}
         {activeMinutes != null && (
-          <MetricCard
-            icon={<Activity className="h-4 w-4 text-cyan-400" />}
-            label="Active Mins"
-            value={activeMinutes}
-            unit="min"
-            color="bg-cyan-500/10"
-          />
+          <MetricCard icon={<Activity className="h-4 w-4 text-cyan-400" />} label="Active Mins" value={activeMinutes} unit="min" color="bg-cyan-500/10" />
         )}
       </div>
     </div>
