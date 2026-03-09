@@ -567,7 +567,7 @@ const Dashboard = () => {
 
               {/* ═══ ZONE B — Today's doses (active) OR Next step (inactive) ═══ */}
               {hasActiveProtocol ? (
-                <TodaysPlan slim onActivate={() => setActiveTab("protocols")} />
+                <TodaysPlan slim onActivate={() => setActiveTab("protocols")} selectedDate={selectedDate} />
               ) : (
                 <div className="bg-card rounded-2xl border border-border p-5 space-y-3">
                   {!hasBloodwork && !hasDna && (
