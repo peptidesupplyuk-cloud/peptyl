@@ -36,6 +36,7 @@ import ProtocolNudges from "@/components/dashboard/ProtocolNudges";
 import MobileTabNav from "@/components/dashboard/MobileTabNav";
 import OptimizationScore from "@/components/dashboard/OptimizationScore";
 import AdherenceSummary from "@/components/dashboard/AdherenceSummary";
+import DayPicker from "@/components/dashboard/DayPicker";
 import { useIsMobile } from "@/hooks/use-mobile";
 import ProtocolOutcomeCard from "@/components/dashboard/ProtocolOutcomeCard";
 import { useSaveOnboarding } from "@/hooks/use-save-onboarding";
