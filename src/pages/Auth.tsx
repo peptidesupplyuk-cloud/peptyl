@@ -415,6 +415,56 @@ const Auth = () => {
                     </select>
                   </div>
                 </div>
+
+                {/* Optional health context */}
+                <div className="border-t border-border pt-3 mt-1">
+                  <p className="text-[11px] text-muted-foreground mb-2">Optional — helps personalise recommendations</p>
+                  <div className="grid grid-cols-2 gap-3">
+                    <div>
+                      <label className="text-xs font-medium text-foreground mb-1.5 block">Age</label>
+                      <input
+                        type="number"
+                        value={signupAge}
+                        onChange={(e) => setSignupAge(e.target.value)}
+                        placeholder="e.g. 35"
+                        className="w-full px-3 py-2.5 rounded-xl bg-background border border-border text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-primary/40 transition-colors"
+                      />
+                    </div>
+                    <div>
+                      <label className="text-xs font-medium text-foreground mb-1.5 block">Biological sex</label>
+                      <select
+                        value={signupGender}
+                        onChange={(e) => setSignupGender(e.target.value)}
+                        className={selectClass.replace("pl-10", "pl-3")}
+                      >
+                        <option value="">Select...</option>
+                        <option value="male">Male</option>
+                        <option value="female">Female</option>
+                        <option value="other">Other</option>
+                      </select>
+                    </div>
+                    <div>
+                      <label className="text-xs font-medium text-foreground mb-1.5 block">Height (cm)</label>
+                      <input
+                        type="number"
+                        value={signupHeight}
+                        onChange={(e) => setSignupHeight(e.target.value)}
+                        placeholder="e.g. 182"
+                        className="w-full px-3 py-2.5 rounded-xl bg-background border border-border text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-primary/40 transition-colors"
+                      />
+                    </div>
+                    <div>
+                      <label className="text-xs font-medium text-foreground mb-1.5 block">Weight (kg)</label>
+                      <input
+                        type="number"
+                        value={signupWeight}
+                        onChange={(e) => setSignupWeight(e.target.value)}
+                        placeholder="e.g. 85"
+                        className="w-full px-3 py-2.5 rounded-xl bg-background border border-border text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-primary/40 transition-colors"
+                      />
+                    </div>
+                  </div>
+                </div>
               </>
             )}
 
