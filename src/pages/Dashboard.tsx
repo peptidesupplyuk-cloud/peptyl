@@ -21,6 +21,7 @@ import { useBloodworkPanels } from "@/hooks/use-bloodwork";
 import { useCreateProtocol, useProtocols } from "@/hooks/use-protocols";
 import { useLogInjection, useUpdateInjectionStatus, useAllInjections, useTodayInjections } from "@/hooks/use-injections";
 import { useTodaySupplementLogs } from "@/hooks/use-supplement-logs";
+import { useJournalEntries, useAddJournalEntry } from "@/hooks/use-journal";
 import ResultsTab from "@/components/dashboard/ResultsTab";
 import { useProtocolNotifications, useNotificationActions, useRequestNotificationPermission } from "@/hooks/use-notifications";
 import { Capacitor } from "@capacitor/core";
