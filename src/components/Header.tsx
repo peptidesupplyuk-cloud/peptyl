@@ -1,6 +1,6 @@
 import { useState, useEffect, useMemo } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
-import { Menu, X, ShoppingBag, LogOut, Heart, Zap, Dna, BookOpen, Store, Info, Shield } from "lucide-react";
+import { Menu, X, ShoppingBag, LogOut, Heart, Zap, Dna, BookOpen, Store, Shield } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useTranslation } from "react-i18next";
 import { useQuery } from "@tanstack/react-query";
@@ -19,7 +19,6 @@ const BASE_NAV_ITEMS = [
   { labelKey: "nav.dna", href: "/dna", dynamic: true, icon: Dna },
   { labelKey: "nav.learn", href: "/education", icon: BookOpen },
   { labelKey: "nav.shop", href: "/shop", icon: Store },
-  { labelKey: "nav.about", href: "/about", icon: Info },
   { labelKey: "nav.admin", href: "/admin/dashboard", adminOnly: true, icon: Shield },
 ];
 
