@@ -1184,6 +1184,7 @@ export type Database = {
           country: string | null
           created_at: string
           current_compounds: string | null
+          current_medications: string | null
           dna_advanced_unlocked: boolean | null
           dna_assessment_unlocked: boolean | null
           dna_standard_unlocked: boolean | null
@@ -1197,6 +1198,7 @@ export type Database = {
           notify_email: boolean
           notify_pm_time: string
           notify_whatsapp: boolean
+          primary_health_goal: string | null
           research_goal: string | null
           risk_tolerance: string | null
           subscription_end: string | null
@@ -1219,6 +1221,7 @@ export type Database = {
           country?: string | null
           created_at?: string
           current_compounds?: string | null
+          current_medications?: string | null
           dna_advanced_unlocked?: boolean | null
           dna_assessment_unlocked?: boolean | null
           dna_standard_unlocked?: boolean | null
@@ -1232,6 +1235,7 @@ export type Database = {
           notify_email?: boolean
           notify_pm_time?: string
           notify_whatsapp?: boolean
+          primary_health_goal?: string | null
           research_goal?: string | null
           risk_tolerance?: string | null
           subscription_end?: string | null
@@ -1254,6 +1258,7 @@ export type Database = {
           country?: string | null
           created_at?: string
           current_compounds?: string | null
+          current_medications?: string | null
           dna_advanced_unlocked?: boolean | null
           dna_assessment_unlocked?: boolean | null
           dna_standard_unlocked?: boolean | null
@@ -1267,6 +1272,7 @@ export type Database = {
           notify_email?: boolean
           notify_pm_time?: string
           notify_whatsapp?: boolean
+          primary_health_goal?: string | null
           research_goal?: string | null
           risk_tolerance?: string | null
           subscription_end?: string | null
