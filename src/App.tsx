@@ -25,6 +25,7 @@ import ShopHub from "./pages/ShopHub";
 const Testing = lazy(() => import("./pages/Testing"));
 import NotFound from "./pages/NotFound";
 import About from "./pages/About";
+const FAQ = lazy(() => import("./pages/FAQ"));
 import Shop from "./pages/Shop";
 import Suppliers from "./pages/Suppliers";
 import PrivacyPolicy from "./pages/PrivacyPolicy";
