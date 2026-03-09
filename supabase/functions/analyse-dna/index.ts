@@ -7,7 +7,7 @@ const corsHeaders = {
     "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
 };
 
-const SYSTEM_PROMPT = `# PEPTYL HOLISTIC HEALTH ASSESSMENT — SYSTEM PROMPT v3
+const SYSTEM_PROMPT = `# PEPTYL DNA HEALTH ASSESSMENT — SYSTEM PROMPT v3
 
 ## Role
 You are Peptyl's genetic health analyst. Parse DNA data from any format,
@@ -150,7 +150,7 @@ IGF1 TT: anabolic-responsive — prioritise progressive overload resistance trai
 1. Output ONLY raw JSON then ---NARRATIVE--- then bullet points. No markdown fences. No preamble text.
 2. health_score MUST be an object with overall, genetics_score, biomarker_score, lifestyle_score, label, summary.
 3. health_score.overall MUST be a real calculated number. NEVER output 0 unless there is genuinely zero data.
-4. action_plan MUST contain immediate, 30_days, AND 90_days — each with 2–4 items. Keep each item to ONE concise sentence: dose + compound or action only. Do NOT repeat gene citations or rationale already covered in gene_results/biomarker_results. The report body covers the "why" — the action plan is the "what to do".
+4. action_plan MUST contain immediate, 30_days, AND 90_days — each with 3–5 items. Every single item MUST name a specific rsID, gene, or biomarker value inline.
 5. For Advanced: diet_recommendations and training_recommendations are MANDATORY.
 6. For Advanced: personalisation object is MANDATORY. genetic_archetype must be unique. priority_insight must name a specific rsID and biomarker value.
 7. Narrative MUST be 5–7 bullet points starting with • and an emoji — NO prose paragraphs.
@@ -158,7 +158,7 @@ IGF1 TT: anabolic-responsive — prioritise progressive overload resistance trai
 9. UK/EU context — metric units, NHS-aligned ranges. UNIT INTEGRITY: if user provides value in ng/dL, display ng/dL. If nmol/L, display nmol/L. NEVER mix value scale with wrong unit label.
 10. hormonal_assessment: for Advanced tier, always include this field. If sex=male AND age≥28: triggered=true, pull testosterone value from biomarkers if provided, or note it as "not provided — recommend testing". Include optimisation_recommendations regardless of testosterone level. For female or age<28: triggered=false with note.
 11. When glp1_assessment.triggered=true, compounds_to_consider MUST contain at least one named compound object with a real compound name (e.g. "Semaglutide (Ozempic/Wegovy)"). Empty compound fields are FORBIDDEN.
-10. peptide_protocol MUST be included for Advanced if ANY of these genes present: COL1A1, COL5A1, IL6, TNF-a, IGF1, ACTN3, SOD2, NOS3. If ACTN3 XX is detected, BPC-157 is appropriate for recovery support. If IL6 or TNF-a high-risk alleles detected, BPC-157 addresses chronic inflammation. If hsCRP >1.0 mg/L (moderate inflammation), BPC-157 500mcg/day oral or SubQ for 4–6 weeks is appropriate — pull dose and cycle from peptides_enriched DB data. Max 3 peptides, each must list driven_by genes. If no tissue repair SNPs are present at all, include an empty array [] — do not omit the field.
+10. peptide_protocol MUST be included for Advanced if ANY of these genes present: COL1A1, COL5A1, IL6, TNF-a, IGF1, ACTN3, SOD2, NOS3. If ACTN3 XX is detected, BPC-157 is appropriate for recovery support. If IL6 or TNF-a high-risk alleles detected, BPC-157 addresses chronic inflammation. Max 3 peptides, each must list driven_by genes. If no tissue repair SNPs are present at all, include an empty array [] — do not omit the field.
 11. Every biomarker_result MUST include gene_interaction field linking it to the relevant variant.
 12. Every supplement in supplement_protocol MUST include driven_by array with gene names AND biomarker values.
 
@@ -180,8 +180,8 @@ The following outputs are UNACCEPTABLE and will be rejected:
 ❌ BAD training weekly_structure: ["3x aerobic", "2x strength", "2x flexibility"]
 ✅ GOOD: ["3x Zone 2 cardio 30-45 min (60-75% max HR) — ACTN3 TT (rs1815739) indicates endurance-dominant fibre profile, this is your genetic training advantage", "2x resistance training moderate weight 10-15 reps — suits ACTN3 XX fibre type, avoid max-effort explosive loading", "1x dedicated mobility session — non-negotiable given COL1A1 GT (rs1800012) connective tissue vulnerability"]
 
-❌ BAD action_plan.immediate: ["Start methylfolate and B12 supplementation."] (too vague, no dose)
-✅ GOOD: ["Methylfolate (5-MTHF) 400mcg daily", "Vitamin D3 5000 IU + K2 100mcg daily", "BPC-157 500mcg oral daily for 4 weeks"]
+❌ BAD action_plan.immediate: ["Start methylfolate and B12 supplementation."]
+✅ GOOD: ["Start methylfolate (5-MTHF) 400mcg daily — MTHFR C677T TT (rs1801133) confirmed, homocysteine 13.2 µmol/L above action threshold — highest priority", "Remove all folic acid fortified foods (cereals, protein bars, white bread) — MTHFR TT cannot convert synthetic folic acid and it accumulates as unmetabolised folic acid"]
 
 ❌ BAD biomarker gene_interaction: absent or missing
 ✅ GOOD gene_interaction: "VDR Taq1 tt (rs731236) — reduced receptor binding efficiency means standard D3 intake achieves lower serum levels than average; you need 2-3x typical dose to reach optimal range"
@@ -645,7 +645,8 @@ async function saveReport(fullContent: string, method: string, userId: string | 
 
     const existingPeptides: any[] = reportJson.peptide_protocol ?? [];
 
-    if (hasTissueSignal && existingPeptides.length === 0) {
+    // Top up to 2 peptides if AI produced fewer than expected
+    if (hasTissueSignal && existingPeptides.length < 2) {
       // Determine which peptides to inject based on detected genes
       const peptides: any[] = [];
 
@@ -712,11 +713,157 @@ async function saveReport(fullContent: string, method: string, userId: string | 
         });
       }
 
-      reportJson.peptide_protocol = peptides.slice(0, 3); // max 3
-      console.log(`Injected ${reportJson.peptide_protocol.length} peptides based on gene signals`);
+      // Merge with any AI-produced peptides, deduplicate by name
+      const existingNames = new Set(existingPeptides.map((p: any) => p.peptide?.toLowerCase() ?? ""));
+      const newPeptides = peptides.filter((p: any) => !existingNames.has(p.peptide?.toLowerCase() ?? ""));
+      reportJson.peptide_protocol = [...existingPeptides, ...newPeptides].slice(0, 3);
+      console.log(`Peptide protocol: ${existingPeptides.length} from AI + ${newPeptides.length} injected = ${reportJson.peptide_protocol.length} total`);
     }
   }
   // ── END PEPTIDE ENFORCEMENT ─────────────────────────────────────────────────
+
+  // ── SUPPLEMENT RANKING + SUGGESTION SPLIT ─────────────────────────────────
+  // Score supplements by evidence grade, split into top 5 (protocol) + suggestions
+  if (tier === "advanced" && Array.isArray(reportJson.supplement_protocol)) {
+    const gradeScore: Record<string, number> = { A: 4, B: 3, C: 2, D: 1 };
+    const supps = reportJson.supplement_protocol as any[];
+
+    // Sort by grade descending
+    supps.sort((a: any, b: any) =>
+      (gradeScore[b.evidence_grade] ?? 0) - (gradeScore[a.evidence_grade] ?? 0)
+    );
+
+    // Tag priority vs suggestion
+    supps.forEach((s: any, i: number) => {
+      s.is_priority = i < 5;
+      s.suggestion_note = i >= 5
+        ? "Consider adding after completing your first 90-day protocol"
+        : undefined;
+    });
+
+    reportJson.supplement_protocol = supps;
+  }
+
+  // ── PEPTIDE RANKING + SUGGESTION SPLIT ────────────────────────────────────
+  // Rank by signal match strength, keep top 3 as protocol, rest as suggestions
+  if (tier === "advanced" && Array.isArray(reportJson.peptide_protocol)) {
+    const gradeScore: Record<string, number> = { A: 4, B: 3, C: 2, D: 1 };
+    const peptides = reportJson.peptide_protocol as any[];
+
+    peptides.sort((a: any, b: any) => {
+      const gradeDiff = (gradeScore[b.evidence_grade] ?? 0) - (gradeScore[a.evidence_grade] ?? 0);
+      if (gradeDiff !== 0) return gradeDiff;
+      // Secondary sort: more driven_by signals = more relevant
+      return (b.driven_by?.length ?? 0) - (a.driven_by?.length ?? 0);
+    });
+
+    peptides.forEach((p: any, i: number) => {
+      p.is_priority = i < 3;
+      p.suggestion_note = i >= 3
+        ? "Consider adding after your first peptide cycle is complete"
+        : undefined;
+    });
+
+    reportJson.peptide_protocol = peptides;
+  }
+  // ── END RANKING ──────────────────────────────────────────────────────────
+
+  // ── ACTION PLAN ENRICHMENT ───────────────────────────────────────────────
+  // Ensure peptides surface in action_plan, keep items SHORT (action only, no explanation)
+  if (tier === "advanced" && reportJson.action_plan) {
+    const ap = reportJson.action_plan;
+
+    // Truncate verbose items to max ~80 chars — strip everything after em dash or " — "
+    const tighten = (s: string) => {
+      const dash = s.indexOf(" — ");
+      if (dash > 40 && dash < 120) return s.slice(0, dash).trim();
+      return s.length > 100 ? s.slice(0, 100).trim() + "…" : s;
+    };
+    if (Array.isArray(ap.immediate)) ap.immediate = ap.immediate.map(tighten);
+    if (Array.isArray(ap["30_days"])) ap["30_days"] = ap["30_days"].map(tighten);
+    if (Array.isArray(ap["90_days"])) ap["90_days"] = ap["90_days"].map(tighten);
+
+    // Add BPC-157 to immediate if peptide protocol has it and it's not already there
+    const hasBPC = (reportJson.peptide_protocol ?? []).some((p: any) => /BPC/i.test(p.peptide ?? ""));
+    const immediateHasBPC = (ap.immediate ?? []).some((s: string) => /BPC/i.test(s));
+    if (hasBPC && !immediateHasBPC) {
+      ap.immediate = [
+        ...(ap.immediate ?? []),
+        "Consider BPC-157 500mcg SC or oral — COL1A1 GT soft tissue support"
+      ];
+    }
+  }
+  // ── END ACTION PLAN ENRICHMENT ───────────────────────────────────────────
+
+  // ── GLP-1 DETERMINISTIC ENFORCEMENT ─────────────────────────────────────
+  // GLP-1 assessment must be consistent. Evaluate from lifestyleContext directly.
+  if (tier === "advanced") {
+    const lc = lifestyleContext ?? {};
+    const bmi = lc.bmi ?? 0;
+    const bp = lc.bp ?? "";
+    const bpElevated = /1[4-9][0-9]\/|[2-9][0-9][0-9]\//.test(bp);
+    const glp1Json = reportJson.glp1_assessment ?? {};
+    const allGeneText = JSON.stringify(reportJson.gene_results ?? []) + " " + JSON.stringify(reportJson.meta ?? {});
+
+    // Trigger conditions
+    const metabolicTriggers: string[] = [];
+    if (bmi >= 25) metabolicTriggers.push(`BMI ${bmi} (≥25 threshold)`);
+    if (bpElevated) metabolicTriggers.push(`BP ${bp} (elevated)`);
+    if (/FTO.*AA|FTO.*AT/i.test(allGeneText)) metabolicTriggers.push("FTO variant — appetite regulation impairment");
+    if (/MC4R.*CC|MC4R.*CT/i.test(allGeneText)) metabolicTriggers.push("MC4R variant — satiety signalling");
+
+    // Also check biomarkers already in the report
+    const biomarkers: any[] = reportJson.biomarker_results ?? [];
+    const cholesterol = biomarkers.find((b: any) => /cholesterol|ldl/i.test(b.name ?? ""));
+    const triglycerides = biomarkers.find((b: any) => /triglyceride/i.test(b.name ?? ""));
+    if (cholesterol?.value > 5.2 || cholesterol?.value > 200) metabolicTriggers.push(`Total cholesterol ${cholesterol.value} ${cholesterol.unit} (elevated)`);
+    if (triglycerides?.value > 2.3) metabolicTriggers.push(`Triglycerides ${triglycerides.value} ${triglycerides.unit} (elevated)`);
+
+    const shouldTrigger = metabolicTriggers.length >= 2;
+
+    if (shouldTrigger && !glp1Json.triggered) {
+      const hasGIPR = /GIPR/i.test(allGeneText);
+      reportJson.glp1_assessment = {
+        triggered: true,
+        trigger_reasons: metabolicTriggers,
+        genetic_response_prediction: {
+          predicted_response: "Standard",
+          confidence: "moderate",
+          basis: "No GLP-1 receptor variants detected — standard response predicted. GIPR variant " + (hasGIPR ? "present — tirzepatide may offer enhanced dual-agonist benefit." : "not detected."),
+        },
+        compounds_to_consider: [
+          {
+            compound: "Semaglutide (Ozempic/Wegovy)",
+            route: "Weekly subcutaneous injection",
+            indication: "GLP-1 receptor agonist — metabolic and weight management",
+            evidence_grade: "A",
+            genetic_relevance: "Standard response expected based on genetic profile",
+            note: "Prescription only — NHS or private. NICE approved for BMI ≥30, or ≥27 with comorbidity. Off-label consideration with GP for BMI ≥25 with metabolic risk factors.",
+          },
+          ...(hasGIPR ? [{
+            compound: "Tirzepatide (Mounjaro)",
+            route: "Weekly subcutaneous injection",
+            indication: "Dual GIP/GLP-1 agonist — superior weight loss vs semaglutide in SURMOUNT-1 trial",
+            evidence_grade: "A",
+            genetic_relevance: "GIPR variant detected — enhanced dual-agonist response predicted",
+            note: "Prescription only — NHS or private.",
+          }] : []),
+        ],
+        gp_talking_points: [
+          `My BMI is ${bmi} and I have metabolic risk factors (${metabolicTriggers.slice(0,2).join(", ")}) — can we discuss GLP-1 suitability?`,
+          "I'd like to understand if pharmacological support alongside lifestyle changes would be appropriate.",
+          "What monitoring would be needed if we trialled a GLP-1 agonist?",
+        ],
+        important_disclaimer: "GLP-1 receptor agonists are prescription medications. This section identifies metabolic indicators only — a physician must assess suitability and prescribe.",
+        pharmacogenomic_note: hasGIPR ? "GIPR variant detected — tirzepatide's dual GIP/GLP-1 mechanism may produce enhanced response." : null,
+      };
+      console.log("GLP-1 deterministically triggered:", metabolicTriggers);
+    } else if (!shouldTrigger) {
+      // Ensure it's explicitly not triggered rather than missing
+      reportJson.glp1_assessment = { triggered: false, trigger_reasons: [], compounds_to_consider: [], gp_talking_points: [], important_disclaimer: "Insufficient metabolic indicators for GLP-1 consideration at this time.", pharmacogenomic_note: null, genetic_response_prediction: null };
+    }
+  }
+  // ── END GLP-1 ENFORCEMENT ────────────────────────────────────────────────
 
   if (!userId) {
     console.log("No userId, skipping save");

@@ -1,4 +1,4 @@
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import Header from "@/components/Header";
@@ -16,8 +16,6 @@ import PeptideProtocolPanel from "@/components/dna/PeptideProtocolPanel";
 import GLP1AssessmentPanel from "@/components/dna/GLP1AssessmentPanel";
 import DietRecommendations from "@/components/dna/DietRecommendations";
 import TrainingRecommendations from "@/components/dna/TrainingRecommendations";
-import HormonalAssessmentPanel from "@/components/dna/HormonalAssessmentPanel";
-import ProtocolCrossReference from "@/components/dna/ProtocolCrossReference";
 import ActionPlan from "@/components/dna/ActionPlan";
 import LegalDisclaimer from "@/components/dna/LegalDisclaimer";
 import ReportReview from "@/components/dna/ReportReview";
@@ -32,8 +30,6 @@ const DNAReport = () => {
   const [report, setReport] = useState<any>(null);
   const [review, setReview] = useState<{ rating: number; note: string | null } | null | undefined>(undefined);
   const [loading, setLoading] = useState(true);
-  
-  const reportRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const fetchReport = async () => {
@@ -65,10 +61,6 @@ const DNAReport = () => {
     fetchReport();
   }, [id, user]);
 
-  const r = report?.report_json || {};
-  const isAdvanced = report?.assessment_tier === "advanced";
-
-
   if (loading) {
     return (
       <>
@@ -79,6 +71,9 @@ const DNAReport = () => {
       </>
     );
   }
+
+  const r = report.report_json || {};
+  const isAdvanced = report.assessment_tier === "advanced";
 
   const buildGenotypeKey = (geneResults: any[]) => {
     if (!geneResults?.length) return null;
@@ -95,22 +90,9 @@ const DNAReport = () => {
       <SEO title="Your DNA Report | Peptyl" description="Personalised genetic health assessment report." path={`/dna/report/${id}`} />
       <Header />
       <main className="min-h-screen pt-24 pb-16 bg-background">
-        {/* Print-only header */}
-        <div className="hidden print:block mb-6 pb-4 border-b border-gray-200 container mx-auto px-6 max-w-4xl">
-          <div className="flex items-center justify-between">
-            <div>
-              <h1 className="text-2xl font-bold text-gray-900">Peptyl DNA Health Report</h1>
-              <p className="text-sm text-gray-500 mt-1">
-                {isAdvanced ? "Advanced Assessment" : "Standard Assessment"} · Generated {new Date(report.created_at || Date.now()).toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' })}
-              </p>
-            </div>
-            <p className="text-xs text-gray-400">peptyl.co.uk · For research and educational purposes only</p>
-          </div>
-        </div>
-
-        <div className="container mx-auto px-6 max-w-4xl space-y-8" ref={reportRef}>
-          {/* Tier badge + PDF button */}
-          <div className="flex items-center justify-between" data-hide-print="true">
+        <div className="container mx-auto px-6 max-w-4xl space-y-8">
+          {/* Tier badge */}
+          <div className="flex items-center gap-2">
             <span className={`text-xs font-semibold px-3 py-1 rounded-full ${
               isAdvanced
                 ? "bg-primary/10 text-primary"
@@ -118,15 +100,6 @@ const DNAReport = () => {
             }`}>
               {isAdvanced ? "Advanced ✦" : "Standard"}
             </span>
-            <button
-              onClick={() => window.print()}
-              className="flex items-center gap-2 text-xs font-medium text-muted-foreground hover:text-foreground border border-border rounded-lg px-3 py-2 hover:bg-muted/30 transition-colors"
-            >
-              <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M6 9V2h12v7"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect width="12" height="8" x="6" y="14"/>
-              </svg>
-              Save as PDF
-            </button>
           </div>
 
           <ReportHeader
@@ -144,7 +117,6 @@ const DNAReport = () => {
           {isAdvanced && (
             <>
               <PersonalisationCard data={r.personalisation} />
-              <HormonalAssessmentPanel hormonal={r.hormonal_assessment} />
               <PeptideProtocolPanel peptides={r.peptide_protocol} />
               <GLP1AssessmentPanel glp1={r.glp1_assessment} />
               <DietRecommendations data={r.diet_recommendations} />
@@ -152,32 +124,18 @@ const DNAReport = () => {
             </>
           )}
 
-          {/* Protocol cross-reference (if user has active protocols) */}
-          {r.protocol_cross_reference && (
-            <ProtocolCrossReference data={r.protocol_cross_reference} />
-          )}
-
           <ActionPlan plan={r.action_plan} />
-          <div data-hide-print="true">
-            <OutcomeInsights reportId={id!} genotypeKey={buildGenotypeKey(r.gene_results)} />
-          </div>
+          <OutcomeInsights reportId={id!} genotypeKey={buildGenotypeKey(r.gene_results)} />
           {(r.supplement_protocol?.length > 0 || r.peptide_protocol?.length > 0) && (
-            <div data-hide-print="true">
-              <CreateProtocolFromReport
-                supplements={r.supplement_protocol || []}
-                peptides={r.peptide_protocol || []}
-                reportId={id!}
-                geneticArchetype={r.personalisation?.genetic_archetype}
-              />
-            </div>
+            <CreateProtocolFromReport
+              supplements={r.supplement_protocol ?? []}
+              peptides={r.peptide_protocol ?? []}
+              reportId={id!}
+            />
           )}
-          <div data-hide-print="true">
-            <LegalDisclaimer />
-          </div>
+          <LegalDisclaimer />
           {review !== undefined && (
-            <div data-hide-print="true">
-              <ReportReview reportId={id!} existingReview={review} />
-            </div>
+            <ReportReview reportId={id!} existingReview={review} />
           )}
         </div>
       </main>
