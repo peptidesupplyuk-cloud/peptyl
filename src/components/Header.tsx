@@ -19,7 +19,6 @@ const BASE_NAV_ITEMS = [
   { labelKey: "nav.dna", href: "/dna", dynamic: true, icon: Dna },
   { labelKey: "nav.learn", href: "/education", icon: BookOpen },
   { labelKey: "nav.shop", href: "/shop", icon: Store },
-  { labelKey: "nav.about", href: "/about", icon: Info },
   { labelKey: "nav.admin", href: "/admin/dashboard", adminOnly: true, icon: Shield },
 ];
 
