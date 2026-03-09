@@ -117,19 +117,26 @@ const DNAUpload = () => {
     const checkUnlock = async () => {
       const { data: profile } = await supabase
         .from("profiles")
-        .select("dna_standard_unlocked, dna_advanced_unlocked, dna_assessment_unlocked, height_cm, weight_kg")
+        .select("dna_standard_unlocked, dna_advanced_unlocked, dna_assessment_unlocked, height_cm, weight_kg, age, gender, bp_systolic, bp_diastolic, primary_health_goal, current_medications, research_goal")
         .eq("user_id", user.id)
         .single();
 
-      const hasPermanentUnlock = !!(profile as any)?.dna_assessment_unlocked;
+      const p = profile as any;
+      const hasPermanentUnlock = !!p?.dna_assessment_unlocked;
       const unlocked = hasPermanentUnlock || (tier === "advanced"
-        ? !!(profile as any)?.dna_advanced_unlocked
-        : !!(profile as any)?.dna_standard_unlocked);
+        ? !!p?.dna_advanced_unlocked
+        : !!p?.dna_standard_unlocked);
       setIsUnlocked(unlocked);
 
-      // Pre-fill from profile
-      if ((profile as any)?.height_cm) setHeightCm(String((profile as any).height_cm));
-      if ((profile as any)?.weight_kg) setWeightKg(String((profile as any).weight_kg));
+      // Pre-fill all lifestyle fields from profile
+      if (p?.height_cm) setHeightCm(String(p.height_cm));
+      if (p?.weight_kg) setWeightKg(String(p.weight_kg));
+      if (p?.age) setAge(String(p.age));
+      if (p?.gender) setSex(p.gender);
+      if (p?.bp_systolic && p?.bp_diastolic) setBp(`${p.bp_systolic}/${p.bp_diastolic}`);
+      if (p?.primary_health_goal) setPrimaryGoal(p.primary_health_goal);
+      else if (p?.research_goal) setPrimaryGoal(p.research_goal);
+      if (p?.current_medications) setMedications(p.current_medications);
 
       setCheckingUnlock(false);
     };
