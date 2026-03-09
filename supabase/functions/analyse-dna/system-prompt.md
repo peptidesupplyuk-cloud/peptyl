@@ -200,9 +200,9 @@ Return JSON + narrative. JSON contains:
     }
   ],
   "action_plan": {
-    "immediate": ["Start methylfolate supplementation", "Book Vitamin D retest"],
-    "30_days": ["Monitor energy and mood", "Add magnesium glycinate 400mg"],
-    "90_days": ["Retest homocysteine and Vitamin D", "Consider expanded lipid panel given APOE status"]
+    "immediate": ["Increase Vitamin D3 to 5000 IU + K2 100mcg daily", "Start methylfolate 5-MTHF 400mcg daily"],
+    "30_days": ["Add magnesium glycinate 300mg before bed", "Log food for 1 week to assess saturated fat intake"],
+    "90_days": ["Retest Vitamin D and homocysteine", "Retest lipid panel"]
   },
   "flags": {
     "urgent": [],
