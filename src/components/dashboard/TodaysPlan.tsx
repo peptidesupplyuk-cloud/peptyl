@@ -615,23 +615,29 @@ const TodaysPlan = ({ onActivate, slim = false, selectedDate }: TodaysPlanProps)
                       )}
                     </p>
                   </div>
-                  <div className="flex gap-1.5">
-                    <Button
-                      size="sm"
-                      variant="outline"
-                      className="h-8 text-xs"
-                      onClick={() => updateStatus.mutate({ id: inj.id, status: "skipped" })}
-                    >
-                      <SkipForward className="h-3 w-3 mr-1" /> Skip
-                    </Button>
-                    <Button
-                      size="sm"
-                      className="h-8 text-xs shadow-brand"
-                      onClick={() => updateStatus.mutate({ id: inj.id, status: "completed" })}
-                    >
-                      <Check className="h-3 w-3 mr-1" /> Done
-                    </Button>
-                  </div>
+                  {isToday ? (
+                    <div className="flex gap-1.5">
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        className="h-8 text-xs"
+                        onClick={() => updateStatus.mutate({ id: inj.id, status: "skipped" })}
+                      >
+                        <SkipForward className="h-3 w-3 mr-1" /> Skip
+                      </Button>
+                      <Button
+                        size="sm"
+                        className="h-8 text-xs shadow-brand"
+                        onClick={() => updateStatus.mutate({ id: inj.id, status: "completed" })}
+                      >
+                        <Check className="h-3 w-3 mr-1" /> Done
+                      </Button>
+                    </div>
+                  ) : (
+                    <span className="text-xs text-muted-foreground">
+                      {isFutureDate ? "Planned" : "Missed"}
+                    </span>
+                  )}
                 </div>
               );
             })}
