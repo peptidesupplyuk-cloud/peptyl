@@ -19,7 +19,8 @@ import DoseCalendar from "./InjectionCalendar";
 
 interface TodaysPlanProps {
   onActivate?: () => void;
-  slim?: boolean; // When true, strips headers/progress — used by overview Zone B
+  slim?: boolean;
+  selectedDate?: Date;
 }
 
 /** Map a protocol goal string to a user-friendly label */
