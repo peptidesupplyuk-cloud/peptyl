@@ -638,7 +638,9 @@ async function saveReport(fullContent: string, method: string, userId: string | 
   if (tier === "advanced") {
     const geneResults: any[] = reportJson.gene_results ?? [];
     const variantsDetected: string[] = reportJson.meta?.variants_detected ?? [];
-    const allText = JSON.stringify(geneResults) + " " + variantsDetected.join(" ");
+    // Include existing peptide driven_by text — AI often puts gene names there even if not in gene_results
+    const existingPeptideText = JSON.stringify(reportJson.peptide_protocol ?? []);
+    const allText = JSON.stringify(geneResults) + " " + variantsDetected.join(" ") + " " + existingPeptideText;
 
     const hasTissueSignal =
       /COL1A1|COL5A1|ACTN3|IL6|TNF|IGF1|SOD2|NOS3/i.test(allText);
@@ -780,6 +782,29 @@ async function saveReport(fullContent: string, method: string, userId: string | 
       return s.length > 100 ? s.slice(0, 100).trim() + "…" : s;
     };
     if (Array.isArray(ap.immediate)) ap.immediate = ap.immediate.map(tighten);
+
+    // Fix GP conversation items — must be actionable talking points, not just gene names
+    const gpSuffixes: Record<string, string> = {
+      "MTHFR C677T": "can we test homocysteine every 6 months and confirm methylfolate dosing?",
+      "APOE e3/e4": "please calculate my 10-year cardiovascular risk and advise on lipid targets",
+      "TCF7L2": "I have a diabetes-risk variant — can we monitor fasting glucose and HbA1c annually?",
+      "CYP2D6": "please flag before prescribing SSRIs, codeine, or tramadol",
+      "VDR": "Vitamin D receptor variant — can we retest after 12 weeks of supplementation?",
+    };
+    if (Array.isArray(ap.gp_conversations)) {
+      ap.gp_conversations = ap.gp_conversations.map((item: string) => {
+        // If it looks like just a gene name/variant with no action (no "—", "?", verb)
+        if (!/ — | can | please | discuss | monitor | consider | ask /i.test(item)) {
+          for (const [gene, suffix] of Object.entries(gpSuffixes)) {
+            if (item.toLowerCase().includes(gene.toLowerCase())) {
+              return `${item} — ${suffix}`;
+            }
+          }
+          return `${item} — please discuss implications with your GP`;
+        }
+        return item;
+      });
+    }
     if (Array.isArray(ap["30_days"])) ap["30_days"] = ap["30_days"].map(tighten);
     if (Array.isArray(ap["90_days"])) ap["90_days"] = ap["90_days"].map(tighten);
 
