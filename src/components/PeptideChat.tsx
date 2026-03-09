@@ -160,10 +160,10 @@ const PeptideChat = () => {
             animate={{ scale: 1, opacity: 1 }}
             exit={{ scale: 0, opacity: 0 }}
             onClick={() => setOpen(true)}
-            className="fixed bottom-6 right-6 z-50 h-14 w-14 rounded-full bg-primary text-primary-foreground shadow-brand flex items-center justify-center hover:opacity-90 transition-opacity"
+            className="fixed bottom-20 right-4 z-50 h-11 w-11 rounded-full bg-primary text-primary-foreground shadow-brand flex items-center justify-center hover:opacity-90 transition-opacity"
             aria-label="Open chat"
           >
-            <MessageCircle className="h-6 w-6" />
+            <MessageCircle className="h-5 w-5" />
           </motion.button>
         )}
       </AnimatePresence>
@@ -175,7 +175,7 @@ const PeptideChat = () => {
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 20, scale: 0.95 }}
             transition={{ duration: 0.2 }}
-            className="fixed bottom-6 right-6 z-50 w-[380px] max-w-[calc(100vw-2rem)] h-[560px] max-h-[calc(100vh-3rem)] flex flex-col bg-card border border-border rounded-2xl shadow-xl overflow-hidden"
+            className="fixed bottom-20 right-4 z-50 w-[340px] max-w-[calc(100vw-2rem)] h-[480px] max-h-[calc(100vh-6rem)] flex flex-col bg-card border border-border rounded-2xl shadow-xl overflow-hidden"
           >
             {/* Header */}
             <div className="flex items-center justify-between px-4 py-2 border-b border-border bg-muted/30">
