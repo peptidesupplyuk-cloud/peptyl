@@ -482,45 +482,57 @@ const Dashboard = () => {
 
             {/* OVERVIEW TAB */}
             <TabsContent value="overview" className="space-y-4">
+              {/* Day Picker */}
+              <DayPicker selectedDate={selectedDate} onDateChange={setSelectedDate} />
+
               {/* ═══ ZONE A — Hero Status ═══ */}
               {hasActiveProtocol ? (
-                <div className="bg-card rounded-2xl border border-border p-5 sm:p-6">
-                  <div className="flex items-start gap-6">
-                    {/* Left: Day counter */}
-                    <div className="shrink-0">
-                      <p className="text-4xl font-heading font-bold text-foreground leading-none">Day {daysActive}</p>
-                      <p className="text-sm text-muted-foreground mt-1">of {totalDays}</p>
-                      <div className="h-1.5 bg-muted rounded-full mt-2 w-28">
-                        <div className="h-1.5 bg-primary rounded-full transition-all duration-500" style={{ width: `${progressPct}%` }} />
-                      </div>
-                    </div>
-                    {/* Right: stat pills */}
-                    <div className="flex flex-col gap-2 flex-1 min-w-0">
-                      <div className="flex items-center gap-2 text-sm">
-                        <span className="font-medium text-foreground">{heroStats.rate}%</span>
-                        <span className="text-muted-foreground">adherence</span>
-                      </div>
-                      <div className="flex items-center gap-2 text-sm">
-                        <span className={`font-medium ${heroStats.streak > 7 ? "text-green-500" : heroStats.streak > 0 ? "text-amber-400" : "text-muted-foreground"}`}>
-                         {heroStats.streak} day streak this protocol
-                        </span>
-                      </div>
-                      <div className="flex items-center gap-2 text-sm">
-                        {todayRemaining > 0 ? (
-                          <span className="font-medium text-primary">{todayRemaining} left today</span>
-                        ) : (
-                          <span className="font-medium text-green-500">Today complete ✓</span>
-                        )}
-                      </div>
-                    </div>
-              </div>
+                <div className="bg-card rounded-2xl border border-border overflow-hidden">
+                  {/* Progress bar across top */}
+                  <div className="h-1 bg-muted">
+                    <div className="h-1 bg-primary transition-all duration-500" style={{ width: `${progressPct}%` }} />
+                  </div>
 
-              {/* Wearable Summary — shown if user has wearable data */}
-              <WearableSummary />
-                  {/* Protocol name line */}
-                  <p className="text-xs text-muted-foreground mt-3">
-                    {activeProtocol.name} · {daysLeft > 0 ? `${daysLeft} days remaining` : "Completing today"}
-                  </p>
+                  <div className="p-4 sm:p-5 space-y-3">
+                    {/* Top row: protocol name + day badge */}
+                    <div className="flex items-center justify-between gap-3">
+                      <div className="min-w-0">
+                        <p className="text-sm font-heading font-semibold text-foreground truncate">{activeProtocol.name}</p>
+                        <p className="text-[11px] text-muted-foreground">{daysLeft > 0 ? `${daysLeft} days remaining` : "Completing today"}</p>
+                      </div>
+                      <div className="shrink-0 bg-primary/10 rounded-xl px-3 py-1.5 text-center">
+                        <p className="text-lg font-heading font-bold text-primary leading-none">{daysActive}</p>
+                        <p className="text-[9px] text-muted-foreground mt-0.5">of {totalDays}</p>
+                      </div>
+                    </div>
+
+                    {/* Stat pills row */}
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <span className="inline-flex items-center gap-1.5 text-xs font-medium bg-muted/60 rounded-full px-2.5 py-1 text-foreground">
+                        {heroStats.rate}% adherence
+                      </span>
+                      {heroStats.streak > 0 && (
+                        <span className={`inline-flex items-center gap-1 text-xs font-medium rounded-full px-2.5 py-1 ${
+                          heroStats.streak > 7 ? "bg-green-500/10 text-green-500" : "bg-amber-500/10 text-amber-400"
+                        }`}>
+                          <Flame className="h-3 w-3" />
+                          {heroStats.streak} day streak
+                        </span>
+                      )}
+                      {todayRemaining > 0 ? (
+                        <span className="inline-flex items-center gap-1 text-xs font-medium bg-primary/10 text-primary rounded-full px-2.5 py-1">
+                          {todayRemaining} left today
+                        </span>
+                      ) : (
+                        <span className="inline-flex items-center gap-1 text-xs font-medium bg-green-500/10 text-green-500 rounded-full px-2.5 py-1">
+                          ✓ Today complete
+                        </span>
+                      )}
+                    </div>
+
+                    {/* Wearable Summary */}
+                    <WearableSummary />
+                  </div>
                 </div>
               ) : (
                 <div className="bg-card rounded-2xl border border-border p-6 text-center space-y-3">
