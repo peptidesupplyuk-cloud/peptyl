@@ -100,6 +100,7 @@ const Dashboard = () => {
   const [activeTab, setActiveTab] = useState("overview");
   const [activatingProtocol, setActivatingProtocol] = useState(false);
   const [bioRecs, setBioRecs] = useState<BiometricRecommendation[]>([]);
+  const [profileSubTab, setProfileSubTab] = useState("profile-info");
   const [initialPeptide, setInitialPeptide] = useState<string | null>(null);
   const isMobile = useIsMobile();
   const [searchParams, setSearchParams] = useSearchParams();
