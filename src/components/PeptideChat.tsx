@@ -160,7 +160,7 @@ const PeptideChat = () => {
             animate={{ scale: 1, opacity: 1 }}
             exit={{ scale: 0, opacity: 0 }}
             onClick={() => setOpen(true)}
-            className="fixed bottom-6 right-6 z-50 h-14 w-14 rounded-full bg-primary text-primary-foreground shadow-brand flex items-center justify-center hover:opacity-90 transition-opacity"
+            className="fixed bottom-20 right-4 z-50 h-11 w-11 rounded-full bg-primary text-primary-foreground shadow-brand flex items-center justify-center hover:opacity-90 transition-opacity"
             aria-label="Open chat"
           >
             <MessageCircle className="h-6 w-6" />
