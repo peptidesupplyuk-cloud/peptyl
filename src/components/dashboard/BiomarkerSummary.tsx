@@ -356,7 +356,7 @@ const BiomarkerSummary = ({ panels }: BiomarkerSummaryProps) => {
 
             {/* Right side info */}
             <div className="flex-1 space-y-2">
-              <h2 className="font-heading font-semibold text-foreground text-sm">What We're Fixing</h2>
+              <h2 className="font-heading font-semibold text-foreground text-sm">Biomarker Status</h2>
               {previous && (
                 <p className="text-[10px] text-muted-foreground">
                   vs {timeLabel} ago · {improvingCount} improving
