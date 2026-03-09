@@ -593,7 +593,11 @@ const TodaysPlan = ({ onActivate, slim = false, selectedDate }: TodaysPlanProps)
 
         {!hasAnyItems ? (
           <p className="text-sm text-muted-foreground py-2 text-center">
-            All doses completed or none scheduled today. Check your active plan below.
+            {isFutureDate
+              ? "No doses scheduled yet for this date."
+              : isPastDate
+              ? "No dose records for this date."
+              : "All doses completed or none scheduled today."}
           </p>
         ) : (
           <div className="space-y-2">
