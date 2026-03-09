@@ -12,6 +12,25 @@ export type SupplementLog = {
 
 const todayStr = () => format(new Date(), "yyyy-MM-dd");
 
+export const useDateSupplementLogs = (date: Date) => {
+  const { user } = useAuth();
+  const dateStr = format(date, "yyyy-MM-dd");
+  return useQuery({
+    queryKey: ["supplement-logs", user?.id, dateStr],
+    queryFn: async () => {
+      if (!user) return [];
+      const { data, error } = await supabase
+        .from("supplement_logs")
+        .select("id, item, completed, date")
+        .eq("user_id", user.id)
+        .eq("date", dateStr);
+      if (error) throw error;
+      return (data || []) as SupplementLog[];
+    },
+    enabled: !!user,
+  });
+};
+
 export const useTodaySupplementLogs = () => {
   const { user } = useAuth();
   return useQuery({
