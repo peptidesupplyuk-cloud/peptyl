@@ -113,10 +113,10 @@ const DNALanding = () => {
         <section className="py-20 bg-background">
           <div className="container mx-auto px-6">
             <h2 className="text-2xl md:text-3xl font-heading font-bold text-foreground text-center mb-4">
-              Choose Your Assessment
+              Choose Your Depth
             </h2>
             <p className="text-muted-foreground text-center mb-12 max-w-lg mx-auto">
-              Both tiers use the same AI engine and genetic parsing. Advanced adds peptide science and deep personalisation.
+              Both tiers analyse your DNA and bloodwork with the same AI engine. Advanced unlocks peptide science, GLP-1 insights, and a deeper personalisation layer.
             </p>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-4xl mx-auto">
               {/* Standard */}
