@@ -1,4 +1,4 @@
-import { Link } from "react-router-dom";
+import { Link, Navigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
@@ -9,10 +9,15 @@ import SignupBenefits from "@/components/SignupBenefits";
 import HowItWorksSection from "@/components/HowItWorksSection";
 import SEO from "@/components/SEO";
 import { useSaveOnboarding } from "@/hooks/use-save-onboarding";
+import { useAuth } from "@/contexts/AuthContext";
 
 const Index = () => {
   useSaveOnboarding();
   const { t } = useTranslation();
+  const { user } = useAuth();
+
+  // Signed-in users go straight to their dashboard — app-like behaviour
+  if (user) return <Navigate to="/dashboard" replace />;
 
   return (
     <div className="min-h-screen bg-background">
