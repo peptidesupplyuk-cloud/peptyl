@@ -46,6 +46,31 @@ function isDueToday(frequency: string, protocolStartDate: string): boolean {
   }
 }
 
+export function useDateInjections(date: Date) {
+  const { user } = useAuth();
+  const dateStr = date.toISOString().split("T")[0];
+  const isToday = dateStr === new Date().toISOString().split("T")[0];
+
+  return useQuery({
+    queryKey: ["injections_date", user?.id, dateStr],
+    enabled: !!user,
+    queryFn: async () => {
+      const startOfDay = `${dateStr}T00:00:00.000Z`;
+      const endOfDay = `${dateStr}T23:59:59.999Z`;
+
+      const { data: existing, error } = await supabase
+        .from("injection_logs")
+        .select("*")
+        .gte("scheduled_time", startOfDay)
+        .lte("scheduled_time", endOfDay)
+        .order("scheduled_time", { ascending: true });
+      if (error) throw error;
+
+      return (existing ?? []) as InjectionLog[];
+    },
+  });
+}
+
 export function useTodayInjections() {
   const { user } = useAuth();
   const today = new Date().toISOString().split("T")[0];

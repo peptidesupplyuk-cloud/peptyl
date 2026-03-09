@@ -1,11 +1,11 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Check, SkipForward, Clock, FlaskConical, ArrowRight, Target, Pill, CheckCheck, Dna, X, CalendarIcon } from "lucide-react";
+import { Check, SkipForward, Clock, FlaskConical, ArrowRight, Target, Pill, CheckCheck, Dna, X, CalendarIcon, CalendarClock } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { useTodayInjections, useUpdateInjectionStatus } from "@/hooks/use-injections";
+import { useTodayInjections, useDateInjections, useUpdateInjectionStatus } from "@/hooks/use-injections";
 import { useProtocols, type ProtocolSupplement } from "@/hooks/use-protocols";
 import { useBloodworkPanels } from "@/hooks/use-bloodwork";
-import { useTodaySupplementLogs, useToggleSupplement, useBatchCompleteSupplement } from "@/hooks/use-supplement-logs";
+import { useTodaySupplementLogs, useDateSupplementLogs, useToggleSupplement, useBatchCompleteSupplement } from "@/hooks/use-supplement-logs";
 import { BIOMARKERS, getMarkerStatus } from "@/data/biomarker-ranges";
 import { format, differenceInDays, differenceInCalendarDays } from "date-fns";
 import { useAuth } from "@/contexts/AuthContext";
@@ -19,7 +19,8 @@ import DoseCalendar from "./InjectionCalendar";
 
 interface TodaysPlanProps {
   onActivate?: () => void;
-  slim?: boolean; // When true, strips headers/progress — used by overview Zone B
+  slim?: boolean;
+  selectedDate?: Date;
 }
 
 /** Map a protocol goal string to a user-friendly label */
@@ -45,19 +46,32 @@ interface SupplementItem {
   drivenBy?: string[];
 }
 
-const TodaysPlan = ({ onActivate, slim = false }: TodaysPlanProps) => {
+const TodaysPlan = ({ onActivate, slim = false, selectedDate }: TodaysPlanProps) => {
   const navigate = useNavigate();
   const { user } = useAuth();
   const { toast } = useToast();
   const queryClient = useQueryClient();
-  const { data: injections = [], isLoading } = useTodayInjections();
+  
+  const effectiveDate = selectedDate || new Date();
+  const isToday = format(effectiveDate, "yyyy-MM-dd") === format(new Date(), "yyyy-MM-dd");
+  const isFutureDate = effectiveDate > new Date() && !isToday;
+  const isPastDate = !isToday && !isFutureDate;
+  
+  // Use date-aware hooks
+  const { data: dateInjections = [], isLoading: dateLoading } = useDateInjections(effectiveDate);
+  const { data: todayInjectionsDefault = [], isLoading: todayLoading } = useTodayInjections();
+  const injections = selectedDate ? dateInjections : todayInjectionsDefault;
+  const isLoading = selectedDate ? dateLoading : todayLoading;
+  
   const updateStatus = useUpdateInjectionStatus();
   const { data: protocols = [] } = useProtocols();
   const { data: panels = [] } = useBloodworkPanels();
   const hasActiveProtocol = protocols.some((p) => p.status === "active");
 
-  // Persist supplement completion to DB
-  const { data: supplementLogs = [] } = useTodaySupplementLogs();
+  // Supplement logs - date aware
+  const { data: dateSupplementLogs = [] } = useDateSupplementLogs(effectiveDate);
+  const { data: todaySupplementLogsDefault = [] } = useTodaySupplementLogs();
+  const supplementLogs = selectedDate ? dateSupplementLogs : todaySupplementLogsDefault;
   const toggleSupplement = useToggleSupplement();
   const batchComplete = useBatchCompleteSupplement();
   const completedSupplements = new Set(supplementLogs.filter((l) => l.completed).map((l) => l.item));
@@ -441,7 +455,19 @@ const TodaysPlan = ({ onActivate, slim = false }: TodaysPlanProps) => {
 
         {/* Slim mode header */}
         {slim && (
-          <p className="text-sm font-medium text-muted-foreground">Today's doses</p>
+          <div className="flex items-center justify-between">
+            <p className="text-sm font-medium text-muted-foreground">
+              {isToday ? "Today's doses" : isFutureDate ? "Planned doses" : format(effectiveDate, "EEEE, MMM d")}
+            </p>
+            {isPastDate && injections.length === 0 && (
+              <span className="text-[10px] text-muted-foreground bg-muted/60 rounded-full px-2 py-0.5">No data</span>
+            )}
+            {isFutureDate && (
+              <span className="inline-flex items-center gap-1 text-[10px] text-muted-foreground bg-muted/60 rounded-full px-2 py-0.5">
+                <CalendarClock className="h-3 w-3" /> Scheduled
+              </span>
+            )}
+          </div>
         )}
 
         {/* J2: Day X of N progress strip — only in full mode */}
@@ -553,7 +579,7 @@ const TodaysPlan = ({ onActivate, slim = false }: TodaysPlanProps) => {
         )}
 
 
-        {remainingScheduled > 1 && (
+        {remainingScheduled > 1 && isToday && (
           <Button
             variant="outline"
             size="sm"
@@ -567,7 +593,11 @@ const TodaysPlan = ({ onActivate, slim = false }: TodaysPlanProps) => {
 
         {!hasAnyItems ? (
           <p className="text-sm text-muted-foreground py-2 text-center">
-            All doses completed or none scheduled today. Check your active plan below.
+            {isFutureDate
+              ? "No doses scheduled yet for this date."
+              : isPastDate
+              ? "No dose records for this date."
+              : "All doses completed or none scheduled today."}
           </p>
         ) : (
           <div className="space-y-2">
@@ -589,23 +619,29 @@ const TodaysPlan = ({ onActivate, slim = false }: TodaysPlanProps) => {
                       )}
                     </p>
                   </div>
-                  <div className="flex gap-1.5">
-                    <Button
-                      size="sm"
-                      variant="outline"
-                      className="h-8 text-xs"
-                      onClick={() => updateStatus.mutate({ id: inj.id, status: "skipped" })}
-                    >
-                      <SkipForward className="h-3 w-3 mr-1" /> Skip
-                    </Button>
-                    <Button
-                      size="sm"
-                      className="h-8 text-xs shadow-brand"
-                      onClick={() => updateStatus.mutate({ id: inj.id, status: "completed" })}
-                    >
-                      <Check className="h-3 w-3 mr-1" /> Done
-                    </Button>
-                  </div>
+                  {isToday ? (
+                    <div className="flex gap-1.5">
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        className="h-8 text-xs"
+                        onClick={() => updateStatus.mutate({ id: inj.id, status: "skipped" })}
+                      >
+                        <SkipForward className="h-3 w-3 mr-1" /> Skip
+                      </Button>
+                      <Button
+                        size="sm"
+                        className="h-8 text-xs shadow-brand"
+                        onClick={() => updateStatus.mutate({ id: inj.id, status: "completed" })}
+                      >
+                        <Check className="h-3 w-3 mr-1" /> Done
+                      </Button>
+                    </div>
+                  ) : (
+                    <span className="text-xs text-muted-foreground">
+                      {isFutureDate ? "Planned" : "Missed"}
+                    </span>
+                  )}
                 </div>
               );
             })}
@@ -631,23 +667,29 @@ const TodaysPlan = ({ onActivate, slim = false }: TodaysPlanProps) => {
                     </span>
                   )}
                 </div>
-                <div className="flex gap-1.5">
-                  <Button
-                    size="sm"
-                    variant="outline"
-                    className="h-8 text-xs"
-                    onClick={() => toggleSupplement.mutate({ item: supp.name, completed: false })}
-                  >
-                    <SkipForward className="h-3 w-3 mr-1" /> Skip
-                  </Button>
-                  <Button
-                    size="sm"
-                    className="h-8 text-xs shadow-brand"
-                    onClick={() => toggleSupplement.mutate({ item: supp.name, completed: true })}
-                  >
-                    <Check className="h-3 w-3 mr-1" /> Done
-                  </Button>
-                </div>
+                {isToday ? (
+                  <div className="flex gap-1.5">
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      className="h-8 text-xs"
+                      onClick={() => toggleSupplement.mutate({ item: supp.name, completed: false })}
+                    >
+                      <SkipForward className="h-3 w-3 mr-1" /> Skip
+                    </Button>
+                    <Button
+                      size="sm"
+                      className="h-8 text-xs shadow-brand"
+                      onClick={() => toggleSupplement.mutate({ item: supp.name, completed: true })}
+                    >
+                      <Check className="h-3 w-3 mr-1" /> Done
+                    </Button>
+                  </div>
+                ) : (
+                  <span className="text-xs text-muted-foreground">
+                    {isFutureDate ? "Planned" : "Missed"}
+                  </span>
+                )}
               </div>
             ))}
 
