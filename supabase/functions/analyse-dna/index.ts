@@ -150,7 +150,7 @@ IGF1 TT: anabolic-responsive — prioritise progressive overload resistance trai
 1. Output ONLY raw JSON then ---NARRATIVE--- then bullet points. No markdown fences. No preamble text.
 2. health_score MUST be an object with overall, genetics_score, biomarker_score, lifestyle_score, label, summary.
 3. health_score.overall MUST be a real calculated number. NEVER output 0 unless there is genuinely zero data.
-4. action_plan MUST contain immediate, 30_days, AND 90_days — each with 3–5 items. Every single item MUST name a specific rsID, gene, or biomarker value inline.
+4. action_plan MUST contain immediate, 30_days, AND 90_days — each with 2–4 items. Keep each item to ONE concise sentence: dose + compound or action only. Do NOT repeat gene citations or rationale already covered in gene_results/biomarker_results. The report body covers the "why" — the action plan is the "what to do".
 5. For Advanced: diet_recommendations and training_recommendations are MANDATORY.
 6. For Advanced: personalisation object is MANDATORY. genetic_archetype must be unique. priority_insight must name a specific rsID and biomarker value.
 7. Narrative MUST be 5–7 bullet points starting with • and an emoji — NO prose paragraphs.
@@ -158,7 +158,7 @@ IGF1 TT: anabolic-responsive — prioritise progressive overload resistance trai
 9. UK/EU context — metric units, NHS-aligned ranges. UNIT INTEGRITY: if user provides value in ng/dL, display ng/dL. If nmol/L, display nmol/L. NEVER mix value scale with wrong unit label.
 10. hormonal_assessment: for Advanced tier, always include this field. If sex=male AND age≥28: triggered=true, pull testosterone value from biomarkers if provided, or note it as "not provided — recommend testing". Include optimisation_recommendations regardless of testosterone level. For female or age<28: triggered=false with note.
 11. When glp1_assessment.triggered=true, compounds_to_consider MUST contain at least one named compound object with a real compound name (e.g. "Semaglutide (Ozempic/Wegovy)"). Empty compound fields are FORBIDDEN.
-10. peptide_protocol MUST be included for Advanced if ANY of these genes present: COL1A1, COL5A1, IL6, TNF-a, IGF1, ACTN3, SOD2, NOS3. If ACTN3 XX is detected, BPC-157 is appropriate for recovery support. If IL6 or TNF-a high-risk alleles detected, BPC-157 addresses chronic inflammation. Max 3 peptides, each must list driven_by genes. If no tissue repair SNPs are present at all, include an empty array [] — do not omit the field.
+10. peptide_protocol MUST be included for Advanced if ANY of these genes present: COL1A1, COL5A1, IL6, TNF-a, IGF1, ACTN3, SOD2, NOS3. If ACTN3 XX is detected, BPC-157 is appropriate for recovery support. If IL6 or TNF-a high-risk alleles detected, BPC-157 addresses chronic inflammation. If hsCRP >1.0 mg/L (moderate inflammation), BPC-157 500mcg/day oral or SubQ for 4–6 weeks is appropriate — pull dose and cycle from peptides_enriched DB data. Max 3 peptides, each must list driven_by genes. If no tissue repair SNPs are present at all, include an empty array [] — do not omit the field.
 11. Every biomarker_result MUST include gene_interaction field linking it to the relevant variant.
 12. Every supplement in supplement_protocol MUST include driven_by array with gene names AND biomarker values.
 
@@ -180,8 +180,8 @@ The following outputs are UNACCEPTABLE and will be rejected:
 ❌ BAD training weekly_structure: ["3x aerobic", "2x strength", "2x flexibility"]
 ✅ GOOD: ["3x Zone 2 cardio 30-45 min (60-75% max HR) — ACTN3 TT (rs1815739) indicates endurance-dominant fibre profile, this is your genetic training advantage", "2x resistance training moderate weight 10-15 reps — suits ACTN3 XX fibre type, avoid max-effort explosive loading", "1x dedicated mobility session — non-negotiable given COL1A1 GT (rs1800012) connective tissue vulnerability"]
 
-❌ BAD action_plan.immediate: ["Start methylfolate and B12 supplementation."]
-✅ GOOD: ["Start methylfolate (5-MTHF) 400mcg daily — MTHFR C677T TT (rs1801133) confirmed, homocysteine 13.2 µmol/L above action threshold — highest priority", "Remove all folic acid fortified foods (cereals, protein bars, white bread) — MTHFR TT cannot convert synthetic folic acid and it accumulates as unmetabolised folic acid"]
+❌ BAD action_plan.immediate: ["Start methylfolate and B12 supplementation."] (too vague, no dose)
+✅ GOOD: ["Methylfolate (5-MTHF) 400mcg daily", "Vitamin D3 5000 IU + K2 100mcg daily", "BPC-157 500mcg oral daily for 4 weeks"]
 
 ❌ BAD biomarker gene_interaction: absent or missing
 ✅ GOOD gene_interaction: "VDR Taq1 tt (rs731236) — reduced receptor binding efficiency means standard D3 intake achieves lower serum levels than average; you need 2-3x typical dose to reach optimal range"
