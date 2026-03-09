@@ -242,28 +242,46 @@ const FullMarkerRow = ({
   marker: BiomarkerDef; value: number; status: MarkerStatus;
   delta: ReturnType<typeof getDelta>;
 }) => {
+  const [showInfo, setShowInfo] = useState(false);
   const pos = rangePosition(value, marker);
   const optLeft = ((marker.optimalMin - marker.refMin) / (marker.refMax - marker.refMin)) * 100;
   const optWidth = ((marker.optimalMax - marker.optimalMin) / (marker.refMax - marker.refMin)) * 100;
+  const statusLabel = getStatusLabel(status, value, marker);
 
   return (
-    <div className="space-y-1.5 py-3 border-b border-border/40 last:border-b-0">
+    <div className="space-y-2 py-3.5 border-b border-border/40 last:border-b-0">
       <div className="flex items-center justify-between gap-2">
         <div className="flex items-center gap-2 min-w-0">
-          <div className={cn(
-            "h-2 w-2 rounded-full shrink-0",
-            status === "optimal" ? "bg-primary" : status === "suboptimal" ? "bg-[hsl(var(--warm))]" : "bg-destructive"
-          )} />
           <span className="text-xs font-medium text-foreground truncate">{marker.name}</span>
+          {MARKER_DESCRIPTIONS[marker.key] && (
+            <button
+              onClick={() => setShowInfo(!showInfo)}
+              className="shrink-0 text-muted-foreground hover:text-foreground transition-colors"
+            >
+              <Info className="h-3.5 w-3.5" />
+            </button>
+          )}
         </div>
         <div className="flex items-center gap-2 shrink-0">
+          <div className="text-right">
+            <span className={cn(
+              "text-base font-heading font-bold leading-none",
+              status === "optimal" ? "text-primary" : status === "suboptimal" ? "text-[hsl(var(--warm))]" : "text-destructive"
+            )}>
+              {value}
+            </span>
+            <span className="text-[9px] text-muted-foreground/70 ml-1">{marker.unit}</span>
+          </div>
           <span className={cn(
-            "text-sm font-heading font-bold",
-            status === "optimal" ? "text-primary" : status === "suboptimal" ? "text-[hsl(var(--warm))]" : "text-destructive"
+            "text-[10px] font-semibold px-1.5 py-0.5 rounded-full",
+            status === "optimal"
+              ? "bg-primary/15 text-primary"
+              : status === "suboptimal"
+                ? "bg-[hsl(var(--warm))]/15 text-[hsl(var(--warm))]"
+                : "bg-destructive/15 text-destructive"
           )}>
-            {value}
+            {statusLabel}
           </span>
-          <span className="text-[10px] text-muted-foreground">{marker.unit}</span>
           {delta && delta.diff !== 0 && (
             <span className={cn(
               "flex items-center gap-0.5 text-[10px] font-semibold",
@@ -275,24 +293,31 @@ const FullMarkerRow = ({
           )}
         </div>
       </div>
-      {/* Range bar */}
-      <div className="relative h-2 bg-muted/60 rounded-full overflow-hidden">
+      {showInfo && MARKER_DESCRIPTIONS[marker.key] && (
+        <p className="text-[11px] text-muted-foreground bg-muted/50 rounded-lg px-3 py-2 leading-relaxed">
+          {MARKER_DESCRIPTIONS[marker.key]}
+        </p>
+      )}
+      <div className="relative h-2.5 bg-muted/40 rounded-full overflow-hidden">
         <div
-          className="absolute top-0 h-full rounded-full bg-primary/15"
-          style={{ left: `${optLeft}%`, width: `${optWidth}%` }}
+          className="absolute top-0 h-full rounded-full bg-primary/30"
+          style={{ left: `${optLeft}%`, width: `${optWidth}%`, boxShadow: "0 0 8px hsl(var(--primary) / 0.2)" }}
         />
         <div
           className={cn(
-            "absolute top-1/2 -translate-y-1/2 h-3 w-3 rounded-full border-2 border-card shadow-sm",
+            "absolute top-1/2 -translate-y-1/2 h-3.5 w-3.5 rounded-full border-2 border-card shadow-md",
             status === "optimal" ? "bg-primary" : status === "suboptimal" ? "bg-[hsl(var(--warm))]" : "bg-destructive"
           )}
-          style={{ left: `calc(${pos}% - 6px)` }}
+          style={{
+            left: `calc(${pos}% - 7px)`,
+            boxShadow: `0 0 6px ${status === "optimal" ? "hsl(var(--primary) / 0.5)" : status === "suboptimal" ? "hsl(var(--warm) / 0.5)" : "hsl(var(--destructive) / 0.5)"}`,
+          }}
         />
       </div>
-      <div className="flex justify-between text-[9px] text-muted-foreground px-0.5">
-        <span>{marker.refMin}</span>
-        <span className="text-primary/70">{marker.optimalMin}–{marker.optimalMax}</span>
-        <span>{marker.refMax}</span>
+      <div className="flex items-center justify-between px-0.5">
+        <span className="text-[10px] text-muted-foreground/80 font-medium">{marker.refMin}</span>
+        <span className="text-[10px] text-primary font-semibold">{marker.optimalMin}–{marker.optimalMax} optimal</span>
+        <span className="text-[10px] text-muted-foreground/80 font-medium">{marker.refMax}</span>
       </div>
     </div>
   );
