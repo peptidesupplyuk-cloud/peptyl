@@ -286,12 +286,12 @@ Return the same JSON as Standard PLUS these additional sections:
     }
   ],
   "action_plan": {
-    "immediate": ["..."],
-    "30_days": ["..."],
-    "90_days": ["..."],
+    "immediate": ["Keep each item to ONE short sentence — dose + compound only, no rationale (the report covers why)"],
+    "30_days": ["Same rule — concise, actionable, no gene citations"],
+    "90_days": ["Same rule — retest targets only"],
     "gp_conversations": [
       "Only populate if glp1_assessment.triggered = true OR urgent flags present.",
-      "Write as exact sentences the user can say to their GP at their next appointment."
+      "Write as exact sentences the user can say to their GP. Keep under 15 words each."
     ]
   },
   "flags": {
