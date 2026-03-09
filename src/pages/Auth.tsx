@@ -34,7 +34,6 @@ const Auth = () => {
   const [signupGender, setSignupGender] = useState("");
   const [signupHeight, setSignupHeight] = useState("");
   const [signupWeight, setSignupWeight] = useState("");
-  const [researchGoal, setResearchGoal] = useState("");
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
   const [loading, setLoading] = useState(false);
