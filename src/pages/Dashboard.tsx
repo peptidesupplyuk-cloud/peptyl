@@ -2,7 +2,7 @@ import { useState, useEffect, useMemo, useRef } from "react";
 import { useSearchParams, useNavigate } from "react-router-dom";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Carousel, CarouselContent, CarouselItem, CarouselPrevious, CarouselNext } from "@/components/ui/carousel";
-import { Activity, FlaskConical, LayoutDashboard, AlertTriangle, User, BookOpen, CalendarDays, BarChart3, Heart, Weight, Droplets, ExternalLink, CheckCircle2, Play, Eye, X, Dna, Sparkles, Flame } from "lucide-react";
+import { Activity, FlaskConical, LayoutDashboard, AlertTriangle, User, BookOpen, CalendarDays, BarChart3, Heart, Weight, Droplets, ExternalLink, CheckCircle2, Play, Eye, X, Dna, Sparkles, Flame, Send, Loader2 } from "lucide-react";
 import { addWeeks, format, differenceInCalendarDays, startOfDay, subDays, isSameDay } from "date-fns";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
