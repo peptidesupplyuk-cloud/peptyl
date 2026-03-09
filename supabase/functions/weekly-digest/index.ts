@@ -6,14 +6,52 @@ const corsHeaders = {
     "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
 };
 
-interface UserDigest {
-  email: string;
-  username: string | null;
-  doses_completed: number;
-  doses_scheduled: number;
-  active_protocols: number;
-  ending_soon: string[];
-  new_articles: number;
+/** Count how many days in the past 7 a peptide was due, based on its frequency */
+function countDueDays(
+  frequency: string,
+  protocolStartDate: string,
+  weekStart: Date,
+  weekEnd: Date
+): number {
+  let count = 0;
+  const start = new Date(protocolStartDate);
+
+  for (let d = new Date(weekStart); d <= weekEnd; d.setDate(d.getDate() + 1)) {
+    // Skip days before protocol started
+    if (d < start) continue;
+
+    const daysSinceStart = Math.floor(
+      (d.getTime() - start.getTime()) / (1000 * 60 * 60 * 24)
+    );
+    const dayOfWeek = d.getDay(); // 0=Sun
+
+    let due = false;
+    switch (frequency.toLowerCase()) {
+      case "daily":
+        due = true;
+        break;
+      case "weekly":
+        due = daysSinceStart % 7 === 0;
+        break;
+      case "2x/week":
+        due = dayOfWeek === 1 || dayOfWeek === 4;
+        break;
+      case "3x/week":
+        due = dayOfWeek === 1 || dayOfWeek === 3 || dayOfWeek === 5;
+        break;
+      case "5on/2off":
+        due = dayOfWeek >= 1 && dayOfWeek <= 5;
+        break;
+      case "eod":
+      case "every other day":
+        due = daysSinceStart % 2 === 0;
+        break;
+      default:
+        due = true;
+    }
+    if (due) count++;
+  }
+  return count;
 }
 
 Deno.serve(async (req) => {
@@ -23,10 +61,13 @@ Deno.serve(async (req) => {
 
   const RESEND_API_KEY = Deno.env.get("RESEND_API_KEY");
   if (!RESEND_API_KEY) {
-    return new Response(JSON.stringify({ error: "RESEND_API_KEY not configured" }), {
-      status: 500,
-      headers: { ...corsHeaders, "Content-Type": "application/json" },
-    });
+    return new Response(
+      JSON.stringify({ error: "RESEND_API_KEY not configured" }),
+      {
+        status: 500,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      }
+    );
   }
 
   const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
@@ -34,7 +75,6 @@ Deno.serve(async (req) => {
   const supabase = createClient(supabaseUrl, supabaseKey);
 
   try {
-    // Get all users with profiles
     const { data: profiles } = await supabase
       .from("profiles")
       .select("user_id, username");
@@ -45,8 +85,9 @@ Deno.serve(async (req) => {
       });
     }
 
-    // Get user emails from auth
-    const { data: authData } = await supabase.auth.admin.listUsers({ perPage: 1000 });
+    const { data: authData } = await supabase.auth.admin.listUsers({
+      perPage: 1000,
+    });
     const emailMap = new Map<string, string>();
     for (const u of authData?.users ?? []) {
       if (u.email) emailMap.set(u.id, u.email);
@@ -56,7 +97,6 @@ Deno.serve(async (req) => {
     const weekAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
     const weekAgoISO = weekAgo.toISOString();
 
-    // Get new articles from this week
     const { count: newArticleCount } = await supabase
       .from("articles")
       .select("id", { count: "exact", head: true })
@@ -69,44 +109,76 @@ Deno.serve(async (req) => {
       const email = emailMap.get(profile.user_id);
       if (!email) continue;
 
-      // Get dose stats for the week
+      // Get active protocols with their peptides
+      const { data: protocols } = await supabase
+        .from("protocols")
+        .select("id, name, start_date, end_date, status")
+        .eq("user_id", profile.user_id)
+        .eq("status", "active");
+
+      const active = protocols?.length ?? 0;
+
+      // Calculate EXPECTED doses from protocol peptides (server-side)
+      let expectedDoses = 0;
+      for (const protocol of protocols ?? []) {
+        const { data: peptides } = await supabase
+          .from("protocol_peptides")
+          .select("frequency")
+          .eq("protocol_id", protocol.id);
+
+        for (const pep of peptides ?? []) {
+          expectedDoses += countDueDays(
+            pep.frequency,
+            protocol.start_date,
+            weekAgo,
+            now
+          );
+        }
+      }
+
+      // Count ACTUAL completed doses from injection_logs
       const { data: doses } = await supabase
         .from("injection_logs")
         .select("status")
         .eq("user_id", profile.user_id)
         .gte("scheduled_time", weekAgoISO);
 
-      const completed = (doses ?? []).filter((i) => i.status === "completed").length;
-      const scheduled = (doses ?? []).length;
+      const completed = (doses ?? []).filter(
+        (i) => i.status === "completed"
+      ).length;
 
-      // Get active protocols + ending soon
-      const { data: protocols } = await supabase
-        .from("protocols")
-        .select("name, end_date, status")
+      // Count completed supplements from supplement_logs
+      const weekAgoDate = weekAgo.toISOString().split("T")[0];
+      const { count: supplementsCompleted } = await supabase
+        .from("supplement_logs")
+        .select("id", { count: "exact", head: true })
         .eq("user_id", profile.user_id)
-        .eq("status", "active");
+        .eq("completed", true)
+        .gte("date", weekAgoDate);
 
-      const active = protocols?.length ?? 0;
+      const totalCompleted = completed + (supplementsCompleted ?? 0);
+
+      // Use the higher of expected vs logged scheduled for denominator
+      const scheduled = Math.max(expectedDoses, doses?.length ?? 0);
+
+      // Ending soon
       const endingSoon = (protocols ?? [])
         .filter((p) => {
           if (!p.end_date) return false;
           const daysLeft = Math.ceil(
-            (new Date(p.end_date).getTime() - now.getTime()) / (1000 * 60 * 60 * 24)
+            (new Date(p.end_date).getTime() - now.getTime()) /
+              (1000 * 60 * 60 * 24)
           );
           return daysLeft <= 7 && daysLeft >= 0;
         })
         .map((p) => p.name);
 
-      // Skip users with no activity at all
-      if (completed === 0 && active === 0) continue;
-
-      // Skip users who have active protocols but zero injection logs —
-      // this means they didn't open the dashboard so logs were never
-      // auto-generated; sending "0 doses, 0%" is misleading.
-      if (scheduled === 0 && active > 0) continue;
+      // Skip users with truly no activity
+      if (totalCompleted === 0 && active === 0) continue;
 
       const displayName = profile.username || "Researcher";
-      const completionRate = scheduled > 0 ? Math.round((completed / scheduled) * 100) : 0;
+      const completionRate =
+        scheduled > 0 ? Math.round((completed / scheduled) * 100) : 0;
 
       const htmlBody = `
 <!DOCTYPE html>
@@ -125,11 +197,11 @@ Deno.serve(async (req) => {
 
   <div style="display: flex; gap: 12px; margin-bottom: 16px;">
     <div style="flex: 1; background: #171717; border: 1px solid #262626; border-radius: 12px; padding: 16px; text-align: center;">
-      <div style="font-size: 28px; font-weight: bold; color: #14b8a6;">${completed}</div>
-      <div style="font-size: 11px; color: #737373; margin-top: 4px;">Doses Completed</div>
+      <div style="font-size: 28px; font-weight: bold; color: #14b8a6;">${completed}/${scheduled}</div>
+      <div style="font-size: 11px; color: #737373; margin-top: 4px;">Doses Logged</div>
     </div>
     <div style="flex: 1; background: #171717; border: 1px solid #262626; border-radius: 12px; padding: 16px; text-align: center;">
-      <div style="font-size: 28px; font-weight: bold; color: #14b8a6;">${completionRate}%</div>
+      <div style="font-size: 28px; font-weight: bold; color: ${completionRate >= 80 ? "#22c55e" : completionRate >= 50 ? "#eab308" : "#ef4444"};">${completionRate}%</div>
       <div style="font-size: 11px; color: #737373; margin-top: 4px;">Adherence Rate</div>
     </div>
     <div style="flex: 1; background: #171717; border: 1px solid #262626; border-radius: 12px; padding: 16px; text-align: center;">
@@ -137,6 +209,12 @@ Deno.serve(async (req) => {
       <div style="font-size: 11px; color: #737373; margin-top: 4px;">Active Protocols</div>
     </div>
   </div>
+
+  ${(supplementsCompleted ?? 0) > 0 ? `
+  <div style="background: #171717; border: 1px solid #262626; border-radius: 12px; padding: 16px; margin-bottom: 16px;">
+    <p style="margin: 0; font-size: 13px;">💊 <strong>${supplementsCompleted}</strong> supplement dose${(supplementsCompleted ?? 0) > 1 ? "s" : ""} logged this week.</p>
+  </div>
+  ` : ""}
 
   ${endingSoon.length > 0 ? `
   <div style="background: #451a03; border: 1px solid #92400e; border-radius: 12px; padding: 16px; margin-bottom: 16px;">
@@ -152,6 +230,12 @@ Deno.serve(async (req) => {
   </div>
   ` : ""}
 
+  ${scheduled > 0 && completionRate < 50 ? `
+  <div style="background: #171717; border: 1px solid #262626; border-radius: 12px; padding: 16px; margin-bottom: 16px;">
+    <p style="margin: 0; font-size: 13px; color: #a3a3a3;">💡 <strong>Tip:</strong> Open your dashboard daily to log doses — consistency is key for accurate tracking.</p>
+  </div>
+  ` : ""}
+
   <div style="text-align: center; margin-top: 24px;">
     <a href="https://peptyl.co.uk/dashboard" style="display: inline-block; background: #14b8a6; color: #0a0a0a; font-weight: 600; padding: 10px 28px; border-radius: 8px; text-decoration: none; font-size: 14px;">View Dashboard</a>
   </div>
@@ -162,7 +246,6 @@ Deno.serve(async (req) => {
 </body>
 </html>`;
 
-      // Send via Resend
       const res = await fetch("https://api.resend.com/emails", {
         method: "POST",
         headers: {
@@ -172,7 +255,7 @@ Deno.serve(async (req) => {
         body: JSON.stringify({
           from: "Peptyl <digest@peptyl.co.uk>",
           to: [email],
-          subject: `Your Week: ${completed} doses, ${completionRate}% adherence`,
+          subject: `Your Week: ${completed}/${scheduled} doses, ${completionRate}% adherence`,
           html: htmlBody,
         }),
       });
@@ -184,9 +267,12 @@ Deno.serve(async (req) => {
       }
     }
 
-    return new Response(JSON.stringify({ sent: sentCount, total_users: profiles.length }), {
-      headers: { ...corsHeaders, "Content-Type": "application/json" },
-    });
+    return new Response(
+      JSON.stringify({ sent: sentCount, total_users: profiles.length }),
+      {
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      }
+    );
   } catch (error) {
     console.error("Weekly digest error:", error);
     return new Response(JSON.stringify({ error: String(error) }), {
