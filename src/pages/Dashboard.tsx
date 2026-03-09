@@ -393,7 +393,7 @@ const Dashboard = () => {
 
             {/* PROFILE TAB */}
             <TabsContent value="profile" className="space-y-6">
-              <Tabs defaultValue="profile-info" className="space-y-4">
+              <Tabs value={profileSubTab} onValueChange={setProfileSubTab} className="space-y-4">
                 <TabsList className="w-full grid grid-cols-4">
                   <TabsTrigger value="profile-info" className="text-xs sm:text-sm gap-1.5">
                     <User className="h-3.5 w-3.5" />Profile
