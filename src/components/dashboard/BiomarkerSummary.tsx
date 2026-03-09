@@ -9,7 +9,10 @@ import BiomarkerTrendChart from "./BiomarkerTrendChart";
 
 /* ── config ─────────────────────────────────────────────── */
 
-const KEY_MARKERS = [
+const MAX_SUMMARY_MARKERS = 6;
+
+/** Fallback markers if everything is optimal — the "core health panel" */
+const CORE_MARKERS = [
   "igf1", "total_testosterone", "hscrp", "hba1c", "vitamin_d", "fasting_glucose",
 ];
 
@@ -341,12 +344,50 @@ const BiomarkerSummary = ({ panels }: BiomarkerSummaryProps) => {
     : {};
   const latestMap = Object.fromEntries(latest.markers.map((m) => [m.marker_name, m.value]));
 
-  // Summary markers (hero card)
-  const summaryMarkers = BIOMARKERS.filter(
-    (b) => KEY_MARKERS.includes(b.key) && latestMap[b.key] !== undefined
+  // ── Dynamic marker selection ──
+  // 1. Find all markers with data
+  const allWithData = BIOMARKERS.filter(
+    (b) => ALL_TRACKED.includes(b.key) && latestMap[b.key] !== undefined
   );
+
+  // 2. Separate by status: out_of_range first, then suboptimal, then optimal
+  const outOfRange = allWithData.filter(m => getMarkerStatus(m, latestMap[m.key]!) === "out_of_range");
+  const suboptimal = allWithData.filter(m => getMarkerStatus(m, latestMap[m.key]!) === "suboptimal");
+  const optimal = allWithData.filter(m => getMarkerStatus(m, latestMap[m.key]!) === "optimal");
+
+  // 3. Build priority list: worst first, fill remaining with core markers, then any optimal
+  const prioritised: BiomarkerDef[] = [];
+  const added = new Set<string>();
+
+  for (const m of [...outOfRange, ...suboptimal]) {
+    if (prioritised.length >= MAX_SUMMARY_MARKERS) break;
+    prioritised.push(m);
+    added.add(m.key);
+  }
+  // Fill remaining slots from core markers (if optimal)
+  if (prioritised.length < MAX_SUMMARY_MARKERS) {
+    for (const key of CORE_MARKERS) {
+      if (prioritised.length >= MAX_SUMMARY_MARKERS) break;
+      if (added.has(key)) continue;
+      const m = optimal.find(o => o.key === key);
+      if (m) { prioritised.push(m); added.add(m.key); }
+    }
+  }
+  // Still need more? fill with any remaining optimal
+  if (prioritised.length < MAX_SUMMARY_MARKERS) {
+    for (const m of optimal) {
+      if (prioritised.length >= MAX_SUMMARY_MARKERS) break;
+      if (added.has(m.key)) continue;
+      prioritised.push(m);
+      added.add(m.key);
+    }
+  }
+
+  const summaryMarkers = prioritised;
   if (summaryMarkers.length === 0) return null;
 
+  // Compute how many need attention vs are on track
+  const needsAttentionCount = summaryMarkers.filter(m => getMarkerStatus(m, latestMap[m.key]!) !== "optimal").length;
   const statuses = summaryMarkers.map(m => getMarkerStatus(m, latestMap[m.key]!));
   const optimalCount = statuses.filter(s => s === "optimal").length;
   const improvingCount = summaryMarkers.filter(m => {
@@ -354,10 +395,12 @@ const BiomarkerSummary = ({ panels }: BiomarkerSummaryProps) => {
     return d && d.improving && d.diff !== 0;
   }).length;
 
-  // All available markers (drawer)
-  const allMarkers = BIOMARKERS.filter(
-    (b) => ALL_TRACKED.includes(b.key) && latestMap[b.key] !== undefined
-  );
+  // Determine the summary explanation
+  const summaryExplanation = needsAttentionCount > 0
+    ? `Showing ${needsAttentionCount} marker${needsAttentionCount > 1 ? "s" : ""} that need${needsAttentionCount === 1 ? "s" : ""} attention from your latest bloodwork`
+    : "All tracked markers are in the optimal range";
+
+  const allMarkers = allWithData;
   const grouped: Record<string, typeof allMarkers> = {};
   for (const m of allMarkers) {
     const g = CATEGORY_GROUP[m.category] || m.category;
@@ -380,14 +423,16 @@ const BiomarkerSummary = ({ panels }: BiomarkerSummaryProps) => {
             <ScoreRing score={optimalCount} total={summaryMarkers.length} improving={improvingCount} />
 
             {/* Right side info */}
-            <div className="flex-1 space-y-2">
+            <div className="flex-1 space-y-1.5">
               <h2 className="font-heading font-semibold text-foreground text-sm">Biomarker Status</h2>
+              <p className="text-[10px] text-muted-foreground leading-relaxed">
+                {summaryExplanation}
+              </p>
               {previous && (
                 <p className="text-[10px] text-muted-foreground">
                   vs {timeLabel} ago · {improvingCount} improving
                 </p>
               )}
-              
             </div>
           </div>
         </div>
