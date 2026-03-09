@@ -455,7 +455,19 @@ const TodaysPlan = ({ onActivate, slim = false, selectedDate }: TodaysPlanProps)
 
         {/* Slim mode header */}
         {slim && (
-          <p className="text-sm font-medium text-muted-foreground">Today's doses</p>
+          <div className="flex items-center justify-between">
+            <p className="text-sm font-medium text-muted-foreground">
+              {isToday ? "Today's doses" : isFutureDate ? "Planned doses" : format(effectiveDate, "EEEE, MMM d")}
+            </p>
+            {isPastDate && injections.length === 0 && (
+              <span className="text-[10px] text-muted-foreground bg-muted/60 rounded-full px-2 py-0.5">No data</span>
+            )}
+            {isFutureDate && (
+              <span className="inline-flex items-center gap-1 text-[10px] text-muted-foreground bg-muted/60 rounded-full px-2 py-0.5">
+                <CalendarClock className="h-3 w-3" /> Scheduled
+              </span>
+            )}
+          </div>
         )}
 
         {/* J2: Day X of N progress strip — only in full mode */}
