@@ -579,7 +579,7 @@ const TodaysPlan = ({ onActivate, slim = false, selectedDate }: TodaysPlanProps)
         )}
 
 
-        {remainingScheduled > 1 && (
+        {remainingScheduled > 1 && isToday && (
           <Button
             variant="outline"
             size="sm"
