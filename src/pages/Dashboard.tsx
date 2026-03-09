@@ -2,7 +2,7 @@ import { useState, useEffect, useMemo, useRef } from "react";
 import { useSearchParams, useNavigate } from "react-router-dom";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Carousel, CarouselContent, CarouselItem, CarouselPrevious, CarouselNext } from "@/components/ui/carousel";
-import { Activity, FlaskConical, LayoutDashboard, AlertTriangle, User, BookOpen, CalendarDays, BarChart3, Heart, Weight, Droplets, ExternalLink, CheckCircle2, Play, Eye, X, Dna, Sparkles, Flame } from "lucide-react";
+import { Activity, FlaskConical, LayoutDashboard, AlertTriangle, User, BookOpen, CalendarDays, BarChart3, Heart, Weight, Droplets, ExternalLink, CheckCircle2, Play, Eye, X, Dna, Sparkles, Flame, Send, Loader2 } from "lucide-react";
 import { addWeeks, format, differenceInCalendarDays, startOfDay, subDays, isSameDay } from "date-fns";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
@@ -21,6 +21,7 @@ import { useBloodworkPanels } from "@/hooks/use-bloodwork";
 import { useCreateProtocol, useProtocols } from "@/hooks/use-protocols";
 import { useLogInjection, useUpdateInjectionStatus, useAllInjections, useTodayInjections } from "@/hooks/use-injections";
 import { useTodaySupplementLogs } from "@/hooks/use-supplement-logs";
+import { useJournalEntries, useAddJournalEntry } from "@/hooks/use-journal";
 import ResultsTab from "@/components/dashboard/ResultsTab";
 import { useProtocolNotifications, useNotificationActions, useRequestNotificationPermission } from "@/hooks/use-notifications";
 import { Capacitor } from "@capacitor/core";
@@ -44,6 +45,68 @@ import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { useQuery } from "@tanstack/react-query";
+
+/* ─── Compact Journal for Overview ─── */
+const CompactJournal = ({ onExpandJournal }: { onExpandJournal: () => void }) => {
+  const [note, setNote] = useState("");
+  const addEntry = useAddJournalEntry();
+  const { data: journal = [] } = useJournalEntries();
+  const { toast } = useToast();
+
+  const submit = async () => {
+    if (note.trim().length < 10) return;
+    try {
+      await addEntry.mutateAsync({ content: note.trim(), peptides: [], summary: null, evidence_quality: null, findings_count: 0 });
+      toast({ title: "Saved", description: "Journal entry logged." });
+      setNote("");
+    } catch {
+      toast({ title: "Error", description: "Could not save entry.", variant: "destructive" });
+    }
+  };
+
+  return (
+    <div className="bg-card rounded-2xl border border-border p-4 space-y-3">
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-2">
+          <BookOpen className="h-4 w-4 text-primary" />
+          <h3 className="text-sm font-heading font-semibold text-foreground">Quick Journal</h3>
+        </div>
+        <button onClick={onExpandJournal} className="text-xs text-primary hover:underline">
+          View all →
+        </button>
+      </div>
+
+      <div className="flex gap-2">
+        <input
+          value={note}
+          onChange={(e) => setNote(e.target.value)}
+          placeholder="Log an observation, side effect, or note…"
+          className="flex-1 min-w-0 bg-muted/50 border border-border rounded-lg px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-primary"
+          onKeyDown={(e) => e.key === "Enter" && submit()}
+        />
+        <Button
+          size="sm"
+          onClick={submit}
+          disabled={note.trim().length < 10 || addEntry.isPending}
+          className="shrink-0"
+        >
+          {addEntry.isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
+        </Button>
+      </div>
+
+      {journal.length > 0 && (
+        <div className="space-y-1.5 max-h-32 overflow-y-auto">
+          {journal.slice(0, 3).map((entry) => (
+            <div key={entry.id} className="flex items-start gap-2 text-xs">
+              <span className="text-muted-foreground shrink-0">{new Date(entry.created_at).toLocaleDateString()}</span>
+              <span className="text-foreground line-clamp-1">{entry.content}</span>
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+};
 
 const VideoHelpButton = () => {
   const [open, setOpen] = useState(false);
@@ -650,8 +713,8 @@ const Dashboard = () => {
                         )}
                       </div>
 
-                      {/* C4 — Personalised recommendations */}
-                      {recommendations.length > 0 && (hasBloodwork || hasDna) && (
+                      {/* C4 — Personalised recommendations — only when NO active protocol */}
+                      {!hasActiveProtocol && recommendations.length > 0 && (hasBloodwork || hasDna) && (
                         <div className="space-y-3">
                           <Carousel opts={{ align: "start", loop: false }} className="w-full">
                             <div className="flex items-center justify-between">
@@ -677,7 +740,8 @@ const Dashboard = () => {
                         </div>
                       )}
 
-                      {/* OnboardingRecommendations removed — unified engine handles it */}
+                      {/* C5 — Quick journal */}
+                      <CompactJournal onExpandJournal={() => setActiveTab("journal")} />
                     </div>
                   )}
                 </div>
@@ -706,8 +770,8 @@ const Dashboard = () => {
                     )}
                   </div>
 
-                  {/* C4 — Personalised recommendations */}
-                  {recommendations.length > 0 && (hasBloodwork || hasDna) && (
+                  {/* C4 — Personalised recommendations — only when NO active protocol */}
+                  {!hasActiveProtocol && recommendations.length > 0 && (hasBloodwork || hasDna) && (
                     <div className="space-y-3">
                       <Carousel opts={{ align: "start", loop: false }} className="w-full">
                         <div className="flex items-center justify-between">
@@ -733,7 +797,8 @@ const Dashboard = () => {
                     </div>
                   )}
 
-                  {/* OnboardingRecommendations removed — unified engine handles it */}
+                  {/* C5 — Quick journal */}
+                  <CompactJournal onExpandJournal={() => setActiveTab("journal")} />
                 </div>
               )}
 
