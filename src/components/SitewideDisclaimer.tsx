@@ -6,15 +6,18 @@ import { useAuth } from "@/contexts/AuthContext";
 const STORAGE_KEY = "peptyl_disclaimer_seen";
 
 const SitewideDisclaimer = () => {
-  const { user } = useAuth();
+  const { user, loading } = useAuth();
   const [visible, setVisible] = useState(false);
 
   useEffect(() => {
+    if (loading) return;
     // Never show for signed-in users; they accepted terms at signup
     if (!user && !sessionStorage.getItem(STORAGE_KEY)) {
       setVisible(true);
+    } else {
+      setVisible(false);
     }
-  }, [user]);
+  }, [user, loading]);
 
   if (!visible) return null;
 
