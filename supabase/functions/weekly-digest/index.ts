@@ -97,8 +97,13 @@ Deno.serve(async (req) => {
         })
         .map((p) => p.name);
 
-      // Skip users with no activity
+      // Skip users with no activity at all
       if (completed === 0 && active === 0) continue;
+
+      // Skip users who have active protocols but zero injection logs —
+      // this means they didn't open the dashboard so logs were never
+      // auto-generated; sending "0 doses, 0%" is misleading.
+      if (scheduled === 0 && active > 0) continue;
 
       const displayName = profile.username || "Researcher";
       const completionRate = scheduled > 0 ? Math.round((completed / scheduled) * 100) : 0;
