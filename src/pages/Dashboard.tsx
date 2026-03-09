@@ -628,7 +628,7 @@ const Dashboard = () => {
                   {showMore && (
                     <div className="space-y-4">
                       {/* C1 — Biomarker summary */}
-                      {hasBloodwork && <BiomarkerSummary panels={panels} />}
+                      {hasBloodwork && <BiomarkerSummary panels={panels} onViewFullBloodwork={() => { setActiveTab("profile"); setProfileSubTab("bloodwork"); }} />}
 
                       {/* C2 — Protocol nudges */}
                       <ProtocolNudges onNavigate={setActiveTab} />
