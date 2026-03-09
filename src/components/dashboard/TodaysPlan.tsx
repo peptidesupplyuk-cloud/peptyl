@@ -46,19 +46,32 @@ interface SupplementItem {
   drivenBy?: string[];
 }
 
-const TodaysPlan = ({ onActivate, slim = false }: TodaysPlanProps) => {
+const TodaysPlan = ({ onActivate, slim = false, selectedDate }: TodaysPlanProps) => {
   const navigate = useNavigate();
   const { user } = useAuth();
   const { toast } = useToast();
   const queryClient = useQueryClient();
-  const { data: injections = [], isLoading } = useTodayInjections();
+  
+  const effectiveDate = selectedDate || new Date();
+  const isToday = format(effectiveDate, "yyyy-MM-dd") === format(new Date(), "yyyy-MM-dd");
+  const isFutureDate = effectiveDate > new Date() && !isToday;
+  const isPastDate = !isToday && !isFutureDate;
+  
+  // Use date-aware hooks
+  const { data: dateInjections = [], isLoading: dateLoading } = useDateInjections(effectiveDate);
+  const { data: todayInjectionsDefault = [], isLoading: todayLoading } = useTodayInjections();
+  const injections = selectedDate ? dateInjections : todayInjectionsDefault;
+  const isLoading = selectedDate ? dateLoading : todayLoading;
+  
   const updateStatus = useUpdateInjectionStatus();
   const { data: protocols = [] } = useProtocols();
   const { data: panels = [] } = useBloodworkPanels();
   const hasActiveProtocol = protocols.some((p) => p.status === "active");
 
-  // Persist supplement completion to DB
-  const { data: supplementLogs = [] } = useTodaySupplementLogs();
+  // Supplement logs - date aware
+  const { data: dateSupplementLogs = [] } = useDateSupplementLogs(effectiveDate);
+  const { data: todaySupplementLogsDefault = [] } = useTodaySupplementLogs();
+  const supplementLogs = selectedDate ? dateSupplementLogs : todaySupplementLogsDefault;
   const toggleSupplement = useToggleSupplement();
   const batchComplete = useBatchCompleteSupplement();
   const completedSupplements = new Set(supplementLogs.filter((l) => l.completed).map((l) => l.item));
