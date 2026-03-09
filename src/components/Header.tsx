@@ -1,6 +1,6 @@
 import { useState, useEffect, useMemo } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
-import { Menu, X, ShoppingBag, LogOut, Heart, Zap, Dna, BookOpen, Store, Info, Shield } from "lucide-react";
+import { Menu, X, ShoppingBag, LogOut, Heart, Zap, Dna, BookOpen, Store, Shield } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useTranslation } from "react-i18next";
 import { useQuery } from "@tanstack/react-query";
