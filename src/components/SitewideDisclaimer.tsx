@@ -1,17 +1,20 @@
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
+import { useAuth } from "@/contexts/AuthContext";
 
 const STORAGE_KEY = "peptyl_disclaimer_seen";
 
 const SitewideDisclaimer = () => {
+  const { user } = useAuth();
   const [visible, setVisible] = useState(false);
 
   useEffect(() => {
-    if (!sessionStorage.getItem(STORAGE_KEY)) {
+    // Never show for signed-in users; they accepted terms at signup
+    if (!user && !sessionStorage.getItem(STORAGE_KEY)) {
       setVisible(true);
     }
-  }, []);
+  }, [user]);
 
   if (!visible) return null;
 

@@ -9,6 +9,7 @@ const SignupBanner = () => {
   const [dismissed, setDismissed] = useState(false);
   const { t } = useTranslation();
 
+  // Never show for signed-in users
   if (user || dismissed) return null;
 
   return (
