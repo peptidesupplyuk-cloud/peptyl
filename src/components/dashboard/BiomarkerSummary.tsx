@@ -344,18 +344,61 @@ const BiomarkerSummary = ({ panels }: BiomarkerSummaryProps) => {
     : {};
   const latestMap = Object.fromEntries(latest.markers.map((m) => [m.marker_name, m.value]));
 
-  // Summary markers (hero card)
-  const summaryMarkers = BIOMARKERS.filter(
-    (b) => KEY_MARKERS.includes(b.key) && latestMap[b.key] !== undefined
+  // ── Dynamic marker selection ──
+  // 1. Find all markers with data
+  const allWithData = BIOMARKERS.filter(
+    (b) => ALL_TRACKED.includes(b.key) && latestMap[b.key] !== undefined
   );
+
+  // 2. Separate by status: out_of_range first, then suboptimal, then optimal
+  const outOfRange = allWithData.filter(m => getMarkerStatus(m, latestMap[m.key]!) === "out_of_range");
+  const suboptimal = allWithData.filter(m => getMarkerStatus(m, latestMap[m.key]!) === "suboptimal");
+  const optimal = allWithData.filter(m => getMarkerStatus(m, latestMap[m.key]!) === "optimal");
+
+  // 3. Build priority list: worst first, fill remaining with core markers, then any optimal
+  const prioritised: BiomarkerDef[] = [];
+  const added = new Set<string>();
+
+  for (const m of [...outOfRange, ...suboptimal]) {
+    if (prioritised.length >= MAX_SUMMARY_MARKERS) break;
+    prioritised.push(m);
+    added.add(m.key);
+  }
+  // Fill remaining slots from core markers (if optimal)
+  if (prioritised.length < MAX_SUMMARY_MARKERS) {
+    for (const key of CORE_MARKERS) {
+      if (prioritised.length >= MAX_SUMMARY_MARKERS) break;
+      if (added.has(key)) continue;
+      const m = optimal.find(o => o.key === key);
+      if (m) { prioritised.push(m); added.add(m.key); }
+    }
+  }
+  // Still need more? fill with any remaining optimal
+  if (prioritised.length < MAX_SUMMARY_MARKERS) {
+    for (const m of optimal) {
+      if (prioritised.length >= MAX_SUMMARY_MARKERS) break;
+      if (added.has(m.key)) continue;
+      prioritised.push(m);
+      added.add(m.key);
+    }
+  }
+
+  const summaryMarkers = prioritised;
   if (summaryMarkers.length === 0) return null;
 
+  // Compute how many need attention vs are on track
+  const needsAttentionCount = summaryMarkers.filter(m => getMarkerStatus(m, latestMap[m.key]!) !== "optimal").length;
   const statuses = summaryMarkers.map(m => getMarkerStatus(m, latestMap[m.key]!));
   const optimalCount = statuses.filter(s => s === "optimal").length;
   const improvingCount = summaryMarkers.filter(m => {
     const d = getDelta(latestMap[m.key]!, prevMap[m.key], m.key);
     return d && d.improving && d.diff !== 0;
   }).length;
+
+  // Determine the summary explanation
+  const summaryExplanation = needsAttentionCount > 0
+    ? `Showing ${needsAttentionCount} marker${needsAttentionCount > 1 ? "s" : ""} that need${needsAttentionCount === 1 ? "s" : ""} attention from your latest bloodwork`
+    : "All tracked markers are in the optimal range";
 
   // All available markers (drawer)
   const allMarkers = BIOMARKERS.filter(
