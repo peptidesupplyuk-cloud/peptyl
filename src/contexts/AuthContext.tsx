@@ -11,6 +11,10 @@ interface SignUpMeta {
   current_compounds?: string;
   biomarker_availability?: string;
   risk_tolerance?: string;
+  age?: number;
+  gender?: string;
+  height_cm?: number;
+  weight_kg?: number;
 }
 
 interface AuthContextType {
