@@ -200,9 +200,9 @@ Return JSON + narrative. JSON contains:
     }
   ],
   "action_plan": {
-    "immediate": ["Start methylfolate supplementation", "Book Vitamin D retest"],
-    "30_days": ["Monitor energy and mood", "Add magnesium glycinate 400mg"],
-    "90_days": ["Retest homocysteine and Vitamin D", "Consider expanded lipid panel given APOE status"]
+    "immediate": ["Increase Vitamin D3 to 5000 IU + K2 100mcg daily", "Start methylfolate 5-MTHF 400mcg daily"],
+    "30_days": ["Add magnesium glycinate 300mg before bed", "Log food for 1 week to assess saturated fat intake"],
+    "90_days": ["Retest Vitamin D and homocysteine", "Retest lipid panel"]
   },
   "flags": {
     "urgent": [],
@@ -286,12 +286,12 @@ Return the same JSON as Standard PLUS these additional sections:
     }
   ],
   "action_plan": {
-    "immediate": ["..."],
-    "30_days": ["..."],
-    "90_days": ["..."],
+    "immediate": ["Keep each item to ONE short sentence — dose + compound only, no rationale (the report covers why)"],
+    "30_days": ["Same rule — concise, actionable, no gene citations"],
+    "90_days": ["Same rule — retest targets only"],
     "gp_conversations": [
       "Only populate if glp1_assessment.triggered = true OR urgent flags present.",
-      "Write as exact sentences the user can say to their GP at their next appointment."
+      "Write as exact sentences the user can say to their GP. Keep under 15 words each."
     ]
   },
   "flags": {
@@ -313,7 +313,7 @@ Never recommend to users who mention cancer, pregnancy, or serious undiagnosed i
 
 | Peptide | Trigger SNPs | Trigger Biomarkers | Use Case |
 |---------|-------------|-------------------|----------|
-| BPC-157 | COL1A1 T, COL5A1 T, IL6 G, TNF-α A, NOS3 TT | hsCRP >3.0, injury mentioned | Tissue repair, gut, inflammation |
+| BPC-157 | COL1A1 T, COL5A1 T, IL6 G, TNF-α A, NOS3 TT | hsCRP >1.0 (moderate+), injury mentioned, gut issues mentioned | Tissue repair, gut, inflammation |
 | TB-500 (Thymosin Beta-4) | ACTN3 XX, COL1A1 T | Injury/recovery mentioned, elevated CK | Muscle recovery, tissue healing |
 | BPC-157 + TB-500 stack | Both trigger sets above | hsCRP elevated + injury mentioned | Only when both signal sets present |
 | GHK-Cu | COL1A1 T, VEGF G | Low ferritin, skin/ageing concern | Skin, wound healing, collagen |
