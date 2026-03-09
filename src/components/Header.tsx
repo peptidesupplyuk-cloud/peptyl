@@ -1,6 +1,6 @@
 import { useState, useEffect, useMemo } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
-import { Menu, X, ShoppingBag, LogOut, Heart, Zap, Dna, BookOpen, Store, Info, Shield } from "lucide-react";
+import { Menu, X, ShoppingBag, LogOut, Heart, Zap, FileText, BookOpen, Store, Info, Shield } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useTranslation } from "react-i18next";
 import { useQuery } from "@tanstack/react-query";
@@ -16,7 +16,7 @@ const ADMIN_EMAIL = "peptidesupplyuk@gmail.com";
 const BASE_NAV_ITEMS = [
   { labelKey: "nav.myHealth", href: "/dashboard", icon: Heart },
   { labelKey: "nav.improve", href: "/improve", icon: Zap },
-  { labelKey: "nav.dna", href: "/dna", dynamic: true, icon: Dna },
+  { labelKey: "nav.dna", href: "/dna", dynamic: true, icon: FileText },
   { labelKey: "nav.learn", href: "/education", icon: BookOpen },
   { labelKey: "nav.shop", href: "/shop", icon: Store },
   { labelKey: "nav.about", href: "/about", icon: Info },

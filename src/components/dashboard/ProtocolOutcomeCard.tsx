@@ -118,7 +118,7 @@ const ProtocolOutcomeCard = ({ baselinePanel, retestPanel, protocolName }: Proto
       {/* Footer */}
       <div className="pt-1">
         <Link to="/dna/dashboard" className="text-xs text-primary hover:underline">
-          View full analysis on your DNA report →
+          View full analysis on your Health Report →
         </Link>
       </div>
     </div>

@@ -49,7 +49,7 @@ const Footer = () => {
               <Link to="/about" className="text-sm text-primary-foreground/50 hover:text-primary transition-colors">{t("footer.aboutUs")}</Link>
               <Link to="/privacy-policy" className="text-sm text-primary-foreground/50 hover:text-primary transition-colors">{t("footer.privacyPolicy")}</Link>
               <Link to="/terms-of-service" className="text-sm text-primary-foreground/50 hover:text-primary transition-colors">{t("footer.termsOfService")}</Link>
-              <Link to="/dna" className="text-sm text-primary-foreground/50 hover:text-primary transition-colors">DNA Data &amp; Privacy</Link>
+              <Link to="/dna" className="text-sm text-primary-foreground/50 hover:text-primary transition-colors">Data &amp; Privacy</Link>
               <span className="text-xs text-primary-foreground/30">ICO Registration: Pending</span>
             </div>
           </div>
