@@ -31,9 +31,9 @@ const advancedExtras = [
 ];
 
 const steps = [
-  { icon: Sparkles, title: "Choose your tier and pay", desc: "Standard or Advanced, one-time payment." },
-  { icon: Upload, title: "Upload your DNA file, lab report, or photo", desc: "We accept 23andMe, AncestryDNA, PDFs, images, or paste text." },
-  { icon: Zap, title: "Receive your personalised report in under 60 seconds", desc: "AI-powered analysis with evidence-graded recommendations." },
+  { icon: Sparkles, title: "Choose your tier and pay", desc: "Standard or Advanced — one-time payment, no subscription." },
+  { icon: Upload, title: "Upload your DNA, bloodwork, or both", desc: "23andMe, AncestryDNA, PDF lab reports, photos, or paste text. Combining DNA + bloods gives the most accurate results." },
+  { icon: Zap, title: "Get your personalised protocol in under 60 seconds", desc: "AI-powered supplement, peptide, and lifestyle recommendations grounded in your biology." },
 ];
 
 const faqs = [
