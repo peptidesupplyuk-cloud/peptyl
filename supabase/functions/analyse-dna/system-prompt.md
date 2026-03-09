@@ -313,7 +313,7 @@ Never recommend to users who mention cancer, pregnancy, or serious undiagnosed i
 
 | Peptide | Trigger SNPs | Trigger Biomarkers | Use Case |
 |---------|-------------|-------------------|----------|
-| BPC-157 | COL1A1 T, COL5A1 T, IL6 G, TNF-α A, NOS3 TT | hsCRP >3.0, injury mentioned | Tissue repair, gut, inflammation |
+| BPC-157 | COL1A1 T, COL5A1 T, IL6 G, TNF-α A, NOS3 TT | hsCRP >1.0 (moderate+), injury mentioned, gut issues mentioned | Tissue repair, gut, inflammation |
 | TB-500 (Thymosin Beta-4) | ACTN3 XX, COL1A1 T | Injury/recovery mentioned, elevated CK | Muscle recovery, tissue healing |
 | BPC-157 + TB-500 stack | Both trigger sets above | hsCRP elevated + injury mentioned | Only when both signal sets present |
 | GHK-Cu | COL1A1 T, VEGF G | Low ferritin, skin/ageing concern | Skin, wound healing, collagen |
