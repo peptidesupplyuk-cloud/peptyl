@@ -100,6 +100,7 @@ const Dashboard = () => {
   const [activeTab, setActiveTab] = useState("overview");
   const [activatingProtocol, setActivatingProtocol] = useState(false);
   const [bioRecs, setBioRecs] = useState<BiometricRecommendation[]>([]);
+  const [profileSubTab, setProfileSubTab] = useState("profile-info");
   const [initialPeptide, setInitialPeptide] = useState<string | null>(null);
   const isMobile = useIsMobile();
   const [searchParams, setSearchParams] = useSearchParams();
@@ -392,7 +393,7 @@ const Dashboard = () => {
 
             {/* PROFILE TAB */}
             <TabsContent value="profile" className="space-y-6">
-              <Tabs defaultValue="profile-info" className="space-y-4">
+              <Tabs value={profileSubTab} onValueChange={setProfileSubTab} className="space-y-4">
                 <TabsList className="w-full grid grid-cols-4">
                   <TabsTrigger value="profile-info" className="text-xs sm:text-sm gap-1.5">
                     <User className="h-3.5 w-3.5" />Profile
@@ -627,7 +628,7 @@ const Dashboard = () => {
                   {showMore && (
                     <div className="space-y-4">
                       {/* C1 — Biomarker summary */}
-                      {hasBloodwork && <BiomarkerSummary panels={panels} />}
+                      {hasBloodwork && <BiomarkerSummary panels={panels} onViewFullBloodwork={() => { setActiveTab("profile"); setProfileSubTab("bloodwork"); }} />}
 
                       {/* C2 — Protocol nudges */}
                       <ProtocolNudges onNavigate={setActiveTab} />
@@ -683,7 +684,7 @@ const Dashboard = () => {
               ) : (
                 <div className="space-y-4">
                   {/* C1 — Biomarker summary */}
-                  {hasBloodwork && <BiomarkerSummary panels={panels} />}
+                  {hasBloodwork && <BiomarkerSummary panels={panels} onViewFullBloodwork={() => { setActiveTab("profile"); setProfileSubTab("bloodwork"); }} />}
 
                   {/* C2 — Protocol nudges */}
                   <ProtocolNudges onNavigate={setActiveTab} />
