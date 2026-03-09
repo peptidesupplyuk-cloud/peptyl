@@ -423,14 +423,16 @@ const BiomarkerSummary = ({ panels }: BiomarkerSummaryProps) => {
             <ScoreRing score={optimalCount} total={summaryMarkers.length} improving={improvingCount} />
 
             {/* Right side info */}
-            <div className="flex-1 space-y-2">
+            <div className="flex-1 space-y-1.5">
               <h2 className="font-heading font-semibold text-foreground text-sm">Biomarker Status</h2>
+              <p className="text-[10px] text-muted-foreground leading-relaxed">
+                {summaryExplanation}
+              </p>
               {previous && (
                 <p className="text-[10px] text-muted-foreground">
                   vs {timeLabel} ago · {improvingCount} improving
                 </p>
               )}
-              
             </div>
           </div>
         </div>
