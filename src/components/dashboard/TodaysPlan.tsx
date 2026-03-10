@@ -605,14 +605,14 @@ const TodaysPlan = ({ onActivate, slim = false, selectedDate }: TodaysPlanProps)
             {scheduled.map((inj) => {
               const goal = peptideGoalMap.get(inj.peptide_name.toLowerCase());
               return (
-                <div key={inj.id} className="flex items-center justify-between bg-muted/50 rounded-xl px-4 py-3">
-                  <div>
+                <div key={inj.id} className="flex flex-wrap items-center justify-between gap-2 bg-muted/50 rounded-xl px-3 sm:px-4 py-3">
+                  <div className="min-w-0 flex-1">
                     <div className="flex items-center gap-2">
-                      <Clock className="h-3.5 w-3.5 text-primary" />
-                      <span className="text-sm font-medium text-foreground">{inj.peptide_name}</span>
-                      <span className="text-xs text-muted-foreground">{inj.dose_mcg}mcg</span>
+                      <Clock className="h-3.5 w-3.5 text-primary shrink-0" />
+                      <span className="text-sm font-medium text-foreground truncate">{inj.peptide_name}</span>
+                      <span className="text-xs text-muted-foreground shrink-0">{inj.dose_mcg}mcg</span>
                     </div>
-                    <p className="text-xs text-muted-foreground ml-5.5 mt-0.5">
+                    <p className="text-xs text-muted-foreground ml-5.5 mt-0.5 truncate">
                       {format(new Date(inj.scheduled_time), "h:mm a")}
                       {goal && (
                         <span className="ml-1.5 text-primary/70">· {goal}</span>
@@ -620,18 +620,18 @@ const TodaysPlan = ({ onActivate, slim = false, selectedDate }: TodaysPlanProps)
                     </p>
                   </div>
                   {isToday ? (
-                    <div className="flex gap-1.5">
+                    <div className="flex gap-1.5 shrink-0">
                       <Button
                         size="sm"
                         variant="outline"
-                        className="h-8 text-xs"
+                        className="h-8 text-xs px-2.5 sm:px-3"
                         onClick={() => updateStatus.mutate({ id: inj.id, status: "skipped" })}
                       >
                         <SkipForward className="h-3 w-3 mr-1" /> Skip
                       </Button>
                       <Button
                         size="sm"
-                        className="h-8 text-xs shadow-brand"
+                        className="h-8 text-xs px-2.5 sm:px-3 shadow-brand"
                         onClick={() => updateStatus.mutate({ id: inj.id, status: "completed" })}
                       >
                         <Check className="h-3 w-3 mr-1" /> Done
