@@ -89,12 +89,23 @@ const PopularProtocols = ({ onActivate, isActivating, disclaimerAccepted }: Prop
       {/* ─── Peptide Protocols ─────────────────────────────────────────────── */}
       <div className="space-y-4">
         <Carousel opts={{ align: "start", loop: false }} className="w-full">
-          <div className="flex items-center justify-between">
+          <div className="flex items-center justify-between gap-3">
             <div className="flex items-center gap-2">
               <FlaskConical className="h-5 w-5 text-primary" />
               <h2 className="font-heading font-semibold text-foreground">Peptide Protocols</h2>
             </div>
-            <div className="flex items-center gap-1">
+            <div className="flex items-center gap-2">
+              <button
+                onClick={() => setBeginnerOnly(!effectiveBeginnerOnly)}
+                className={`flex items-center gap-1.5 text-[11px] px-2.5 py-1 rounded-full border transition-colors ${
+                  effectiveBeginnerOnly
+                    ? "bg-green-500/10 text-green-600 border-green-500/20"
+                    : "bg-muted/50 text-muted-foreground border-border hover:bg-muted"
+                }`}
+              >
+                <Shield className="h-3 w-3" />
+                Beginner safe
+              </button>
               <CarouselPrevious className="static translate-y-0 h-7 w-7" />
               <CarouselNext className="static translate-y-0 h-7 w-7" />
             </div>

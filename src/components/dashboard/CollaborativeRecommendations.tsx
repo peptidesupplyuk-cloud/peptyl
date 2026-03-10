@@ -129,7 +129,7 @@ const CollaborativeRecommendations = () => {
             </div>
             <div className="flex items-center justify-between text-xs text-muted-foreground">
               <span>~{rec.avg_dose_mcg}mcg avg dose</span>
-              <span>{rec.usage_count} user{rec.usage_count > 1 ? "s" : ""}</span>
+              <span>{rec.usage_count} {rec.usage_count === 1 ? "member" : "members"}</span>
             </div>
             {rec.common_goal && (
               <p className="text-[10px] text-muted-foreground italic">

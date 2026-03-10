@@ -927,6 +927,12 @@ const Dashboard = () => {
                 disclaimerAccepted={disclaimerAccepted}
               />
 
+              {/* COMMUNITY PICKS */}
+              <CollaborativeRecommendations />
+
+              {/* QUICK STACK IMPORT */}
+              <QuickStackImport disclaimerAccepted={disclaimerAccepted} />
+
               {/* CREATE CUSTOM */}
               <CreateProtocolForm disclaimerAccepted={disclaimerAccepted} initialPeptide={initialPeptide} onInitialPeptideConsumed={() => setInitialPeptide(null)} />
             </TabsContent>
