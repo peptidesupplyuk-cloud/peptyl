@@ -102,12 +102,13 @@ const ResearchQueue = () => {
 
   // ── Queries ──
   const { data: items = [], isLoading } = useQuery({
-    queryKey: ["research-queue", filter],
+    queryKey: ["research-queue", filter, scoreFilter],
     enabled: isAdmin,
     queryFn: async () => {
       let q = (supabase.from("research_queue") as any)
-        .select("*").order("created_at", { ascending: false }).limit(100);
+        .select("*").order("evidence_score", { ascending: false }).order("created_at", { ascending: false }).limit(200);
       if (filter !== "all") q = q.eq("status", filter);
+      if (scoreFilter !== null) q = q.gte("evidence_score", scoreFilter);
       const { data, error } = await q;
       if (error) throw error;
       return data ?? [];
