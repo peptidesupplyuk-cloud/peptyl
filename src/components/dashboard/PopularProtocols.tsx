@@ -26,16 +26,39 @@ const toRecommendation = (p: PopularProtocol): Recommendation => ({
 });
 
 const PopularProtocols = ({ onActivate, isActivating, disclaimerAccepted }: Props) => {
+  const { user } = useAuth();
   const [selectedCategory, setSelectedCategory] = useState<PopularProtocol["category"] | "all">("all");
+
+  const { data: profile } = useQuery({
+    queryKey: ["profile-popular-protocols", user?.id],
+    enabled: !!user,
+    staleTime: 1000 * 60 * 10,
+    queryFn: async () => {
+      const { data } = await supabase
+        .from("profiles")
+        .select("experience_level")
+        .eq("user_id", user!.id)
+        .maybeSingle();
+      return data;
+    },
+  });
+
+  const isBeginnerByDefault =
+    !profile?.experience_level ||
+    profile.experience_level === "none" ||
+    profile.experience_level === "beginner";
+
+  const [beginnerOnly, setBeginnerOnly] = useState<boolean | null>(null);
+  const effectiveBeginnerOnly = beginnerOnly !== null ? beginnerOnly : isBeginnerByDefault;
 
   const categories = Object.keys(CATEGORY_LABELS) as PopularProtocol["category"][];
 
   const supplementOnly = POPULAR_PROTOCOLS.filter(p => p.peptides.length === 0);
   const peptideProtocols = POPULAR_PROTOCOLS.filter(p => p.peptides.length > 0);
 
-  const filteredPeptide = selectedCategory === "all"
-    ? peptideProtocols
-    : peptideProtocols.filter((p) => p.category === selectedCategory);
+  const filteredPeptide = peptideProtocols
+    .filter((p) => selectedCategory === "all" || p.category === selectedCategory)
+    .filter((p) => !effectiveBeginnerOnly || p.beginner_safe === true);
 
   return (
     <div className="space-y-8">
