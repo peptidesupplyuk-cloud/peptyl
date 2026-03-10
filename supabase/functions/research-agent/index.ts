@@ -27,7 +27,7 @@ const SEARCH_TERMS = [
   "MTHFR methylfolate supplementation",
 ];
 
-const DAYS_BACK = 7;
+const DEFAULT_DAYS_BACK = 7;
 
 async function fetchPubMedArticles(searchTerm: string): Promise<any[]> {
   const today = new Date();
