@@ -93,34 +93,8 @@ const ResearchQueue = () => {
     );
   }
 
-  const { data: items = [], isLoading } = useQuery({
-    queryKey: ["research-queue", filter],
-    queryFn: async () => {
-      let q = (supabase.from("research_queue") as any)
-        .select("*")
-        .order("created_at", { ascending: false })
-        .limit(100);
-      if (filter !== "all") q = q.eq("status", filter);
-      const { data, error } = await q;
-      if (error) throw error;
-      return data ?? [];
-    },
-  });
 
-  const { data: counts = {} } = useQuery({
-    queryKey: ["research-queue-counts"],
-    queryFn: async () => {
-      const out: Record<string, number> = {};
-      for (const s of ["pending", "approved", "rejected", "needs_review"]) {
-        const { count } = await (supabase.from("research_queue") as any)
-          .select("id", { count: "exact", head: true })
-          .eq("status", s);
-        out[s] = count ?? 0;
-      }
-      out.all = Object.values(out).reduce((a, b) => a + b, 0);
-      return out;
-    },
-  });
+
 
   const updateStatus = useMutation({
     mutationFn: async ({ id, status, writeToGraph }: { id: string; status: string; writeToGraph?: boolean }) => {
