@@ -141,7 +141,7 @@ const Header = () => {
       >
         <div className="container mx-auto px-4 h-14 flex items-center justify-between safe-area-top">
           <Link to="/">
-            <Logo size="sm" inverted={!scrolled && isHeroPage} />
+            <Logo size="sm" inverted={!scrolled && isHeroPage} hideTagline />
           </Link>
           <button
             onClick={() => setIsOpen(!isOpen)}
