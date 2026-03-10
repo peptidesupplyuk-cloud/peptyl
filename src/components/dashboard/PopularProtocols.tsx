@@ -1,8 +1,11 @@
 import { useState } from "react";
-import { TrendingUp, Pill, FlaskConical } from "lucide-react";
+import { TrendingUp, Pill, FlaskConical, Shield } from "lucide-react";
 import { POPULAR_PROTOCOLS, CATEGORY_LABELS, CATEGORY_COLORS, type PopularProtocol, type Recommendation } from "@/data/recommendation-rules";
 import RecommendationCard from "./RecommendationCard";
 import { Carousel, CarouselContent, CarouselItem, CarouselPrevious, CarouselNext } from "@/components/ui/carousel";
+import { useQuery } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/contexts/AuthContext";
 
 interface Props {
   onActivate: (rec: Recommendation) => void;
