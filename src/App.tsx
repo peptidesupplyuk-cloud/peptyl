@@ -31,6 +31,7 @@ import Suppliers from "./pages/Suppliers";
 import PrivacyPolicy from "./pages/PrivacyPolicy";
 import TermsOfService from "./pages/TermsOfService";
 const AdminDashboard = lazy(() => import("./pages/AdminDashboard"));
+const ResearchQueue = lazy(() => import("./pages/ResearchQueue"));
 
 const BeginnersGuide = lazy(() => import("./pages/articles/BeginnersGuide"));
 const HowToReconstitute = lazy(() => import("./pages/articles/HowToReconstitute"));
