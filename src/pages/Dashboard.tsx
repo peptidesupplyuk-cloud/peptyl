@@ -569,6 +569,18 @@ const Dashboard = () => {
               {/* Day Picker */}
               <DayPicker selectedDate={selectedDate} onDateChange={setSelectedDate} />
 
+              {/* ═══ ONBOARDING BANNER (first-time users only) ═══ */}
+              {showOnboardingBanner && !hasActiveProtocol && onboardingProfile?.research_goal && (
+                <OnboardingSummaryBanner
+                  profile={onboardingProfile}
+                  hasBloodwork={hasBloodwork}
+                  hasDna={hasDna}
+                  onDismiss={dismissOnboardingBanner}
+                  onNavigateToProtocols={() => { dismissOnboardingBanner(); setActiveTab("protocols"); }}
+                  onNavigateToBloodwork={() => { dismissOnboardingBanner(); setActiveTab("profile"); }}
+                />
+              )}
+
               {/* ═══ ZONE A — Hero Status ═══ */}
               {hasActiveProtocol ? (
                 <div className="bg-card rounded-2xl border border-border overflow-hidden">
