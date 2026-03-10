@@ -29,13 +29,14 @@ const SEARCH_TERMS = [
 
 const DEFAULT_DAYS_BACK = 7;
 
-async function fetchPubMedArticles(searchTerm: string): Promise<any[]> {
+async function fetchPubMedArticles(searchTerm: string, daysBack: number): Promise<any[]> {
   const today = new Date();
-  const past = new Date(today.getTime() - DAYS_BACK * 24 * 60 * 60 * 1000);
+  const past = new Date(today.getTime() - daysBack * 24 * 60 * 60 * 1000);
   const dateFilter = `${past.toISOString().split("T")[0]}[PDAT]:${today.toISOString().split("T")[0]}[PDAT]`;
   const query = encodeURIComponent(`${searchTerm} AND ${dateFilter}`);
   const apiKeyParam = NCBI_API_KEY ? `&api_key=${NCBI_API_KEY}` : "";
-  const searchUrl = `https://eutils.ncbi.nlm.nih.gov/entrez/eutils/esearch.fcgi?db=pubmed&term=${query}&retmax=5&retmode=json${apiKeyParam}`;
+  const retMax = daysBack > 30 ? 20 : 5;
+  const searchUrl = `https://eutils.ncbi.nlm.nih.gov/entrez/eutils/esearch.fcgi?db=pubmed&term=${query}&retmax=${retMax}&retmode=json${apiKeyParam}`;
 
   const searchRes = await fetch(searchUrl);
   const searchData = await searchRes.json();
