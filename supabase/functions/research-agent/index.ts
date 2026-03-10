@@ -27,15 +27,16 @@ const SEARCH_TERMS = [
   "MTHFR methylfolate supplementation",
 ];
 
-const DAYS_BACK = 7;
+const DEFAULT_DAYS_BACK = 7;
 
-async function fetchPubMedArticles(searchTerm: string): Promise<any[]> {
+async function fetchPubMedArticles(searchTerm: string, daysBack: number): Promise<any[]> {
   const today = new Date();
-  const past = new Date(today.getTime() - DAYS_BACK * 24 * 60 * 60 * 1000);
+  const past = new Date(today.getTime() - daysBack * 24 * 60 * 60 * 1000);
   const dateFilter = `${past.toISOString().split("T")[0]}[PDAT]:${today.toISOString().split("T")[0]}[PDAT]`;
   const query = encodeURIComponent(`${searchTerm} AND ${dateFilter}`);
   const apiKeyParam = NCBI_API_KEY ? `&api_key=${NCBI_API_KEY}` : "";
-  const searchUrl = `https://eutils.ncbi.nlm.nih.gov/entrez/eutils/esearch.fcgi?db=pubmed&term=${query}&retmax=5&retmode=json${apiKeyParam}`;
+  const retMax = daysBack > 30 ? 20 : 5;
+  const searchUrl = `https://eutils.ncbi.nlm.nih.gov/entrez/eutils/esearch.fcgi?db=pubmed&term=${query}&retmax=${retMax}&retmode=json${apiKeyParam}`;
 
   const searchRes = await fetch(searchUrl);
   const searchData = await searchRes.json();
@@ -138,6 +139,26 @@ serve(async (req) => {
     return new Response(null, { headers: corsHeaders });
   }
 
+  let daysBack = DEFAULT_DAYS_BACK;
+  let termsOffset = 0;
+  let termsLimit = 3; // Process 3 terms per batch to avoid timeout
+  try {
+    const body = await req.json();
+    if (body?.days_back && typeof body.days_back === "number") {
+      daysBack = body.days_back;
+    }
+    if (typeof body?.terms_offset === "number") {
+      termsOffset = body.terms_offset;
+    }
+    if (typeof body?.terms_limit === "number") {
+      termsLimit = body.terms_limit;
+    }
+  } catch {
+    // No body or invalid JSON — use default
+  }
+
+  const batchTerms = SEARCH_TERMS.slice(termsOffset, termsOffset + termsLimit);
+
   const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
 
   const results = {
@@ -145,14 +166,19 @@ serve(async (req) => {
     fetched: 0,
     inserted: 0,
     skipped: 0,
+    days_back: daysBack,
+    terms_offset: termsOffset,
+    terms_limit: termsLimit,
+    batch_terms: batchTerms.map(t => t.slice(0, 30)),
+    total_terms: SEARCH_TERMS.length,
     errors: [] as string[],
   };
 
-  for (const term of SEARCH_TERMS) {
+  for (const term of batchTerms) {
     results.searched++;
 
     try {
-      const articles = await fetchPubMedArticles(term);
+      const articles = await fetchPubMedArticles(term, daysBack);
       results.fetched += articles.length;
 
       for (const article of articles) {
