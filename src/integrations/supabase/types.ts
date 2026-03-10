@@ -1596,6 +1596,95 @@ export type Database = {
         }
         Relationships: []
       }
+      research_queue: {
+        Row: {
+          abstract: string | null
+          ai_summary: string | null
+          authors: string[] | null
+          biomarker_names: string[] | null
+          compound_names: string[] | null
+          created_at: string | null
+          dose_note: string | null
+          evidence_level: string | null
+          evidence_score: number | null
+          gene_names: string[] | null
+          id: string
+          knowledge_edge_id: string | null
+          published_date: string | null
+          pubmed_id: string | null
+          relationship_type: string | null
+          review_notes: string | null
+          reviewed_at: string | null
+          reviewed_by: string | null
+          source_url: string | null
+          status: string | null
+          strength: string | null
+          title: string
+          updated_at: string | null
+          written_to_graph: boolean | null
+        }
+        Insert: {
+          abstract?: string | null
+          ai_summary?: string | null
+          authors?: string[] | null
+          biomarker_names?: string[] | null
+          compound_names?: string[] | null
+          created_at?: string | null
+          dose_note?: string | null
+          evidence_level?: string | null
+          evidence_score?: number | null
+          gene_names?: string[] | null
+          id?: string
+          knowledge_edge_id?: string | null
+          published_date?: string | null
+          pubmed_id?: string | null
+          relationship_type?: string | null
+          review_notes?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          source_url?: string | null
+          status?: string | null
+          strength?: string | null
+          title: string
+          updated_at?: string | null
+          written_to_graph?: boolean | null
+        }
+        Update: {
+          abstract?: string | null
+          ai_summary?: string | null
+          authors?: string[] | null
+          biomarker_names?: string[] | null
+          compound_names?: string[] | null
+          created_at?: string | null
+          dose_note?: string | null
+          evidence_level?: string | null
+          evidence_score?: number | null
+          gene_names?: string[] | null
+          id?: string
+          knowledge_edge_id?: string | null
+          published_date?: string | null
+          pubmed_id?: string | null
+          relationship_type?: string | null
+          review_notes?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          source_url?: string | null
+          status?: string | null
+          strength?: string | null
+          title?: string
+          updated_at?: string | null
+          written_to_graph?: boolean | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "research_queue_knowledge_edge_id_fkey"
+            columns: ["knowledge_edge_id"]
+            isOneToOne: false
+            referencedRelation: "knowledge_edges"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       retest_recommendations: {
         Row: {
           completed_at: string | null
