@@ -420,16 +420,16 @@ const Dashboard = () => {
       <Header />
       <main className="pt-20 pb-24 md:pb-16">
         <div className="container mx-auto px-4 sm:px-6">
-          <div className="mb-8 flex items-start justify-between gap-4">
-            <div>
-              <h1 className="text-2xl sm:text-3xl font-heading font-bold text-foreground">
+          <div className="mb-6 space-y-3">
+            <div className="flex items-center justify-between gap-3">
+              <h1 className="text-2xl sm:text-3xl font-heading font-bold text-foreground leading-tight">
                 My <span className="text-gradient-teal">Health</span>
               </h1>
-              <p className="text-muted-foreground text-sm mt-1">
-                Your daily actions, biomarkers, and active protocols.
-              </p>
+              <VideoHelpButton />
             </div>
-            <VideoHelpButton />
+            <p className="text-muted-foreground text-sm">
+              Your daily actions, biomarkers, and active protocols.
+            </p>
           </div>
 
           <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
