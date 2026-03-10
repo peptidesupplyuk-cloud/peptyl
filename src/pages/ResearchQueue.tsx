@@ -388,9 +388,21 @@ const ResearchQueue = () => {
                 <span className="ml-1.5 opacity-70">({counts[s] ?? 0})</span>
               </button>
             ))}
+            {/* Score filter */}
+            <div className="flex items-center gap-2 ml-auto">
+              <span className="text-xs text-muted-foreground">Min score:</span>
+              {[null, 3, 4, 5].map(s => (
+                <button key={s ?? "all"} onClick={() => setScoreFilter(s)}
+                  className={`text-xs px-2.5 py-1.5 rounded-lg border transition-colors ${
+                    scoreFilter === s
+                      ? "bg-primary text-primary-foreground border-primary"
+                      : "bg-muted/50 border-border text-muted-foreground hover:text-foreground"
+                  }`}>
+                  {s === null ? "All" : `≥${s}`}
+                </button>
+              ))}
+            </div>
           </div>
-
-          {/* Items */}
           {isLoading ? (
             <div className="flex justify-center py-12"><Loader2 className="h-6 w-6 animate-spin text-muted-foreground" /></div>
           ) : items.length === 0 ? (
