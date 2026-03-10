@@ -45,6 +45,10 @@ import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { useQuery } from "@tanstack/react-query";
+import OnboardingSummaryBanner from "@/components/dashboard/OnboardingSummaryBanner";
+import ResearchInsightsFeed from "@/components/dashboard/ResearchInsightsFeed";
+import QuickStackImport from "@/components/dashboard/QuickStackImport";
+import CollaborativeRecommendations from "@/components/dashboard/CollaborativeRecommendations";
 
 /* ─── Compact Journal for Overview ─── */
 const CompactJournal = ({ onExpandJournal }: { onExpandJournal: () => void }) => {
@@ -274,7 +278,18 @@ const Dashboard = () => {
   ).length;
   const todayRemaining = todayScheduled + todayPendingSupplements;
 
-  const [showMore, setShowMore] = useState(false);
+  const [showMore, setShowMore] = useState(!hasActiveProtocol);
+
+  // Onboarding banner — show once after first login
+  const onboardingBannerKey = user ? `peptyl_onboarding_seen_${user.id}` : null;
+  const [showOnboardingBanner, setShowOnboardingBanner] = useState(() => {
+    if (!onboardingBannerKey) return false;
+    return localStorage.getItem(onboardingBannerKey) !== "true";
+  });
+  const dismissOnboardingBanner = () => {
+    if (onboardingBannerKey) localStorage.setItem(onboardingBannerKey, "true");
+    setShowOnboardingBanner(false);
+  };
   const [selectedDate, setSelectedDate] = useState(new Date());
   const { shouldAsk, requestPermission } = useRequestNotificationPermission();
   const [notifDismissed, setNotifDismissed] = useState(false);
@@ -554,6 +569,18 @@ const Dashboard = () => {
               {/* Day Picker */}
               <DayPicker selectedDate={selectedDate} onDateChange={setSelectedDate} />
 
+              {/* ═══ ONBOARDING BANNER (first-time users only) ═══ */}
+              {showOnboardingBanner && !hasActiveProtocol && onboardingProfile?.research_goal && (
+                <OnboardingSummaryBanner
+                  profile={onboardingProfile}
+                  hasBloodwork={hasBloodwork}
+                  hasDna={hasDna}
+                  onDismiss={dismissOnboardingBanner}
+                  onNavigateToProtocols={() => { dismissOnboardingBanner(); setActiveTab("protocols"); }}
+                  onNavigateToBloodwork={() => { dismissOnboardingBanner(); setActiveTab("profile"); }}
+                />
+              )}
+
               {/* ═══ ZONE A — Hero Status ═══ */}
               {hasActiveProtocol ? (
                 <div className="bg-card rounded-2xl border border-border overflow-hidden">
@@ -701,6 +728,9 @@ const Dashboard = () => {
                       {/* C2 — Protocol nudges */}
                       <ProtocolNudges onNavigate={setActiveTab} />
 
+                      {/* C2.5 — Research insights feed */}
+                      <ResearchInsightsFeed />
+
                       {/* C3 — Data completeness row */}
                       <div className="flex items-center gap-3 px-1 flex-wrap">
                         <span className="text-xs text-muted-foreground">Your data:</span>
@@ -757,6 +787,9 @@ const Dashboard = () => {
 
                   {/* C2 — Protocol nudges */}
                   <ProtocolNudges onNavigate={setActiveTab} />
+
+                  {/* C2.5 — Research insights feed */}
+                  <ResearchInsightsFeed />
 
                   {/* C3 — Data completeness row */}
                   <div className="flex items-center gap-3 px-1 flex-wrap">
@@ -865,12 +898,25 @@ const Dashboard = () => {
                   </Carousel>
                 </div>
               ) : (
-                <div className="bg-card rounded-2xl border border-border p-8 text-center">
-                  <FlaskConical className="h-10 w-10 text-primary mx-auto mb-3" />
-                  <h3 className="font-heading font-semibold text-foreground mb-1">No Personalised Recommendations Yet</h3>
-                  <p className="text-sm text-muted-foreground">
-                    Upload bloodwork or DNA data to get personalised protocol recommendations.
+                <div className="bg-primary/5 border border-primary/20 rounded-2xl p-5 space-y-3">
+                  <div className="flex items-center gap-2">
+                    <Sparkles className="h-5 w-5 text-primary" />
+                    <h3 className="font-heading font-semibold text-foreground">
+                      Recommendations tailored to your biology
+                    </h3>
+                  </div>
+                  <p className="text-sm text-muted-foreground leading-relaxed">
+                    Add bloodwork or a DNA file and we'll surface protocols matched to your actual biology.
+                    Until then, browse below — we've marked beginner-safe options clearly.
                   </p>
+                  <div className="flex gap-3 flex-wrap">
+                    <Button size="sm" variant="outline" onClick={() => setActiveTab("profile")}>
+                      <Droplets className="h-3.5 w-3.5 mr-1.5" /> Log bloodwork
+                    </Button>
+                    <Button size="sm" variant="outline" onClick={() => navigate("/dna/upload")}>
+                      <Dna className="h-3.5 w-3.5 mr-1.5" /> Upload DNA
+                    </Button>
+                  </div>
                 </div>
               )}
 
@@ -880,6 +926,12 @@ const Dashboard = () => {
                 isActivating={activatingProtocol}
                 disclaimerAccepted={disclaimerAccepted}
               />
+
+              {/* COMMUNITY PICKS */}
+              <CollaborativeRecommendations />
+
+              {/* QUICK STACK IMPORT */}
+              <QuickStackImport disclaimerAccepted={disclaimerAccepted} />
 
               {/* CREATE CUSTOM */}
               <CreateProtocolForm disclaimerAccepted={disclaimerAccepted} initialPeptide={initialPeptide} onInitialPeptideConsumed={() => setInitialPeptide(null)} />

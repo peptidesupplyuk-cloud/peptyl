@@ -1,8 +1,11 @@
 import { useState } from "react";
-import { TrendingUp, Pill, FlaskConical } from "lucide-react";
+import { TrendingUp, Pill, FlaskConical, Shield } from "lucide-react";
 import { POPULAR_PROTOCOLS, CATEGORY_LABELS, CATEGORY_COLORS, type PopularProtocol, type Recommendation } from "@/data/recommendation-rules";
 import RecommendationCard from "./RecommendationCard";
 import { Carousel, CarouselContent, CarouselItem, CarouselPrevious, CarouselNext } from "@/components/ui/carousel";
+import { useQuery } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/contexts/AuthContext";
 
 interface Props {
   onActivate: (rec: Recommendation) => void;
@@ -23,16 +26,39 @@ const toRecommendation = (p: PopularProtocol): Recommendation => ({
 });
 
 const PopularProtocols = ({ onActivate, isActivating, disclaimerAccepted }: Props) => {
+  const { user } = useAuth();
   const [selectedCategory, setSelectedCategory] = useState<PopularProtocol["category"] | "all">("all");
+
+  const { data: profile } = useQuery({
+    queryKey: ["profile-popular-protocols", user?.id],
+    enabled: !!user,
+    staleTime: 1000 * 60 * 10,
+    queryFn: async () => {
+      const { data } = await supabase
+        .from("profiles")
+        .select("experience_level")
+        .eq("user_id", user!.id)
+        .maybeSingle();
+      return data;
+    },
+  });
+
+  const isBeginnerByDefault =
+    !profile?.experience_level ||
+    profile.experience_level === "none" ||
+    profile.experience_level === "beginner";
+
+  const [beginnerOnly, setBeginnerOnly] = useState<boolean | null>(null);
+  const effectiveBeginnerOnly = beginnerOnly !== null ? beginnerOnly : isBeginnerByDefault;
 
   const categories = Object.keys(CATEGORY_LABELS) as PopularProtocol["category"][];
 
   const supplementOnly = POPULAR_PROTOCOLS.filter(p => p.peptides.length === 0);
   const peptideProtocols = POPULAR_PROTOCOLS.filter(p => p.peptides.length > 0);
 
-  const filteredPeptide = selectedCategory === "all"
-    ? peptideProtocols
-    : peptideProtocols.filter((p) => p.category === selectedCategory);
+  const filteredPeptide = peptideProtocols
+    .filter((p) => selectedCategory === "all" || p.category === selectedCategory)
+    .filter((p) => !effectiveBeginnerOnly || p.beginner_safe === true);
 
   return (
     <div className="space-y-8">
@@ -63,12 +89,23 @@ const PopularProtocols = ({ onActivate, isActivating, disclaimerAccepted }: Prop
       {/* ─── Peptide Protocols ─────────────────────────────────────────────── */}
       <div className="space-y-4">
         <Carousel opts={{ align: "start", loop: false }} className="w-full">
-          <div className="flex items-center justify-between">
+          <div className="flex items-center justify-between gap-3">
             <div className="flex items-center gap-2">
               <FlaskConical className="h-5 w-5 text-primary" />
               <h2 className="font-heading font-semibold text-foreground">Peptide Protocols</h2>
             </div>
-            <div className="flex items-center gap-1">
+            <div className="flex items-center gap-2">
+              <button
+                onClick={() => setBeginnerOnly(!effectiveBeginnerOnly)}
+                className={`flex items-center gap-1.5 text-[11px] px-2.5 py-1 rounded-full border transition-colors ${
+                  effectiveBeginnerOnly
+                    ? "bg-green-500/10 text-green-600 border-green-500/20"
+                    : "bg-muted/50 text-muted-foreground border-border hover:bg-muted"
+                }`}
+              >
+                <Shield className="h-3 w-3" />
+                Beginner safe
+              </button>
               <CarouselPrevious className="static translate-y-0 h-7 w-7" />
               <CarouselNext className="static translate-y-0 h-7 w-7" />
             </div>

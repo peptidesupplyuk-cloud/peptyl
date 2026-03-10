@@ -99,7 +99,7 @@ const CollaborativeRecommendations = () => {
           avg_dose_mcg: Math.round(stats.totalDose / stats.count),
           common_goal: stats.goals[0] || null,
         }))
-        .filter((rec) => rec.usage_count >= 3)
+        .filter((rec) => rec.usage_count >= 1)
         .sort((a, b) => b.usage_count - a.usage_count)
         .slice(0, 4);
     },
@@ -129,7 +129,7 @@ const CollaborativeRecommendations = () => {
             </div>
             <div className="flex items-center justify-between text-xs text-muted-foreground">
               <span>~{rec.avg_dose_mcg}mcg avg dose</span>
-              <span>{rec.usage_count} user{rec.usage_count > 1 ? "s" : ""}</span>
+              <span>{rec.usage_count} {rec.usage_count === 1 ? "member" : "members"}</span>
             </div>
             {rec.common_goal && (
               <p className="text-[10px] text-muted-foreground italic">
