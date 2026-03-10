@@ -77,7 +77,7 @@ const Header = () => {
       {/* Desktop floating pill nav */}
       <div className="hidden md:flex items-center gap-1 mt-3 px-2 py-1.5 rounded-2xl border border-border bg-card/95 backdrop-blur-xl shadow-md pointer-events-auto transition-all duration-300">
         <Link to="/" className="px-3 py-1.5 mr-1">
-          <Logo size="sm" />
+          <Logo size="sm" hideTagline />
         </Link>
 
         {navItems.filter(item => !item.adminOnly || user?.email === ADMIN_EMAIL).map((item) => {
@@ -141,7 +141,7 @@ const Header = () => {
       >
         <div className="container mx-auto px-4 h-14 flex items-center justify-between safe-area-top">
           <Link to="/">
-            <Logo size="sm" inverted={!scrolled && isHeroPage} />
+            <Logo size="sm" inverted={!scrolled && isHeroPage} hideTagline />
           </Link>
           <button
             onClick={() => setIsOpen(!isOpen)}

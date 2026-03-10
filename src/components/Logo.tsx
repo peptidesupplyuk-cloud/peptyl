@@ -5,9 +5,10 @@ interface LogoProps {
   size?: "sm" | "md" | "lg";
   variant?: "full" | "icon";
   inverted?: boolean;
+  hideTagline?: boolean;
 }
 
-const Logo = ({ className, size = "md", variant = "full", inverted = false }: LogoProps) => {
+const Logo = ({ className, size = "md", variant = "full", inverted = false, hideTagline = false }: LogoProps) => {
   const sizes = {
     sm: { icon: 28, text: "text-lg" },
     md: { icon: 36, text: "text-xl" },
@@ -55,12 +56,14 @@ const Logo = ({ className, size = "md", variant = "full", inverted = false }: Lo
           )}>
             Pep<span className="text-gradient-teal">tyl</span>
           </span>
-          <span className={cn(
-            "text-[0.5em] font-body font-medium tracking-[0.15em] mt-0.5",
-            inverted ? "text-primary-foreground/40" : "text-muted-foreground/60"
-          )}>
-            HEALTH OPTIMISED
-          </span>
+          {!hideTagline && (
+            <span className={cn(
+              "text-[0.5em] font-body font-medium tracking-[0.15em] mt-0.5",
+              inverted ? "text-primary-foreground/40" : "text-muted-foreground/60"
+            )}>
+              HEALTH OPTIMISED
+            </span>
+          )}
         </div>
       )}
     </div>
