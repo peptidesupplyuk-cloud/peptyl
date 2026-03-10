@@ -214,41 +214,71 @@ export type Database = {
       bloodwork_panels: {
         Row: {
           created_at: string | null
+          dna_report_id: string | null
           id: string
           medichecks_product_code: string | null
           panel_name: string
+          panel_type: string | null
+          protocol_id: string | null
           rationale: string
           recommended_tests: string[]
+          test_date: string | null
           tier: string | null
           trigger_biomarker: string | null
           trigger_condition: string | null
           trigger_gene: string | null
+          user_id: string | null
         }
         Insert: {
           created_at?: string | null
+          dna_report_id?: string | null
           id?: string
           medichecks_product_code?: string | null
           panel_name: string
+          panel_type?: string | null
+          protocol_id?: string | null
           rationale: string
           recommended_tests: string[]
+          test_date?: string | null
           tier?: string | null
           trigger_biomarker?: string | null
           trigger_condition?: string | null
           trigger_gene?: string | null
+          user_id?: string | null
         }
         Update: {
           created_at?: string | null
+          dna_report_id?: string | null
           id?: string
           medichecks_product_code?: string | null
           panel_name?: string
+          panel_type?: string | null
+          protocol_id?: string | null
           rationale?: string
           recommended_tests?: string[]
+          test_date?: string | null
           tier?: string | null
           trigger_biomarker?: string | null
           trigger_condition?: string | null
           trigger_gene?: string | null
+          user_id?: string | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "bloodwork_panels_dna_report_id_fkey"
+            columns: ["dna_report_id"]
+            isOneToOne: false
+            referencedRelation: "dna_reports"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "bloodwork_panels_protocol_id_fkey"
+            columns: ["protocol_id"]
+            isOneToOne: false
+            referencedRelation: "protocols"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       contact_submissions: {
         Row: {
