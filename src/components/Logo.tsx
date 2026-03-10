@@ -5,9 +5,10 @@ interface LogoProps {
   size?: "sm" | "md" | "lg";
   variant?: "full" | "icon";
   inverted?: boolean;
+  hideTagline?: boolean;
 }
 
-const Logo = ({ className, size = "md", variant = "full", inverted = false }: LogoProps) => {
+const Logo = ({ className, size = "md", variant = "full", inverted = false, hideTagline = false }: LogoProps) => {
   const sizes = {
     sm: { icon: 28, text: "text-lg" },
     md: { icon: 36, text: "text-xl" },
