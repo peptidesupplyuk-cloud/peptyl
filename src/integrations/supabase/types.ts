@@ -209,60 +209,46 @@ export type Database = {
           unit?: string
           value?: number | null
         }
-        Relationships: [
-          {
-            foreignKeyName: "bloodwork_markers_panel_id_fkey"
-            columns: ["panel_id"]
-            isOneToOne: false
-            referencedRelation: "bloodwork_panels"
-            referencedColumns: ["id"]
-          },
-        ]
+        Relationships: []
       }
       bloodwork_panels: {
         Row: {
-          created_at: string
-          dna_report_id: string | null
+          created_at: string | null
           id: string
-          panel_type: string
-          protocol_id: string | null
-          test_date: string
-          user_id: string
+          medichecks_product_code: string | null
+          panel_name: string
+          rationale: string
+          recommended_tests: string[]
+          tier: string | null
+          trigger_biomarker: string | null
+          trigger_condition: string | null
+          trigger_gene: string | null
         }
         Insert: {
-          created_at?: string
-          dna_report_id?: string | null
+          created_at?: string | null
           id?: string
-          panel_type?: string
-          protocol_id?: string | null
-          test_date: string
-          user_id: string
+          medichecks_product_code?: string | null
+          panel_name: string
+          rationale: string
+          recommended_tests: string[]
+          tier?: string | null
+          trigger_biomarker?: string | null
+          trigger_condition?: string | null
+          trigger_gene?: string | null
         }
         Update: {
-          created_at?: string
-          dna_report_id?: string | null
+          created_at?: string | null
           id?: string
-          panel_type?: string
-          protocol_id?: string | null
-          test_date?: string
-          user_id?: string
+          medichecks_product_code?: string | null
+          panel_name?: string
+          rationale?: string
+          recommended_tests?: string[]
+          tier?: string | null
+          trigger_biomarker?: string | null
+          trigger_condition?: string | null
+          trigger_gene?: string | null
         }
-        Relationships: [
-          {
-            foreignKeyName: "bloodwork_panels_dna_report_id_fkey"
-            columns: ["dna_report_id"]
-            isOneToOne: false
-            referencedRelation: "dna_reports"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "bloodwork_panels_protocol_id_fkey"
-            columns: ["protocol_id"]
-            isOneToOne: false
-            referencedRelation: "protocols"
-            referencedColumns: ["id"]
-          },
-        ]
+        Relationships: []
       }
       contact_submissions: {
         Row: {
@@ -506,6 +492,90 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      drug_interactions: {
+        Row: {
+          clinical_note: string
+          compound_name: string
+          created_at: string | null
+          drug_class: string
+          drug_examples: string[]
+          id: string
+          interaction_type: string
+          mechanism: string | null
+          rxnorm_ids: string[] | null
+          severity: string
+        }
+        Insert: {
+          clinical_note: string
+          compound_name: string
+          created_at?: string | null
+          drug_class: string
+          drug_examples: string[]
+          id?: string
+          interaction_type: string
+          mechanism?: string | null
+          rxnorm_ids?: string[] | null
+          severity: string
+        }
+        Update: {
+          clinical_note?: string
+          compound_name?: string
+          created_at?: string | null
+          drug_class?: string
+          drug_examples?: string[]
+          id?: string
+          interaction_type?: string
+          mechanism?: string | null
+          rxnorm_ids?: string[] | null
+          severity?: string
+        }
+        Relationships: []
+      }
+      entities: {
+        Row: {
+          aliases: string[] | null
+          created_at: string | null
+          dbsnp_id: string | null
+          evidence_score: number | null
+          id: string
+          loinc_code: string | null
+          name: string
+          notes: string | null
+          pubmed_ids: string[] | null
+          rxnorm_id: string | null
+          type: string
+          updated_at: string | null
+        }
+        Insert: {
+          aliases?: string[] | null
+          created_at?: string | null
+          dbsnp_id?: string | null
+          evidence_score?: number | null
+          id?: string
+          loinc_code?: string | null
+          name: string
+          notes?: string | null
+          pubmed_ids?: string[] | null
+          rxnorm_id?: string | null
+          type: string
+          updated_at?: string | null
+        }
+        Update: {
+          aliases?: string[] | null
+          created_at?: string | null
+          dbsnp_id?: string | null
+          evidence_score?: number | null
+          id?: string
+          loinc_code?: string | null
+          name?: string
+          notes?: string | null
+          pubmed_ids?: string[] | null
+          rxnorm_id?: string | null
+          type?: string
+          updated_at?: string | null
+        }
+        Relationships: []
       }
       feed_posts: {
         Row: {
@@ -784,6 +854,63 @@ export type Database = {
         }
         Relationships: []
       }
+      knowledge_edges: {
+        Row: {
+          created_at: string | null
+          direction: string | null
+          dose_note: string | null
+          evidence_level: string | null
+          from_entity_id: string
+          id: string
+          notes: string | null
+          relationship: string
+          source: string | null
+          strength: string | null
+          to_entity_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          direction?: string | null
+          dose_note?: string | null
+          evidence_level?: string | null
+          from_entity_id: string
+          id?: string
+          notes?: string | null
+          relationship: string
+          source?: string | null
+          strength?: string | null
+          to_entity_id: string
+        }
+        Update: {
+          created_at?: string | null
+          direction?: string | null
+          dose_note?: string | null
+          evidence_level?: string | null
+          from_entity_id?: string
+          id?: string
+          notes?: string | null
+          relationship?: string
+          source?: string | null
+          strength?: string | null
+          to_entity_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "knowledge_edges_from_entity_id_fkey"
+            columns: ["from_entity_id"]
+            isOneToOne: false
+            referencedRelation: "entities"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "knowledge_edges_to_entity_id_fkey"
+            columns: ["to_entity_id"]
+            isOneToOne: false
+            referencedRelation: "entities"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       monitored_accounts: {
         Row: {
           added_by: string | null
@@ -963,13 +1090,6 @@ export type Database = {
         }
         Relationships: [
           {
-            foreignKeyName: "outcome_records_baseline_panel_id_fkey"
-            columns: ["baseline_panel_id"]
-            isOneToOne: false
-            referencedRelation: "bloodwork_panels"
-            referencedColumns: ["id"]
-          },
-          {
             foreignKeyName: "outcome_records_dna_report_id_fkey"
             columns: ["dna_report_id"]
             isOneToOne: false
@@ -981,13 +1101,6 @@ export type Database = {
             columns: ["protocol_id"]
             isOneToOne: false
             referencedRelation: "protocols"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "outcome_records_retest_panel_id_fkey"
-            columns: ["retest_panel_id"]
-            isOneToOne: false
-            referencedRelation: "bloodwork_panels"
             referencedColumns: ["id"]
           },
         ]
@@ -1201,6 +1314,15 @@ export type Database = {
           primary_health_goal: string | null
           research_goal: string | null
           risk_tolerance: string | null
+          safety_age: number | null
+          safety_conditions: string[] | null
+          safety_country: string | null
+          safety_height_cm: number | null
+          safety_medications: string[] | null
+          safety_onboarding_complete: boolean | null
+          safety_onboarding_completed_at: string | null
+          safety_sex: string | null
+          safety_weight_kg: number | null
           subscription_end: string | null
           subscription_start: string | null
           subscription_tier: string | null
@@ -1238,6 +1360,15 @@ export type Database = {
           primary_health_goal?: string | null
           research_goal?: string | null
           risk_tolerance?: string | null
+          safety_age?: number | null
+          safety_conditions?: string[] | null
+          safety_country?: string | null
+          safety_height_cm?: number | null
+          safety_medications?: string[] | null
+          safety_onboarding_complete?: boolean | null
+          safety_onboarding_completed_at?: string | null
+          safety_sex?: string | null
+          safety_weight_kg?: number | null
           subscription_end?: string | null
           subscription_start?: string | null
           subscription_tier?: string | null
@@ -1275,6 +1406,15 @@ export type Database = {
           primary_health_goal?: string | null
           research_goal?: string | null
           risk_tolerance?: string | null
+          safety_age?: number | null
+          safety_conditions?: string[] | null
+          safety_country?: string | null
+          safety_height_cm?: number | null
+          safety_medications?: string[] | null
+          safety_onboarding_complete?: boolean | null
+          safety_onboarding_completed_at?: string | null
+          safety_sex?: string | null
+          safety_weight_kg?: number | null
           subscription_end?: string | null
           subscription_start?: string | null
           subscription_tier?: string | null
@@ -1286,6 +1426,54 @@ export type Database = {
           whatsapp_verified?: boolean | null
           whatsapp_verify_code?: string | null
           whatsapp_verify_expires_at?: string | null
+        }
+        Relationships: []
+      }
+      protocol_outcomes: {
+        Row: {
+          baseline_tested_at: string | null
+          baseline_value: number | null
+          biomarker_name: string
+          clinical_significance: string | null
+          created_at: string | null
+          delta_absolute: number | null
+          delta_percent: number | null
+          follow_up_tested_at: string | null
+          follow_up_value: number | null
+          id: string
+          outcome_direction: string | null
+          protocol_ids: string[] | null
+          user_id: string
+        }
+        Insert: {
+          baseline_tested_at?: string | null
+          baseline_value?: number | null
+          biomarker_name: string
+          clinical_significance?: string | null
+          created_at?: string | null
+          delta_absolute?: number | null
+          delta_percent?: number | null
+          follow_up_tested_at?: string | null
+          follow_up_value?: number | null
+          id?: string
+          outcome_direction?: string | null
+          protocol_ids?: string[] | null
+          user_id: string
+        }
+        Update: {
+          baseline_tested_at?: string | null
+          baseline_value?: number | null
+          biomarker_name?: string
+          clinical_significance?: string | null
+          created_at?: string | null
+          delta_absolute?: number | null
+          delta_percent?: number | null
+          follow_up_tested_at?: string | null
+          follow_up_value?: number | null
+          id?: string
+          outcome_direction?: string | null
+          protocol_ids?: string[] | null
+          user_id?: string
         }
         Relationships: []
       }
@@ -1374,6 +1562,48 @@ export type Database = {
           status?: string
           supplements?: Json | null
           updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      retest_recommendations: {
+        Row: {
+          completed_at: string | null
+          created_at: string | null
+          dna_report_id: string | null
+          due_date: string | null
+          id: string
+          medichecks_url: string | null
+          rationale: string | null
+          recommended_at: string
+          recommended_panel: string
+          recommended_tests: string[]
+          user_id: string
+        }
+        Insert: {
+          completed_at?: string | null
+          created_at?: string | null
+          dna_report_id?: string | null
+          due_date?: string | null
+          id?: string
+          medichecks_url?: string | null
+          rationale?: string | null
+          recommended_at: string
+          recommended_panel: string
+          recommended_tests: string[]
+          user_id: string
+        }
+        Update: {
+          completed_at?: string | null
+          created_at?: string | null
+          dna_report_id?: string | null
+          due_date?: string | null
+          id?: string
+          medichecks_url?: string | null
+          rationale?: string | null
+          recommended_at?: string
+          recommended_panel?: string
+          recommended_tests?: string[]
           user_id?: string
         }
         Relationships: []
@@ -1763,6 +1993,127 @@ export type Database = {
           tags?: string[] | null
         }
         Relationships: []
+      }
+      user_biomarker_results: {
+        Row: {
+          biomarker_name: string
+          created_at: string | null
+          entity_id: string | null
+          id: string
+          is_in_range: boolean | null
+          loinc_code: string | null
+          notes: string | null
+          optimal_high: number | null
+          optimal_low: number | null
+          provider_test_id: string | null
+          reference_high: number | null
+          reference_low: number | null
+          source: string | null
+          tested_at: string
+          unit: string | null
+          user_id: string
+          value: number
+        }
+        Insert: {
+          biomarker_name: string
+          created_at?: string | null
+          entity_id?: string | null
+          id?: string
+          is_in_range?: boolean | null
+          loinc_code?: string | null
+          notes?: string | null
+          optimal_high?: number | null
+          optimal_low?: number | null
+          provider_test_id?: string | null
+          reference_high?: number | null
+          reference_low?: number | null
+          source?: string | null
+          tested_at: string
+          unit?: string | null
+          user_id: string
+          value: number
+        }
+        Update: {
+          biomarker_name?: string
+          created_at?: string | null
+          entity_id?: string | null
+          id?: string
+          is_in_range?: boolean | null
+          loinc_code?: string | null
+          notes?: string | null
+          optimal_high?: number | null
+          optimal_low?: number | null
+          provider_test_id?: string | null
+          reference_high?: number | null
+          reference_low?: number | null
+          source?: string | null
+          tested_at?: string
+          unit?: string | null
+          user_id?: string
+          value?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_biomarker_results_entity_id_fkey"
+            columns: ["entity_id"]
+            isOneToOne: false
+            referencedRelation: "entities"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      user_protocols: {
+        Row: {
+          compound_entity_id: string | null
+          compound_name: string
+          created_at: string | null
+          dna_report_id: string | null
+          dose_amount: number | null
+          dose_frequency: string | null
+          dose_unit: string | null
+          id: string
+          is_active: boolean | null
+          protocol_end_date: string | null
+          protocol_start_date: string
+          user_id: string
+        }
+        Insert: {
+          compound_entity_id?: string | null
+          compound_name: string
+          created_at?: string | null
+          dna_report_id?: string | null
+          dose_amount?: number | null
+          dose_frequency?: string | null
+          dose_unit?: string | null
+          id?: string
+          is_active?: boolean | null
+          protocol_end_date?: string | null
+          protocol_start_date: string
+          user_id: string
+        }
+        Update: {
+          compound_entity_id?: string | null
+          compound_name?: string
+          created_at?: string | null
+          dna_report_id?: string | null
+          dose_amount?: number | null
+          dose_frequency?: string | null
+          dose_unit?: string | null
+          id?: string
+          is_active?: boolean | null
+          protocol_end_date?: string | null
+          protocol_start_date?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_protocols_compound_entity_id_fkey"
+            columns: ["compound_entity_id"]
+            isOneToOne: false
+            referencedRelation: "entities"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       user_roles: {
         Row: {
