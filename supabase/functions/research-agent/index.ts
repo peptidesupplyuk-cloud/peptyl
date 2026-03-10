@@ -139,6 +139,16 @@ serve(async (req) => {
     return new Response(null, { headers: corsHeaders });
   }
 
+  let daysBack = DEFAULT_DAYS_BACK;
+  try {
+    const body = await req.json();
+    if (body?.days_back && typeof body.days_back === "number") {
+      daysBack = body.days_back;
+    }
+  } catch {
+    // No body or invalid JSON — use default
+  }
+
   const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
 
   const results = {
@@ -146,6 +156,7 @@ serve(async (req) => {
     fetched: 0,
     inserted: 0,
     skipped: 0,
+    days_back: daysBack,
     errors: [] as string[],
   };
 
@@ -153,7 +164,7 @@ serve(async (req) => {
     results.searched++;
 
     try {
-      const articles = await fetchPubMedArticles(term);
+      const articles = await fetchPubMedArticles(term, daysBack);
       results.fetched += articles.length;
 
       for (const article of articles) {
