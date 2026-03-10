@@ -59,17 +59,20 @@ export function useSaveBloodwork() {
     }) => {
       if (!user) throw new Error("Not authenticated");
 
-      const insertPayload: { user_id: string; test_date: string; panel_type: string; protocol_id?: string; dna_report_id?: string } = {
+      const insertPayload: Record<string, unknown> = {
         user_id: user.id,
         test_date: testDate,
         panel_type: panelType,
+        panel_name: panelType,
+        rationale: "User-submitted bloodwork",
+        recommended_tests: markers.map((m) => m.marker_name),
       };
       if (protocolId) insertPayload.protocol_id = protocolId;
       if (dnaReportId) insertPayload.dna_report_id = dnaReportId;
 
       const { data: panel, error: pErr } = await supabase
         .from("bloodwork_panels")
-        .insert(insertPayload)
+        .insert(insertPayload as any)
         .select()
         .single();
       if (pErr) throw pErr;
