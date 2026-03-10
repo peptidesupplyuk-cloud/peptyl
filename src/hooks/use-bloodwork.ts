@@ -90,8 +90,8 @@ export function useSaveBloodwork() {
         if (latestDna) {
           await supabase
             .from("bloodwork_panels")
-            .update({ dna_report_id: latestDna.id })
-            .eq("id", panel.id);
+            .update({ dna_report_id: latestDna.id } as any)
+            .eq("id", (panel as any).id);
         }
       }
 
