@@ -96,6 +96,7 @@ const App = () => (
               <Route path="/terms-of-service" element={<TermsOfService />} />
               <Route path="/admin/content" element={<ProtectedRoute><AdminDashboard /></ProtectedRoute>} />
               <Route path="/admin/dashboard" element={<ProtectedRoute><AdminDashboard /></ProtectedRoute>} />
+              <Route path="/admin/research-queue" element={<ProtectedRoute><ResearchQueue /></ProtectedRoute>} />
               <Route path="/education/beginners-guide-peptides" element={<BeginnersGuide />} />
               <Route path="/education/how-to-reconstitute-peptides" element={<HowToReconstitute />} />
               <Route path="/education/bpc157-vs-tb500" element={<Bpc157VsTb500 />} />

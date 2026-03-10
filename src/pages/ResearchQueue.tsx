@@ -44,9 +44,41 @@ const ResearchQueue = () => {
   const [noteText, setNoteText] = useState("");
   const [approveItem, setApproveItem] = useState<any | null>(null);
   const [isRunning, setIsRunning] = useState(false);
+  const isAdmin = user?.email === ADMIN_EMAIL;
 
-  // Access check
-  if (user?.email !== ADMIN_EMAIL) {
+  const { data: items = [], isLoading } = useQuery({
+    queryKey: ["research-queue", filter],
+    enabled: isAdmin,
+    queryFn: async () => {
+      let q = (supabase.from("research_queue") as any)
+        .select("*")
+        .order("created_at", { ascending: false })
+        .limit(100);
+      if (filter !== "all") q = q.eq("status", filter);
+      const { data, error } = await q;
+      if (error) throw error;
+      return data ?? [];
+    },
+  });
+
+  const { data: counts = {} } = useQuery({
+    queryKey: ["research-queue-counts"],
+    enabled: isAdmin,
+    queryFn: async () => {
+      const out: Record<string, number> = {};
+      for (const s of ["pending", "approved", "rejected", "needs_review"]) {
+        const { count } = await (supabase.from("research_queue") as any)
+          .select("id", { count: "exact", head: true })
+          .eq("status", s);
+        out[s] = count ?? 0;
+      }
+      out.all = Object.values(out).reduce((a, b) => a + b, 0);
+      return out;
+    },
+  });
+
+  // Access check — after all hooks
+  if (!isAdmin) {
     return (
       <div className="min-h-screen bg-background">
         <Header />
