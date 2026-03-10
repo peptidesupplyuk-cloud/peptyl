@@ -140,14 +140,24 @@ serve(async (req) => {
   }
 
   let daysBack = DEFAULT_DAYS_BACK;
+  let termsOffset = 0;
+  let termsLimit = 3; // Process 3 terms per batch to avoid timeout
   try {
     const body = await req.json();
     if (body?.days_back && typeof body.days_back === "number") {
       daysBack = body.days_back;
     }
+    if (typeof body?.terms_offset === "number") {
+      termsOffset = body.terms_offset;
+    }
+    if (typeof body?.terms_limit === "number") {
+      termsLimit = body.terms_limit;
+    }
   } catch {
     // No body or invalid JSON — use default
   }
+
+  const batchTerms = SEARCH_TERMS.slice(termsOffset, termsOffset + termsLimit);
 
   const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
 
@@ -157,10 +167,14 @@ serve(async (req) => {
     inserted: 0,
     skipped: 0,
     days_back: daysBack,
+    terms_offset: termsOffset,
+    terms_limit: termsLimit,
+    batch_terms: batchTerms.map(t => t.slice(0, 30)),
+    total_terms: SEARCH_TERMS.length,
     errors: [] as string[],
   };
 
-  for (const term of SEARCH_TERMS) {
+  for (const term of batchTerms) {
     results.searched++;
 
     try {
