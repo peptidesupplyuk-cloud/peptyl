@@ -16,10 +16,15 @@ const AdherenceSummary = ({ onNavigate }: { onNavigate?: () => void }) => {
     const rate = total > 0 ? Math.round((completed / total) * 100) : 0;
 
     let streak = 0;
-    const today = startOfDay(new Date());
+    const now = new Date();
+    const today = startOfDay(now);
     for (let d = 0; d < 365; d++) {
       const day = subDays(today, d);
-      const dayInj = injections.filter((i) => isSameDay(new Date(i.scheduled_time), day));
+      // Only consider injections whose scheduled time has passed
+      const dayInj = injections.filter((i) => {
+        const st = new Date(i.scheduled_time);
+        return isSameDay(st, day) && st <= now;
+      });
       if (dayInj.length === 0) continue;
       if (dayInj.every((i) => i.status === "completed")) streak++;
       else break;
