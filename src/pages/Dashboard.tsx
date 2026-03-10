@@ -278,7 +278,18 @@ const Dashboard = () => {
   ).length;
   const todayRemaining = todayScheduled + todayPendingSupplements;
 
-  const [showMore, setShowMore] = useState(false);
+  const [showMore, setShowMore] = useState(!hasActiveProtocol);
+
+  // Onboarding banner — show once after first login
+  const onboardingBannerKey = user ? `peptyl_onboarding_seen_${user.id}` : null;
+  const [showOnboardingBanner, setShowOnboardingBanner] = useState(() => {
+    if (!onboardingBannerKey) return false;
+    return localStorage.getItem(onboardingBannerKey) !== "true";
+  });
+  const dismissOnboardingBanner = () => {
+    if (onboardingBannerKey) localStorage.setItem(onboardingBannerKey, "true");
+    setShowOnboardingBanner(false);
+  };
   const [selectedDate, setSelectedDate] = useState(new Date());
   const { shouldAsk, requestPermission } = useRequestNotificationPermission();
   const [notifDismissed, setNotifDismissed] = useState(false);
