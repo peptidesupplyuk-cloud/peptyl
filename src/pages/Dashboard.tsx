@@ -788,6 +788,9 @@ const Dashboard = () => {
                   {/* C2 — Protocol nudges */}
                   <ProtocolNudges onNavigate={setActiveTab} />
 
+                  {/* C2.5 — Research insights feed */}
+                  <ResearchInsightsFeed />
+
                   {/* C3 — Data completeness row */}
                   <div className="flex items-center gap-3 px-1 flex-wrap">
                     <span className="text-xs text-muted-foreground">Your data:</span>
