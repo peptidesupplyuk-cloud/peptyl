@@ -97,11 +97,11 @@ const ActiveProtocols = () => {
       let baselinePanelId: string | null = null;
       let baselineDate: string | null = null;
       let baselineMarkers: Record<string, number> = {};
-      const { data: baselinePanel } = await supabase
+      const { data: baselinePanel } = await (supabase
         .from("bloodwork_panels")
-        .select("id, test_date")
+        .select("id, test_date, protocol_id") as any)
         .eq("protocol_id", p.id)
-        .order("test_date", { ascending: true })
+        .order("created_at", { ascending: true })
         .limit(1)
         .maybeSingle();
       if (baselinePanel) {
