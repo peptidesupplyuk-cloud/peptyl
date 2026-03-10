@@ -45,6 +45,10 @@ import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { useQuery } from "@tanstack/react-query";
+import OnboardingSummaryBanner from "@/components/dashboard/OnboardingSummaryBanner";
+import ResearchInsightsFeed from "@/components/dashboard/ResearchInsightsFeed";
+import QuickStackImport from "@/components/dashboard/QuickStackImport";
+import CollaborativeRecommendations from "@/components/dashboard/CollaborativeRecommendations";
 
 /* ─── Compact Journal for Overview ─── */
 const CompactJournal = ({ onExpandJournal }: { onExpandJournal: () => void }) => {
