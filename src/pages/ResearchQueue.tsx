@@ -93,7 +93,7 @@ const ResearchQueue = () => {
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const [filter, setFilter] = useState<StatusFilter>("pending");
-  const [expandedIds, setExpandedIds] = useState<Set<string>>(new Set());
+  const [scoreFilter, setScoreFilter] = useState<number | null>(null);
   const [noteEditing, setNoteEditing] = useState<string | null>(null);
   const [noteText, setNoteText] = useState("");
   const [approvePreview, setApprovePreview] = useState<ApprovePreview | null>(null);
