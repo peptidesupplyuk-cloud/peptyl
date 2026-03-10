@@ -56,12 +56,14 @@ const Logo = ({ className, size = "md", variant = "full", inverted = false, hide
           )}>
             Pep<span className="text-gradient-teal">tyl</span>
           </span>
-          <span className={cn(
-            "text-[0.5em] font-body font-medium tracking-[0.15em] mt-0.5",
-            inverted ? "text-primary-foreground/40" : "text-muted-foreground/60"
-          )}>
-            HEALTH OPTIMISED
-          </span>
+          {!hideTagline && (
+            <span className={cn(
+              "text-[0.5em] font-body font-medium tracking-[0.15em] mt-0.5",
+              inverted ? "text-primary-foreground/40" : "text-muted-foreground/60"
+            )}>
+              HEALTH OPTIMISED
+            </span>
+          )}
         </div>
       )}
     </div>
