@@ -23,7 +23,7 @@ export function useBloodworkPanels() {
       const { data: panels, error } = await supabase
         .from("bloodwork_panels")
         .select("*")
-        .order("test_date", { ascending: false });
+        .order("created_at", { ascending: false });
       if (error) throw error;
 
       const results: BloodworkPanel[] = [];
@@ -32,7 +32,7 @@ export function useBloodworkPanels() {
           .from("bloodwork_markers")
           .select("marker_name, value, unit")
           .eq("panel_id", p.id);
-        results.push({ ...p, markers: markers ?? [] });
+        results.push({ ...p, markers: markers ?? [] } as unknown as BloodworkPanel);
       }
       return results;
     },
