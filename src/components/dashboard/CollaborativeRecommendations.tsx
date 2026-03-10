@@ -99,7 +99,7 @@ const CollaborativeRecommendations = () => {
           avg_dose_mcg: Math.round(stats.totalDose / stats.count),
           common_goal: stats.goals[0] || null,
         }))
-        .filter((rec) => rec.usage_count >= 3)
+        .filter((rec) => rec.usage_count >= 1)
         .sort((a, b) => b.usage_count - a.usage_count)
         .slice(0, 4);
     },
