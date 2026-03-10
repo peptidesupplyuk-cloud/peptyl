@@ -40,11 +40,11 @@ const ImprovePage = () => {
       <main className="pt-24 pb-16">
         <div className="container mx-auto px-6">
           <Tabs value={activeTab} onValueChange={handleTabChange}>
-             <TabsList className="mb-8 w-full max-w-lg">
+             <TabsList className="mb-8 w-full max-w-lg overflow-x-auto no-scrollbar">
               {TABS.map(({ value, label, icon: Icon }) => (
-                <TabsTrigger key={value} value={value} className="flex items-center gap-2 flex-1">
-                  <Icon className="h-4 w-4" />
-                  {label}
+                <TabsTrigger key={value} value={value} className="flex items-center gap-1.5 sm:gap-2 flex-1 text-xs sm:text-sm min-w-0">
+                  <Icon className="h-4 w-4 shrink-0" />
+                  <span className="truncate">{label}</span>
                 </TabsTrigger>
               ))}
             </TabsList>

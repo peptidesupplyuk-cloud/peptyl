@@ -477,18 +477,18 @@ const Dashboard = () => {
             {/* PROFILE TAB */}
             <TabsContent value="profile" className="space-y-6">
               <Tabs value={profileSubTab} onValueChange={setProfileSubTab} className="space-y-4">
-                <TabsList className="w-full grid grid-cols-4">
-                  <TabsTrigger value="profile-info" className="text-xs sm:text-sm gap-1.5">
-                    <User className="h-3.5 w-3.5" />Profile
+                <TabsList className="w-full grid grid-cols-4 overflow-x-auto no-scrollbar">
+                  <TabsTrigger value="profile-info" className="text-xs sm:text-sm gap-1 sm:gap-1.5 min-w-0 px-1.5 sm:px-3">
+                    <User className="h-3.5 w-3.5 shrink-0" /><span className="truncate">Profile</span>
                   </TabsTrigger>
-                  <TabsTrigger value="bloodwork" className="text-xs sm:text-sm gap-1.5">
-                    <Droplets className="h-3.5 w-3.5" />Bloodwork
+                  <TabsTrigger value="bloodwork" className="text-xs sm:text-sm gap-1 sm:gap-1.5 min-w-0 px-1.5 sm:px-3">
+                    <Droplets className="h-3.5 w-3.5 shrink-0" /><span className="truncate">Bloodwork</span>
                   </TabsTrigger>
-                  <TabsTrigger value="body" className="text-xs sm:text-sm gap-1.5">
-                    <Weight className="h-3.5 w-3.5" />Body
+                  <TabsTrigger value="body" className="text-xs sm:text-sm gap-1 sm:gap-1.5 min-w-0 px-1.5 sm:px-3">
+                    <Weight className="h-3.5 w-3.5 shrink-0" /><span className="truncate">Body</span>
                   </TabsTrigger>
-                  <TabsTrigger value="cardio" className="text-xs sm:text-sm gap-1.5">
-                    <Heart className="h-3.5 w-3.5" />Cardiovascular
+                  <TabsTrigger value="cardio" className="text-xs sm:text-sm gap-1 sm:gap-1.5 min-w-0 px-1.5 sm:px-3">
+                    <Heart className="h-3.5 w-3.5 shrink-0" /><span className="truncate">Cardio</span>
                   </TabsTrigger>
                 </TabsList>
 
