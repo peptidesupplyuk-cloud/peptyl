@@ -223,19 +223,22 @@ const Dashboard = () => {
       const pepIds = new Set(protocol.peptides.map((pp) => pp.id));
       const protocolStart = startOfDay(new Date(protocol.start_date));
       const now = new Date();
+      const hasPeptides = protocol.peptides.length > 0;
 
-      // Only this protocol's injection logs (by protocol_peptide_id)
-      const protocolInjections = allInjections.filter(
-        (i) => i.protocol_peptide_id && pepIds.has(i.protocol_peptide_id)
-      );
+      let rate: number | null = null;
 
-      const completed = protocolInjections.filter((i) => i.status === "completed").length;
-      const skipped = protocolInjections.filter((i) => i.status === "skipped").length;
-      const missed = protocolInjections.filter((i) =>
-        i.status === "scheduled" && new Date(i.scheduled_time) < now
-      ).length;
-      const total = completed + skipped + missed;
-      const rate = total > 0 ? Math.round((completed / total) * 100) : 0;
+      if (hasPeptides) {
+        const protocolInjections = allInjections.filter(
+          (i) => i.protocol_peptide_id && pepIds.has(i.protocol_peptide_id)
+        );
+        const completed = protocolInjections.filter((i) => i.status === "completed").length;
+        const skipped = protocolInjections.filter((i) => i.status === "skipped").length;
+        const missed = protocolInjections.filter((i) =>
+          i.status === "scheduled" && new Date(i.scheduled_time) < now
+        ).length;
+        const total = completed + skipped + missed;
+        rate = total > 0 ? Math.round((completed / total) * 100) : null;
+      }
 
       const daysActive = Math.max(0, differenceInCalendarDays(now, protocolStart));
       const endDate = protocol.end_date ? new Date(protocol.end_date) : null;
@@ -243,7 +246,7 @@ const Dashboard = () => {
       const progressPct = Math.min(100, Math.round((daysActive / totalDays) * 100));
       const daysLeft = totalDays - daysActive;
 
-      return { protocol, rate, daysActive, totalDays, progressPct, daysLeft };
+      return { protocol, rate, daysActive, totalDays, progressPct, daysLeft, hasPeptides };
     });
   }, [activeProtocols, allInjections]);
 
@@ -625,7 +628,7 @@ const Dashboard = () => {
               {/* ═══ ZONE A — Hero Status ═══ */}
               {hasActiveProtocol ? (
                 <div className="space-y-3">
-                  {perProtocolStats.map(({ protocol, rate, daysActive, totalDays, progressPct, daysLeft }) => (
+                  {perProtocolStats.map(({ protocol, rate, daysActive, totalDays, progressPct, daysLeft, hasPeptides }) => (
                     <div key={protocol.id} className="bg-card rounded-2xl border border-border overflow-hidden">
                       {/* Progress bar across top */}
                       <div className="h-1 bg-muted">
@@ -648,7 +651,7 @@ const Dashboard = () => {
                         {/* Stat pills row */}
                         <div className="flex items-center gap-2 flex-wrap">
                           <span className="inline-flex items-center gap-1.5 text-xs font-medium bg-muted/60 rounded-full px-2.5 py-1 text-foreground">
-                            {rate}% adherence
+                            {rate !== null ? `${rate}% adherence` : hasPeptides ? "No doses yet" : "Supplements only"}
                           </span>
                         </div>
                       </div>
