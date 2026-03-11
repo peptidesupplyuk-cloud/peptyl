@@ -263,7 +263,7 @@ const Dashboard = () => {
 
       return { protocol, rate, daysActive, totalDays, progressPct, daysLeft, hasPeptides, hasSupplements: !!hasSupplements };
     });
-  }, [activeProtocols, allInjections, todaySuppLogs]);
+  }, [activeProtocols, allInjections, supplementLogs]);
 
   // Global streak across ALL protocol-scheduled injections
   const globalStreak = useMemo(() => {
