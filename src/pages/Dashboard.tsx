@@ -223,19 +223,37 @@ const Dashboard = () => {
       const pepIds = new Set(protocol.peptides.map((pp) => pp.id));
       const protocolStart = startOfDay(new Date(protocol.start_date));
       const now = new Date();
+      const hasPeptides = protocol.peptides.length > 0;
+      const hasSupplements = protocol.supplements && protocol.supplements.length > 0;
 
-      // Only this protocol's injection logs (by protocol_peptide_id)
-      const protocolInjections = allInjections.filter(
-        (i) => i.protocol_peptide_id && pepIds.has(i.protocol_peptide_id)
-      );
+      let rate: number | null = null;
 
-      const completed = protocolInjections.filter((i) => i.status === "completed").length;
-      const skipped = protocolInjections.filter((i) => i.status === "skipped").length;
-      const missed = protocolInjections.filter((i) =>
-        i.status === "scheduled" && new Date(i.scheduled_time) < now
-      ).length;
-      const total = completed + skipped + missed;
-      const rate = total > 0 ? Math.round((completed / total) * 100) : 0;
+      if (hasPeptides) {
+        // Peptide-based adherence via injection logs
+        const protocolInjections = allInjections.filter(
+          (i) => i.protocol_peptide_id && pepIds.has(i.protocol_peptide_id)
+        );
+        const completed = protocolInjections.filter((i) => i.status === "completed").length;
+        const skipped = protocolInjections.filter((i) => i.status === "skipped").length;
+        const missed = protocolInjections.filter((i) =>
+          i.status === "scheduled" && new Date(i.scheduled_time) < now
+        ).length;
+        const total = completed + skipped + missed;
+        rate = total > 0 ? Math.round((completed / total) * 100) : null;
+      }
+
+      if (rate === null && hasSupplements) {
+        // Supplement-only protocol — use supplement_logs
+        const suppNames = protocol.supplements.map(s => s.name.toLowerCase());
+        const protocolSuppLogs = todaySuppLogs.filter(
+          (sl) => suppNames.includes(sl.item.toLowerCase()) && sl.protocol_id === protocol.id
+        );
+        // Fallback: count any matching supplement logs across all time isn't available here,
+        // so for supplement-only protocols show days active as proxy
+        const suppCompleted = protocolSuppLogs.filter(sl => sl.completed).length;
+        const suppTotal = protocolSuppLogs.length;
+        rate = suppTotal > 0 ? Math.round((suppCompleted / suppTotal) * 100) : null;
+      }
 
       const daysActive = Math.max(0, differenceInCalendarDays(now, protocolStart));
       const endDate = protocol.end_date ? new Date(protocol.end_date) : null;
@@ -243,9 +261,9 @@ const Dashboard = () => {
       const progressPct = Math.min(100, Math.round((daysActive / totalDays) * 100));
       const daysLeft = totalDays - daysActive;
 
-      return { protocol, rate, daysActive, totalDays, progressPct, daysLeft };
+      return { protocol, rate, daysActive, totalDays, progressPct, daysLeft, hasPeptides, hasSupplements: !!hasSupplements };
     });
-  }, [activeProtocols, allInjections]);
+  }, [activeProtocols, allInjections, todaySuppLogs]);
 
   // Global streak across ALL protocol-scheduled injections
   const globalStreak = useMemo(() => {
