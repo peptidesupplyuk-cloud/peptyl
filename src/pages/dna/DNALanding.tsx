@@ -148,7 +148,7 @@ const DNALanding = () => {
                     <span className="text-sm font-medium text-muted-foreground">Advanced</span>
                     <span className="text-xs bg-amber-500/10 text-amber-600 font-semibold px-2 py-0.5 rounded-md">NEW</span>
                   </div>
-                  <div className="text-3xl font-heading font-bold text-foreground mt-1">£39.99</div>
+                  <div className="text-3xl font-heading font-bold text-foreground mt-1">£29.99</div>
                 </div>
                 <p className="text-xs text-muted-foreground mb-3">Everything in Standard, plus:</p>
                 <ul className="space-y-3 flex-1 mb-6">
