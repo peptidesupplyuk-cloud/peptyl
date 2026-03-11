@@ -92,6 +92,8 @@ export function useTodayInjections() {
       if (error) throw error;
 
       if (existing && existing.length > 0) {
+        // Still backfill past days in the background (non-blocking)
+        backfillMissingDays(user!.id).catch(() => {});
         return existing as InjectionLog[];
       }
 
@@ -149,7 +151,6 @@ export function useTodayInjections() {
           const key = mergeKey(pep.peptide_name, t);
           const existing = merged.get(key);
           if (existing) {
-            // Same compound at same time — sum the doses
             existing.dose_mcg += pep.dose_mcg;
           } else {
             merged.set(key, {
@@ -179,12 +180,124 @@ export function useTodayInjections() {
           .upsert(logsToInsert, { onConflict: "user_id,peptide_name,scheduled_time", ignoreDuplicates: true })
           .select();
         if (insertErr) throw insertErr;
+
+        // Backfill past days too
+        backfillMissingDays(user!.id).catch(() => {});
+
         return (inserted ?? []) as InjectionLog[];
       } finally {
         generatingForDate = null;
       }
     },
   });
+}
+
+/** Check if a peptide is due on a specific date based on its frequency */
+function isDueOnDate(frequency: string, protocolStartDate: string, targetDate: Date): boolean {
+  const start = new Date(protocolStartDate);
+  const daysSinceStart = Math.floor((targetDate.getTime() - start.getTime()) / (1000 * 60 * 60 * 24));
+  const dayOfWeek = targetDate.getDay();
+
+  switch (frequency.toLowerCase()) {
+    case "daily":
+      return true;
+    case "weekly":
+      return daysSinceStart % 7 === 0;
+    case "2x/week":
+      return dayOfWeek === 1 || dayOfWeek === 4;
+    case "3x/week":
+      return dayOfWeek === 1 || dayOfWeek === 3 || dayOfWeek === 5;
+    case "5on/2off":
+      return dayOfWeek >= 1 && dayOfWeek <= 5;
+    case "eod":
+    case "every other day":
+      return daysSinceStart % 2 === 0;
+    default:
+      return true;
+  }
+}
+
+// Module-level flag to prevent concurrent backfill
+let backfillRunning = false;
+
+/**
+ * Backfill missing injection_log rows for past days since each active protocol started.
+ * Creates them with status="scheduled" so adherence correctly shows them as missed.
+ */
+async function backfillMissingDays(userId: string) {
+  if (backfillRunning) return;
+  backfillRunning = true;
+
+  try {
+    const { data: protocols } = await supabase
+      .from("protocols")
+      .select("*")
+      .in("status", ["active", "paused"]);
+
+    if (!protocols || protocols.length === 0) return;
+
+    const today = new Date();
+    const todayStr = today.toISOString().split("T")[0];
+
+    for (const protocol of protocols) {
+      const { data: peptides } = await supabase
+        .from("protocol_peptides")
+        .select("*")
+        .eq("protocol_id", protocol.id);
+
+      if (!peptides || peptides.length === 0) continue;
+
+      const protocolStart = new Date(protocol.start_date);
+      const logsToInsert: Array<{
+        user_id: string;
+        peptide_name: string;
+        dose_mcg: number;
+        scheduled_time: string;
+        protocol_peptide_id: string;
+        status: string;
+      }> = [];
+
+      // Iterate from protocol start to yesterday (today is handled by useTodayInjections)
+      for (let d = new Date(protocolStart); d < today; d.setDate(d.getDate() + 1)) {
+        const dateStr = d.toISOString().split("T")[0];
+        if (dateStr === todayStr) continue; // Skip today
+
+        for (const pep of peptides) {
+          if (!isDueOnDate(pep.frequency, protocol.start_date, d)) continue;
+
+          const timings: string[] = [];
+          const timing = (pep.timing || "AM").toUpperCase();
+          if (timing.includes("AM")) timings.push("09:00");
+          if (timing.includes("PM") || timing.includes("BED")) timings.push("21:00");
+          if (timings.length === 0) timings.push("09:00");
+
+          for (const t of timings) {
+            logsToInsert.push({
+              user_id: userId,
+              peptide_name: pep.peptide_name,
+              dose_mcg: pep.dose_mcg,
+              scheduled_time: `${dateStr}T${t}:00.000Z`,
+              protocol_peptide_id: pep.id,
+              status: "scheduled", // Will show as "missed" since time has passed
+            });
+          }
+        }
+      }
+
+      if (logsToInsert.length > 0) {
+        // Upsert with ignoreDuplicates so existing completed/skipped logs aren't overwritten
+        // Process in batches of 100 to avoid payload limits
+        for (let i = 0; i < logsToInsert.length; i += 100) {
+          const batch = logsToInsert.slice(i, i + 100);
+          await supabase
+            .from("injection_logs")
+            .upsert(batch, { onConflict: "user_id,peptide_name,scheduled_time", ignoreDuplicates: true });
+        }
+      }
+    }
+  } finally {
+    backfillRunning = false;
+  }
 }
 
 export function useAllInjections() {
