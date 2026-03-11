@@ -122,6 +122,8 @@ const App = () => (
               <Route path="/education/peptide-research-europe-guide" element={<EuropeanPeptideGuide />} />
               <Route path="/education/peptides-cancer-therapy-2026" element={<PeptidesCancer2026 />} />
               <Route path="/education/peptide-craze-biohacking" element={<PeptideCrazeBiohacking />} />
+              <Route path="/education/mots-c-mitochondrial-peptide" element={<MotsCMitochondrial />} />
+              <Route path="/education/ss31-elamipretide-mitochondrial-ageing" element={<Ss31Elamipretide />} />
               <Route path="/whoop-callback" element={<WhoopCallback />} />
               <Route path="/fitbit-callback" element={<FitbitCallback />} />
               <Route path="/start/:slug" element={<CampaignPage />} />
