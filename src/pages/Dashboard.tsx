@@ -401,27 +401,49 @@ const Dashboard = () => {
           : undefined,
       });
 
-      // Generate today's dose logs for the new protocol
-      for (const p of rec.peptides) {
-        const timing = p.timing.includes("AM") ? "09:00" : "21:00";
-        await logInjection.mutateAsync({
-          peptide_name: p.name,
-          dose_mcg: p.dose_mcg,
-          scheduled_time: `${startDate}T${timing}:00.000Z`,
-        });
+      // Generate today's dose logs — use upsert to avoid duplicate key errors
+      if (rec.peptides.length > 0) {
+        const { data: protocolPeptides } = await supabase
+          .from("protocol_peptides")
+          .select("id, peptide_name, timing")
+          .eq("protocol_id", protocol.id);
 
-        if (p.timing === "AM+PM") {
-          await logInjection.mutateAsync({
-            peptide_name: p.name,
-            dose_mcg: p.dose_mcg,
-            scheduled_time: `${startDate}T21:00:00.000Z`,
-          });
+        for (const pp of protocolPeptides ?? []) {
+          const timing = (pp.timing || "AM").toUpperCase();
+          const timings: string[] = [];
+          if (timing.includes("AM")) timings.push("09:00");
+          if (timing.includes("PM") || timing === "AM+PM") timings.push("21:00");
+          if (timings.length === 0) timings.push("09:00");
+
+          const matchingRec = rec.peptides.find((p) => p.name === pp.peptide_name);
+          if (!matchingRec) continue;
+
+          for (const t of timings) {
+            await supabase.from("injection_logs").upsert(
+              {
+                user_id: user!.id,
+                peptide_name: pp.peptide_name,
+                dose_mcg: matchingRec.dose_mcg,
+                scheduled_time: `${startDate}T${t}:00.000Z`,
+                protocol_peptide_id: pp.id,
+                status: "scheduled",
+              },
+              { onConflict: "user_id,peptide_name,scheduled_time", ignoreDuplicates: true }
+            );
+          }
         }
       }
 
       toast({ title: "Protocol activated", description: `${rec.protocolName} is now active. Today's doses have been scheduled.` });
     } catch (err: any) {
-      toast({ title: "Error", description: err?.message || "Failed to activate protocol.", variant: "destructive" });
+      const msg = err?.message || "";
+      let userMessage = "Failed to activate protocol. Please try again.";
+      if (msg.includes("already active")) {
+        userMessage = `"${rec.protocolName}" is already in your active protocols. Please edit or delete the existing one first.`;
+      } else if (msg.includes("duplicate key") || msg.includes("unique constraint")) {
+        userMessage = `"${rec.protocolName}" already has scheduled doses for today. Please delete the existing protocol first, then try again.`;
+      }
+      toast({ title: "Protocol already exists", description: userMessage, variant: "destructive" });
     } finally {
       setActivatingProtocol(false);
     }

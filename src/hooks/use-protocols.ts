@@ -146,6 +146,22 @@ export function useDeleteProtocol() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: async (id: string) => {
+      // Get protocol peptide IDs to clean up injection logs
+      const { data: pepRows } = await supabase
+        .from("protocol_peptides")
+        .select("id")
+        .eq("protocol_id", id);
+
+      // Delete injection logs linked to this protocol's peptides
+      if (pepRows && pepRows.length > 0) {
+        const pepIds = pepRows.map((r) => r.id);
+        const { error: logErr } = await supabase
+          .from("injection_logs")
+          .delete()
+          .in("protocol_peptide_id", pepIds);
+        if (logErr) throw logErr;
+      }
+
       // Delete peptides first, then protocol
       const { error: pepErr } = await supabase.from("protocol_peptides").delete().eq("protocol_id", id);
       if (pepErr) throw pepErr;
@@ -155,6 +171,8 @@ export function useDeleteProtocol() {
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["protocols"] });
       qc.invalidateQueries({ queryKey: ["injections_today"] });
+      qc.invalidateQueries({ queryKey: ["injections_all"] });
+      qc.invalidateQueries({ queryKey: ["injections_date"] });
     },
   });
 }
