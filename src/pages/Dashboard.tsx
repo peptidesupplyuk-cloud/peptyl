@@ -609,52 +609,60 @@ const Dashboard = () => {
 
               {/* ═══ ZONE A — Hero Status ═══ */}
               {hasActiveProtocol ? (
-                <div className="bg-card rounded-2xl border border-border overflow-hidden">
-                  {/* Progress bar across top */}
-                  <div className="h-1 bg-muted">
-                    <div className="h-1 bg-primary transition-all duration-500" style={{ width: `${progressPct}%` }} />
-                  </div>
-
-                  <div className="p-4 sm:p-5 space-y-3">
-                    {/* Top row: protocol name + day badge */}
-                    <div className="flex items-center justify-between gap-3">
-                      <div className="min-w-0">
-                        <p className="text-sm font-heading font-semibold text-foreground truncate">{activeProtocol.name}</p>
-                        <p className="text-[11px] text-muted-foreground">{daysLeft > 0 ? `${daysLeft} days remaining` : "Completing today"}</p>
+                <div className="space-y-3">
+                  {perProtocolStats.map(({ protocol, rate, daysActive, totalDays, progressPct, daysLeft }) => (
+                    <div key={protocol.id} className="bg-card rounded-2xl border border-border overflow-hidden">
+                      {/* Progress bar across top */}
+                      <div className="h-1 bg-muted">
+                        <div className="h-1 bg-primary transition-all duration-500" style={{ width: `${progressPct}%` }} />
                       </div>
-                      <div className="shrink-0 bg-primary/10 rounded-xl px-3 py-1.5 text-center">
-                        <p className="text-lg font-heading font-bold text-primary leading-none">{daysActive}</p>
-                        <p className="text-[9px] text-muted-foreground mt-0.5">of {totalDays}</p>
+
+                      <div className="p-4 sm:p-5 space-y-3">
+                        {/* Top row: protocol name + day badge */}
+                        <div className="flex items-center justify-between gap-3">
+                          <div className="min-w-0">
+                            <p className="text-sm font-heading font-semibold text-foreground truncate">{protocol.name}</p>
+                            <p className="text-[11px] text-muted-foreground">{daysLeft > 0 ? `${daysLeft} days remaining` : "Completing today"}</p>
+                          </div>
+                          <div className="shrink-0 bg-primary/10 rounded-xl px-3 py-1.5 text-center">
+                            <p className="text-lg font-heading font-bold text-primary leading-none">{daysActive}</p>
+                            <p className="text-[9px] text-muted-foreground mt-0.5">of {totalDays}</p>
+                          </div>
+                        </div>
+
+                        {/* Stat pills row */}
+                        <div className="flex items-center gap-2 flex-wrap">
+                          <span className="inline-flex items-center gap-1.5 text-xs font-medium bg-muted/60 rounded-full px-2.5 py-1 text-foreground">
+                            {rate}% adherence
+                          </span>
+                        </div>
                       </div>
                     </div>
+                  ))}
 
-                    {/* Stat pills row */}
-                    <div className="flex items-center gap-2 flex-wrap">
-                      <span className="inline-flex items-center gap-1.5 text-xs font-medium bg-muted/60 rounded-full px-2.5 py-1 text-foreground">
-                        {heroStats.rate}% adherence
+                  {/* Global streak + today status (shared across protocols) */}
+                  <div className="flex items-center gap-2 flex-wrap px-1">
+                    {globalStreak > 0 && (
+                      <span className={`inline-flex items-center gap-1 text-xs font-medium rounded-full px-2.5 py-1 ${
+                        globalStreak > 7 ? "bg-green-500/10 text-green-500" : "bg-amber-500/10 text-amber-400"
+                      }`}>
+                        <Flame className="h-3 w-3" />
+                        {globalStreak} day streak
                       </span>
-                      {heroStats.streak > 0 && (
-                        <span className={`inline-flex items-center gap-1 text-xs font-medium rounded-full px-2.5 py-1 ${
-                          heroStats.streak > 7 ? "bg-green-500/10 text-green-500" : "bg-amber-500/10 text-amber-400"
-                        }`}>
-                          <Flame className="h-3 w-3" />
-                          {heroStats.streak} day streak
-                        </span>
-                      )}
-                      {todayRemaining > 0 ? (
-                        <span className="inline-flex items-center gap-1 text-xs font-medium bg-primary/10 text-primary rounded-full px-2.5 py-1">
-                          {todayRemaining} left today
-                        </span>
-                      ) : (
-                        <span className="inline-flex items-center gap-1 text-xs font-medium bg-green-500/10 text-green-500 rounded-full px-2.5 py-1">
-                          ✓ Today complete
-                        </span>
-                      )}
-                    </div>
-
-                    {/* Wearable Summary */}
-                    <WearableSummary selectedDate={selectedDate} />
+                    )}
+                    {todayRemaining > 0 ? (
+                      <span className="inline-flex items-center gap-1 text-xs font-medium bg-primary/10 text-primary rounded-full px-2.5 py-1">
+                        {todayRemaining} left today
+                      </span>
+                    ) : (
+                      <span className="inline-flex items-center gap-1 text-xs font-medium bg-green-500/10 text-green-500 rounded-full px-2.5 py-1">
+                        ✓ Today complete
+                      </span>
+                    )}
                   </div>
+
+                  {/* Wearable Summary */}
+                  <WearableSummary selectedDate={selectedDate} />
                 </div>
               ) : (
                 <div className="bg-card rounded-2xl border border-border p-6 text-center space-y-3">
