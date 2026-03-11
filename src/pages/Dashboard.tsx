@@ -651,8 +651,9 @@ const Dashboard = () => {
                         {/* Stat pills row */}
                         <div className="flex items-center gap-2 flex-wrap">
                           <span className="inline-flex items-center gap-1.5 text-xs font-medium bg-muted/60 rounded-full px-2.5 py-1 text-foreground">
-                            {rate}% adherence
+                            {rate !== null ? `${rate}% adherence` : hasPeptides ? "No doses yet" : "Supplements only"}
                           </span>
+                        </div>
                         </div>
                       </div>
                     </div>
