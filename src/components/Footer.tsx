@@ -39,6 +39,8 @@ const Footer = () => {
               <Link to="/improve?tab=supplements" className="text-sm text-primary-foreground/50 hover:text-primary transition-colors">Supplements</Link>
               <Link to="/improve?tab=calculators" className="text-sm text-primary-foreground/50 hover:text-primary transition-colors">{t("footer.calculators")}</Link>
               <Link to="/education" className="text-sm text-primary-foreground/50 hover:text-primary transition-colors">Articles</Link>
+              <Link to="/glossary" className="text-sm text-primary-foreground/50 hover:text-primary transition-colors">Glossary</Link>
+              <Link to="/sitemap" className="text-sm text-primary-foreground/50 hover:text-primary transition-colors">Sitemap</Link>
             </div>
           </div>
 
