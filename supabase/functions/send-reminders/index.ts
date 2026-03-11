@@ -501,10 +501,21 @@ Deno.serve(async (req) => {
               body: JSON.stringify({
                 app_id: onesignalAppId,
                 include_external_user_ids: [outcome.user_id],
-                headings: { en: "Your results are ready 🧬" },
+                headings: { en: "🧬 Your results are ready" },
                 contents: { en: pushBody },
                 url: reportUrl,
                 chrome_web_icon: "https://peptyl.co.uk/icon-192.png",
+                chrome_web_badge: "https://peptyl.co.uk/favicon.png",
+                priority: 10,
+                ios_interruption_level: "time-sensitive",
+                ios_relevance_score: 1.0,
+                ios_badge_type: "Increase",
+                ios_badge_count: 1,
+                ttl: 86400,
+                web_buttons: [
+                  { id: "view-results", text: "📊 View Results", url: reportUrl },
+                ],
+                collapse_id: `results_${outcome.id}`,
               }),
             });
             const pushData = await pushRes.json();
