@@ -654,7 +654,6 @@ const Dashboard = () => {
                             {rate !== null ? `${rate}% adherence` : hasPeptides ? "No doses yet" : "Supplements only"}
                           </span>
                         </div>
-                        </div>
                       </div>
                     </div>
                   ))}
