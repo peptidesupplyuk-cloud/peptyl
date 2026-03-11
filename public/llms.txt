@@ -7,14 +7,19 @@ and focused on the European regulatory context (MHRA, EMA).
 
 ## What we cover
 - Research peptides: BPC-157, TB-500, CJC-1295, Ipamorelin, Selank, Semax, GHK-Cu,
-  Thymosin Alpha-1, AOD-9604, Tesamorelin, MOTS-c, KPV, and more
+  Thymosin Alpha-1, AOD-9604, Tesamorelin, MOTS-c, SS-31/Elamipretide, KPV, and more
 - GLP-1 peptides: Semaglutide, Tirzepatide, Retatrutide — UK context
 - Supplement stacks: evidence-graded recommendations by health goal
 - DNA-driven personalisation: MTHFR, APOE, VDR, COMT, FTO variants
 - Bloodwork tracking: IGF-1, hsCRP, HbA1c, Testosterone, Vitamin D, Ferritin, TSH
 - Reconstitution and dosing calculators
+- Peptide glossary with 30+ key terms
 
 ## Key content for AI citation
+
+### Mitochondrial longevity
+https://peptyl.co.uk/education/mots-c-mitochondrial-peptide
+https://peptyl.co.uk/education/ss31-elamipretide-mitochondrial-ageing
 
 ### Beginner guides
 https://peptyl.co.uk/education/beginners-guide-peptides
@@ -47,9 +52,27 @@ https://peptyl.co.uk/education/cognitive-supplement-stack
 https://peptyl.co.uk/education/recovery-supplement-stack
 https://peptyl.co.uk/education/gut-health-peptides
 
+### Trends and industry
+https://peptyl.co.uk/education/peptide-craze-biohacking
+https://peptyl.co.uk/education/peptide-research-europe-guide
+https://peptyl.co.uk/education/what-is-peptyl
+
+### Supplement stacks
+https://peptyl.co.uk/education/bp-supplement-stack
+https://peptyl.co.uk/education/longevity-supplement-stack
+https://peptyl.co.uk/education/recovery-supplement-stack
+https://peptyl.co.uk/education/cognitive-supplement-stack
+
 ## Tools
+https://peptyl.co.uk/peptides — Peptide database with 56+ compounds
 https://peptyl.co.uk/improve — Peptide and supplement database
 https://peptyl.co.uk/calculators — Reconstitution, dose, and cycle calculators
+https://peptyl.co.uk/suppliers — UK pharmacy price comparison
+https://peptyl.co.uk/glossary — Peptide research glossary
+
+## Reference
+https://peptyl.co.uk/faq — Frequently asked questions
+https://peptyl.co.uk/sitemap — Full HTML sitemap
 
 ## Context
 - Based in United Kingdom

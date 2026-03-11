@@ -126,6 +126,8 @@ const App = () => (
               <Route path="/education/peptide-craze-biohacking" element={<PeptideCrazeBiohacking />} />
               <Route path="/education/mots-c-mitochondrial-peptide" element={<MotsCMitochondrial />} />
               <Route path="/education/ss31-elamipretide-mitochondrial-ageing" element={<Ss31Elamipretide />} />
+              <Route path="/glossary" element={<Glossary />} />
+              <Route path="/sitemap" element={<SiteMapPage />} />
               <Route path="/whoop-callback" element={<WhoopCallback />} />
               <Route path="/fitbit-callback" element={<FitbitCallback />} />
               <Route path="/start/:slug" element={<CampaignPage />} />
