@@ -286,12 +286,22 @@ async function backfillMissingDays(userId: string) {
 
       if (logsToInsert.length > 0) {
         // Upsert with ignoreDuplicates so existing completed/skipped logs aren't overwritten
-        // Process in batches of 100 to avoid payload limits
         for (let i = 0; i < logsToInsert.length; i += 100) {
           const batch = logsToInsert.slice(i, i + 100);
           await supabase
             .from("injection_logs")
             .upsert(batch, { onConflict: "user_id,peptide_name,scheduled_time", ignoreDuplicates: true });
+        }
+
+        // Second pass: link any existing unlinked logs to the correct protocol_peptide_id
+        for (const pep of peptides) {
+          await supabase
+            .from("injection_logs")
+            .update({ protocol_peptide_id: pep.id })
+            .eq("user_id", userId)
+            .eq("peptide_name", pep.peptide_name)
+            .is("protocol_peptide_id", null)
+            .gte("scheduled_time", `${protocol.start_date}T00:00:00.000Z`);
         }
       }
     }
