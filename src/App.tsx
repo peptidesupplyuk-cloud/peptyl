@@ -56,6 +56,8 @@ const GutHealthPeptides = lazy(() => import("./pages/articles/GutHealthPeptides"
 const EuropeanPeptideGuide = lazy(() => import("./pages/articles/EuropeanPeptideGuide"));
 const PeptidesCancer2026 = lazy(() => import("./pages/articles/PeptidesCancer2026"));
 const PeptideCrazeBiohacking = lazy(() => import("./pages/articles/PeptideCrazeBiohacking"));
+const MotsCMitochondrial = lazy(() => import("./pages/articles/MotsCMitochondrial"));
+const Ss31Elamipretide = lazy(() => import("./pages/articles/Ss31Elamipretide"));
 const CampaignPage = lazy(() => import("./pages/CampaignPage"));
 const WhoopCallback = lazy(() => import("./pages/WhoopCallback"));
 const FitbitCallback = lazy(() => import("./pages/FitbitCallback"));
