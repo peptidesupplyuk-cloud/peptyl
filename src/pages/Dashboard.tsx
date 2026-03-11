@@ -214,57 +214,59 @@ const Dashboard = () => {
   // Hero status stats
   const { data: allInjections = [] } = useAllInjections();
   const { data: todayInjections = [] } = useTodayInjections();
-  const activeProtocol = protocols.find((p) => p.status === "active");
-  const hasActiveProtocol = !!activeProtocol;
+  const activeProtocols = protocols.filter((p) => p.status === "active");
+  const hasActiveProtocol = activeProtocols.length > 0;
 
-  const heroStats = useMemo(() => {
-    if (!hasActiveProtocol || allInjections.length === 0) return { rate: 0, streak: 0 };
+  // Per-protocol stats for hero zone
+  const perProtocolStats = useMemo(() => {
+    return activeProtocols.map((protocol) => {
+      const pepIds = new Set(protocol.peptides.map((pp) => pp.id));
+      const protocolStart = startOfDay(new Date(protocol.start_date));
+      const now = new Date();
 
-    const protocolStart = activeProtocol?.start_date
-      ? startOfDay(new Date(activeProtocol.start_date))
-      : null;
-    // Only count protocol-scheduled injections (has protocol_peptide_id), not ad-hoc extras
-    const protocolInjections = (protocolStart
-      ? allInjections.filter((i) => new Date(i.scheduled_time) >= protocolStart)
-      : allInjections
-    ).filter((i) => !!i.protocol_peptide_id);
+      // Only this protocol's injection logs (by protocol_peptide_id)
+      const protocolInjections = allInjections.filter(
+        (i) => i.protocol_peptide_id && pepIds.has(i.protocol_peptide_id)
+      );
 
+      const completed = protocolInjections.filter((i) => i.status === "completed").length;
+      const skipped = protocolInjections.filter((i) => i.status === "skipped").length;
+      const missed = protocolInjections.filter((i) =>
+        i.status === "scheduled" && new Date(i.scheduled_time) < now
+      ).length;
+      const total = completed + skipped + missed;
+      const rate = total > 0 ? Math.round((completed / total) * 100) : 0;
+
+      const daysActive = Math.max(0, differenceInCalendarDays(now, protocolStart));
+      const endDate = protocol.end_date ? new Date(protocol.end_date) : null;
+      const totalDays = endDate ? Math.max(1, differenceInCalendarDays(endDate, protocolStart)) : 90;
+      const progressPct = Math.min(100, Math.round((daysActive / totalDays) * 100));
+      const daysLeft = totalDays - daysActive;
+
+      return { protocol, rate, daysActive, totalDays, progressPct, daysLeft };
+    });
+  }, [activeProtocols, allInjections]);
+
+  // Global streak across ALL protocol-scheduled injections
+  const globalStreak = useMemo(() => {
+    if (!hasActiveProtocol || allInjections.length === 0) return 0;
+    const protocolInjections = allInjections.filter((i) => !!i.protocol_peptide_id);
     const now = new Date();
-    const completed = protocolInjections.filter((i) => i.status === "completed").length;
-    const skipped = protocolInjections.filter((i) => i.status === "skipped").length;
-    const missed = protocolInjections.filter((i) =>
-      i.status === "scheduled" && new Date(i.scheduled_time) < now
-    ).length;
-    const total = completed + skipped + missed;
-    const rate = total > 0 ? Math.round((completed / total) * 100) : 0;
-
-    let streak = 0;
     const today = startOfDay(now);
+    let streak = 0;
     for (let d = 0; d < 365; d++) {
       const day = subDays(today, d);
-      if (protocolStart && day < protocolStart) break;
-      // Only consider protocol-scheduled injections whose scheduled time has passed
       const dayInj = protocolInjections.filter((i) => {
         const st = new Date(i.scheduled_time);
         return isSameDay(st, day) && st <= now;
       });
-      if (dayInj.length === 0) continue; // Off-day (EOD/weekly) — don't break streak
+      if (dayInj.length === 0) continue; // Off-day — don't break streak
       if (dayInj.every((i) => i.status === "completed")) streak++;
       else break;
     }
-    return { rate, streak };
-  }, [allInjections, hasActiveProtocol, activeProtocol?.start_date]);
+    return streak;
+  }, [allInjections, hasActiveProtocol]);
 
-  const protocolStartDate = activeProtocol?.start_date;
-  const protocolEndDate = activeProtocol?.end_date;
-  const daysActive = protocolStartDate
-    ? Math.max(0, differenceInCalendarDays(new Date(), new Date(protocolStartDate)))
-    : 0;
-  const totalDays = protocolStartDate && protocolEndDate
-    ? Math.max(1, differenceInCalendarDays(new Date(protocolEndDate), new Date(protocolStartDate)))
-    : 90;
-  const progressPct = Math.min(100, Math.round((daysActive / totalDays) * 100));
-  const daysLeft = totalDays - daysActive;
   const todayScheduled = todayInjections.filter((i) => i.status === "scheduled").length;
   const todayCompleted = todayInjections.filter((i) => i.status === "completed").length;
 
