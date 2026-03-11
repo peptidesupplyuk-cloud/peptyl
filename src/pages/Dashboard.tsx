@@ -421,7 +421,14 @@ const Dashboard = () => {
 
       toast({ title: "Protocol activated", description: `${rec.protocolName} is now active. Today's doses have been scheduled.` });
     } catch (err: any) {
-      toast({ title: "Error", description: err?.message || "Failed to activate protocol.", variant: "destructive" });
+      const msg = err?.message || "";
+      let userMessage = "Failed to activate protocol. Please try again.";
+      if (msg.includes("already active")) {
+        userMessage = `"${rec.protocolName}" is already in your active protocols. Please edit or delete the existing one first.`;
+      } else if (msg.includes("duplicate key") || msg.includes("unique constraint")) {
+        userMessage = `"${rec.protocolName}" already has scheduled doses for today. Please delete the existing protocol first, then try again.`;
+      }
+      toast({ title: "Protocol already exists", description: userMessage, variant: "destructive" });
     } finally {
       setActivatingProtocol(false);
     }
