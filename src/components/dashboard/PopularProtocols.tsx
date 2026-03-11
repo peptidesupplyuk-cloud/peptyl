@@ -62,30 +62,6 @@ const PopularProtocols = ({ onActivate, isActivating, disclaimerAccepted }: Prop
 
   return (
     <div className="space-y-8">
-      {/* ─── Supplement-Only Protocols ──────────────────────────────────────── */}
-      {supplementOnly.length > 0 && (
-        <div className="space-y-4">
-          <div className="flex items-center gap-2">
-            <Pill className="h-5 w-5 text-primary" />
-            <h2 className="font-heading font-semibold text-foreground">Supplement Protocols</h2>
-          </div>
-          <p className="text-xs text-muted-foreground">
-            No injections required. Supplement stacks to support your health goals.
-          </p>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {supplementOnly.map((protocol) => (
-              <RecommendationCard
-                key={protocol.id}
-                recommendation={toRecommendation(protocol)}
-                onActivate={onActivate}
-                isActivating={isActivating}
-                badge={CATEGORY_LABELS[protocol.category]}
-              />
-            ))}
-          </div>
-        </div>
-      )}
-
       {/* ─── Peptide Protocols ─────────────────────────────────────────────── */}
       <div className="space-y-4">
         <Carousel opts={{ align: "start", loop: false }} className="w-full">
@@ -155,6 +131,30 @@ const PopularProtocols = ({ onActivate, isActivating, disclaimerAccepted }: Prop
           </CarouselContent>
         </Carousel>
       </div>
+
+      {/* ─── Supplement-Only Protocols ──────────────────────────────────────── */}
+      {supplementOnly.length > 0 && (
+        <div className="space-y-4">
+          <div className="flex items-center gap-2">
+            <Pill className="h-5 w-5 text-primary" />
+            <h2 className="font-heading font-semibold text-foreground">Supplement Protocols</h2>
+          </div>
+          <p className="text-xs text-muted-foreground">
+            No injections required. Supplement stacks to support your health goals.
+          </p>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {supplementOnly.map((protocol) => (
+              <RecommendationCard
+                key={protocol.id}
+                recommendation={toRecommendation(protocol)}
+                onActivate={onActivate}
+                isActivating={isActivating}
+                badge={CATEGORY_LABELS[protocol.category]}
+              />
+            ))}
+          </div>
+        </div>
+      )}
     </div>
   );
 };
