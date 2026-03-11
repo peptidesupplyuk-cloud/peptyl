@@ -223,30 +223,32 @@ const Dashboard = () => {
     const protocolStart = activeProtocol?.start_date
       ? startOfDay(new Date(activeProtocol.start_date))
       : null;
-    const protocolInjections = protocolStart
+    // Only count protocol-scheduled injections (has protocol_peptide_id), not ad-hoc extras
+    const protocolInjections = (protocolStart
       ? allInjections.filter((i) => new Date(i.scheduled_time) >= protocolStart)
-      : allInjections;
+      : allInjections
+    ).filter((i) => !!i.protocol_peptide_id);
 
+    const now = new Date();
     const completed = protocolInjections.filter((i) => i.status === "completed").length;
     const skipped = protocolInjections.filter((i) => i.status === "skipped").length;
     const missed = protocolInjections.filter((i) =>
-      i.status === "scheduled" && new Date(i.scheduled_time) < new Date()
+      i.status === "scheduled" && new Date(i.scheduled_time) < now
     ).length;
     const total = completed + skipped + missed;
     const rate = total > 0 ? Math.round((completed / total) * 100) : 0;
 
     let streak = 0;
-    const now = new Date();
     const today = startOfDay(now);
     for (let d = 0; d < 365; d++) {
       const day = subDays(today, d);
       if (protocolStart && day < protocolStart) break;
-      // Only consider injections whose scheduled time has passed
+      // Only consider protocol-scheduled injections whose scheduled time has passed
       const dayInj = protocolInjections.filter((i) => {
         const st = new Date(i.scheduled_time);
         return isSameDay(st, day) && st <= now;
       });
-      if (dayInj.length === 0) continue;
+      if (dayInj.length === 0) continue; // Off-day (EOD/weekly) — don't break streak
       if (dayInj.every((i) => i.status === "completed")) streak++;
       else break;
     }

@@ -35,36 +35,43 @@ const AdherenceTracker = () => {
   const stats = useMemo(() => {
     if (injections.length === 0) return null;
 
+    // Only count protocol-scheduled injections (has protocol_peptide_id), not ad-hoc extras
+    const protocolInj = injections.filter((i) => !!i.protocol_peptide_id);
+
     // Filter to current protocol if available
     const scoped = protocolStart
-      ? injections.filter((i) => new Date(i.scheduled_time) >= protocolStart)
-      : injections;
+      ? protocolInj.filter((i) => new Date(i.scheduled_time) >= protocolStart)
+      : protocolInj;
 
+    const now = new Date();
     const completed = scoped.filter((i) => i.status === "completed").length;
     const skipped = scoped.filter((i) => i.status === "skipped").length;
     const missed = scoped.filter((i) =>
-      i.status === "scheduled" && new Date(i.scheduled_time) < new Date()
+      i.status === "scheduled" && new Date(i.scheduled_time) < now
     ).length;
     const total = completed + skipped + missed;
     const rate = total > 0 ? Math.round((completed / total) * 100) : 0;
 
-    // Streak (scoped to current protocol)
+    // Streak: only count protocol-scheduled injections whose time has passed
     let streak = 0;
-    const today = startOfDay(new Date());
+    const today = startOfDay(now);
     for (let d = 0; d < 365; d++) {
       const day = subDays(today, d);
       if (protocolStart && day < protocolStart) break;
-      const dayInj = scoped.filter((i) => isSameDay(new Date(i.scheduled_time), day));
-      if (dayInj.length === 0) continue;
+      const dayInj = scoped.filter((i) => {
+        const st = new Date(i.scheduled_time);
+        return isSameDay(st, day) && st <= now;
+      });
+      if (dayInj.length === 0) continue; // Off-day (EOD/weekly) — don't break streak
       const allDone = dayInj.every((i) => i.status === "completed");
       if (allDone) streak++;
       else break;
     }
 
-    // Per peptide
+    // Per peptide (all injections for breakdown, including ad-hoc)
     const byPeptide: Record<string, { completed: number; total: number }> = {};
     for (const inj of injections) {
-      const isPast = new Date(inj.scheduled_time) < new Date();
+      const isPast = new Date(inj.scheduled_time) < now;
       if (!isPast && inj.status === "scheduled") continue;
       if (!byPeptide[inj.peptide_name]) byPeptide[inj.peptide_name] = { completed: 0, total: 0 };
       byPeptide[inj.peptide_name].total++;
