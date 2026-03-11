@@ -330,7 +330,7 @@ const DNAUpload = () => {
   };
 
   const tierLabel = tier === "advanced" ? "Advanced" : "Standard";
-  const tierPrice = tier === "advanced" ? "£39.99" : "£19.99";
+  const tierPrice = tier === "advanced" ? "£29.99" : "£9.99";
 
   // Show loading while checking
   if (checkingUnlock) {
