@@ -85,12 +85,12 @@ const DNALanding = () => {
             <div className="flex justify-center gap-3 flex-wrap">
               <Link to="/dna/upload?tier=standard">
                 <Button size="lg" variant="outline" className="border-primary-foreground/20 text-primary-foreground hover:bg-primary-foreground/10 px-8 py-6 text-base">
-                  Start Standard £19.99
+                  Start Standard £9.99
                 </Button>
               </Link>
               <Link to="/dna/upload?tier=advanced">
                 <Button size="lg" className="shadow-brand px-8 py-6 text-base">
-                  Go Advanced £39.99 <ArrowRight className="ml-2 h-5 w-5" />
+                  Go Advanced £29.99 <ArrowRight className="ml-2 h-5 w-5" />
                 </Button>
               </Link>
             </div>
