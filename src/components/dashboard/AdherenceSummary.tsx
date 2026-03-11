@@ -9,23 +9,27 @@ const AdherenceSummary = ({ onNavigate }: { onNavigate?: () => void }) => {
   const stats = useMemo(() => {
     if (injections.length === 0) return null;
 
-    const completed = injections.filter((i) => i.status === "completed").length;
-    const skipped = injections.filter((i) => i.status === "skipped").length;
-    const missed = injections.filter((i) => i.status !== "scheduled" ? false : new Date(i.scheduled_time) < new Date()).length;
+    // Only count protocol-scheduled injections (has protocol_peptide_id), not ad-hoc extras
+    const protocolInj = injections.filter((i) => !!i.protocol_peptide_id);
+    if (protocolInj.length === 0) return null;
+
+    const now = new Date();
+    const completed = protocolInj.filter((i) => i.status === "completed").length;
+    const skipped = protocolInj.filter((i) => i.status === "skipped").length;
+    const missed = protocolInj.filter((i) => i.status !== "scheduled" ? false : new Date(i.scheduled_time) < now).length;
     const total = completed + skipped + missed;
     const rate = total > 0 ? Math.round((completed / total) * 100) : 0;
 
     let streak = 0;
-    const now = new Date();
     const today = startOfDay(now);
     for (let d = 0; d < 365; d++) {
       const day = subDays(today, d);
-      // Only consider injections whose scheduled time has passed
-      const dayInj = injections.filter((i) => {
+      // Only consider protocol-scheduled injections whose scheduled time has passed
+      const dayInj = protocolInj.filter((i) => {
         const st = new Date(i.scheduled_time);
         return isSameDay(st, day) && st <= now;
       });
-      if (dayInj.length === 0) continue;
+      if (dayInj.length === 0) continue; // Off-day — don't break streak
       if (dayInj.every((i) => i.status === "completed")) streak++;
       else break;
     }
