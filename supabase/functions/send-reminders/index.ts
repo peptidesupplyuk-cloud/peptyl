@@ -338,6 +338,7 @@ Deno.serve(async (req) => {
 
         if (onesignalApiKey) {
           try {
+            const retestUrl = `https://peptyl.co.uk/dashboard?tab=bloodwork&retest=true&protocolId=${np.id}`;
             const pushRes = await fetch("https://onesignal.com/api/v1/notifications", {
               method: "POST",
               headers: {
@@ -347,10 +348,19 @@ Deno.serve(async (req) => {
               body: JSON.stringify({
                 app_id: onesignalAppId,
                 include_external_user_ids: [np.user_id],
-                headings: { en: "Time to retest your bloods" },
-                contents: { en: `${np.name} — 10 weeks in. Book a test to see your results.` },
-                url: `https://peptyl.co.uk/dashboard?tab=bloodwork&retest=true&protocolId=${np.id}`,
+                headings: { en: "🔬 Time to retest your bloods" },
+                contents: { en: `${np.name} — 10 weeks in. Book a follow-up test to see your results.` },
+                url: retestUrl,
                 chrome_web_icon: "https://peptyl.co.uk/icon-192.png",
+                chrome_web_badge: "https://peptyl.co.uk/favicon.png",
+                priority: 10,
+                ios_interruption_level: "time-sensitive",
+                ios_relevance_score: 0.9,
+                ttl: 86400,
+                web_buttons: [
+                  { id: "book-test", text: "📊 Book Retest", url: retestUrl },
+                ],
+                collapse_id: `retest_${np.id}`,
               }),
             });
             const pushData = await pushRes.json();
