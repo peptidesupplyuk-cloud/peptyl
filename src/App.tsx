@@ -58,6 +58,8 @@ const PeptidesCancer2026 = lazy(() => import("./pages/articles/PeptidesCancer202
 const PeptideCrazeBiohacking = lazy(() => import("./pages/articles/PeptideCrazeBiohacking"));
 const MotsCMitochondrial = lazy(() => import("./pages/articles/MotsCMitochondrial"));
 const Ss31Elamipretide = lazy(() => import("./pages/articles/Ss31Elamipretide"));
+const Glossary = lazy(() => import("./pages/Glossary"));
+const SiteMapPage = lazy(() => import("./pages/SiteMap"));
 const CampaignPage = lazy(() => import("./pages/CampaignPage"));
 const WhoopCallback = lazy(() => import("./pages/WhoopCallback"));
 const FitbitCallback = lazy(() => import("./pages/FitbitCallback"));
@@ -124,6 +126,8 @@ const App = () => (
               <Route path="/education/peptide-craze-biohacking" element={<PeptideCrazeBiohacking />} />
               <Route path="/education/mots-c-mitochondrial-peptide" element={<MotsCMitochondrial />} />
               <Route path="/education/ss31-elamipretide-mitochondrial-ageing" element={<Ss31Elamipretide />} />
+              <Route path="/glossary" element={<Glossary />} />
+              <Route path="/sitemap" element={<SiteMapPage />} />
               <Route path="/whoop-callback" element={<WhoopCallback />} />
               <Route path="/fitbit-callback" element={<FitbitCallback />} />
               <Route path="/start/:slug" element={<CampaignPage />} />

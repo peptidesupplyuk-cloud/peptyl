@@ -15,6 +15,17 @@ const CalculatorsPage = () => {
         title="Peptide Calculators: Reconstitution, Dosing & Cycle Planning"
         description="Free precision tools for peptide reconstitution, dose calculation with syringe diagrams, and cycle planning with waste buffers. U-100, U-40 and Tuberculin support."
         path="/calculators"
+        jsonLd={{
+          "@context": "https://schema.org",
+          "@type": "WebApplication",
+          "name": "Peptyl Peptide Calculators",
+          "url": "https://peptyl.co.uk/calculators",
+          "applicationCategory": "HealthApplication",
+          "operatingSystem": "Any",
+          "offers": { "@type": "Offer", "price": "0", "priceCurrency": "GBP" },
+          "description": "Free precision tools for peptide reconstitution, dose calculation with syringe diagrams, and cycle planning.",
+          "author": { "@type": "Organization", "name": "Peptyl", "url": "https://peptyl.co.uk" }
+        }}
       />
       <Header />
       <main className="pt-24 pb-16">
