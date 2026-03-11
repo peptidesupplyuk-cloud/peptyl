@@ -85,12 +85,12 @@ const DNALanding = () => {
             <div className="flex justify-center gap-3 flex-wrap">
               <Link to="/dna/upload?tier=standard">
                 <Button size="lg" variant="outline" className="border-primary-foreground/20 text-primary-foreground hover:bg-primary-foreground/10 px-8 py-6 text-base">
-                  Start Standard £19.99
+                  Start Standard £9.99
                 </Button>
               </Link>
               <Link to="/dna/upload?tier=advanced">
                 <Button size="lg" className="shadow-brand px-8 py-6 text-base">
-                  Go Advanced £39.99 <ArrowRight className="ml-2 h-5 w-5" />
+                  Go Advanced £29.99 <ArrowRight className="ml-2 h-5 w-5" />
                 </Button>
               </Link>
             </div>
@@ -123,7 +123,7 @@ const DNALanding = () => {
               <div className="bg-card border border-border rounded-2xl p-6 flex flex-col">
                 <div className="mb-4">
                   <span className="text-sm font-medium text-muted-foreground">Standard</span>
-                  <div className="text-3xl font-heading font-bold text-foreground mt-1">£19.99</div>
+                  <div className="text-3xl font-heading font-bold text-foreground mt-1">£9.99</div>
                 </div>
                 <ul className="space-y-3 flex-1 mb-6">
                   {standardFeatures.map((f) => (
@@ -148,7 +148,7 @@ const DNALanding = () => {
                     <span className="text-sm font-medium text-muted-foreground">Advanced</span>
                     <span className="text-xs bg-amber-500/10 text-amber-600 font-semibold px-2 py-0.5 rounded-md">NEW</span>
                   </div>
-                  <div className="text-3xl font-heading font-bold text-foreground mt-1">£39.99</div>
+                  <div className="text-3xl font-heading font-bold text-foreground mt-1">£29.99</div>
                 </div>
                 <p className="text-xs text-muted-foreground mb-3">Everything in Standard, plus:</p>
                 <ul className="space-y-3 flex-1 mb-6">
@@ -261,10 +261,10 @@ const DNALanding = () => {
           <div className="container mx-auto px-6 text-center">
             <div className="flex justify-center gap-3 flex-wrap">
               <Link to="/dna/upload?tier=standard">
-                <Button size="lg" variant="outline" className="px-8 py-6 text-base">Standard £19.99</Button>
+                <Button size="lg" variant="outline" className="px-8 py-6 text-base">Standard £9.99</Button>
               </Link>
               <Link to="/dna/upload?tier=advanced">
-                <Button size="lg" className="shadow-brand px-8 py-6 text-base">Advanced £39.99</Button>
+                <Button size="lg" className="shadow-brand px-8 py-6 text-base">Advanced £29.99</Button>
               </Link>
             </div>
             {hasReports && (
