@@ -58,6 +58,8 @@ const PeptidesCancer2026 = lazy(() => import("./pages/articles/PeptidesCancer202
 const PeptideCrazeBiohacking = lazy(() => import("./pages/articles/PeptideCrazeBiohacking"));
 const MotsCMitochondrial = lazy(() => import("./pages/articles/MotsCMitochondrial"));
 const Ss31Elamipretide = lazy(() => import("./pages/articles/Ss31Elamipretide"));
+const Glossary = lazy(() => import("./pages/Glossary"));
+const SiteMapPage = lazy(() => import("./pages/SiteMap"));
 const CampaignPage = lazy(() => import("./pages/CampaignPage"));
 const WhoopCallback = lazy(() => import("./pages/WhoopCallback"));
 const FitbitCallback = lazy(() => import("./pages/FitbitCallback"));
