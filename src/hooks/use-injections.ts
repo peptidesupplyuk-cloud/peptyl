@@ -306,11 +306,14 @@ export function useAllInjections() {
     queryKey: ["injections_all", user?.id],
     enabled: !!user,
     queryFn: async () => {
+      // Trigger backfill before fetching
+      await backfillMissingDays(user!.id);
+
       const { data, error } = await supabase
         .from("injection_logs")
         .select("*")
         .order("scheduled_time", { ascending: false })
-        .limit(500);
+        .limit(1000);
       if (error) throw error;
       return (data ?? []) as InjectionLog[];
     },
