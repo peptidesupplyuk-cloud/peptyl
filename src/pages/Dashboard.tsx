@@ -421,17 +421,32 @@ const Dashboard = () => {
           if (!matchingRec) continue;
 
           for (const t of timings) {
-            await supabase.from("injection_logs").upsert(
-              {
+            // First try to claim any existing unlinked log for this slot
+            const scheduledTime = `${startDate}T${t}:00.000Z`;
+            const { data: existingLog } = await supabase
+              .from("injection_logs")
+              .select("id")
+              .eq("user_id", user!.id)
+              .eq("peptide_name", pp.peptide_name)
+              .eq("scheduled_time", scheduledTime)
+              .maybeSingle();
+
+            if (existingLog) {
+              // Link the existing log to this protocol
+              await supabase
+                .from("injection_logs")
+                .update({ protocol_peptide_id: pp.id })
+                .eq("id", existingLog.id);
+            } else {
+              await supabase.from("injection_logs").insert({
                 user_id: user!.id,
                 peptide_name: pp.peptide_name,
                 dose_mcg: matchingRec.dose_mcg,
-                scheduled_time: `${startDate}T${t}:00.000Z`,
+                scheduled_time: scheduledTime,
                 protocol_peptide_id: pp.id,
                 status: "scheduled",
-              },
-              { onConflict: "user_id,peptide_name,scheduled_time", ignoreDuplicates: true }
-            );
+              });
+            }
           }
         }
       }

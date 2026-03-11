@@ -181,10 +181,31 @@ export function useTodayInjections() {
           .select();
         if (insertErr) throw insertErr;
 
+        // Link any existing unlinked logs for today to their protocol peptides
+        for (const entry of logsToInsert) {
+          if (entry.protocol_peptide_id) {
+            await supabase
+              .from("injection_logs")
+              .update({ protocol_peptide_id: entry.protocol_peptide_id })
+              .eq("user_id", user!.id)
+              .eq("peptide_name", entry.peptide_name)
+              .eq("scheduled_time", entry.scheduled_time)
+              .is("protocol_peptide_id", null);
+          }
+        }
+
         // Backfill past days too
         backfillMissingDays(user!.id).catch(() => {});
 
-        return (inserted ?? []) as InjectionLog[];
+        // Re-fetch to get updated data
+        const { data: final } = await supabase
+          .from("injection_logs")
+          .select("*")
+          .gte("scheduled_time", `${today}T00:00:00.000Z`)
+          .lte("scheduled_time", `${today}T23:59:59.999Z`)
+          .order("scheduled_time", { ascending: true });
+
+        return (final ?? inserted ?? []) as InjectionLog[];
       } finally {
         generatingForDate = null;
       }
@@ -286,12 +307,22 @@ async function backfillMissingDays(userId: string) {
 
       if (logsToInsert.length > 0) {
         // Upsert with ignoreDuplicates so existing completed/skipped logs aren't overwritten
-        // Process in batches of 100 to avoid payload limits
         for (let i = 0; i < logsToInsert.length; i += 100) {
           const batch = logsToInsert.slice(i, i + 100);
           await supabase
             .from("injection_logs")
             .upsert(batch, { onConflict: "user_id,peptide_name,scheduled_time", ignoreDuplicates: true });
+        }
+
+        // Second pass: link any existing unlinked logs to the correct protocol_peptide_id
+        for (const pep of peptides) {
+          await supabase
+            .from("injection_logs")
+            .update({ protocol_peptide_id: pep.id })
+            .eq("user_id", userId)
+            .eq("peptide_name", pep.peptide_name)
+            .is("protocol_peptide_id", null)
+            .gte("scheduled_time", `${protocol.start_date}T00:00:00.000Z`);
         }
       }
     }
