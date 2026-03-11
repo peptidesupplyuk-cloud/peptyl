@@ -245,7 +245,7 @@ const Dashboard = () => {
       if (rate === null && hasSupplements) {
         // Supplement-only protocol — use supplement_logs
         const suppNames = protocol.supplements.map(s => s.name.toLowerCase());
-        const protocolSuppLogs = todaySuppLogs.filter(
+        const protocolSuppLogs = supplementLogs.filter(
           (sl) => suppNames.includes(sl.item.toLowerCase()) && sl.protocol_id === protocol.id
         );
         // Fallback: count any matching supplement logs across all time isn't available here,
