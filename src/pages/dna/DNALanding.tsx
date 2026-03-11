@@ -123,7 +123,7 @@ const DNALanding = () => {
               <div className="bg-card border border-border rounded-2xl p-6 flex flex-col">
                 <div className="mb-4">
                   <span className="text-sm font-medium text-muted-foreground">Standard</span>
-                  <div className="text-3xl font-heading font-bold text-foreground mt-1">£19.99</div>
+                  <div className="text-3xl font-heading font-bold text-foreground mt-1">£9.99</div>
                 </div>
                 <ul className="space-y-3 flex-1 mb-6">
                   {standardFeatures.map((f) => (
