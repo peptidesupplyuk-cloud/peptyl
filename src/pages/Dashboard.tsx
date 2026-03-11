@@ -224,12 +224,10 @@ const Dashboard = () => {
       const protocolStart = startOfDay(new Date(protocol.start_date));
       const now = new Date();
       const hasPeptides = protocol.peptides.length > 0;
-      const hasSupplements = protocol.supplements && protocol.supplements.length > 0;
 
       let rate: number | null = null;
 
       if (hasPeptides) {
-        // Peptide-based adherence via injection logs
         const protocolInjections = allInjections.filter(
           (i) => i.protocol_peptide_id && pepIds.has(i.protocol_peptide_id)
         );
@@ -242,28 +240,15 @@ const Dashboard = () => {
         rate = total > 0 ? Math.round((completed / total) * 100) : null;
       }
 
-      if (rate === null && hasSupplements) {
-        // Supplement-only protocol — use supplement_logs
-        const suppNames = protocol.supplements.map(s => s.name.toLowerCase());
-        const protocolSuppLogs = supplementLogs.filter(
-          (sl) => suppNames.includes(sl.item.toLowerCase()) && sl.protocol_id === protocol.id
-        );
-        // Fallback: count any matching supplement logs across all time isn't available here,
-        // so for supplement-only protocols show days active as proxy
-        const suppCompleted = protocolSuppLogs.filter(sl => sl.completed).length;
-        const suppTotal = protocolSuppLogs.length;
-        rate = suppTotal > 0 ? Math.round((suppCompleted / suppTotal) * 100) : null;
-      }
-
       const daysActive = Math.max(0, differenceInCalendarDays(now, protocolStart));
       const endDate = protocol.end_date ? new Date(protocol.end_date) : null;
       const totalDays = endDate ? Math.max(1, differenceInCalendarDays(endDate, protocolStart)) : 90;
       const progressPct = Math.min(100, Math.round((daysActive / totalDays) * 100));
       const daysLeft = totalDays - daysActive;
 
-      return { protocol, rate, daysActive, totalDays, progressPct, daysLeft, hasPeptides, hasSupplements: !!hasSupplements };
+      return { protocol, rate, daysActive, totalDays, progressPct, daysLeft, hasPeptides };
     });
-  }, [activeProtocols, allInjections, supplementLogs]);
+  }, [activeProtocols, allInjections]);
 
   // Global streak across ALL protocol-scheduled injections
   const globalStreak = useMemo(() => {
