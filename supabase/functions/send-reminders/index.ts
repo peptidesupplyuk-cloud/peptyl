@@ -246,8 +246,9 @@ Deno.serve(async (req) => {
           // Send push notification via OneSignal
           let pushSent = false;
           if (onesignalApiKey) {
-            try {
+          try {
               const pushMessage = buildPushMessage(reminders, supplementReminders, window);
+              const totalCount = reminders.length + supplementReminders.length;
               const pushRes = await fetch("https://onesignal.com/api/v1/notifications", {
                 method: "POST",
                 headers: {
@@ -261,6 +262,22 @@ Deno.serve(async (req) => {
                   contents: { en: pushMessage.body },
                   url: "https://peptyl.co.uk/dashboard",
                   chrome_web_icon: "https://peptyl.co.uk/icon-192.png",
+                  chrome_web_badge: "https://peptyl.co.uk/favicon.png",
+                  priority: 10,
+                  ios_interruption_level: "time-sensitive",
+                  ios_relevance_score: 1.0,
+                  ios_badge_type: "SetTo",
+                  ios_badge_count: totalCount,
+                  android_channel_id: undefined,
+                  ttl: 3600,
+                  web_buttons: [
+                    { id: "log-dose", text: "✅ Log Doses", url: "https://peptyl.co.uk/dashboard" },
+                    { id: "snooze", text: "⏰ Remind Later", url: "https://peptyl.co.uk/dashboard?snooze=true" },
+                  ],
+                  android_group: "peptyl_dose_reminders",
+                  thread_id: "peptyl_dose_reminders",
+                  summary_arg: `${totalCount} items due`,
+                  collapse_id: `dose_${window}_${today}`,
                 }),
               });
               const pushData = await pushRes.json();
