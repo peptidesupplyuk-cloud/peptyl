@@ -628,7 +628,7 @@ const Dashboard = () => {
               {/* ═══ ZONE A — Hero Status ═══ */}
               {hasActiveProtocol ? (
                 <div className="space-y-3">
-                  {perProtocolStats.map(({ protocol, rate, daysActive, totalDays, progressPct, daysLeft }) => (
+                  {perProtocolStats.map(({ protocol, rate, daysActive, totalDays, progressPct, daysLeft, hasPeptides }) => (
                     <div key={protocol.id} className="bg-card rounded-2xl border border-border overflow-hidden">
                       {/* Progress bar across top */}
                       <div className="h-1 bg-muted">
