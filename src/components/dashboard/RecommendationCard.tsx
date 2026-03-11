@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { AlertTriangle, Play, Clock, FlaskConical, Pill, Pencil, Check } from "lucide-react";
+import { AlertTriangle, Play, Clock, FlaskConical, Pill, Pencil, Check, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -165,7 +165,7 @@ const RecommendationCard = ({ recommendation: initialRec, onActivate, isActivati
             <Pill className="h-3 w-3" /> Suggested Supplements
           </p>
           {rec.supplements.map((s, i) => (
-            <div key={i} className="flex items-center justify-between text-sm bg-accent/30 rounded-lg px-3 py-2">
+            <div key={i} className="flex items-center justify-between text-sm bg-accent/30 rounded-lg px-3 py-2 group">
               <div>
                 <span className="font-medium text-foreground">{s.name}</span>
                 {(s as any).driven_by && (s as any).driven_by.length > 0 && (
@@ -174,7 +174,19 @@ const RecommendationCard = ({ recommendation: initialRec, onActivate, isActivati
                   </span>
                 )}
               </div>
-              <span className="text-muted-foreground text-xs">{s.dose} · {s.frequency}</span>
+              <div className="flex items-center gap-2">
+                <span className="text-muted-foreground text-xs">{s.dose} · {s.frequency}</span>
+                <button
+                  onClick={() => setRec((prev) => ({
+                    ...prev,
+                    supplements: prev.supplements?.filter((_, idx) => idx !== i),
+                  }))}
+                  className="p-0.5 rounded hover:bg-destructive/10 transition-colors opacity-0 group-hover:opacity-100"
+                  title="Remove supplement"
+                >
+                  <X className="h-3.5 w-3.5 text-muted-foreground hover:text-destructive" />
+                </button>
+              </div>
             </div>
           ))}
         </div>
