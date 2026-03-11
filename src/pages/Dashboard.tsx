@@ -401,21 +401,36 @@ const Dashboard = () => {
           : undefined,
       });
 
-      // Generate today's dose logs for the new protocol
-      for (const p of rec.peptides) {
-        const timing = p.timing.includes("AM") ? "09:00" : "21:00";
-        await logInjection.mutateAsync({
-          peptide_name: p.name,
-          dose_mcg: p.dose_mcg,
-          scheduled_time: `${startDate}T${timing}:00.000Z`,
-        });
+      // Generate today's dose logs — use upsert to avoid duplicate key errors
+      if (rec.peptides.length > 0) {
+        const { data: protocolPeptides } = await supabase
+          .from("protocol_peptides")
+          .select("id, peptide_name, timing")
+          .eq("protocol_id", protocol.id);
 
-        if (p.timing === "AM+PM") {
-          await logInjection.mutateAsync({
-            peptide_name: p.name,
-            dose_mcg: p.dose_mcg,
-            scheduled_time: `${startDate}T21:00:00.000Z`,
-          });
+        for (const pp of protocolPeptides ?? []) {
+          const timing = (pp.timing || "AM").toUpperCase();
+          const timings: string[] = [];
+          if (timing.includes("AM")) timings.push("09:00");
+          if (timing.includes("PM") || timing === "AM+PM") timings.push("21:00");
+          if (timings.length === 0) timings.push("09:00");
+
+          const matchingRec = rec.peptides.find((p) => p.name === pp.peptide_name);
+          if (!matchingRec) continue;
+
+          for (const t of timings) {
+            await supabase.from("injection_logs").upsert(
+              {
+                user_id: user!.id,
+                peptide_name: pp.peptide_name,
+                dose_mcg: matchingRec.dose_mcg,
+                scheduled_time: `${startDate}T${t}:00.000Z`,
+                protocol_peptide_id: pp.id,
+                status: "scheduled",
+              },
+              { onConflict: "user_id,peptide_name,scheduled_time", ignoreDuplicates: true }
+            );
+          }
         }
       }
 
