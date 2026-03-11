@@ -214,57 +214,59 @@ const Dashboard = () => {
   // Hero status stats
   const { data: allInjections = [] } = useAllInjections();
   const { data: todayInjections = [] } = useTodayInjections();
-  const activeProtocol = protocols.find((p) => p.status === "active");
-  const hasActiveProtocol = !!activeProtocol;
+  const activeProtocols = protocols.filter((p) => p.status === "active");
+  const hasActiveProtocol = activeProtocols.length > 0;
 
-  const heroStats = useMemo(() => {
-    if (!hasActiveProtocol || allInjections.length === 0) return { rate: 0, streak: 0 };
+  // Per-protocol stats for hero zone
+  const perProtocolStats = useMemo(() => {
+    return activeProtocols.map((protocol) => {
+      const pepIds = new Set(protocol.peptides.map((pp) => pp.id));
+      const protocolStart = startOfDay(new Date(protocol.start_date));
+      const now = new Date();
 
-    const protocolStart = activeProtocol?.start_date
-      ? startOfDay(new Date(activeProtocol.start_date))
-      : null;
-    // Only count protocol-scheduled injections (has protocol_peptide_id), not ad-hoc extras
-    const protocolInjections = (protocolStart
-      ? allInjections.filter((i) => new Date(i.scheduled_time) >= protocolStart)
-      : allInjections
-    ).filter((i) => !!i.protocol_peptide_id);
+      // Only this protocol's injection logs (by protocol_peptide_id)
+      const protocolInjections = allInjections.filter(
+        (i) => i.protocol_peptide_id && pepIds.has(i.protocol_peptide_id)
+      );
 
+      const completed = protocolInjections.filter((i) => i.status === "completed").length;
+      const skipped = protocolInjections.filter((i) => i.status === "skipped").length;
+      const missed = protocolInjections.filter((i) =>
+        i.status === "scheduled" && new Date(i.scheduled_time) < now
+      ).length;
+      const total = completed + skipped + missed;
+      const rate = total > 0 ? Math.round((completed / total) * 100) : 0;
+
+      const daysActive = Math.max(0, differenceInCalendarDays(now, protocolStart));
+      const endDate = protocol.end_date ? new Date(protocol.end_date) : null;
+      const totalDays = endDate ? Math.max(1, differenceInCalendarDays(endDate, protocolStart)) : 90;
+      const progressPct = Math.min(100, Math.round((daysActive / totalDays) * 100));
+      const daysLeft = totalDays - daysActive;
+
+      return { protocol, rate, daysActive, totalDays, progressPct, daysLeft };
+    });
+  }, [activeProtocols, allInjections]);
+
+  // Global streak across ALL protocol-scheduled injections
+  const globalStreak = useMemo(() => {
+    if (!hasActiveProtocol || allInjections.length === 0) return 0;
+    const protocolInjections = allInjections.filter((i) => !!i.protocol_peptide_id);
     const now = new Date();
-    const completed = protocolInjections.filter((i) => i.status === "completed").length;
-    const skipped = protocolInjections.filter((i) => i.status === "skipped").length;
-    const missed = protocolInjections.filter((i) =>
-      i.status === "scheduled" && new Date(i.scheduled_time) < now
-    ).length;
-    const total = completed + skipped + missed;
-    const rate = total > 0 ? Math.round((completed / total) * 100) : 0;
-
-    let streak = 0;
     const today = startOfDay(now);
+    let streak = 0;
     for (let d = 0; d < 365; d++) {
       const day = subDays(today, d);
-      if (protocolStart && day < protocolStart) break;
-      // Only consider protocol-scheduled injections whose scheduled time has passed
       const dayInj = protocolInjections.filter((i) => {
         const st = new Date(i.scheduled_time);
         return isSameDay(st, day) && st <= now;
       });
-      if (dayInj.length === 0) continue; // Off-day (EOD/weekly) — don't break streak
+      if (dayInj.length === 0) continue; // Off-day — don't break streak
       if (dayInj.every((i) => i.status === "completed")) streak++;
       else break;
     }
-    return { rate, streak };
-  }, [allInjections, hasActiveProtocol, activeProtocol?.start_date]);
+    return streak;
+  }, [allInjections, hasActiveProtocol]);
 
-  const protocolStartDate = activeProtocol?.start_date;
-  const protocolEndDate = activeProtocol?.end_date;
-  const daysActive = protocolStartDate
-    ? Math.max(0, differenceInCalendarDays(new Date(), new Date(protocolStartDate)))
-    : 0;
-  const totalDays = protocolStartDate && protocolEndDate
-    ? Math.max(1, differenceInCalendarDays(new Date(protocolEndDate), new Date(protocolStartDate)))
-    : 90;
-  const progressPct = Math.min(100, Math.round((daysActive / totalDays) * 100));
-  const daysLeft = totalDays - daysActive;
   const todayScheduled = todayInjections.filter((i) => i.status === "scheduled").length;
   const todayCompleted = todayInjections.filter((i) => i.status === "completed").length;
 
@@ -607,52 +609,60 @@ const Dashboard = () => {
 
               {/* ═══ ZONE A — Hero Status ═══ */}
               {hasActiveProtocol ? (
-                <div className="bg-card rounded-2xl border border-border overflow-hidden">
-                  {/* Progress bar across top */}
-                  <div className="h-1 bg-muted">
-                    <div className="h-1 bg-primary transition-all duration-500" style={{ width: `${progressPct}%` }} />
-                  </div>
-
-                  <div className="p-4 sm:p-5 space-y-3">
-                    {/* Top row: protocol name + day badge */}
-                    <div className="flex items-center justify-between gap-3">
-                      <div className="min-w-0">
-                        <p className="text-sm font-heading font-semibold text-foreground truncate">{activeProtocol.name}</p>
-                        <p className="text-[11px] text-muted-foreground">{daysLeft > 0 ? `${daysLeft} days remaining` : "Completing today"}</p>
+                <div className="space-y-3">
+                  {perProtocolStats.map(({ protocol, rate, daysActive, totalDays, progressPct, daysLeft }) => (
+                    <div key={protocol.id} className="bg-card rounded-2xl border border-border overflow-hidden">
+                      {/* Progress bar across top */}
+                      <div className="h-1 bg-muted">
+                        <div className="h-1 bg-primary transition-all duration-500" style={{ width: `${progressPct}%` }} />
                       </div>
-                      <div className="shrink-0 bg-primary/10 rounded-xl px-3 py-1.5 text-center">
-                        <p className="text-lg font-heading font-bold text-primary leading-none">{daysActive}</p>
-                        <p className="text-[9px] text-muted-foreground mt-0.5">of {totalDays}</p>
+
+                      <div className="p-4 sm:p-5 space-y-3">
+                        {/* Top row: protocol name + day badge */}
+                        <div className="flex items-center justify-between gap-3">
+                          <div className="min-w-0">
+                            <p className="text-sm font-heading font-semibold text-foreground truncate">{protocol.name}</p>
+                            <p className="text-[11px] text-muted-foreground">{daysLeft > 0 ? `${daysLeft} days remaining` : "Completing today"}</p>
+                          </div>
+                          <div className="shrink-0 bg-primary/10 rounded-xl px-3 py-1.5 text-center">
+                            <p className="text-lg font-heading font-bold text-primary leading-none">{daysActive}</p>
+                            <p className="text-[9px] text-muted-foreground mt-0.5">of {totalDays}</p>
+                          </div>
+                        </div>
+
+                        {/* Stat pills row */}
+                        <div className="flex items-center gap-2 flex-wrap">
+                          <span className="inline-flex items-center gap-1.5 text-xs font-medium bg-muted/60 rounded-full px-2.5 py-1 text-foreground">
+                            {rate}% adherence
+                          </span>
+                        </div>
                       </div>
                     </div>
+                  ))}
 
-                    {/* Stat pills row */}
-                    <div className="flex items-center gap-2 flex-wrap">
-                      <span className="inline-flex items-center gap-1.5 text-xs font-medium bg-muted/60 rounded-full px-2.5 py-1 text-foreground">
-                        {heroStats.rate}% adherence
+                  {/* Global streak + today status (shared across protocols) */}
+                  <div className="flex items-center gap-2 flex-wrap px-1">
+                    {globalStreak > 0 && (
+                      <span className={`inline-flex items-center gap-1 text-xs font-medium rounded-full px-2.5 py-1 ${
+                        globalStreak > 7 ? "bg-green-500/10 text-green-500" : "bg-amber-500/10 text-amber-400"
+                      }`}>
+                        <Flame className="h-3 w-3" />
+                        {globalStreak} day streak
                       </span>
-                      {heroStats.streak > 0 && (
-                        <span className={`inline-flex items-center gap-1 text-xs font-medium rounded-full px-2.5 py-1 ${
-                          heroStats.streak > 7 ? "bg-green-500/10 text-green-500" : "bg-amber-500/10 text-amber-400"
-                        }`}>
-                          <Flame className="h-3 w-3" />
-                          {heroStats.streak} day streak
-                        </span>
-                      )}
-                      {todayRemaining > 0 ? (
-                        <span className="inline-flex items-center gap-1 text-xs font-medium bg-primary/10 text-primary rounded-full px-2.5 py-1">
-                          {todayRemaining} left today
-                        </span>
-                      ) : (
-                        <span className="inline-flex items-center gap-1 text-xs font-medium bg-green-500/10 text-green-500 rounded-full px-2.5 py-1">
-                          ✓ Today complete
-                        </span>
-                      )}
-                    </div>
-
-                    {/* Wearable Summary */}
-                    <WearableSummary selectedDate={selectedDate} />
+                    )}
+                    {todayRemaining > 0 ? (
+                      <span className="inline-flex items-center gap-1 text-xs font-medium bg-primary/10 text-primary rounded-full px-2.5 py-1">
+                        {todayRemaining} left today
+                      </span>
+                    ) : (
+                      <span className="inline-flex items-center gap-1 text-xs font-medium bg-green-500/10 text-green-500 rounded-full px-2.5 py-1">
+                        ✓ Today complete
+                      </span>
+                    )}
                   </div>
+
+                  {/* Wearable Summary */}
+                  <WearableSummary selectedDate={selectedDate} />
                 </div>
               ) : (
                 <div className="bg-card rounded-2xl border border-border p-6 text-center space-y-3">

@@ -16,7 +16,7 @@ const AdherenceSummary = ({ onNavigate }: { onNavigate?: () => void }) => {
     const now = new Date();
     const completed = protocolInj.filter((i) => i.status === "completed").length;
     const skipped = protocolInj.filter((i) => i.status === "skipped").length;
-    const missed = protocolInj.filter((i) => i.status !== "scheduled" ? false : new Date(i.scheduled_time) < now).length;
+    const missed = protocolInj.filter((i) => i.status === "scheduled" && new Date(i.scheduled_time) < now).length;
     const total = completed + skipped + missed;
     const rate = total > 0 ? Math.round((completed / total) * 100) : 0;
 
@@ -41,7 +41,7 @@ const AdherenceSummary = ({ onNavigate }: { onNavigate?: () => void }) => {
 
   const tiles = [
     { icon: <CheckCircle2 className="h-3.5 w-3.5 text-green-500" />, label: "Completed", value: stats.completed },
-    { icon: <XCircle className="h-3.5 w-3.5 text-red-500" />, label: "Missed", value: stats.missed },
+    { icon: <XCircle className="h-3.5 w-3.5 text-destructive" />, label: "Missed", value: stats.missed },
     { icon: <SkipForward className="h-3.5 w-3.5 text-muted-foreground" />, label: "Skipped", value: stats.skipped },
     { icon: <TrendingUp className="h-3.5 w-3.5 text-primary" />, label: "Adherence", value: `${stats.rate}%` },
   ];
