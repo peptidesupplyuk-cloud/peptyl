@@ -184,4 +184,20 @@ export const blogPosts: BlogPost[] = [
     readTime: "12 min read",
     date: "February 2026",
   },
+  {
+    slug: "mots-c-mitochondrial-peptide",
+    title: "MOTS-c: The Mitochondrial Peptide Rewriting the Rules on Ageing and Metabolism",
+    category: "Deep Dive",
+    excerpt: "MOTS-c is a mitochondrial-derived peptide that activates AMPK, mimics exercise at the cellular level, and declines with age. Here's why longevity researchers are paying attention.",
+    readTime: "9 min read",
+    date: "March 2026",
+  },
+  {
+    slug: "ss31-elamipretide-mitochondrial-ageing",
+    title: "SS-31 (Elamipretide): The Mitochondrial Peptide Targeting the Root of Cellular Ageing",
+    category: "Deep Dive",
+    excerpt: "SS-31 targets cardiolipin on the inner mitochondrial membrane to restore electron transport efficiency. Preclinical data shows reversal of age-related organ decline.",
+    readTime: "10 min read",
+    date: "March 2026",
+  },
 ];
