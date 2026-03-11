@@ -246,8 +246,9 @@ Deno.serve(async (req) => {
           // Send push notification via OneSignal
           let pushSent = false;
           if (onesignalApiKey) {
-            try {
+          try {
               const pushMessage = buildPushMessage(reminders, supplementReminders, window);
+              const totalCount = reminders.length + supplementReminders.length;
               const pushRes = await fetch("https://onesignal.com/api/v1/notifications", {
                 method: "POST",
                 headers: {
@@ -261,6 +262,22 @@ Deno.serve(async (req) => {
                   contents: { en: pushMessage.body },
                   url: "https://peptyl.co.uk/dashboard",
                   chrome_web_icon: "https://peptyl.co.uk/icon-192.png",
+                  chrome_web_badge: "https://peptyl.co.uk/favicon.png",
+                  priority: 10,
+                  ios_interruption_level: "time-sensitive",
+                  ios_relevance_score: 1.0,
+                  ios_badge_type: "SetTo",
+                  ios_badge_count: totalCount,
+                  android_channel_id: undefined,
+                  ttl: 3600,
+                  web_buttons: [
+                    { id: "log-dose", text: "✅ Log Doses", url: "https://peptyl.co.uk/dashboard" },
+                    { id: "snooze", text: "⏰ Remind Later", url: "https://peptyl.co.uk/dashboard?snooze=true" },
+                  ],
+                  android_group: "peptyl_dose_reminders",
+                  thread_id: "peptyl_dose_reminders",
+                  summary_arg: `${totalCount} items due`,
+                  collapse_id: `dose_${window}_${today}`,
                 }),
               });
               const pushData = await pushRes.json();
@@ -321,6 +338,7 @@ Deno.serve(async (req) => {
 
         if (onesignalApiKey) {
           try {
+            const retestUrl = `https://peptyl.co.uk/dashboard?tab=bloodwork&retest=true&protocolId=${np.id}`;
             const pushRes = await fetch("https://onesignal.com/api/v1/notifications", {
               method: "POST",
               headers: {
@@ -330,10 +348,19 @@ Deno.serve(async (req) => {
               body: JSON.stringify({
                 app_id: onesignalAppId,
                 include_external_user_ids: [np.user_id],
-                headings: { en: "Time to retest your bloods" },
-                contents: { en: `${np.name} — 10 weeks in. Book a test to see your results.` },
-                url: `https://peptyl.co.uk/dashboard?tab=bloodwork&retest=true&protocolId=${np.id}`,
+                headings: { en: "🔬 Time to retest your bloods" },
+                contents: { en: `${np.name} — 10 weeks in. Book a follow-up test to see your results.` },
+                url: retestUrl,
                 chrome_web_icon: "https://peptyl.co.uk/icon-192.png",
+                chrome_web_badge: "https://peptyl.co.uk/favicon.png",
+                priority: 10,
+                ios_interruption_level: "time-sensitive",
+                ios_relevance_score: 0.9,
+                ttl: 86400,
+                web_buttons: [
+                  { id: "book-test", text: "📊 Book Retest", url: retestUrl },
+                ],
+                collapse_id: `retest_${np.id}`,
               }),
             });
             const pushData = await pushRes.json();
@@ -474,10 +501,21 @@ Deno.serve(async (req) => {
               body: JSON.stringify({
                 app_id: onesignalAppId,
                 include_external_user_ids: [outcome.user_id],
-                headings: { en: "Your results are ready 🧬" },
+                headings: { en: "🧬 Your results are ready" },
                 contents: { en: pushBody },
                 url: reportUrl,
                 chrome_web_icon: "https://peptyl.co.uk/icon-192.png",
+                chrome_web_badge: "https://peptyl.co.uk/favicon.png",
+                priority: 10,
+                ios_interruption_level: "time-sensitive",
+                ios_relevance_score: 1.0,
+                ios_badge_type: "Increase",
+                ios_badge_count: 1,
+                ttl: 86400,
+                web_buttons: [
+                  { id: "view-results", text: "📊 View Results", url: reportUrl },
+                ],
+                collapse_id: `results_${outcome.id}`,
               }),
             });
             const pushData = await pushRes.json();
