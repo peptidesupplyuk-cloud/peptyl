@@ -181,10 +181,31 @@ export function useTodayInjections() {
           .select();
         if (insertErr) throw insertErr;
 
+        // Link any existing unlinked logs for today to their protocol peptides
+        for (const entry of logsToInsert) {
+          if (entry.protocol_peptide_id) {
+            await supabase
+              .from("injection_logs")
+              .update({ protocol_peptide_id: entry.protocol_peptide_id })
+              .eq("user_id", user!.id)
+              .eq("peptide_name", entry.peptide_name)
+              .eq("scheduled_time", entry.scheduled_time)
+              .is("protocol_peptide_id", null);
+          }
+        }
+
         // Backfill past days too
         backfillMissingDays(user!.id).catch(() => {});
 
-        return (inserted ?? []) as InjectionLog[];
+        // Re-fetch to get updated data
+        const { data: final } = await supabase
+          .from("injection_logs")
+          .select("*")
+          .gte("scheduled_time", `${today}T00:00:00.000Z`)
+          .lte("scheduled_time", `${today}T23:59:59.999Z`)
+          .order("scheduled_time", { ascending: true });
+
+        return (final ?? inserted ?? []) as InjectionLog[];
       } finally {
         generatingForDate = null;
       }
