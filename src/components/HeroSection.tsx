@@ -10,7 +10,7 @@ import OnboardingModal from "@/components/OnboardingModal";
 import ComingSoonCards from "@/components/ComingSoonCards";
 
 const TEASER_PHRASES = [
-  "Stop guessing your peptides.",
+  "Stop guessing your peptides & supplements.",
   "Never miss a dose again.",
   "See what actually works.",
 ];
