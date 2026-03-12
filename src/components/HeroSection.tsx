@@ -9,10 +9,32 @@ import heroBg from "@/assets/hero-bg.jpg";
 import OnboardingModal from "@/components/OnboardingModal";
 import ComingSoonCards from "@/components/ComingSoonCards";
 
+const TEASER_PHRASES = [
+  "Stop guessing your peptides.",
+  "Never miss a dose again.",
+  "See what actually works.",
+];
+
+const PHASE_DURATION = 2200; // ms per teaser phrase
+
 const HeroSection = () => {
   const [onboardingOpen, setOnboardingOpen] = useState(false);
   const [installOpen, setInstallOpen] = useState(false);
+  const [phraseIndex, setPhraseIndex] = useState(0);
+  const [settled, setSettled] = useState(false);
   const { t } = useTranslation();
+
+  useEffect(() => {
+    if (settled) return;
+    const timer = setTimeout(() => {
+      if (phraseIndex < TEASER_PHRASES.length - 1) {
+        setPhraseIndex((i) => i + 1);
+      } else {
+        setSettled(true);
+      }
+    }, PHASE_DURATION);
+    return () => clearTimeout(timer);
+  }, [phraseIndex, settled]);
 
   return (
   <>
