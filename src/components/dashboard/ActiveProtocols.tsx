@@ -335,13 +335,13 @@ const ActiveProtocols = () => {
         </div>
       )}
 
-      {/* Delete Confirmation Dialog */}
+      {/* Delete Confirmation Dialog — now archives instead of hard-deleting */}
       <AlertDialog open={!!deleteTarget} onOpenChange={(open) => !open && setDeleteTarget(null)}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Delete Protocol</AlertDialogTitle>
+            <AlertDialogTitle>Archive Protocol</AlertDialogTitle>
             <AlertDialogDescription>
-              Are you sure you want to delete <strong>{deleteTarget?.name}</strong>? This will permanently remove the protocol and all its peptide entries. This action cannot be undone.
+              Are you sure you want to archive <strong>{deleteTarget?.name}</strong>? Your history, logged doses, and any scorecards will be preserved in Previous Plans.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
@@ -350,19 +350,19 @@ const ActiveProtocols = () => {
               className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
               onClick={() => {
                 if (deleteTarget) {
-                  deleteProtocol.mutate(deleteTarget.id, {
+                  updateStatus.mutate({ id: deleteTarget.id, status: "archived" }, {
                     onSuccess: () => {
-                      toast({ title: "Protocol deleted", description: `${deleteTarget.name} has been removed.` });
+                      toast({ title: "Protocol archived", description: `${deleteTarget.name} has been moved to Previous Plans.` });
                       setDeleteTarget(null);
                     },
                     onError: (err: any) => {
-                      toast({ title: "Error", description: err?.message || "Failed to delete.", variant: "destructive" });
+                      toast({ title: "Error", description: err?.message || "Failed to archive.", variant: "destructive" });
                     },
                   });
                 }
               }}
             >
-              Delete
+              Archive
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
