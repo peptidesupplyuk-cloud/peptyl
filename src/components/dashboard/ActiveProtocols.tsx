@@ -439,6 +439,15 @@ const ActiveProtocols = () => {
           )}
         </DialogContent>
       </Dialog>
+
+      {/* Adjust Protocol Dialog */}
+      {adjustTarget && (
+        <AdjustProtocolDialog
+          protocol={adjustTarget}
+          open={!!adjustTarget}
+          onOpenChange={(open) => !open && setAdjustTarget(null)}
+        />
+      )}
     </div>
   );
 };

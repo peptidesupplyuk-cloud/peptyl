@@ -12,6 +12,7 @@ import TodaysPlan from "@/components/dashboard/TodaysPlan";
 import BiomarkerSummary from "@/components/dashboard/BiomarkerSummary";
 import BiomarkerTrendChart from "@/components/dashboard/BiomarkerTrendChart";
 import ActiveProtocols from "@/components/dashboard/ActiveProtocols";
+import PreviousPlans from "@/components/dashboard/PreviousPlans";
 import CreateProtocolForm from "@/components/dashboard/CreateProtocolForm";
 import ProfileBiometrics from "@/components/dashboard/ProfileBiometrics";
 import WhoopSection from "@/components/dashboard/WhoopSection";
