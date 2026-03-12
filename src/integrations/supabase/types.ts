@@ -1459,6 +1459,44 @@ export type Database = {
         }
         Relationships: []
       }
+      protocol_change_log: {
+        Row: {
+          change_detail: Json
+          change_type: string
+          created_at: string
+          day_number: number | null
+          id: string
+          protocol_id: string
+          user_id: string
+        }
+        Insert: {
+          change_detail?: Json
+          change_type: string
+          created_at?: string
+          day_number?: number | null
+          id?: string
+          protocol_id: string
+          user_id: string
+        }
+        Update: {
+          change_detail?: Json
+          change_type?: string
+          created_at?: string
+          day_number?: number | null
+          id?: string
+          protocol_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "protocol_change_log_protocol_id_fkey"
+            columns: ["protocol_id"]
+            isOneToOne: false
+            referencedRelation: "protocols"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       protocol_outcomes: {
         Row: {
           baseline_tested_at: string | null
@@ -1544,6 +1582,62 @@ export type Database = {
         Relationships: [
           {
             foreignKeyName: "protocol_peptides_protocol_id_fkey"
+            columns: ["protocol_id"]
+            isOneToOne: false
+            referencedRelation: "protocols"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      protocol_scorecards: {
+        Row: {
+          adherence_percentage: number | null
+          biomarker_improvements: Json | null
+          changes_made: Json | null
+          created_at: string
+          day_number: number
+          id: string
+          milestone: string
+          protocol_id: string
+          protocol_snapshot: Json | null
+          streak_best: number | null
+          summary_text: string | null
+          user_id: string
+          wearable_improvements: Json | null
+        }
+        Insert: {
+          adherence_percentage?: number | null
+          biomarker_improvements?: Json | null
+          changes_made?: Json | null
+          created_at?: string
+          day_number: number
+          id?: string
+          milestone: string
+          protocol_id: string
+          protocol_snapshot?: Json | null
+          streak_best?: number | null
+          summary_text?: string | null
+          user_id: string
+          wearable_improvements?: Json | null
+        }
+        Update: {
+          adherence_percentage?: number | null
+          biomarker_improvements?: Json | null
+          changes_made?: Json | null
+          created_at?: string
+          day_number?: number
+          id?: string
+          milestone?: string
+          protocol_id?: string
+          protocol_snapshot?: Json | null
+          streak_best?: number | null
+          summary_text?: string | null
+          user_id?: string
+          wearable_improvements?: Json | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "protocol_scorecards_protocol_id_fkey"
             columns: ["protocol_id"]
             isOneToOne: false
             referencedRelation: "protocols"
