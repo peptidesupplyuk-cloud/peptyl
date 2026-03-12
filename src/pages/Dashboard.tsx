@@ -903,6 +903,9 @@ const Dashboard = () => {
               {/* ACTIVE PLAN — always first */}
               <ActiveProtocols />
 
+              {/* PREVIOUS PLANS — completed/archived */}
+              <PreviousPlans />
+
               {/* Disclaimer */}
               <div className="bg-yellow-500/5 border border-yellow-500/20 rounded-2xl p-5 space-y-3">
                 <div className="flex items-start gap-2">
