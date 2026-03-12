@@ -63,9 +63,9 @@ const PreviousPlans = () => {
                 </div>
                 <div className="flex items-center gap-2 shrink-0">
                   <span className={`text-[10px] px-2 py-0.5 rounded-full font-medium ${
-                    p.status === "completed" ? "bg-green-500/10 text-green-500" : "bg-muted text-muted-foreground"
+                    isCompletedEarly ? "bg-primary/10 text-primary" : "bg-green-500/10 text-green-500"
                   }`}>
-                    {p.status === "completed" ? "Completed" : "Archived"}
+                    {isCompletedEarly ? "Completed early" : "Completed"}
                   </span>
                   {isExpanded ? <ChevronUp className="h-4 w-4 text-muted-foreground" /> : <ChevronDown className="h-4 w-4 text-muted-foreground" />}
                 </div>
