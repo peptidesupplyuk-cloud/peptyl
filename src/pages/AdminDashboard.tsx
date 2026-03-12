@@ -181,22 +181,40 @@ const AnalyticsTab = () => {
           </div>
         </div>
 
-        <div className="bg-card border border-border rounded-xl p-5">
+        <div className="bg-card border border-border rounded-xl p-5 col-span-full">
           <h3 className="font-heading font-semibold text-foreground text-sm mb-4">Recent Signups</h3>
-          <div className="space-y-2 max-h-[200px] overflow-y-auto">
-            <div className="flex items-center justify-between text-[10px] text-muted-foreground font-semibold uppercase tracking-wider pb-1 border-b border-border">
-              <span className="flex-1">Name</span>
-              <span className="flex-1">Email</span>
-              <span className="w-20 text-right">Date</span>
-            </div>
-            {(stats.recent_signups || []).map((u: any, i: number) => (
-              <div key={i} className="flex items-center justify-between text-xs border-b border-border/50 pb-1.5 last:border-0">
-                <span className="flex-1 text-foreground font-medium truncate">{u.username || "—"}</span>
-                <span className="flex-1 text-muted-foreground truncate">{u.email || "—"}</span>
-                <span className="w-20 text-right text-muted-foreground">{new Date(u.created_at).toLocaleDateString()}</span>
-              </div>
-            ))}
-            {(stats.recent_signups || []).length === 0 && <p className="text-xs text-muted-foreground">No signups yet.</p>}
+          <div className="overflow-x-auto max-h-[320px] overflow-y-auto">
+            <table className="w-full text-xs">
+              <thead className="sticky top-0 bg-card z-10">
+                <tr className="text-[10px] text-muted-foreground font-semibold uppercase tracking-wider border-b border-border">
+                  <th className="text-left py-1.5 pr-2">Name</th>
+                  <th className="text-left py-1.5 pr-2">Email</th>
+                  <th className="text-left py-1.5 pr-2">Country</th>
+                  <th className="text-left py-1.5 pr-2">Goal</th>
+                  <th className="text-left py-1.5 pr-2">Experience</th>
+                  <th className="text-left py-1.5 pr-2">Compounds</th>
+                  <th className="text-right py-1.5">Date</th>
+                </tr>
+              </thead>
+              <tbody>
+                {(stats.recent_signups || []).map((u: any, i: number) => {
+                  const name = [u.first_name, u.last_name].filter(Boolean).join(" ") || u.username || "—";
+                  const missingFields = [!u.first_name && "name", !u.country && "country", !u.research_goal && "goal"].filter(Boolean);
+                  return (
+                    <tr key={i} className={`border-b border-border/30 last:border-0 ${missingFields.length >= 2 ? "bg-destructive/5" : ""}`}>
+                      <td className="py-1.5 pr-2 text-foreground font-medium whitespace-nowrap">{name}</td>
+                      <td className="py-1.5 pr-2 text-muted-foreground">{u.email || "—"}</td>
+                      <td className="py-1.5 pr-2 text-muted-foreground">{u.country || <span className="text-destructive/70">—</span>}</td>
+                      <td className="py-1.5 pr-2 text-muted-foreground capitalize">{u.research_goal?.replace(/_/g, " ") || <span className="text-destructive/70">—</span>}</td>
+                      <td className="py-1.5 pr-2 text-muted-foreground capitalize">{u.experience_level?.replace(/_/g, " ") || "—"}</td>
+                      <td className="py-1.5 pr-2 text-muted-foreground">{u.current_compounds || "—"}</td>
+                      <td className="py-1.5 text-right text-muted-foreground whitespace-nowrap">{new Date(u.created_at).toLocaleDateString()}</td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+            {(stats.recent_signups || []).length === 0 && <p className="text-xs text-muted-foreground py-2">No signups yet.</p>}
           </div>
         </div>
       </div>
