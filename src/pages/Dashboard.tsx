@@ -992,7 +992,7 @@ const Dashboard = () => {
 
             {/* TRACKER TAB */}
             <TabsContent value="injections" className="space-y-6">
-              <TodaysPlan />
+              <TodaysPlan onActivate={() => setActiveTab("protocols")} />
               <ActiveProtocols />
             </TabsContent>
 
