@@ -1,6 +1,6 @@
 import { useMemo } from "react";
 import { useAllInjections } from "@/hooks/use-injections";
-import { startOfDay, subDays, isSameDay } from "date-fns";
+import { startOfWeek } from "date-fns";
 import { CheckCircle2, XCircle, SkipForward, TrendingUp } from "lucide-react";
 
 const AdherenceSummary = ({ onNavigate }: { onNavigate?: () => void }) => {
@@ -9,7 +9,6 @@ const AdherenceSummary = ({ onNavigate }: { onNavigate?: () => void }) => {
   const stats = useMemo(() => {
     if (injections.length === 0) return null;
 
-    // Only count protocol-scheduled injections (has protocol_peptide_id), not ad-hoc extras
     const protocolInj = injections.filter((i) => !!i.protocol_peptide_id);
     if (protocolInj.length === 0) return null;
 
@@ -20,24 +19,17 @@ const AdherenceSummary = ({ onNavigate }: { onNavigate?: () => void }) => {
     const total = completed + skipped + missed;
     const rate = total > 0 ? Math.round((completed / total) * 100) : 0;
 
-    let streak = 0;
-    const today = startOfDay(now);
-    for (let d = 0; d < 365; d++) {
-      const day = subDays(today, d);
-      // Only consider protocol-scheduled injections whose scheduled time has passed
-      const dayInj = protocolInj.filter((i) => {
-        const st = new Date(i.scheduled_time);
-        return isSameDay(st, day) && st <= now;
-      });
-      if (dayInj.length === 0) continue; // Off-day — don't break streak
-      if (dayInj.every((i) => i.status === "completed")) streak++;
-      else break;
-    }
+    const weekStart = startOfWeek(now, { weekStartsOn: 1 });
+    const weekEligible = protocolInj.filter((i) => {
+      const scheduledAt = new Date(i.scheduled_time);
+      return scheduledAt >= weekStart && scheduledAt <= now;
+    });
+    const weekCompleted = weekEligible.filter((i) => i.status === "completed").length;
 
-    return { completed, skipped, missed, rate, streak };
+    return { completed, skipped, missed, rate, weekCompleted, weekTotal: weekEligible.length };
   }, [injections]);
 
-  if (isLoading || !stats || (stats.completed + stats.missed + stats.skipped) === 0) return null;
+  if (isLoading || !stats || stats.completed + stats.missed + stats.skipped === 0) return null;
 
   const tiles = [
     { icon: <CheckCircle2 className="h-3.5 w-3.5 text-green-500" />, label: "Completed", value: stats.completed },
@@ -67,16 +59,10 @@ const AdherenceSummary = ({ onNavigate }: { onNavigate?: () => void }) => {
           </div>
         ))}
       </div>
-      {stats.streak > 0 && (
-        <div className="bg-card rounded-xl border border-border px-4 py-3 flex items-center gap-3">
-          <div className="h-9 w-9 rounded-lg bg-primary/10 flex items-center justify-center">
-            <span className="text-base">🔥</span>
-          </div>
-          <div>
-            <p className="text-lg font-heading font-bold text-foreground leading-tight">{stats.streak}</p>
-            <p className="text-[10px] text-muted-foreground">Day Streak</p>
-          </div>
-        </div>
+      {stats.weekTotal > 0 && (
+        <p className="text-xs text-muted-foreground px-1">
+          This week: <span className="text-foreground font-medium">{stats.weekCompleted}/{stats.weekTotal}</span> doses completed.
+        </p>
       )}
     </div>
   );
