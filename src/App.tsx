@@ -16,6 +16,7 @@ import GeoGate from "@/components/GeoGate";
 import Index from "./pages/Index";
 import Auth from "./pages/Auth";
 const ResetPassword = lazy(() => import("./pages/ResetPassword"));
+const CompleteProfile = lazy(() => import("./pages/CompleteProfile"));
 import Peptides from "./pages/Peptides";
 import Calculators from "./pages/Calculators";
 import Education from "./pages/Education";
