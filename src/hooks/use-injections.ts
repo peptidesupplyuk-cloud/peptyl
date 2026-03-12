@@ -391,32 +391,62 @@ export function useUpdateInjectionStatus() {
       side_effects?: string;
       injection_site?: string;
     }) => {
-      console.log("[useUpdateInjectionStatus] mutating", { id, status });
       const update: Record<string, unknown> = { status };
       if (status === "completed") update.completed_at = new Date().toISOString();
       if (notes !== undefined) update.notes = notes;
       if (side_effects !== undefined) update.side_effects = side_effects;
       if (injection_site !== undefined) update.injection_site = injection_site;
 
-      const { data, error, count } = await supabase
+      const { data, error } = await supabase
         .from("injection_logs")
         .update(update)
         .eq("id", id)
         .select();
-      console.log("[useUpdateInjectionStatus] result", { data, error, count });
       if (error) throw error;
-      if (!data || data.length === 0) {
-        console.warn("[useUpdateInjectionStatus] No rows updated for id:", id);
+      return data;
+    },
+    onMutate: async ({ id, status }) => {
+      // Cancel outgoing refetches so they don't overwrite our optimistic update
+      await qc.cancelQueries({ queryKey: ["injections_today"] });
+      await qc.cancelQueries({ queryKey: ["injections_date"] });
+
+      // Snapshot previous values for rollback
+      const prevToday = qc.getQueriesData<InjectionLog[]>({ queryKey: ["injections_today"] });
+      const prevDate = qc.getQueriesData<InjectionLog[]>({ queryKey: ["injections_date"] });
+
+      // Optimistically update all injection query caches
+      const updater = (old: InjectionLog[] | undefined) => {
+        if (!old) return old;
+        return old.map((inj) =>
+          inj.id === id
+            ? { ...inj, status, completed_at: status === "completed" ? new Date().toISOString() : inj.completed_at }
+            : inj
+        );
+      };
+
+      qc.setQueriesData<InjectionLog[]>({ queryKey: ["injections_today"] }, updater);
+      qc.setQueriesData<InjectionLog[]>({ queryKey: ["injections_date"] }, updater);
+
+      return { prevToday, prevDate };
+    },
+    onError: (_err, _vars, context) => {
+      // Rollback on error
+      if (context?.prevToday) {
+        for (const [key, data] of context.prevToday) {
+          qc.setQueryData(key, data);
+        }
+      }
+      if (context?.prevDate) {
+        for (const [key, data] of context.prevDate) {
+          qc.setQueryData(key, data);
+        }
       }
     },
-    onSuccess: () => {
-      console.log("[useUpdateInjectionStatus] success, invalidating queries");
+    onSettled: () => {
+      // Always refetch after mutation settles to ensure consistency
       qc.invalidateQueries({ queryKey: ["injections_today"] });
       qc.invalidateQueries({ queryKey: ["injections_all"] });
       qc.invalidateQueries({ queryKey: ["injections_date"] });
-    },
-    onError: (err) => {
-      console.error("[useUpdateInjectionStatus] error", err);
     },
   });
 }
