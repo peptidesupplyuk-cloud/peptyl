@@ -268,7 +268,7 @@ export function useGenerateScorecard() {
         milestone: params.milestone,
         day_number: params.dayNumber,
         adherence_percentage: adherence,
-        streak_best: bestStreak,
+        streak_best: null,
         biomarker_improvements: biomarkerImprovements as any,
         wearable_improvements: wearableImprovements as any,
         protocol_snapshot: snapshot as any,
