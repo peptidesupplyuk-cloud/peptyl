@@ -343,7 +343,7 @@ const TodaysPlan = ({ onActivate, slim = false, selectedDate }: TodaysPlanProps)
             {dnaStartDate && (
               <div className="space-y-1">
                 <div className="flex items-center justify-between text-[10px] text-muted-foreground">
-                  <span>{hasStarted ? `Day ${dna90DaysElapsed} of 90` : `Starts ${format(dnaStartDate, "d MMM")}`}</span>
+                  <span>{hasStarted ? `Day ${dna90DaysElapsed + 1} of 90` : `Starts ${format(dnaStartDate, "d MMM")}`}</span>
                   <span>{dna90EndDate ? format(dna90EndDate, "d MMM yyyy") : ""}</span>
                 </div>
                 <div className="w-full h-1.5 bg-muted rounded-full">
@@ -478,7 +478,7 @@ const TodaysPlan = ({ onActivate, slim = false, selectedDate }: TodaysPlanProps)
           >
             <div className="flex-1 min-w-0">
               <p className="font-heading font-semibold text-sm text-foreground">
-                Day {daysActive} of {totalDays}
+                Day {daysActive + 1} of {totalDays}
               </p>
               <div className="w-full h-1 bg-muted rounded-full mt-1.5">
                 <div
