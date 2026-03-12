@@ -478,7 +478,7 @@ const TodaysPlan = ({ onActivate, slim = false, selectedDate }: TodaysPlanProps)
           >
             <div className="flex-1 min-w-0">
               <p className="font-heading font-semibold text-sm text-foreground">
-                Day {daysActive} of {totalDays}
+                Day {daysActive + 1} of {totalDays}
               </p>
               <div className="w-full h-1 bg-muted rounded-full mt-1.5">
                 <div
