@@ -131,7 +131,7 @@ export function useGenerateScorecard() {
         .from("injection_logs")
         .select("id", { count: "exact", head: true })
         .eq("user_id", user.id)
-        .eq("status", "done")
+        .eq("status", "completed")
         .in("protocol_peptide_id", pepIds);
       const adherence = totalLogs && totalLogs > 0
         ? Math.round(((completedLogs ?? 0) / totalLogs) * 100)
