@@ -32,6 +32,7 @@ const ActiveProtocols = () => {
   const { data: protocols = [], isLoading } = useProtocols();
   const updateStatus = useUpdateProtocolStatus();
   const deleteProtocol = useDeleteProtocol();
+  const generateScorecard = useGenerateScorecard();
   const { toast } = useToast();
   const { user } = useAuth();
   const navigate = useNavigate();
@@ -40,6 +41,7 @@ const ActiveProtocols = () => {
   const [completeStep, setCompleteStep] = useState<1 | 2>(1);
   const [consentChecked, setConsentChecked] = useState(false);
   const [completing, setCompleting] = useState(false);
+  const [adjustTarget, setAdjustTarget] = useState<Protocol | null>(null);
   const active = protocols.filter((p) => p.status === "active");
   const paused = protocols.filter((p) => p.status === "paused");
   const completed = protocols.filter((p) => p.status === "completed");
