@@ -240,13 +240,14 @@ const Dashboard = () => {
         rate = total > 0 ? Math.round((completed / total) * 100) : null;
       }
 
-      const daysActive = Math.max(0, differenceInCalendarDays(now, protocolStart));
+      const daysElapsed = Math.max(0, differenceInCalendarDays(now, protocolStart));
       const endDate = protocol.end_date ? new Date(protocol.end_date) : null;
       const totalDays = endDate ? Math.max(1, differenceInCalendarDays(endDate, protocolStart)) : 90;
-      const progressPct = Math.min(100, Math.round((daysActive / totalDays) * 100));
-      const daysLeft = totalDays - daysActive;
+      const dayNumber = Math.min(totalDays, daysElapsed + 1);
+      const progressPct = Math.min(100, Math.round((dayNumber / totalDays) * 100));
+      const daysLeft = Math.max(0, totalDays - dayNumber);
 
-      return { protocol, rate, daysActive, totalDays, progressPct, daysLeft, hasPeptides };
+      return { protocol, rate, dayNumber, totalDays, progressPct, daysLeft, hasPeptides };
     });
   }, [activeProtocols, allInjections]);
 
