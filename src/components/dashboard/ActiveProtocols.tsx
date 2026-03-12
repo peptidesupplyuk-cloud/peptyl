@@ -1,9 +1,11 @@
 import { useState } from "react";
-import { Pause, Play, CheckCircle2, Clock, FlaskConical, Trash2, Pill, CheckCircle, Info } from "lucide-react";
+import { Pause, Play, CheckCircle2, Clock, FlaskConical, Trash2, Pill, CheckCircle, Info, Settings2 } from "lucide-react";
 import PeptideInfoTooltip from "./PeptideInfoTooltip";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { useProtocols, useUpdateProtocolStatus, useDeleteProtocol, type Protocol } from "@/hooks/use-protocols";
+import { useGenerateScorecard } from "@/hooks/use-protocol-history";
+import AdjustProtocolDialog from "./AdjustProtocolDialog";
 import { differenceInDays, subDays, format } from "date-fns";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
@@ -30,6 +32,7 @@ const ActiveProtocols = () => {
   const { data: protocols = [], isLoading } = useProtocols();
   const updateStatus = useUpdateProtocolStatus();
   const deleteProtocol = useDeleteProtocol();
+  const generateScorecard = useGenerateScorecard();
   const { toast } = useToast();
   const { user } = useAuth();
   const navigate = useNavigate();
@@ -38,6 +41,7 @@ const ActiveProtocols = () => {
   const [completeStep, setCompleteStep] = useState<1 | 2>(1);
   const [consentChecked, setConsentChecked] = useState(false);
   const [completing, setCompleting] = useState(false);
+  const [adjustTarget, setAdjustTarget] = useState<Protocol | null>(null);
   const active = protocols.filter((p) => p.status === "active");
   const paused = protocols.filter((p) => p.status === "paused");
   const completed = protocols.filter((p) => p.status === "completed");
@@ -174,10 +178,23 @@ const ActiveProtocols = () => {
         status: "in_progress",
       } as any);
 
+      // Generate scorecard on completion
+      const dayNum = Math.max(1, Math.round((new Date().getTime() - new Date(p.start_date).getTime()) / 86400000) + 1);
+      try {
+        await generateScorecard.mutateAsync({
+          protocolId: p.id,
+          milestone: dayNum >= 90 ? "completion" : "early_completion",
+          dayNumber: dayNum,
+        });
+      } catch (e) {
+        // Non-critical — scorecard generation failure shouldn't block completion
+        console.warn("Scorecard generation failed:", e);
+      }
+
       // Invalidate queries
       updateStatus.mutate({ id: p.id, status: "completed" });
 
-      toast({ title: "Protocol completed", description: `${p.name} has been marked as complete.` });
+      toast({ title: "Protocol completed", description: `${p.name} has been marked as complete. Your scorecard has been generated.` });
     } catch (err: any) {
       toast({ title: "Error completing protocol", description: err?.message || "Please try again.", variant: "destructive" });
     } finally {
@@ -263,9 +280,13 @@ const ActiveProtocols = () => {
           <div className="flex gap-1">
             {p.status === "active" && (
               <>
+                <Button size="sm" variant="outline" className="h-7 text-xs gap-1" onClick={() => setAdjustTarget(p)}>
+                  <Settings2 className="h-3 w-3" />
+                  Adjust
+                </Button>
                 <Button size="sm" variant="outline" className="h-7 text-xs gap-1" onClick={() => { setCompleteTarget(p); setCompleteStep(1); }}>
                   <CheckCircle2 className="h-3 w-3" />
-                  Complete Early
+                  Complete
                 </Button>
                 <Button size="sm" variant="ghost" className="h-7 text-xs" onClick={() => updateStatus.mutate({ id: p.id, status: "paused" })}>
                   <Pause className="h-3 w-3" />
@@ -314,13 +335,13 @@ const ActiveProtocols = () => {
         </div>
       )}
 
-      {/* Delete Confirmation Dialog */}
+      {/* Delete Confirmation Dialog — now archives instead of hard-deleting */}
       <AlertDialog open={!!deleteTarget} onOpenChange={(open) => !open && setDeleteTarget(null)}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Delete Protocol</AlertDialogTitle>
+            <AlertDialogTitle>Archive Protocol</AlertDialogTitle>
             <AlertDialogDescription>
-              Are you sure you want to delete <strong>{deleteTarget?.name}</strong>? This will permanently remove the protocol and all its peptide entries. This action cannot be undone.
+              Are you sure you want to archive <strong>{deleteTarget?.name}</strong>? Your history, logged doses, and any scorecards will be preserved in Previous Plans.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
@@ -329,19 +350,19 @@ const ActiveProtocols = () => {
               className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
               onClick={() => {
                 if (deleteTarget) {
-                  deleteProtocol.mutate(deleteTarget.id, {
+                  updateStatus.mutate({ id: deleteTarget.id, status: "archived" }, {
                     onSuccess: () => {
-                      toast({ title: "Protocol deleted", description: `${deleteTarget.name} has been removed.` });
+                      toast({ title: "Protocol archived", description: `${deleteTarget.name} has been moved to Previous Plans.` });
                       setDeleteTarget(null);
                     },
                     onError: (err: any) => {
-                      toast({ title: "Error", description: err?.message || "Failed to delete.", variant: "destructive" });
+                      toast({ title: "Error", description: err?.message || "Failed to archive.", variant: "destructive" });
                     },
                   });
                 }
               }}
             >
-              Delete
+              Archive
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
@@ -418,6 +439,15 @@ const ActiveProtocols = () => {
           )}
         </DialogContent>
       </Dialog>
+
+      {/* Adjust Protocol Dialog */}
+      {adjustTarget && (
+        <AdjustProtocolDialog
+          protocol={adjustTarget}
+          open={!!adjustTarget}
+          onOpenChange={(open) => !open && setAdjustTarget(null)}
+        />
+      )}
     </div>
   );
 };
