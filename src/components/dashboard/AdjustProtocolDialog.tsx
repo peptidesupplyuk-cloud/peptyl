@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Plus, FlaskConical, Pill } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -13,12 +13,62 @@ import { useAddPeptideToProtocol, useAddSupplementToProtocol } from "@/hooks/use
 import { useToast } from "@/hooks/use-toast";
 import { differenceInCalendarDays } from "date-fns";
 import type { Protocol } from "@/hooks/use-protocols";
+import { peptides as peptideDatabase } from "@/data/peptides";
+import { supplements as supplementDatabase } from "@/data/supplements";
 
 interface Props {
   protocol: Protocol;
   open: boolean;
   onOpenChange: (open: boolean) => void;
 }
+
+/* ─── Searchable autocomplete input ─── */
+const SearchInput = ({
+  value,
+  onChange,
+  options,
+  placeholder,
+}: {
+  value: string;
+  onChange: (v: string) => void;
+  options: string[];
+  placeholder: string;
+}) => {
+  const [query, setQuery] = useState(value);
+  const [open, setOpen] = useState(false);
+  const filtered = query.length > 0
+    ? options.filter((n) => n.toLowerCase().includes(query.toLowerCase())).slice(0, 8)
+    : [];
+
+  useEffect(() => { setQuery(value); }, [value]);
+
+  return (
+    <div className="relative">
+      <Input
+        value={query}
+        onChange={(e) => { setQuery(e.target.value); setOpen(true); }}
+        onFocus={() => setOpen(true)}
+        onBlur={() => setTimeout(() => setOpen(false), 150)}
+        placeholder={placeholder}
+        className="text-sm"
+      />
+      {open && filtered.length > 0 && (
+        <div className="absolute z-50 top-full left-0 right-0 bg-card border border-border rounded-lg shadow-lg mt-1 max-h-48 overflow-y-auto">
+          {filtered.map((name) => (
+            <button
+              key={name}
+              type="button"
+              className="w-full text-left px-3 py-2 text-xs hover:bg-muted transition-colors text-foreground"
+              onMouseDown={() => { onChange(name); setQuery(name); setOpen(false); }}
+            >
+              {name}
+            </button>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+};
 
 const AdjustProtocolDialog = ({ protocol, open, onOpenChange }: Props) => {
   const { toast } = useToast();
@@ -27,6 +77,9 @@ const AdjustProtocolDialog = ({ protocol, open, onOpenChange }: Props) => {
   const [mode, setMode] = useState<"peptide" | "supplement">("peptide");
 
   const dayNumber = Math.max(1, differenceInCalendarDays(new Date(), new Date(protocol.start_date)) + 1);
+
+  const peptideNames = peptideDatabase.map((p) => p.name);
+  const supplementNames = supplementDatabase.map((s) => s.name);
 
   // Peptide form
   const [pepName, setPepName] = useState("");
@@ -116,11 +169,11 @@ const AdjustProtocolDialog = ({ protocol, open, onOpenChange }: Props) => {
 
         {mode === "peptide" ? (
           <div className="space-y-3">
-            <Input
-              placeholder="Peptide name (e.g. BPC-157)"
+            <SearchInput
               value={pepName}
-              onChange={(e) => setPepName(e.target.value)}
-              className="text-sm"
+              onChange={setPepName}
+              options={peptideNames}
+              placeholder="Search peptide..."
             />
             <div className="grid grid-cols-2 gap-3">
               <div>
@@ -182,11 +235,11 @@ const AdjustProtocolDialog = ({ protocol, open, onOpenChange }: Props) => {
           </div>
         ) : (
           <div className="space-y-3">
-            <Input
-              placeholder="Supplement name (e.g. Magnesium Glycinate)"
+            <SearchInput
               value={suppName}
-              onChange={(e) => setSuppName(e.target.value)}
-              className="text-sm"
+              onChange={setSuppName}
+              options={supplementNames}
+              placeholder="Search supplement..."
             />
             <div className="grid grid-cols-2 gap-3">
               <div>
