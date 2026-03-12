@@ -250,7 +250,7 @@ const ActiveProtocols = () => {
 
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3 text-xs text-muted-foreground">
-            <span className="flex items-center gap-1"><Clock className="h-3 w-3" />{daysActive}d active</span>
+            <span className="flex items-center gap-1"><Clock className="h-3 w-3" />Day {daysActive + 1}</span>
             {progress !== null && (
               <div className="flex items-center gap-2">
                 <div className="w-20 h-1.5 bg-muted rounded-full overflow-hidden">
