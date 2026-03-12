@@ -1,9 +1,11 @@
 import { useState } from "react";
-import { Pause, Play, CheckCircle2, Clock, FlaskConical, Trash2, Pill, CheckCircle, Info } from "lucide-react";
+import { Pause, Play, CheckCircle2, Clock, FlaskConical, Trash2, Pill, CheckCircle, Info, Settings2 } from "lucide-react";
 import PeptideInfoTooltip from "./PeptideInfoTooltip";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { useProtocols, useUpdateProtocolStatus, useDeleteProtocol, type Protocol } from "@/hooks/use-protocols";
+import { useGenerateScorecard } from "@/hooks/use-protocol-history";
+import AdjustProtocolDialog from "./AdjustProtocolDialog";
 import { differenceInDays, subDays, format } from "date-fns";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
