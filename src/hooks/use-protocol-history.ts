@@ -137,33 +137,7 @@ export function useGenerateScorecard() {
         ? Math.round(((completedLogs ?? 0) / totalLogs) * 100)
         : null;
 
-      // 3. Best streak
-      const { data: injLogs } = await supabase
-        .from("injection_logs")
-        .select("scheduled_time, status")
-        .eq("user_id", user.id)
-        .in("protocol_peptide_id", pepIds)
-        .lte("scheduled_time", now.toISOString())
-        .order("scheduled_time", { ascending: true });
-
-      let bestStreak = 0;
-      let currentStreak = 0;
-      const dayMap = new Map<string, boolean>();
-      for (const log of injLogs ?? []) {
-        const day = format(new Date(log.scheduled_time), "yyyy-MM-dd");
-        if (!dayMap.has(day)) dayMap.set(day, true);
-        if (log.status !== "completed" && log.status !== "done") {
-          dayMap.set(day, false);
-        }
-      }
-      for (const [, allDone] of dayMap) {
-        if (allDone) {
-          currentStreak++;
-          bestStreak = Math.max(bestStreak, currentStreak);
-        } else {
-          currentStreak = 0;
-        }
-      }
+      // 3. Streak metrics removed: adherence is the primary consistency metric
 
       // 4. Wearable improvements
       const protocolStart = new Date(protocol.start_date);
