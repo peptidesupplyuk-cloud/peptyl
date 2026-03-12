@@ -280,9 +280,13 @@ const ActiveProtocols = () => {
           <div className="flex gap-1">
             {p.status === "active" && (
               <>
+                <Button size="sm" variant="outline" className="h-7 text-xs gap-1" onClick={() => setAdjustTarget(p)}>
+                  <Settings2 className="h-3 w-3" />
+                  Adjust
+                </Button>
                 <Button size="sm" variant="outline" className="h-7 text-xs gap-1" onClick={() => { setCompleteTarget(p); setCompleteStep(1); }}>
                   <CheckCircle2 className="h-3 w-3" />
-                  Complete Early
+                  Complete
                 </Button>
                 <Button size="sm" variant="ghost" className="h-7 text-xs" onClick={() => updateStatus.mutate({ id: p.id, status: "paused" })}>
                   <Pause className="h-3 w-3" />
