@@ -240,13 +240,14 @@ const Dashboard = () => {
         rate = total > 0 ? Math.round((completed / total) * 100) : null;
       }
 
-      const daysActive = Math.max(0, differenceInCalendarDays(now, protocolStart));
+      const daysElapsed = Math.max(0, differenceInCalendarDays(now, protocolStart));
       const endDate = protocol.end_date ? new Date(protocol.end_date) : null;
       const totalDays = endDate ? Math.max(1, differenceInCalendarDays(endDate, protocolStart)) : 90;
-      const progressPct = Math.min(100, Math.round((daysActive / totalDays) * 100));
-      const daysLeft = totalDays - daysActive;
+      const dayNumber = Math.min(totalDays, daysElapsed + 1);
+      const progressPct = Math.min(100, Math.round((dayNumber / totalDays) * 100));
+      const daysLeft = Math.max(0, totalDays - dayNumber);
 
-      return { protocol, rate, daysActive, totalDays, progressPct, daysLeft, hasPeptides };
+      return { protocol, rate, dayNumber, totalDays, progressPct, daysLeft, hasPeptides };
     });
   }, [activeProtocols, allInjections]);
 
@@ -628,7 +629,7 @@ const Dashboard = () => {
               {/* ═══ ZONE A — Hero Status ═══ */}
               {hasActiveProtocol ? (
                 <div className="space-y-3">
-                  {perProtocolStats.map(({ protocol, rate, daysActive, totalDays, progressPct, daysLeft, hasPeptides }) => (
+                  {perProtocolStats.map(({ protocol, rate, dayNumber, totalDays, progressPct, daysLeft, hasPeptides }) => (
                     <div key={protocol.id} className="bg-card rounded-2xl border border-border overflow-hidden">
                       {/* Progress bar across top */}
                       <div className="h-1 bg-muted">
@@ -643,7 +644,7 @@ const Dashboard = () => {
                             <p className="text-[11px] text-muted-foreground">{daysLeft > 0 ? `${daysLeft} days remaining` : "Completing today"}</p>
                           </div>
                           <div className="shrink-0 bg-primary/10 rounded-xl px-3 py-1.5 text-center">
-                            <p className="text-lg font-heading font-bold text-primary leading-none">{daysActive}</p>
+                            <p className="text-lg font-heading font-bold text-primary leading-none">{dayNumber}</p>
                             <p className="text-[9px] text-muted-foreground mt-0.5">of {totalDays}</p>
                           </div>
                         </div>
@@ -991,7 +992,7 @@ const Dashboard = () => {
 
             {/* TRACKER TAB */}
             <TabsContent value="injections" className="space-y-6">
-              <TodaysPlan />
+              <TodaysPlan onActivate={() => setActiveTab("protocols")} />
               <ActiveProtocols />
             </TabsContent>
 

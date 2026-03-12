@@ -56,7 +56,15 @@ const TodaysPlan = ({ onActivate, slim = false, selectedDate }: TodaysPlanProps)
   const isToday = format(effectiveDate, "yyyy-MM-dd") === format(new Date(), "yyyy-MM-dd");
   const isFutureDate = effectiveDate > new Date() && !isToday;
   const isPastDate = !isToday && !isFutureDate;
-  
+
+  const handleActivatePlan = () => {
+    if (onActivate) {
+      onActivate();
+      return;
+    }
+    navigate("/dashboard?tab=protocols");
+  };
+
   // Use date-aware hooks
   const { data: dateInjections = [], isLoading: dateLoading } = useDateInjections(effectiveDate);
   const { data: todayInjectionsDefault = [], isLoading: todayLoading } = useTodayInjections();
@@ -387,7 +395,7 @@ const TodaysPlan = ({ onActivate, slim = false, selectedDate }: TodaysPlanProps)
             </div>
           </div>
         )}
-        <Button className="w-full shadow-brand" onClick={onActivate}>
+        <Button className="w-full shadow-brand" onClick={handleActivatePlan}>
           Activate My Plan <ArrowRight className="h-4 w-4 ml-1" />
         </Button>
       </div>
@@ -556,7 +564,7 @@ const TodaysPlan = ({ onActivate, slim = false, selectedDate }: TodaysPlanProps)
             {dnaStartDate && (
               <div className="space-y-1">
                 <div className="flex items-center justify-between text-[10px] text-muted-foreground">
-                  <span>{hasStarted ? `Day ${dna90DaysElapsed} of 90` : `Starts ${format(dnaStartDate, "d MMM")}`}</span>
+                  <span>{hasStarted ? `Day ${dna90DaysElapsed + 1} of 90` : `Starts ${format(dnaStartDate, "d MMM")}`}</span>
                   <span>{dna90EndDate ? format(dna90EndDate, "d MMM yyyy") : ""}</span>
                 </div>
                 <div className="w-full h-1.5 bg-muted rounded-full">
