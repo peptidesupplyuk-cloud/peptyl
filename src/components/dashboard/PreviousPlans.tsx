@@ -53,7 +53,7 @@ const PreviousPlans = () => {
                     <div className="flex items-center gap-2 mt-0.5">
                       <span className="text-[10px] text-muted-foreground flex items-center gap-1">
                         <Calendar className="h-2.5 w-2.5" />
-                        {format(new Date(p.start_date), "MMM d")} — {p.end_date ? format(new Date(p.end_date), "MMM d, yyyy") : "ongoing"}
+                        {format(new Date(p.start_date), "MMM d")} — {format(closedAt, "MMM d, yyyy")}
                       </span>
                       <span className="text-[10px] text-muted-foreground">
                         {daysCompleted}/{totalDays} days
