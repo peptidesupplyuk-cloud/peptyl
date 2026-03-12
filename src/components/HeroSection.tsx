@@ -91,11 +91,34 @@ const HeroSection = () => {
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
       <div className="max-w-3xl">
 
-        <motion.h1 initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.8, delay: 0.1 }} className="text-4xl sm:text-5xl lg:text-7xl font-heading font-bold text-primary-foreground leading-[1.1] mb-6">
-          {t("hero.title1")}
-          <br />
-          <span className="text-gradient-teal">{t("hero.title2")}</span>
-        </motion.h1>
+        <div className="min-h-[4.5rem] sm:min-h-[5.5rem] lg:min-h-[8rem] mb-6">
+          <AnimatePresence mode="wait">
+            {!settled ? (
+              <motion.h1
+                key={phraseIndex}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -20 }}
+                transition={{ duration: 0.5 }}
+                className="text-4xl sm:text-5xl lg:text-7xl font-heading font-bold text-primary-foreground leading-[1.1]"
+              >
+                {TEASER_PHRASES[phraseIndex]}
+              </motion.h1>
+            ) : (
+              <motion.h1
+                key="final"
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.8 }}
+                className="text-4xl sm:text-5xl lg:text-7xl font-heading font-bold text-primary-foreground leading-[1.1]"
+              >
+                {t("hero.title1")}
+                <br />
+                <span className="text-gradient-teal">{t("hero.title2")}</span>
+              </motion.h1>
+            )}
+          </AnimatePresence>
+        </div>
 
         <motion.p initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.8, delay: 0.2 }} className="text-lg sm:text-xl text-primary-foreground/60 max-w-xl mb-10 leading-relaxed">
           {t("hero.subtitle")}
