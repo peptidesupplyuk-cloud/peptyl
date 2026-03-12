@@ -56,7 +56,15 @@ const TodaysPlan = ({ onActivate, slim = false, selectedDate }: TodaysPlanProps)
   const isToday = format(effectiveDate, "yyyy-MM-dd") === format(new Date(), "yyyy-MM-dd");
   const isFutureDate = effectiveDate > new Date() && !isToday;
   const isPastDate = !isToday && !isFutureDate;
-  
+
+  const handleActivatePlan = () => {
+    if (onActivate) {
+      onActivate();
+      return;
+    }
+    navigate("/dashboard?tab=protocols");
+  };
+
   // Use date-aware hooks
   const { data: dateInjections = [], isLoading: dateLoading } = useDateInjections(effectiveDate);
   const { data: todayInjectionsDefault = [], isLoading: todayLoading } = useTodayInjections();
