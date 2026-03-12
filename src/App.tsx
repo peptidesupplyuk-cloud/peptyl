@@ -16,6 +16,7 @@ import GeoGate from "@/components/GeoGate";
 import Index from "./pages/Index";
 import Auth from "./pages/Auth";
 const ResetPassword = lazy(() => import("./pages/ResetPassword"));
+const CompleteProfile = lazy(() => import("./pages/CompleteProfile"));
 import Peptides from "./pages/Peptides";
 import Calculators from "./pages/Calculators";
 import Education from "./pages/Education";
@@ -86,6 +87,7 @@ const App = () => (
               <Route path="/home" element={<Index />} />
               <Route path="/auth" element={<Auth />} />
               <Route path="/reset-password" element={<ResetPassword />} />
+              <Route path="/complete-profile" element={<ProtectedRoute><CompleteProfile /></ProtectedRoute>} />
               <Route path="/peptides" element={<Peptides />} />
               <Route path="/calculators" element={<ProtectedRoute><Calculators /></ProtectedRoute>} />
               <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
