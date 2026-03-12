@@ -54,7 +54,7 @@ Deno.serve(async (req) => {
       admin.from("contact_submissions").select("id, name, email, message, created_at").order("created_at", { ascending: false }).limit(50),
       admin.from("protocols").select("id, user_id, name, goal, status, created_at"),
       admin.from("bloodwork_panels").select("id, user_id, panel_type, test_date, created_at"),
-      admin.from("profiles").select("user_id, username, country, research_goal, created_at").order("created_at", { ascending: false }).limit(20),
+      admin.from("profiles").select("user_id, first_name, last_name, username, country, research_goal, experience_level, current_compounds, created_at").order("created_at", { ascending: false }).limit(30),
       admin.auth.admin.listUsers({ page: 1, perPage: 100 }),
       admin.from("journal_entries").select("id, user_id, content, peptides, summary, created_at").order("created_at", { ascending: false }),
     ]);
