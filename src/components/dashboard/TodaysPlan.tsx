@@ -561,7 +561,7 @@ const TodaysPlan = ({ onActivate, slim = false, selectedDate }: TodaysPlanProps)
               </Popover>
             </div>
             {/* Progress bar */}
-            {dnaStartDate && (
+            {dnaStartDate && !hasActiveProtocol && (
               <div className="space-y-1">
                 <div className="flex items-center justify-between text-[10px] text-muted-foreground">
                   <span>{hasStarted ? `Day ${dna90DaysElapsed + 1} of 90` : `Starts ${format(dnaStartDate, "d MMM")}`}</span>

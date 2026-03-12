@@ -29,15 +29,13 @@ const PreviousPlans = () => {
 
       <div className="space-y-3">
         {previousProtocols.map((p) => {
-          const daysActive = differenceInCalendarDays(
-            p.end_date ? new Date(p.end_date) : new Date(),
-            new Date(p.start_date)
+          const closedAt = p.end_date ? new Date(p.end_date) : new Date(p.updated_at);
+          const totalDays = Math.max(
+            1,
+            differenceInCalendarDays(closedAt, new Date(p.start_date)) + 1
           );
-          const endDate = p.end_date ? new Date(p.end_date) : null;
-          const totalDays = endDate
-            ? differenceInCalendarDays(endDate, new Date(p.start_date))
-            : 90;
-          const daysCompleted = Math.min(daysActive, totalDays);
+          const daysCompleted = totalDays;
+          const isCompletedEarly = p.status === "archived";
           const isExpanded = expandedId === p.id;
           const scorecards = allScorecards.filter((s) => s.protocol_id === p.id);
 
@@ -55,7 +53,7 @@ const PreviousPlans = () => {
                     <div className="flex items-center gap-2 mt-0.5">
                       <span className="text-[10px] text-muted-foreground flex items-center gap-1">
                         <Calendar className="h-2.5 w-2.5" />
-                        {format(new Date(p.start_date), "MMM d")} — {p.end_date ? format(new Date(p.end_date), "MMM d, yyyy") : "ongoing"}
+                        {format(new Date(p.start_date), "MMM d")} — {format(closedAt, "MMM d, yyyy")}
                       </span>
                       <span className="text-[10px] text-muted-foreground">
                         {daysCompleted}/{totalDays} days
@@ -65,9 +63,9 @@ const PreviousPlans = () => {
                 </div>
                 <div className="flex items-center gap-2 shrink-0">
                   <span className={`text-[10px] px-2 py-0.5 rounded-full font-medium ${
-                    p.status === "completed" ? "bg-green-500/10 text-green-500" : "bg-muted text-muted-foreground"
+                    isCompletedEarly ? "bg-primary/10 text-primary" : "bg-green-500/10 text-green-500"
                   }`}>
-                    {p.status === "completed" ? "Completed" : "Archived"}
+                    {isCompletedEarly ? "Completed early" : "Completed"}
                   </span>
                   {isExpanded ? <ChevronUp className="h-4 w-4 text-muted-foreground" /> : <ChevronDown className="h-4 w-4 text-muted-foreground" />}
                 </div>
@@ -107,6 +105,14 @@ const PreviousPlans = () => {
                   {/* Notes */}
                   {p.notes && (
                     <p className="text-[10px] text-muted-foreground italic">{p.notes}</p>
+                  )}
+
+                  {isCompletedEarly && (
+                    <div className="rounded-lg border border-border bg-card px-3 py-2">
+                      <p className="text-xs text-muted-foreground">
+                        Completed early. <a href="/dashboard?tab=protocols" className="text-primary hover:underline">Create a new protocol?</a>
+                      </p>
+                    </div>
                   )}
 
                   {/* Scorecards */}

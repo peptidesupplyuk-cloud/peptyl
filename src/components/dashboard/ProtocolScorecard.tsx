@@ -1,4 +1,4 @@
-import { Trophy, TrendingUp, TrendingDown, Flame, Activity, Heart, Brain, Calendar, ArrowUpRight, ArrowDownRight, Minus } from "lucide-react";
+import { Trophy, Activity, Heart, Calendar, ArrowUpRight, ArrowDownRight, Minus } from "lucide-react";
 import type { ProtocolScorecard as ScorecardType } from "@/hooks/use-protocol-history";
 
 interface Props {
@@ -6,21 +6,20 @@ interface Props {
 }
 
 const ProtocolScorecard = ({ scorecard }: Props) => {
-  const bioGains = scorecard.biomarker_improvements.filter((b: any) => b.delta_pct > 2);
-  const bioDeclines = scorecard.biomarker_improvements.filter((b: any) => b.delta_pct < -2);
   const wearableGains = scorecard.wearable_improvements.filter((w: any) => w.delta_pct > 0);
 
   const milestoneLabel = scorecard.milestone
     .replace("_day", "-day")
     .replace("completion", "Completion")
-    .replace("early_completion", "Early Completion")
+    .replace("early_completion", "Completed Early")
     .replace("30-day", "30-Day Milestone")
     .replace("60-day", "60-Day Milestone")
     .replace("90-day", "90-Day Milestone");
 
+  const statColumns = scorecard.adherence_percentage != null ? "grid-cols-2" : "grid-cols-1";
+
   return (
     <div className="bg-card rounded-2xl border border-border overflow-hidden">
-      {/* Header */}
       <div className="bg-primary/5 px-4 py-3 border-b border-border flex items-center justify-between">
         <div className="flex items-center gap-2">
           <Trophy className="h-4 w-4 text-primary" />
@@ -30,20 +29,11 @@ const ProtocolScorecard = ({ scorecard }: Props) => {
       </div>
 
       <div className="p-4 space-y-4">
-        {/* Key stats */}
-        <div className="grid grid-cols-3 gap-3">
+        <div className={`grid ${statColumns} gap-3`}>
           {scorecard.adherence_percentage != null && (
             <div className="text-center">
               <p className="text-lg font-bold text-foreground">{scorecard.adherence_percentage}%</p>
               <p className="text-[10px] text-muted-foreground">Adherence</p>
-            </div>
-          )}
-          {scorecard.streak_best != null && scorecard.streak_best > 0 && (
-            <div className="text-center">
-              <p className="text-lg font-bold text-foreground flex items-center justify-center gap-1">
-                <Flame className="h-4 w-4 text-amber-500" />{scorecard.streak_best}
-              </p>
-              <p className="text-[10px] text-muted-foreground">Best Streak</p>
             </div>
           )}
           <div className="text-center">
@@ -52,7 +42,6 @@ const ProtocolScorecard = ({ scorecard }: Props) => {
           </div>
         </div>
 
-        {/* Wearable improvements */}
         {wearableGains.length > 0 && (
           <div className="space-y-2">
             <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider flex items-center gap-1">
@@ -81,7 +70,6 @@ const ProtocolScorecard = ({ scorecard }: Props) => {
           </div>
         )}
 
-        {/* Biomarker improvements */}
         {scorecard.biomarker_improvements.length > 0 && (
           <div className="space-y-2">
             <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider flex items-center gap-1">
@@ -103,7 +91,6 @@ const ProtocolScorecard = ({ scorecard }: Props) => {
           </div>
         )}
 
-        {/* Changes made */}
         {scorecard.changes_made.length > 0 && (
           <div className="space-y-1.5">
             <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider flex items-center gap-1">
@@ -117,7 +104,6 @@ const ProtocolScorecard = ({ scorecard }: Props) => {
           </div>
         )}
 
-        {/* Summary */}
         {scorecard.summary_text && (
           <p className="text-xs text-muted-foreground italic border-t border-border pt-3">
             {scorecard.summary_text}

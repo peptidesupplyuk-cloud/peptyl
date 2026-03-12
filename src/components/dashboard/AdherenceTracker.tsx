@@ -1,7 +1,7 @@
 import { useMemo, useState } from "react";
 import { useAllInjections, useUpdateInjectionStatus } from "@/hooks/use-injections";
 import { useProtocols } from "@/hooks/use-protocols";
-import { format, subDays, isSameDay, startOfDay } from "date-fns";
+import { format, isSameDay, startOfDay, startOfWeek, subDays } from "date-fns";
 import { toast } from "sonner";
 import { CalendarDays, TrendingUp, TrendingDown, CheckCircle2, XCircle, SkipForward, ChevronLeft, ChevronRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -31,57 +31,42 @@ const AdherenceTracker = () => {
     });
   };
 
-  // === Stats ===
   const stats = useMemo(() => {
     if (injections.length === 0) return null;
 
-    // Only count protocol-scheduled injections (has protocol_peptide_id), not ad-hoc extras
     const protocolInj = injections.filter((i) => !!i.protocol_peptide_id);
-
-    // Filter to current protocol if available
     const scoped = protocolStart
       ? protocolInj.filter((i) => new Date(i.scheduled_time) >= protocolStart)
       : protocolInj;
 
     const now = new Date();
-    const completed = scoped.filter((i) => i.status === "completed").length;
-    const skipped = scoped.filter((i) => i.status === "skipped").length;
-    const missed = scoped.filter((i) =>
-      i.status === "scheduled" && new Date(i.scheduled_time) < now
-    ).length;
+    const eligible = scoped.filter((i) => new Date(i.scheduled_time) <= now);
+
+    const completed = eligible.filter((i) => i.status === "completed").length;
+    const skipped = eligible.filter((i) => i.status === "skipped").length;
+    const missed = eligible.filter((i) => i.status === "scheduled").length;
     const total = completed + skipped + missed;
     const rate = total > 0 ? Math.round((completed / total) * 100) : 0;
 
-    // Streak: only count protocol-scheduled injections whose time has passed
-    let streak = 0;
-    const today = startOfDay(now);
-    for (let d = 0; d < 365; d++) {
-      const day = subDays(today, d);
-      if (protocolStart && day < protocolStart) break;
-      const dayInj = scoped.filter((i) => {
-        const st = new Date(i.scheduled_time);
-        return isSameDay(st, day) && st <= now;
-      });
-      if (dayInj.length === 0) continue; // Off-day (EOD/weekly) — don't break streak
-      const allDone = dayInj.every((i) => i.status === "completed");
-      if (allDone) streak++;
-      else break;
-    }
+    const weekStart = startOfWeek(now, { weekStartsOn: 1 });
+    const thisWeek = eligible.filter((i) => {
+      const st = new Date(i.scheduled_time);
+      return st >= weekStart;
+    });
+    const weekCompleted = thisWeek.filter((i) => i.status === "completed").length;
+    const weekTotal = thisWeek.length;
+    const weekRate = weekTotal > 0 ? Math.round((weekCompleted / weekTotal) * 100) : 0;
 
-    // Per peptide (all injections for breakdown, including ad-hoc)
     const byPeptide: Record<string, { completed: number; total: number }> = {};
-    for (const inj of injections) {
-      const isPast = new Date(inj.scheduled_time) < now;
-      if (!isPast && inj.status === "scheduled") continue;
+    for (const inj of eligible) {
       if (!byPeptide[inj.peptide_name]) byPeptide[inj.peptide_name] = { completed: 0, total: 0 };
       byPeptide[inj.peptide_name].total++;
       if (inj.status === "completed") byPeptide[inj.peptide_name].completed++;
     }
 
-    return { completed, skipped, missed, total, rate, streak, byPeptide };
+    return { completed, skipped, missed, total, rate, byPeptide, weekCompleted, weekTotal, weekRate };
   }, [injections, protocolStart]);
 
-  // === Heatmap (last 90 days) ===
   const heatmapData = useMemo(() => {
     const today = startOfDay(new Date());
     const days: Array<{ date: Date; status: "full" | "partial" | "missed" | "none" }> = [];
@@ -99,7 +84,6 @@ const AdherenceTracker = () => {
     return days;
   }, [injections]);
 
-  // === Detailed log (paginated) ===
   const pastInjections = useMemo(() => {
     return injections
       .filter((i) => i.status !== "scheduled" || new Date(i.scheduled_time) < new Date())
@@ -141,7 +125,6 @@ const AdherenceTracker = () => {
 
   return (
     <div className="space-y-6">
-      {/* Summary Cards */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
         <StatCard icon={<CheckCircle2 className="h-4 w-4 text-green-500" />} label="Completed" value={stats.completed} />
         <StatCard icon={<XCircle className="h-4 w-4 text-red-500" />} label="Missed" value={stats.missed} />
@@ -149,20 +132,21 @@ const AdherenceTracker = () => {
         <StatCard icon={<TrendingUp className="h-4 w-4 text-primary" />} label="Adherence" value={`${stats.rate}%`} />
       </div>
 
-      {/* Streak */}
-      <div className="bg-card rounded-2xl border border-border p-5">
-        <div className="flex items-center gap-3">
-          <div className="h-12 w-12 rounded-xl bg-primary/10 flex items-center justify-center">
-            <span className="text-xl">🔥</span>
-          </div>
+      {stats.weekTotal > 0 && (
+        <div className="bg-card rounded-2xl border border-border p-5 flex items-center justify-between gap-3 flex-wrap">
           <div>
-            <p className="text-2xl font-heading font-bold text-foreground">{stats.streak}</p>
-            <p className="text-xs text-muted-foreground">Day Streak</p>
+            <p className="text-xs uppercase tracking-wider text-muted-foreground">This Week</p>
+            <p className="text-2xl font-heading font-bold text-foreground leading-tight">
+              {stats.weekCompleted}/{stats.weekTotal}
+            </p>
+            <p className="text-xs text-muted-foreground">scheduled doses completed</p>
           </div>
+          <span className="inline-flex items-center gap-1 text-sm font-medium bg-primary/10 text-primary rounded-full px-3 py-1.5">
+            {stats.weekRate}% adherence
+          </span>
         </div>
-      </div>
+      )}
 
-      {/* Heatmap */}
       <div className="bg-card rounded-2xl border border-border p-5 space-y-3">
         <h3 className="font-heading font-semibold text-foreground text-sm flex items-center gap-2">
           <CalendarDays className="h-4 w-4 text-primary" /> 90-Day Adherence
@@ -184,7 +168,6 @@ const AdherenceTracker = () => {
         </div>
       </div>
 
-      {/* Per-peptide breakdown */}
       <div className="bg-card rounded-2xl border border-border p-5 space-y-3">
         <h3 className="font-heading font-semibold text-foreground text-sm flex items-center gap-2">
           <TrendingDown className="h-4 w-4 text-primary" /> Per-Peptide Adherence
@@ -208,7 +191,6 @@ const AdherenceTracker = () => {
         </div>
       </div>
 
-      {/* Detailed Log */}
       <div className="bg-card rounded-2xl border border-border p-5 space-y-3">
         <h3 className="font-heading font-semibold text-foreground text-sm">Dose Log</h3>
         <div className="space-y-1">

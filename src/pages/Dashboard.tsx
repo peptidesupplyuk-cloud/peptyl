@@ -693,16 +693,7 @@ const Dashboard = () => {
                     </div>
                   ))}
 
-                  {/* Global streak + today status (shared across protocols) */}
                   <div className="flex items-center gap-2 flex-wrap px-1">
-                    {globalStreak > 0 && (
-                      <span className={`inline-flex items-center gap-1 text-xs font-medium rounded-full px-2.5 py-1 ${
-                        globalStreak > 7 ? "bg-green-500/10 text-green-500" : "bg-amber-500/10 text-amber-400"
-                      }`}>
-                        <Flame className="h-3 w-3" />
-                        {globalStreak} day streak
-                      </span>
-                    )}
                     {todayRemaining > 0 ? (
                       <span className="inline-flex items-center gap-1 text-xs font-medium bg-primary/10 text-primary rounded-full px-2.5 py-1">
                         {todayRemaining} left today
