@@ -138,6 +138,7 @@ export function useGenerateScorecard() {
         : null;
 
       // 3. Streak metrics removed: adherence is the primary consistency metric
+      const bestStreak = null;
 
       // 4. Wearable improvements
       const protocolStart = new Date(protocol.start_date);
