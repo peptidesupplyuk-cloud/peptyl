@@ -120,11 +120,11 @@ const HeroSection = () => {
           </AnimatePresence>
         </div>
 
-        <motion.p initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.8, delay: 0.2 }} className="text-lg sm:text-xl text-primary-foreground/60 max-w-xl mb-10 leading-relaxed">
+        <motion.p initial={{ opacity: 0 }} animate={{ opacity: settled ? 1 : 0 }} transition={{ duration: 0.8, delay: 0.3 }} className="text-lg sm:text-xl text-primary-foreground/60 max-w-xl mb-10 leading-relaxed">
           {t("hero.subtitle")}
         </motion.p>
 
-        <motion.div initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.8, delay: 0.3 }} className="flex flex-wrap gap-4">
+        <motion.div initial={{ opacity: 0 }} animate={{ opacity: settled ? 1 : 0 }} transition={{ duration: 0.8, delay: 0.5 }} className="flex flex-wrap gap-4">
           <Button size="lg" className="shadow-brand text-base px-8" onClick={() => setOnboardingOpen(true)}>
             {t("hero.startProtocol")}
             <ArrowRight className="ml-2 h-4 w-4" />
