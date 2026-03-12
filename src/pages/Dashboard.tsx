@@ -253,6 +253,38 @@ const Dashboard = () => {
     });
   }, [activeProtocols, allInjections]);
 
+  // Auto-generate milestone scorecards at 30/60/90 days
+  const { data: existingScorecards = [] } = useProtocolScorecards();
+  const generateScorecard = useGenerateScorecard();
+  const milestoneCheckedRef = useRef(new Set<string>());
+
+  useEffect(() => {
+    const milestones = [
+      { day: 30, key: "30_day" },
+      { day: 60, key: "60_day" },
+      { day: 90, key: "90_day" },
+    ];
+    for (const stat of perProtocolStats) {
+      for (const m of milestones) {
+        if (stat.dayNumber >= m.day) {
+          const cacheKey = `${stat.protocol.id}_${m.key}`;
+          if (milestoneCheckedRef.current.has(cacheKey)) continue;
+          milestoneCheckedRef.current.add(cacheKey);
+          const exists = existingScorecards.some(
+            (s) => s.protocol_id === stat.protocol.id && s.milestone === m.key
+          );
+          if (!exists) {
+            generateScorecard.mutate({
+              protocolId: stat.protocol.id,
+              milestone: m.key,
+              dayNumber: m.day,
+            });
+          }
+        }
+      }
+    }
+  }, [perProtocolStats, existingScorecards]);
+
   // Global streak across ALL protocol-scheduled injections
   const globalStreak = useMemo(() => {
     if (!hasActiveProtocol || allInjections.length === 0) return 0;
