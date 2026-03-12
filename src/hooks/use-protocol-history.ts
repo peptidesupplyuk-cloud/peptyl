@@ -252,7 +252,6 @@ export function useGenerateScorecard() {
       let summary = `${params.milestone.replace("_", " ")} scorecard for "${protocol.name}". `;
       summary += `Day ${params.dayNumber}. `;
       if (adherence != null) summary += `Adherence: ${adherence}%. `;
-      if (bestStreak > 0) summary += `Best streak: ${bestStreak} days. `;
       if (improvementCount > 0) summary += `${improvementCount} biomarker(s) improved. `;
       if (wearableGains.length > 0) {
         summary += `Wearable gains: ${wearableGains.map((w) => `${w.metric} +${w.delta_pct}%`).join(", ")}. `;
