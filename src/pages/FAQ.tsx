@@ -80,8 +80,8 @@ const faqJsonLd = {
 const FAQ = () => (
   <div className="min-h-screen bg-background">
     <SEO
-      title="FAQ | Peptyl — Peptide Research Questions Answered"
-      description="Frequently asked questions about Peptyl's peptide database, protocol tracker, DNA analysis, dose calculators, and AI research assistant."
+        title="FAQ — Peptide Research Questions Answered | Peptyl"
+        description="Answers to common questions about peptide dosing, reconstitution calculators, protocol tracking, DNA analysis, bloodwork integration, and the Peptyl platform."
       path="/faq"
     />
     <script

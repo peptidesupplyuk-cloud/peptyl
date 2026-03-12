@@ -12,8 +12,8 @@ const CalculatorsPage = () => {
   return (
     <div className="min-h-screen bg-background">
       <SEO
-        title="Peptide Calculators: Reconstitution, Dosing & Cycle Planning"
-        description="Free precision tools for peptide reconstitution, dose calculation with syringe diagrams, and cycle planning with waste buffers. U-100, U-40 and Tuberculin support."
+        title="Free Peptide Reconstitution Calculator & Dose Planner"
+        description="Calculate peptide reconstitution volumes, syringe doses (U-100, U-40, Tuberculin), and plan full cycles with waste buffers. Free online precision tools."
         path="/calculators"
         jsonLd={{
           "@context": "https://schema.org",

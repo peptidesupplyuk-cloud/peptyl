@@ -507,8 +507,8 @@ const Dashboard = () => {
   return (
     <div className="min-h-screen bg-background">
       <SEO
-        title="My Health | Peptyl"
-        description="See what to do today, track biomarkers, and manage your active peptide protocols."
+        title="My Health Dashboard — Protocol & Bloodwork Tracker"
+        description="Track your active peptide protocols, log bloodwork results, and monitor biomarker trends. Personalised health dashboard by Peptyl."
         path="/dashboard"
       />
       <Header />

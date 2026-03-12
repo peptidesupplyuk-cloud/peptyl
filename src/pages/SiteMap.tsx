@@ -40,8 +40,8 @@ const sections = [
 const SiteMapPage = () => (
   <div className="min-h-screen bg-background">
     <SEO
-      title="Sitemap"
-      description="Complete list of all pages on Peptyl, the UK peptide research platform. Browse our peptide database, educational articles, calculators, and more."
+        title="Sitemap — All Pages | Peptyl"
+        description="Complete list of all pages on Peptyl. Browse the peptide database, educational guides, calculators, DNA analysis, and more."
       path="/sitemap"
     />
     <Header />

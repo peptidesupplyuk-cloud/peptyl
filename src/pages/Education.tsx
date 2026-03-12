@@ -24,8 +24,8 @@ const EducationPage = () => {
   return (
     <div className="min-h-screen bg-background">
       <SEO
-        title="Peptide Education Hub: Science-Backed Guides"
-        description="Learn about peptide reconstitution, storage, GLP-1 protocols, BPC-157 vs TB-500, and more. Free, science-backed educational resources."
+        title="Peptide Guides — Reconstitution, Storage, GLP-1 & More"
+        description="Free science-backed guides on peptide reconstitution, storage, GLP-1 protocols, BPC-157 vs TB-500, NAD+ longevity stacks, and peptide cycling. Updated for 2026."
         path="/education"
         jsonLd={{
           "@context": "https://schema.org",

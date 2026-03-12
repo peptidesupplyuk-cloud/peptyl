@@ -221,8 +221,8 @@ const Auth = () => {
   return (
     <div className="min-h-screen bg-background flex items-center justify-center px-6">
       <SEO
-        title="Sign In"
-        description="Sign in or create your free Peptyl account to access precision calculators, protocol tracking, and community tools."
+        title="Sign In — Free Peptide Research Account"
+        description="Create your free Peptyl account to access peptide calculators, protocol tracking, DNA analysis, and personalised health tools."
         path="/auth"
       />
       <motion.div
