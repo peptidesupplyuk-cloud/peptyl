@@ -395,7 +395,7 @@ const TodaysPlan = ({ onActivate, slim = false, selectedDate }: TodaysPlanProps)
             </div>
           </div>
         )}
-        <Button className="w-full shadow-brand" onClick={onActivate}>
+        <Button className="w-full shadow-brand" onClick={handleActivatePlan}>
           Activate My Plan <ArrowRight className="h-4 w-4 ml-1" />
         </Button>
       </div>
