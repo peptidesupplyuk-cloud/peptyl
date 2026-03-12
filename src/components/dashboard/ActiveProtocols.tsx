@@ -178,10 +178,23 @@ const ActiveProtocols = () => {
         status: "in_progress",
       } as any);
 
+      // Generate scorecard on completion
+      const dayNum = Math.max(1, Math.round((new Date().getTime() - new Date(p.start_date).getTime()) / 86400000) + 1);
+      try {
+        await generateScorecard.mutateAsync({
+          protocolId: p.id,
+          milestone: dayNum >= 90 ? "completion" : "early_completion",
+          dayNumber: dayNum,
+        });
+      } catch (e) {
+        // Non-critical — scorecard generation failure shouldn't block completion
+        console.warn("Scorecard generation failed:", e);
+      }
+
       // Invalidate queries
       updateStatus.mutate({ id: p.id, status: "completed" });
 
-      toast({ title: "Protocol completed", description: `${p.name} has been marked as complete.` });
+      toast({ title: "Protocol completed", description: `${p.name} has been marked as complete. Your scorecard has been generated.` });
     } catch (err: any) {
       toast({ title: "Error completing protocol", description: err?.message || "Please try again.", variant: "destructive" });
     } finally {
