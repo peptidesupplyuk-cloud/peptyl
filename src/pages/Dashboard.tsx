@@ -20,6 +20,7 @@ import FitbitSection from "@/components/dashboard/FitbitSection";
 import WearableSummary from "@/components/dashboard/WearableSummary";
 import { useBloodworkPanels } from "@/hooks/use-bloodwork";
 import { useCreateProtocol, useProtocols } from "@/hooks/use-protocols";
+import { useProtocolScorecards, useGenerateScorecard } from "@/hooks/use-protocol-history";
 import { useLogInjection, useUpdateInjectionStatus, useAllInjections, useTodayInjections } from "@/hooks/use-injections";
 import { useTodaySupplementLogs } from "@/hooks/use-supplement-logs";
 import { useJournalEntries, useAddJournalEntry } from "@/hooks/use-journal";
