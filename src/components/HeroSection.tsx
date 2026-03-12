@@ -1,7 +1,7 @@
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import { ArrowRight, Download, Smartphone, BookOpen } from "lucide-react";
 import { Link } from "react-router-dom";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
@@ -9,10 +9,32 @@ import heroBg from "@/assets/hero-bg.jpg";
 import OnboardingModal from "@/components/OnboardingModal";
 import ComingSoonCards from "@/components/ComingSoonCards";
 
+const TEASER_PHRASES = [
+  "Stop guessing your peptides.",
+  "Never miss a dose again.",
+  "See what actually works.",
+];
+
+const PHASE_DURATION = 2200; // ms per teaser phrase
+
 const HeroSection = () => {
   const [onboardingOpen, setOnboardingOpen] = useState(false);
   const [installOpen, setInstallOpen] = useState(false);
+  const [phraseIndex, setPhraseIndex] = useState(0);
+  const [settled, setSettled] = useState(false);
   const { t } = useTranslation();
+
+  useEffect(() => {
+    if (settled) return;
+    const timer = setTimeout(() => {
+      if (phraseIndex < TEASER_PHRASES.length - 1) {
+        setPhraseIndex((i) => i + 1);
+      } else {
+        setSettled(true);
+      }
+    }, PHASE_DURATION);
+    return () => clearTimeout(timer);
+  }, [phraseIndex, settled]);
 
   return (
   <>
@@ -69,17 +91,40 @@ const HeroSection = () => {
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
       <div className="max-w-3xl">
 
-        <motion.h1 initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.8, delay: 0.1 }} className="text-4xl sm:text-5xl lg:text-7xl font-heading font-bold text-primary-foreground leading-[1.1] mb-6">
-          {t("hero.title1")}
-          <br />
-          <span className="text-gradient-teal">{t("hero.title2")}</span>
-        </motion.h1>
+        <div className="min-h-[4.5rem] sm:min-h-[5.5rem] lg:min-h-[8rem] mb-6">
+          <AnimatePresence mode="wait">
+            {!settled ? (
+              <motion.h1
+                key={phraseIndex}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -20 }}
+                transition={{ duration: 0.5 }}
+                className="text-4xl sm:text-5xl lg:text-7xl font-heading font-bold text-primary-foreground leading-[1.1]"
+              >
+                {TEASER_PHRASES[phraseIndex]}
+              </motion.h1>
+            ) : (
+              <motion.h1
+                key="final"
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.8 }}
+                className="text-4xl sm:text-5xl lg:text-7xl font-heading font-bold text-primary-foreground leading-[1.1]"
+              >
+                {t("hero.title1")}
+                <br />
+                <span className="text-gradient-teal">{t("hero.title2")}</span>
+              </motion.h1>
+            )}
+          </AnimatePresence>
+        </div>
 
-        <motion.p initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.8, delay: 0.2 }} className="text-lg sm:text-xl text-primary-foreground/60 max-w-xl mb-10 leading-relaxed">
+        <motion.p initial={{ opacity: 0 }} animate={{ opacity: settled ? 1 : 0 }} transition={{ duration: 0.8, delay: 0.3 }} className="text-lg sm:text-xl text-primary-foreground/60 max-w-xl mb-10 leading-relaxed">
           {t("hero.subtitle")}
         </motion.p>
 
-        <motion.div initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.8, delay: 0.3 }} className="flex flex-wrap gap-4">
+        <motion.div initial={{ opacity: 0 }} animate={{ opacity: settled ? 1 : 0 }} transition={{ duration: 0.8, delay: 0.5 }} className="flex flex-wrap gap-4">
           <Button size="lg" className="shadow-brand text-base px-8" onClick={() => setOnboardingOpen(true)}>
             {t("hero.startProtocol")}
             <ArrowRight className="ml-2 h-4 w-4" />
