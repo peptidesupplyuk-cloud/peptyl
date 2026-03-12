@@ -51,8 +51,8 @@ const ShopHubPage = () => {
   return (
     <div className="min-h-screen bg-background">
       <SEO
-        title="Shop — Research Products | Peptyl"
-        description="Curated research-grade products for your protocols. NAD+ kits, BPC-157 capsules, and more coming soon."
+        title="Shop — Peptide & Supplement Products | Peptyl"
+        description="Research-grade peptide and supplement products. NAD+ home kits, oral BPC-157, GHK-Cu topicals, and curated longevity stacks. Coming soon."
         path="/shop"
       />
       <Header />

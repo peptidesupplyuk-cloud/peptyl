@@ -90,8 +90,8 @@ const TestingPage = () => {
   return (
     <div className="min-h-screen bg-background">
       <SEO
-        title="Blood Tests & Testing: Coming Soon | Peptyl"
-        description="Integrated blood testing to track your biomarkers and optimise your protocols. Join the waitlist."
+        title="Peptide Bloodwork Testing — Track Biomarkers Online"
+        description="Integrated blood testing to track biomarkers alongside your peptide protocols. Order tests, log results, and monitor trends. Coming soon to Peptyl."
         path="/testing"
       />
       <Header />

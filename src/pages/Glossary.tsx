@@ -57,8 +57,8 @@ const letters = Object.keys(grouped).sort();
 const Glossary = () => (
   <div className="min-h-screen bg-background">
     <SEO
-      title="Peptide Glossary: Key Terms & Definitions"
-      description="A comprehensive glossary of peptide research terminology. Understand BPC-157, GLP-1, reconstitution, biomarkers, and 30+ key terms used in peptide science."
+        title="Peptide Glossary — 30+ Key Terms & Definitions"
+        description="Comprehensive glossary of peptide research terms. BPC-157, GLP-1, reconstitution, biomarkers, half-life, subcutaneous injection, and more explained simply."
       path="/glossary"
       jsonLd={{
         "@context": "https://schema.org",

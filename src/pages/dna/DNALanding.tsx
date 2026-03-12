@@ -61,8 +61,8 @@ const DNALanding = () => {
   return (
     <>
       <SEO
-        title="Stop Guessing. Start Knowing | Peptyl"
-        description="Upload your DNA and bloodwork to get a personalised supplement, peptide, and lifestyle protocol built from your biology. Standard or Advanced tier."
+        title="Peptide DNA Analysis — Personalised Health Protocols"
+        description="Upload DNA and bloodwork for AI-powered personalised peptide, supplement, and lifestyle protocols built from your genetics. Standard and Advanced tiers available."
         path="/dna"
       />
       <Header />

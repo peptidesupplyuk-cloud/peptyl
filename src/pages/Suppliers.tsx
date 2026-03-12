@@ -40,8 +40,8 @@ const Suppliers = () => {
   return (
     <div className="min-h-screen bg-background">
       <SEO
-        title="Compare Prices: UK Approved Suppliers"
-        description="Compare prices for GLP-1 medications and bloodwork from approved UK pharmacies and labs. Find the best deal from trusted suppliers."
+        title="Compare GLP-1 & Peptide Prices — Approved Suppliers"
+        description="Compare prices for Semaglutide, Tirzepatide, and other GLP-1 medications from approved pharmacies. Find the best deal from trusted, verified suppliers."
         path="/suppliers"
       />
       <Header />
