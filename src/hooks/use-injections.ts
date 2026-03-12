@@ -391,19 +391,32 @@ export function useUpdateInjectionStatus() {
       side_effects?: string;
       injection_site?: string;
     }) => {
+      console.log("[useUpdateInjectionStatus] mutating", { id, status });
       const update: Record<string, unknown> = { status };
       if (status === "completed") update.completed_at = new Date().toISOString();
       if (notes !== undefined) update.notes = notes;
       if (side_effects !== undefined) update.side_effects = side_effects;
       if (injection_site !== undefined) update.injection_site = injection_site;
 
-      const { error } = await supabase.from("injection_logs").update(update).eq("id", id);
+      const { data, error, count } = await supabase
+        .from("injection_logs")
+        .update(update)
+        .eq("id", id)
+        .select();
+      console.log("[useUpdateInjectionStatus] result", { data, error, count });
       if (error) throw error;
+      if (!data || data.length === 0) {
+        console.warn("[useUpdateInjectionStatus] No rows updated for id:", id);
+      }
     },
     onSuccess: () => {
+      console.log("[useUpdateInjectionStatus] success, invalidating queries");
       qc.invalidateQueries({ queryKey: ["injections_today"] });
       qc.invalidateQueries({ queryKey: ["injections_all"] });
       qc.invalidateQueries({ queryKey: ["injections_date"] });
+    },
+    onError: (err) => {
+      console.error("[useUpdateInjectionStatus] error", err);
     },
   });
 }
