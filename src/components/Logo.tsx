@@ -54,7 +54,7 @@ const Logo = ({ className, size = "md", variant = "full", inverted = false, hide
             s.text,
             "text-foreground"
           )}>
-            Pep<span className="text-gradient-teal">tyl</span>
+            Pept<span className="text-gradient-teal">yl</span>
           </span>
           {!hideTagline && (
             <span className={cn(
