@@ -644,7 +644,7 @@ const Dashboard = () => {
                             <p className="text-[11px] text-muted-foreground">{daysLeft > 0 ? `${daysLeft} days remaining` : "Completing today"}</p>
                           </div>
                           <div className="shrink-0 bg-primary/10 rounded-xl px-3 py-1.5 text-center">
-                            <p className="text-lg font-heading font-bold text-primary leading-none">{daysActive}</p>
+                            <p className="text-lg font-heading font-bold text-primary leading-none">{dayNumber}</p>
                             <p className="text-[9px] text-muted-foreground mt-0.5">of {totalDays}</p>
                           </div>
                         </div>
