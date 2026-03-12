@@ -107,6 +107,14 @@ const PreviousPlans = () => {
                     <p className="text-[10px] text-muted-foreground italic">{p.notes}</p>
                   )}
 
+                  {isCompletedEarly && (
+                    <div className="rounded-lg border border-border bg-card px-3 py-2">
+                      <p className="text-xs text-muted-foreground">
+                        Completed early. <a href="/dashboard?tab=protocols" className="text-primary hover:underline">Create a new protocol?</a>
+                      </p>
+                    </div>
+                  )}
+
                   {/* Scorecards */}
                   {scorecards.length > 0 ? (
                     <div className="space-y-3">

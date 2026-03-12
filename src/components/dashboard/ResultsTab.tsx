@@ -510,11 +510,6 @@ const WeeklyCard = ({ week }: { week: WeekSummary }) => {
           <span className="text-[11px] text-muted-foreground">
             {week.completedDoses}/{week.totalDoses} doses
           </span>
-          {week.streak > 0 && (
-            <span className="text-[11px] text-amber-400 flex items-center gap-0.5">
-              <Flame className="h-3 w-3" /> {week.streak}d streak
-            </span>
-          )}
         </div>
       </div>
 
