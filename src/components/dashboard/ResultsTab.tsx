@@ -350,10 +350,9 @@ const OverallStatsBanner = ({
         </div>
       </div>
 
-      <div className="grid grid-cols-3 gap-3">
+      <div className="grid grid-cols-2 gap-3">
         <StatPill icon={<Calendar className="h-3.5 w-3.5" />} label="Weeks" value={String(weeks)} />
         <StatPill icon={<Target className="h-3.5 w-3.5" />} label="Adherence" value={`${adherence}%`} highlight={adherence >= 80} />
-        <StatPill icon={<Flame className="h-3.5 w-3.5" />} label="Best Streak" value={`${longestStreak}w`} highlight={longestStreak >= 4} />
       </div>
     </div>
   </div>

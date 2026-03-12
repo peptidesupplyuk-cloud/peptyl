@@ -29,15 +29,13 @@ const PreviousPlans = () => {
 
       <div className="space-y-3">
         {previousProtocols.map((p) => {
-          const daysActive = differenceInCalendarDays(
-            p.end_date ? new Date(p.end_date) : new Date(),
-            new Date(p.start_date)
+          const closedAt = p.end_date ? new Date(p.end_date) : new Date(p.updated_at);
+          const totalDays = Math.max(
+            1,
+            differenceInCalendarDays(closedAt, new Date(p.start_date)) + 1
           );
-          const endDate = p.end_date ? new Date(p.end_date) : null;
-          const totalDays = endDate
-            ? differenceInCalendarDays(endDate, new Date(p.start_date))
-            : 90;
-          const daysCompleted = Math.min(daysActive, totalDays);
+          const daysCompleted = totalDays;
+          const isCompletedEarly = p.status === "archived";
           const isExpanded = expandedId === p.id;
           const scorecards = allScorecards.filter((s) => s.protocol_id === p.id);
 
