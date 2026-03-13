@@ -16,6 +16,12 @@ const AdherenceTracker = () => {
   const [editingId, setEditingId] = useState<string | null>(null);
   const LOG_PAGE_SIZE = 15;
 
+  const protocolPeptideNames = useMemo(() => {
+    return new Set(
+      protocols.flatMap((protocol) => protocol.peptides?.map((pep) => pep.peptide_name) ?? [])
+    );
+  }, [protocols]);
+
   const activeProtocol = protocols.find((p) => p.status === "active");
   const protocolStart = activeProtocol?.start_date
     ? startOfDay(new Date(activeProtocol.start_date))
@@ -34,7 +40,9 @@ const AdherenceTracker = () => {
   const stats = useMemo(() => {
     if (injections.length === 0) return null;
 
-    const protocolInj = injections.filter((i) => !!i.protocol_peptide_id);
+    const protocolInj = injections.filter(
+      (i) => !!i.protocol_peptide_id || protocolPeptideNames.has(i.peptide_name)
+    );
     const scoped = protocolStart
       ? protocolInj.filter((i) => new Date(i.scheduled_time) >= protocolStart)
       : protocolInj;
@@ -65,7 +73,7 @@ const AdherenceTracker = () => {
     }
 
     return { completed, skipped, missed, total, rate, byPeptide, weekCompleted, weekTotal, weekRate };
-  }, [injections, protocolStart]);
+  }, [injections, protocolStart, protocolPeptideNames]);
 
   const heatmapData = useMemo(() => {
     const today = startOfDay(new Date());
