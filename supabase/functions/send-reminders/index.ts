@@ -44,10 +44,23 @@ Deno.serve(async (req) => {
     const supabase = createClient(supabaseUrl, serviceRoleKey);
 
     const now = new Date();
-    const today = now.toISOString().split("T")[0];
-    const currentHour = now.getUTCHours();
+    // Use UK timezone (handles GMT/BST automatically)
+    const ukFormatter = new Intl.DateTimeFormat("en-GB", {
+      timeZone: "Europe/London",
+      year: "numeric",
+      month: "2-digit",
+      day: "2-digit",
+      hour: "2-digit",
+      hour12: false,
+    });
+    const ukParts = ukFormatter.formatToParts(now);
+    const ukYear = ukParts.find(p => p.type === "year")!.value;
+    const ukMonth = ukParts.find(p => p.type === "month")!.value;
+    const ukDay = ukParts.find(p => p.type === "day")!.value;
+    const today = `${ukYear}-${ukMonth}-${ukDay}`;
+    const currentHour = parseInt(ukParts.find(p => p.type === "hour")!.value, 10);
 
-    console.log(`Current UTC hour: ${currentHour}, date: ${today}`);
+    console.log(`Current UK hour: ${currentHour}, UK date: ${today}`);
 
     // ── DOSE REMINDERS ──
     // Two phases:
