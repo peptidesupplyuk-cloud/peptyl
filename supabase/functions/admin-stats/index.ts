@@ -22,7 +22,6 @@ Deno.serve(async (req) => {
       });
     }
 
-    // Verify user is admin via JWT
     const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
     const supabaseKey = Deno.env.get("SUPABASE_ANON_KEY")!;
     const userClient = createClient(supabaseUrl, supabaseKey, {
@@ -36,11 +35,9 @@ Deno.serve(async (req) => {
       });
     }
 
-    // Use service role for aggregate queries
     const serviceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
     const admin = createClient(supabaseUrl, serviceKey);
 
-    // Run all queries in parallel
     const [
       profilesRes,
       contactsRes,
@@ -49,14 +46,16 @@ Deno.serve(async (req) => {
       recentSignupsRes,
       authUsersRes,
       journalRes,
+      activityRes,
     ] = await Promise.all([
       admin.from("profiles").select("country, research_goal, experience_level, risk_tolerance, biomarker_availability, current_compounds, created_at"),
       admin.from("contact_submissions").select("id, name, email, message, created_at").order("created_at", { ascending: false }).limit(50),
       admin.from("protocols").select("id, user_id, name, goal, status, created_at"),
       admin.from("bloodwork_panels").select("id, user_id, panel_type, test_date, created_at"),
       admin.from("profiles").select("user_id, first_name, last_name, username, country, research_goal, experience_level, current_compounds, created_at").order("created_at", { ascending: false }).limit(30),
-      admin.auth.admin.listUsers({ page: 1, perPage: 100 }),
+      admin.auth.admin.listUsers({ page: 1, perPage: 1000 }),
       admin.from("journal_entries").select("id, user_id, content, peptides, summary, created_at").order("created_at", { ascending: false }),
+      admin.from("user_activity").select("user_id, session_id, is_pwa, display_mode, device_type, page_path, screen_width, created_at").order("created_at", { ascending: false }).limit(10000),
     ]);
 
     const profiles = profilesRes.data || [];
@@ -65,10 +64,12 @@ Deno.serve(async (req) => {
     const bloodwork = bloodworkRes.data || [];
     const recentSignupsRaw = recentSignupsRes.data || [];
     const journalEntries = journalRes.data || [];
+    const activityLogs = activityRes.data || [];
 
     // Build email lookup from auth users
     const emailMap: Record<string, string> = {};
-    for (const u of authUsersRes.data?.users || []) {
+    const authUsers = authUsersRes.data?.users || [];
+    for (const u of authUsers) {
       emailMap[u.id] = u.email || "";
     }
     const recentSignups = recentSignupsRaw.map((s: any) => ({
@@ -76,42 +77,37 @@ Deno.serve(async (req) => {
       email: emailMap[s.user_id] || "",
     }));
 
-    // Aggregate: users by country
+    // ===== EXISTING AGGREGATIONS =====
     const byCountry: Record<string, number> = {};
     for (const p of profiles) {
       const c = p.country || "Not specified";
       byCountry[c] = (byCountry[c] || 0) + 1;
     }
 
-    // Aggregate: users by research goal
     const byGoal: Record<string, number> = {};
     for (const p of profiles) {
       const g = p.research_goal || "Not specified";
       byGoal[g] = (byGoal[g] || 0) + 1;
     }
 
-    // Aggregate: users by experience level
     const byExperience: Record<string, number> = {};
     for (const p of profiles) {
       const e = p.experience_level || "Not specified";
       byExperience[e] = (byExperience[e] || 0) + 1;
     }
 
-    // Aggregate: users by risk tolerance
     const byRisk: Record<string, number> = {};
     for (const p of profiles) {
       const r = p.risk_tolerance || "Not specified";
       byRisk[r] = (byRisk[r] || 0) + 1;
     }
 
-    // Aggregate: users by biomarker availability
     const byBiomarker: Record<string, number> = {};
     for (const p of profiles) {
       const b = p.biomarker_availability || "Not specified";
       byBiomarker[b] = (byBiomarker[b] || 0) + 1;
     }
 
-    // Signups over time (last 30 days)
     const thirtyDaysAgo = new Date();
     thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
     const signupsByDay: Record<string, number> = {};
@@ -122,16 +118,13 @@ Deno.serve(async (req) => {
       }
     }
 
-    // Unique users with protocols / bloodwork
     const uniqueProtocolUsers = new Set(protocols.map((p: any) => p.user_id)).size;
     const uniqueBloodworkUsers = new Set(bloodwork.map((b: any) => b.user_id)).size;
 
-    // Journal aggregations
     const today = new Date().toISOString().slice(0, 10);
     const journalToday = journalEntries.filter((j: any) => j.created_at?.slice(0, 10) === today).length;
     const uniqueJournalUsers = new Set(journalEntries.map((j: any) => j.user_id)).size;
 
-    // Journal entries by day (last 30 days)
     const journalByDay: Record<string, number> = {};
     for (const j of journalEntries) {
       const d = j.created_at?.slice(0, 10);
@@ -140,7 +133,6 @@ Deno.serve(async (req) => {
       }
     }
 
-    // Top peptides mentioned across all journal entries
     const peptideMentions: Record<string, number> = {};
     for (const j of journalEntries) {
       if (Array.isArray(j.peptides)) {
@@ -150,11 +142,131 @@ Deno.serve(async (req) => {
       }
     }
 
-    // Recent journal entries (last 20) with email
     const recentJournal = journalEntries.slice(0, 20).map((j: any) => ({
       ...j,
       email: emailMap[j.user_id] || "",
     }));
+
+    // ===== USER ENGAGEMENT ANALYTICS =====
+    const now = new Date();
+    const oneDayAgo = new Date(now); oneDayAgo.setDate(oneDayAgo.getDate() - 1);
+    const sevenDaysAgo = new Date(now); sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
+
+    // DAU / WAU / MAU
+    const dauUsers = new Set<string>();
+    const wauUsers = new Set<string>();
+    const mauUsers = new Set<string>();
+    const pwaUsers = new Set<string>();
+    const browserUsers = new Set<string>();
+    const deviceCounts: Record<string, number> = {};
+    const dailyActiveByDay: Record<string, Set<string>> = {};
+    const topPages: Record<string, number> = {};
+    const sessionsByUser: Record<string, Set<string>> = {};
+
+    for (const a of activityLogs) {
+      const ts = new Date(a.created_at);
+      const uid = a.user_id;
+      const day = a.created_at.slice(0, 10);
+
+      // MAU (all within last 30 days from activity data)
+      if (ts >= thirtyDaysAgo) mauUsers.add(uid);
+      if (ts >= sevenDaysAgo) wauUsers.add(uid);
+      if (ts >= oneDayAgo) dauUsers.add(uid);
+
+      // PWA vs browser
+      if (a.is_pwa) pwaUsers.add(uid);
+      else browserUsers.add(uid);
+
+      // Device type
+      if (a.device_type) {
+        deviceCounts[a.device_type] = (deviceCounts[a.device_type] || 0) + 1;
+      }
+
+      // DAU trend
+      if (ts >= thirtyDaysAgo) {
+        if (!dailyActiveByDay[day]) dailyActiveByDay[day] = new Set();
+        dailyActiveByDay[day].add(uid);
+      }
+
+      // Top pages
+      if (a.page_path && ts >= thirtyDaysAgo) {
+        topPages[a.page_path] = (topPages[a.page_path] || 0) + 1;
+      }
+
+      // Sessions per user (for return rate)
+      if (!sessionsByUser[uid]) sessionsByUser[uid] = new Set();
+      sessionsByUser[uid].add(a.session_id);
+    }
+
+    // DAU trend array
+    const dauTrend = Object.entries(dailyActiveByDay)
+      .sort(([a], [b]) => a.localeCompare(b))
+      .map(([date, users]) => ({ date: date.slice(5), count: users.size }));
+
+    // Return users: users with more than 1 session
+    const totalTrackedUsers = Object.keys(sessionsByUser).length;
+    const returningUsers = Object.values(sessionsByUser).filter(s => s.size > 1).length;
+    const returnRate = totalTrackedUsers > 0 ? Math.round((returningUsers / totalTrackedUsers) * 100) : 0;
+
+    // Session frequency distribution
+    const sessionDistribution: Record<string, number> = { "1": 0, "2-3": 0, "4-7": 0, "8-14": 0, "15+": 0 };
+    for (const sessions of Object.values(sessionsByUser)) {
+      const count = sessions.size;
+      if (count === 1) sessionDistribution["1"]++;
+      else if (count <= 3) sessionDistribution["2-3"]++;
+      else if (count <= 7) sessionDistribution["4-7"]++;
+      else if (count <= 14) sessionDistribution["8-14"]++;
+      else sessionDistribution["15+"]++;
+    }
+
+    // Top pages sorted
+    const topPagesSorted = Object.entries(topPages)
+      .sort(([, a], [, b]) => b - a)
+      .slice(0, 15)
+      .map(([path, views]) => ({ path, views }));
+
+    // Most active users
+    const userActivityCount: Record<string, number> = {};
+    for (const a of activityLogs) {
+      if (new Date(a.created_at) >= thirtyDaysAgo) {
+        userActivityCount[a.user_id] = (userActivityCount[a.user_id] || 0) + 1;
+      }
+    }
+    const mostActiveUsers = Object.entries(userActivityCount)
+      .sort(([, a], [, b]) => b - a)
+      .slice(0, 20)
+      .map(([userId, pageViews]) => ({
+        userId,
+        email: emailMap[userId] || "Unknown",
+        pageViews,
+        sessions: sessionsByUser[userId]?.size || 0,
+        isPwa: pwaUsers.has(userId),
+      }));
+
+    // Last seen for all auth users (from activity)
+    const lastSeenMap: Record<string, string> = {};
+    for (const a of activityLogs) {
+      if (!lastSeenMap[a.user_id] || a.created_at > lastSeenMap[a.user_id]) {
+        lastSeenMap[a.user_id] = a.created_at;
+      }
+    }
+
+    const engagement = {
+      dau: dauUsers.size,
+      wau: wauUsers.size,
+      mau: mauUsers.size,
+      pwa_users: pwaUsers.size,
+      browser_users: browserUsers.size,
+      return_rate: returnRate,
+      returning_users: returningUsers,
+      total_tracked: totalTrackedUsers,
+      device_counts: deviceCounts,
+      dau_trend: dauTrend,
+      session_distribution: sessionDistribution,
+      top_pages: topPagesSorted,
+      most_active_users: mostActiveUsers,
+      total_page_views: activityLogs.length,
+    };
 
     const stats = {
       total_users: profiles.length,
@@ -177,6 +289,7 @@ Deno.serve(async (req) => {
       signups_by_day: signupsByDay,
       recent_signups: recentSignups,
       recent_contacts: contacts.slice(0, 20),
+      engagement,
     };
 
     return new Response(JSON.stringify(stats), {
