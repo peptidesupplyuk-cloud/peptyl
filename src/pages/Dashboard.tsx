@@ -514,11 +514,20 @@ const Dashboard = () => {
         path="/dashboard"
       />
       <Header />
-      <main className="pt-20 pb-24 md:pb-16">
+      <main className="pt-20 pb-28 md:pb-16">
+        {/* Ambient radial glow behind hero area */}
+        <div className="pointer-events-none fixed top-0 left-1/2 -translate-x-1/2 w-[600px] h-[400px] opacity-20 blur-[100px] -z-10"
+          style={{ background: "radial-gradient(ellipse at center, hsl(var(--primary) / 0.3) 0%, transparent 70%)" }}
+        />
         <div className="container mx-auto px-4 sm:px-6">
-          <div className="mb-6 space-y-3">
+          <motion.div
+            className="mb-6 space-y-3"
+            initial={{ opacity: 0, y: 12 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, ease: "easeOut" }}
+          >
             <div className="flex items-center justify-between gap-3">
-              <h1 className="text-2xl sm:text-3xl font-heading font-bold text-foreground leading-tight">
+              <h1 className="text-2xl sm:text-3xl font-heading font-bold text-foreground leading-tight tracking-tight">
                 My <span className="text-gradient-teal">Health</span>
               </h1>
               <VideoHelpButton />
@@ -526,7 +535,7 @@ const Dashboard = () => {
             <p className="text-muted-foreground text-sm">
               Your daily actions, biomarkers, and active protocols.
             </p>
-          </div>
+          </motion.div>
 
           <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
             <TabsList className="hidden md:flex w-full overflow-x-auto max-w-3xl no-scrollbar">
