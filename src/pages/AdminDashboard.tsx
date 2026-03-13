@@ -1671,6 +1671,8 @@ const AdminDashboard = () => {
               <TabsTrigger value="analytics" className="gap-1.5">
                 <BarChart3 className="h-4 w-4" /> Analytics
               </TabsTrigger>
+              <TabsTrigger value="users" className="gap-1.5">
+                <Users className="h-4 w-4" /> Users
               <TabsTrigger value="payments" className="gap-1.5">
                 <CreditCard className="h-4 w-4" /> Payments
               </TabsTrigger>
