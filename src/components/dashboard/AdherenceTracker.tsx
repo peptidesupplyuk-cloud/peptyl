@@ -40,7 +40,9 @@ const AdherenceTracker = () => {
   const stats = useMemo(() => {
     if (injections.length === 0) return null;
 
-    const protocolInj = injections.filter((i) => !!i.protocol_peptide_id);
+    const protocolInj = injections.filter(
+      (i) => !!i.protocol_peptide_id || protocolPeptideNames.has(i.peptide_name)
+    );
     const scoped = protocolStart
       ? protocolInj.filter((i) => new Date(i.scheduled_time) >= protocolStart)
       : protocolInj;
