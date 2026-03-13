@@ -39,7 +39,16 @@ const AdherenceSummary = ({ onNavigate }: { onNavigate?: () => void }) => {
     return { completed, skipped, missed, rate, weekCompleted, weekTotal: weekEligible.length };
   }, [injections, protocolPeptideNames]);
 
-  if (isLoading || !stats) return null;
+  if (isLoading) return null;
+
+  if (!stats) {
+    return (
+      <div className="bg-card rounded-xl border border-border px-4 py-3">
+        <h2 className="font-heading font-semibold text-foreground text-sm">📊 Adherence Snapshot</h2>
+        <p className="text-xs text-muted-foreground mt-1">Complete your first scheduled dose to unlock adherence stats.</p>
+      </div>
+    );
+  }
 
   const tiles = [
     { icon: <CheckCircle2 className="h-3.5 w-3.5 text-green-500" />, label: "Completed", value: stats.completed },
