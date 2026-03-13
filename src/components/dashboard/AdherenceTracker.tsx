@@ -16,6 +16,12 @@ const AdherenceTracker = () => {
   const [editingId, setEditingId] = useState<string | null>(null);
   const LOG_PAGE_SIZE = 15;
 
+  const protocolPeptideNames = useMemo(() => {
+    return new Set(
+      protocols.flatMap((protocol) => protocol.peptides?.map((pep) => pep.peptide_name) ?? [])
+    );
+  }, [protocols]);
+
   const activeProtocol = protocols.find((p) => p.status === "active");
   const protocolStart = activeProtocol?.start_date
     ? startOfDay(new Date(activeProtocol.start_date))
