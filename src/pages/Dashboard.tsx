@@ -886,6 +886,9 @@ const Dashboard = () => {
                 </div>
               ) : (
                 <div className="space-y-4">
+                  {/* Adherence snapshot */}
+                  <AdherenceSummary onNavigate={() => setActiveTab("injections")} />
+
                   {/* C1 — Biomarker summary */}
                   {hasBloodwork && <BiomarkerSummary panels={panels} />}
 
