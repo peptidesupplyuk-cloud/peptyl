@@ -139,7 +139,7 @@ const Header = () => {
             : "bg-card/90 backdrop-blur-xl"
         } ${!scrolled && isHeroPage ? "dark-section" : ""}`}
       >
-        <div className="container mx-auto px-4 h-14 flex items-center justify-between safe-area-top">
+        <div className="w-full px-4 h-14 flex items-center justify-between safe-area-top">
           <Link to="/">
             <Logo size="sm" inverted={!scrolled && isHeroPage} hideTagline />
           </Link>

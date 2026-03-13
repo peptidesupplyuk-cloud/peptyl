@@ -18,7 +18,7 @@ const Logo = ({ className, size = "md", variant = "full", inverted = false, hide
   const s = sizes[size];
 
   return (
-    <div className={cn("flex items-center gap-2.5", className)}>
+    <div className={cn("flex items-center gap-2.5 min-w-0", className)}>
       {/* Molecular hexagon mark */}
       <svg
         width={s.icon}
