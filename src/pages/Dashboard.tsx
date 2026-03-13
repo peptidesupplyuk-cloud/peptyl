@@ -3,6 +3,8 @@ import { useSearchParams, useNavigate } from "react-router-dom";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Carousel, CarouselContent, CarouselItem, CarouselPrevious, CarouselNext } from "@/components/ui/carousel";
 import { Activity, FlaskConical, LayoutDashboard, AlertTriangle, User, BookOpen, CalendarDays, BarChart3, Heart, Weight, Droplets, ExternalLink, CheckCircle2, Play, Eye, X, Dna, Sparkles, Flame, Send, Loader2 } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
+import PremiumCard from "@/components/ui/PremiumCard";
 import { addWeeks, format, differenceInCalendarDays, startOfDay, subDays, isSameDay } from "date-fns";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
@@ -71,7 +73,7 @@ const CompactJournal = ({ onExpandJournal }: { onExpandJournal: () => void }) =>
   };
 
   return (
-    <div className="bg-card rounded-2xl border border-border p-4 space-y-3">
+    <PremiumCard className="p-4 space-y-3">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
           <BookOpen className="h-4 w-4 text-primary" />
@@ -110,7 +112,7 @@ const CompactJournal = ({ onExpandJournal }: { onExpandJournal: () => void }) =>
           ))}
         </div>
       )}
-    </div>
+    </PremiumCard>
   );
 };
 
@@ -512,11 +514,20 @@ const Dashboard = () => {
         path="/dashboard"
       />
       <Header />
-      <main className="pt-20 pb-24 md:pb-16">
+      <main className="pt-20 pb-28 md:pb-16">
+        {/* Ambient radial glow behind hero area */}
+        <div className="pointer-events-none fixed top-0 left-1/2 -translate-x-1/2 w-[600px] h-[400px] opacity-20 blur-[100px] -z-10"
+          style={{ background: "radial-gradient(ellipse at center, hsl(var(--primary) / 0.3) 0%, transparent 70%)" }}
+        />
         <div className="container mx-auto px-4 sm:px-6">
-          <div className="mb-6 space-y-3">
+          <motion.div
+            className="mb-6 space-y-3"
+            initial={{ opacity: 0, y: 12 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, ease: "easeOut" }}
+          >
             <div className="flex items-center justify-between gap-3">
-              <h1 className="text-2xl sm:text-3xl font-heading font-bold text-foreground leading-tight">
+              <h1 className="text-2xl sm:text-3xl font-heading font-bold text-foreground leading-tight tracking-tight">
                 My <span className="text-gradient-teal">Health</span>
               </h1>
               <VideoHelpButton />
@@ -524,7 +535,7 @@ const Dashboard = () => {
             <p className="text-muted-foreground text-sm">
               Your daily actions, biomarkers, and active protocols.
             </p>
-          </div>
+          </motion.div>
 
           <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
             <TabsList className="hidden md:flex w-full overflow-x-auto max-w-3xl no-scrollbar">
@@ -663,11 +674,16 @@ const Dashboard = () => {
               {/* ═══ ZONE A — Hero Status ═══ */}
               {hasActiveProtocol ? (
                 <div className="space-y-3">
-                  {perProtocolStats.map(({ protocol, rate, dayNumber, totalDays, progressPct, daysLeft, hasPeptides }) => (
-                    <div key={protocol.id} className="bg-card rounded-2xl border border-border overflow-hidden">
+                  {perProtocolStats.map(({ protocol, rate, dayNumber, totalDays, progressPct, daysLeft, hasPeptides }, idx) => (
+                    <PremiumCard key={protocol.id} glow delay={idx * 0.08}>
                       {/* Progress bar across top */}
                       <div className="h-1 bg-muted">
-                        <div className="h-1 bg-primary transition-all duration-500" style={{ width: `${progressPct}%` }} />
+                        <motion.div
+                          className="h-1 bg-primary"
+                          initial={{ width: 0 }}
+                          animate={{ width: `${progressPct}%` }}
+                          transition={{ duration: 1, ease: "easeOut", delay: 0.3 }}
+                        />
                       </div>
 
                       <div className="p-4 sm:p-5 space-y-3">
@@ -677,10 +693,16 @@ const Dashboard = () => {
                             <p className="text-sm font-heading font-semibold text-foreground truncate">{protocol.name}</p>
                             <p className="text-[11px] text-muted-foreground">{daysLeft > 0 ? `${daysLeft} days remaining` : "Completing today"}</p>
                           </div>
-                          <div className="shrink-0 bg-primary/10 rounded-xl px-3 py-1.5 text-center">
+                          <motion.div
+                            className="shrink-0 bg-primary/10 rounded-xl px-3 py-1.5 text-center"
+                            initial={{ scale: 0.5, opacity: 0 }}
+                            animate={{ scale: 1, opacity: 1 }}
+                            transition={{ type: "spring", stiffness: 300, damping: 20, delay: 0.4 }}
+                            style={{ boxShadow: "0 0 12px hsl(var(--primary) / 0.1)" }}
+                          >
                             <p className="text-lg font-heading font-bold text-primary leading-none">{dayNumber}</p>
                             <p className="text-[9px] text-muted-foreground mt-0.5">of {totalDays}</p>
-                          </div>
+                          </motion.div>
                         </div>
 
                         {/* Stat pills row */}
@@ -690,7 +712,7 @@ const Dashboard = () => {
                           </span>
                         </div>
                       </div>
-                    </div>
+                    </PremiumCard>
                   ))}
 
                   <div className="flex items-center gap-2 flex-wrap px-1">
