@@ -73,7 +73,7 @@ const AdherenceTracker = () => {
     }
 
     return { completed, skipped, missed, total, rate, byPeptide, weekCompleted, weekTotal, weekRate };
-  }, [injections, protocolStart]);
+  }, [injections, protocolStart, protocolPeptideNames]);
 
   const heatmapData = useMemo(() => {
     const today = startOfDay(new Date());
