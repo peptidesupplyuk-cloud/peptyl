@@ -41,6 +41,7 @@ import ProtocolNudges from "@/components/dashboard/ProtocolNudges";
 import MobileTabNav from "@/components/dashboard/MobileTabNav";
 import OptimizationScore from "@/components/dashboard/OptimizationScore";
 import AdherenceSummary from "@/components/dashboard/AdherenceSummary";
+import AdherenceTracker from "@/components/dashboard/AdherenceTracker";
 import DayPicker from "@/components/dashboard/DayPicker";
 import { useIsMobile } from "@/hooks/use-mobile";
 import ProtocolOutcomeCard from "@/components/dashboard/ProtocolOutcomeCard";
@@ -822,6 +823,9 @@ const Dashboard = () => {
                   </button>
                   {showMore && (
                     <div className="space-y-4">
+                      {/* Adherence snapshot */}
+                      <AdherenceSummary onNavigate={() => setActiveTab("injections")} />
+
                       {/* C1 — Biomarker summary */}
                       {hasBloodwork && <BiomarkerSummary panels={panels} />}
 
@@ -882,6 +886,9 @@ const Dashboard = () => {
                 </div>
               ) : (
                 <div className="space-y-4">
+                  {/* Adherence snapshot */}
+                  <AdherenceSummary onNavigate={() => setActiveTab("injections")} />
+
                   {/* C1 — Biomarker summary */}
                   {hasBloodwork && <BiomarkerSummary panels={panels} />}
 
@@ -1044,6 +1051,7 @@ const Dashboard = () => {
             <TabsContent value="injections" className="space-y-6">
               <TodaysPlan onActivate={() => setActiveTab("protocols")} />
               <ActiveProtocols />
+              <AdherenceTracker />
             </TabsContent>
 
             {/* RESULTS TAB */}
