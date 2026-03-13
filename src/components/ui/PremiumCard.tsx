@@ -14,7 +14,7 @@ interface PremiumCardProps extends React.HTMLAttributes<HTMLDivElement> {
  * subtle 3D hover tilt, and optional ambient glow.
  */
 const PremiumCard = React.forwardRef<HTMLDivElement, PremiumCardProps>(
-  ({ className, children, glow = false, delay = 0, ...props }, ref) => {
+  ({ className, children, glow = false, delay = 0, onAnimationStart: _oas, ...props }, ref) => {
     const prefersReduced = useReducedMotion();
 
     return (
