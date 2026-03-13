@@ -9,6 +9,7 @@ import ProtectedRoute from "@/components/ProtectedRoute";
 import PeptideChat from "@/components/PeptideChat";
 import SignupBanner from "@/components/SignupBanner";
 import PWAUpdatePrompt from "@/components/PWAUpdatePrompt";
+import { useActivityTracker } from "@/hooks/use-activity-tracker";
 
 import SitewideDisclaimer from "@/components/SitewideDisclaimer";
 import ScrollToTop from "@/components/ScrollToTop";
