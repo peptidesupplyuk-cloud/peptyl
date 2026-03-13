@@ -1,95 +1,80 @@
 
 
-# Mobile UX Improvements + Admin Feedback Categories
+## Functionality Audit & User Retention Plan
 
-Four user-reported improvements across the dashboard and admin areas.
-
----
-
-## 1. Peptide Info Tooltips in Protocols Tab
-
-**Problem:** Users on the Protocols tab don't know what each peptide is without navigating back to the Peptides page.
-
-**Solution:** Add a small (i) icon next to each peptide name in `RecommendationCard` and `ActiveProtocols`. Tapping it opens a tooltip/popover with a one-line description and category badge, sourced from the existing `peptides` data array.
-
-- Create a reusable `PeptideInfoTooltip` component that looks up the peptide by name from `src/data/peptides.ts`
-- Shows: name, category badge, and the `description` field (truncated to ~1 sentence)
-- Uses the existing Popover component (touch-friendly, works on mobile)
-- Integrate into `RecommendationCard` (next to each peptide name) and `ActiveProtocols` (next to each peptide in the list)
+### Problem Summary
+1. **AdherenceTracker + heatmap dropped from UI** — the component exists but is no longer rendered anywhere in the Dashboard. It was removed when the "injections" (Tracker) tab was simplified to only show `TodaysPlan` + `ActiveProtocols`.
+2. **AdherenceSummary** is imported in Dashboard but only referenced in the overview — need to verify it's actually rendered.
+3. **Adherence calculation logic** needs review for frequency-aware correctness (weekly peptide = 1 dose/week, not 7 missed).
+4. **No real users yet** — need a concrete acquisition plan.
 
 ---
 
-## 2. Mobile Dashboard Rendering Fixes
+### Part 1: Restore Missing Adherence Components
 
-**Problem:** Dashboard tab layout breaks or feels cramped on mobile.
+**Tracker tab** (currently lines 1043-1047 in Dashboard.tsx):
+- Re-add `AdherenceTracker` below `TodaysPlan` and `ActiveProtocols` in the "injections" TabsContent
+- This restores the 90-day heatmap, per-peptide adherence bars, stat cards, and dose log
 
-**Changes:**
-- Fix the `TabsList` overflow -- ensure horizontal scroll works cleanly with proper padding and snap behaviour
-- Make carousel items in the Overview and Protocols tabs `basis-full` on small screens (currently `basis-[85%]` which can clip awkwardly)
-- Ensure `BiomarkerTrendChart` and `BiomarkerSummary` cards don't overflow on narrow viewports
-- Add proper spacing/padding adjustments for mobile in the Overview tab's stacked cards
-- Fix any text truncation issues in protocol cards on small screens
+**Overview tab**:
+- Verify `AdherenceSummary` is rendered (it's imported but may have been removed from JSX during refactors)
 
 ---
 
-## 3. Mobile Bottom Navigation Bar
+### Part 2: Fix Adherence Calculation Logic
 
-**Problem:** Users find it confusing navigating on mobile with the hamburger menu -- no clear persistent navigator.
+Current issue: The backfill mechanism (`backfillMissingDays`) creates a `scheduled` injection log for every peptide every day, regardless of frequency. A user on weekly semaglutide gets 7 `scheduled` rows per week — 6 show as "missed", tanking adherence to ~14%.
 
-**Solution:** Add a sticky bottom navigation bar (visible only on mobile) for the Dashboard page with the key tabs: Overview, Bloodwork, Protocols, Tracker, Profile.
+**Fix in `use-injections.ts` `backfillMissingDays`**:
+- Before inserting a backfill row, call `isDueToday()` (already exists at line 24) for each past date
+- Only insert `scheduled` rows for dates the peptide was actually due
+- This ensures: weekly peptide + 1 completion = 100% adherence
 
-- Create a `MobileTabNav` component that renders a fixed bottom bar with icons + labels
-- Only visible on screens < 768px (uses `useIsMobile` hook)
-- Syncs with the existing `activeTab` state in `Dashboard.tsx`
-- Hides the existing `TabsList` on mobile since the bottom nav replaces it
-- Uses the same icons already in the tab triggers (LayoutDashboard, Activity, FlaskConical, CalendarDays, User)
+**Fix in `useTodayInjections` auto-generation**:
+- Already uses `isDueToday` — confirmed correct. No change needed here.
 
----
-
-## 4. Feedback Categorisation in Admin Dashboard
-
-**Problem:** No way to categorise feedback entries -- all appear as a flat list.
-
-**Solution:** Add a `category` column to the feedback table and allow admins to tag each item.
-
-**Database migration:**
-- Add `category` column to the `feedback` table (text, nullable, default null)
-- Allowed values: `ui_ux`, `error`, `feature_request`, `not_relevant`, `other`
-
-**Admin UI changes (FeedbackTab):**
-- Add category filter buttons at the top (All, UI/UX, Error, Feature Request, Not Relevant, Other)
-- Add a small category selector dropdown on each feedback card so admins can tag items
-- Show category as a colour-coded badge on each card
-- Show count per category in the header
-
-**Optionally update FeedbackBanner** to let users self-categorise when submitting (dropdown with: Bug/Error, Feature Request, UI/UX, Other).
+**Fix in `AdherenceTracker` heatmap**:
+- The heatmap marks days with zero injection_logs as "none" — this is correct behaviour (no dose scheduled = grey). No change needed.
 
 ---
 
-## Technical Details
+### Part 3: Data Persistence & Storage Audit
 
-### New files
-- `src/components/dashboard/PeptideInfoTooltip.tsx` -- reusable info popover
-- `src/components/dashboard/MobileTabNav.tsx` -- bottom nav bar for dashboard
+Quick verification of core flows:
+- Protocol creation → `protocols` + `protocol_peptides` tables (has RLS) ✓
+- Injection logging → `injection_logs` table (has RLS) ✓  
+- Supplement logging → `supplement_logs` table (has RLS, UNIQUE constraint) ✓
+- Journal entries → `journal_entries` table (has RLS) ✓
+- Bloodwork → `bloodwork_panels` + `bloodwork_markers` ✓
+- Profile/onboarding → `profiles` table ✓
+- Notifications → `nudge_log` deduplication ✓
 
-### Modified files
-- `src/components/dashboard/RecommendationCard.tsx` -- add info tooltip next to peptide names
-- `src/components/dashboard/ActiveProtocols.tsx` -- add info tooltip next to peptide names
-- `src/pages/Dashboard.tsx` -- integrate MobileTabNav, hide TabsList on mobile, fix carousel responsive classes
-- `src/pages/AdminDashboard.tsx` -- update FeedbackTab with category filter, tag selector, badges
-- `src/components/FeedbackBanner.tsx` -- optionally add category dropdown to submission form
+No missing persistence identified.
 
-### Database migration
-```sql
-ALTER TABLE public.feedback ADD COLUMN category text DEFAULT null;
-```
+---
 
-### Sequencing
-1. Database migration (add category column)
-2. PeptideInfoTooltip component
-3. MobileTabNav component
-4. Integrate tooltips into RecommendationCard + ActiveProtocols
-5. Update Dashboard.tsx with mobile nav + responsive fixes
-6. Update AdminDashboard FeedbackTab with categories
-7. Optionally update FeedbackBanner with user-facing category picker
+### Part 4: User Acquisition — Getting to 100 Users
+
+This is a strategy section, not code changes:
+
+1. **Fix the product first** (Parts 1-3 above) — broken adherence tracking kills retention
+2. **Simplify onboarding** — audit the signup-to-first-protocol flow for friction. Currently requires email verification + profile completion + protocol creation + first dose log. That's 4+ steps before any value.
+3. **Share-worthy moments** — the Results tab with adherence rings and milestone cards is shareable. Add a "Share my progress" button that generates an image (you already have `html2canvas` + `jspdf` installed).
+4. **Content-led SEO** — you have 25+ article pages. Ensure each has a clear CTA to sign up. The articles already exist; this is about conversion.
+5. **Referral loop** — add a simple invite link (unique per user) that tracks signups. Even a basic `?ref=userId` parameter logged to a table.
+6. **Reddit/forum seeding** — peptide communities on Reddit (r/Peptides, r/semaglutide) are highly active. Share the free tools (calculators, reconstitution guide) as value-first posts.
+7. **PWA install prompt** — you already have PWA support. Make the install banner more prominent for mobile visitors.
+
+---
+
+### Implementation Summary
+
+| Task | Type | Risk |
+|------|------|------|
+| Re-add AdherenceTracker to Tracker tab | UI restore | Low |
+| Fix backfillMissingDays frequency awareness | Logic fix | Medium — core metric |
+| Verify AdherenceSummary renders in overview | UI check | Low |
+| Add "Share progress" button to Results tab | New feature | Low |
+
+The code changes are focused on 2 files: `src/pages/Dashboard.tsx` (re-add component) and `src/hooks/use-injections.ts` (fix backfill logic). The adherence fix is the most critical — without it, any user on a non-daily protocol sees broken stats.
 
