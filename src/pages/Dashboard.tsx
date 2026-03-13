@@ -112,7 +112,7 @@ const CompactJournal = ({ onExpandJournal }: { onExpandJournal: () => void }) =>
           ))}
         </div>
       )}
-    </div>
+    </PremiumCard>
   );
 };
 
