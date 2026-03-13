@@ -43,91 +43,103 @@ Deno.serve(async (req) => {
 
     const supabase = createClient(supabaseUrl, serviceRoleKey);
 
-    const today = new Date().toISOString().split("T")[0];
-    const currentHour = new Date().getUTCHours();
+    const now = new Date();
+    const today = now.toISOString().split("T")[0];
+    const currentHour = now.getUTCHours();
 
-    const isAM = currentHour >= 6 && currentHour < 12;
-    const isPM = currentHour >= 17 && currentHour < 23;
-    const window = isAM ? "AM" : isPM ? "PM" : null;
+    console.log(`Current UTC hour: ${currentHour}, date: ${today}`);
 
-    console.log(`Current UTC hour: ${currentHour}, window: ${window}`);
+    // ── DOSE REMINDERS ──
+    // Two phases:
+    //   1) "initial" — fires at user's chosen AM/PM time, sends email + push
+    //   2) "followup" — fires 3 hours later, checks if doses are incomplete, sends push + email chase
+    const results: Array<{ user_id: string; phase: string; email_sent: boolean; push_sent: boolean; peptides_count: number; supplements_count: number; error?: string }> = [];
 
-    // ── DOSE REMINDERS (only within AM/PM window) ──
-    const results: Array<{ user_id: string; email_sent: boolean; whatsapp_sent: boolean; push_sent: boolean; peptides_count: number; supplements_count: number; error?: string }> = [];
+    // Fetch all active protocols
+    const { data: protocols, error: protErr } = await supabase
+      .from("protocols")
+      .select("id, user_id, name, status, supplements, start_date")
+      .eq("status", "active");
 
-    if (window) {
-      const { data: protocols, error: protErr } = await supabase
-        .from("protocols")
-        .select("id, user_id, name, status, supplements")
-        .eq("status", "active");
+    if (protErr) throw protErr;
 
-      if (protErr) throw protErr;
+    if (protocols && protocols.length > 0) {
+      const userProtocols: Record<string, typeof protocols> = {};
+      for (const p of protocols) {
+        if (!userProtocols[p.user_id]) userProtocols[p.user_id] = [];
+        userProtocols[p.user_id].push(p);
+      }
 
-      if (protocols && protocols.length > 0) {
-        const userProtocols: Record<string, typeof protocols> = {};
-        for (const p of protocols) {
-          if (!userProtocols[p.user_id]) userProtocols[p.user_id] = [];
-          userProtocols[p.user_id].push(p);
+      for (const [userId, userProts] of Object.entries(userProtocols)) {
+        const { data: profile } = await supabase
+          .from("profiles")
+          .select("notify_email, notify_whatsapp, whatsapp_number, whatsapp_verified, notify_am_time, notify_pm_time")
+          .eq("user_id", userId)
+          .single();
+
+        if (!profile) continue;
+        if (!profile.notify_email && !onesignalApiKey) continue;
+
+        // Parse user's preferred hours (stored as "HH:MM:SS" time strings, assumed UTC)
+        const amHour = parseInt((profile.notify_am_time || "08:00:00").split(":")[0], 10);
+        const pmHour = parseInt((profile.notify_pm_time || "20:00:00").split(":")[0], 10);
+
+        // Determine which phase we're in for this user
+        const isAMTime = currentHour === amHour;
+        const isPMTime = currentHour === pmHour;
+        const isAMFollowup = currentHour === amHour + 3;
+        const isPMFollowup = currentHour === pmHour + 3;
+
+        if (!isAMTime && !isPMTime && !isAMFollowup && !isPMFollowup) continue;
+
+        const window = (isAMTime || isAMFollowup) ? "AM" : "PM";
+        const isFollowup = isAMFollowup || isPMFollowup;
+        const nudgeType = isFollowup ? `dose_followup_${window}_${today}` : `dose_${window}_${today}`;
+
+        // ── DEDUPLICATION: check if we already sent this exact nudge today ──
+        const { data: existingNudge } = await supabase
+          .from("nudge_log")
+          .select("id")
+          .eq("user_id", userId)
+          .eq("nudge_type", nudgeType)
+          .limit(1)
+          .maybeSingle();
+
+        if (existingNudge) {
+          console.log(`Skipping ${nudgeType} for ${userId}: already sent`);
+          continue;
         }
 
-        for (const [userId, userProts] of Object.entries(userProtocols)) {
-          const { data: profile } = await supabase
-            .from("profiles")
-            .select("notify_email, notify_whatsapp, whatsapp_number, whatsapp_verified, notify_am_time, notify_pm_time")
-            .eq("user_id", userId)
-            .single();
+        // Get user email
+        const { data: authUser } = await supabase.auth.admin.getUserById(userId);
+        const userEmail = authUser?.user?.email;
+        if (!userEmail && profile.notify_email) continue;
 
-          if (!profile) continue;
-          // Always try push; email/WhatsApp have their own guards below
-          if (!profile.notify_email && !profile.notify_whatsapp && !onesignalApiKey) continue;
+        // Build reminder items
+        const reminders: PeptideReminder[] = [];
+        const supplementReminders: SupplementReminder[] = [];
+        const seenSupplements = new Set<string>();
 
-          const { data: authUser } = await supabase.auth.admin.getUserById(userId);
-          const userEmail = authUser?.user?.email;
+        for (const prot of userProts) {
+          const { data: peptides } = await supabase
+            .from("protocol_peptides")
+            .select("peptide_name, dose_mcg, timing, frequency")
+            .eq("protocol_id", prot.id);
 
-          if (!userEmail && profile.notify_email) {
-            console.log(`User ${userId}: notify_email=true but no email found, skipping`);
-            continue;
-          }
+          if (peptides) {
+            for (const pep of peptides) {
+              const timing = (pep.timing || "AM").toUpperCase();
+              const matchesWindow =
+                (window === "AM" && timing.includes("AM")) ||
+                (window === "PM" && (timing.includes("PM") || timing.includes("BED")));
 
-          const reminders: PeptideReminder[] = [];
-          const supplementReminders: SupplementReminder[] = [];
-          const seenSupplements = new Set<string>();
-
-          for (const prot of userProts) {
-            const { data: peptides } = await supabase
-              .from("protocol_peptides")
-              .select("peptide_name, dose_mcg, timing, frequency")
-              .eq("protocol_id", prot.id);
-
-            if (peptides) {
-              for (const pep of peptides) {
-                const timing = (pep.timing || "AM").toUpperCase();
-                const matchesWindow =
-                  (window === "AM" && timing.includes("AM")) ||
-                  (window === "PM" && (timing.includes("PM") || timing.includes("BED")));
-
-                if (matchesWindow) {
-                  const isDue = checkFrequencyDue(pep.frequency, today);
-                  if (isDue) {
-                    reminders.push({
-                      peptide_name: pep.peptide_name,
-                      dose_mcg: pep.dose_mcg,
-                      timing: pep.timing || "AM",
-                      protocol_name: prot.name,
-                    });
-                  }
-                }
-              }
-            }
-
-            if (window === "AM" && Array.isArray(prot.supplements)) {
-              for (const supp of prot.supplements as Array<{ name: string; dose: string; frequency: string }>) {
-                if (supp.name && !seenSupplements.has(supp.name)) {
-                  seenSupplements.add(supp.name);
-                  supplementReminders.push({
-                    name: supp.name,
-                    dose: supp.dose || "",
-                    frequency: supp.frequency || "daily",
+              if (matchesWindow) {
+                const isDue = checkFrequencyDue(pep.frequency, today);
+                if (isDue) {
+                  reminders.push({
+                    peptide_name: pep.peptide_name,
+                    dose_mcg: pep.dose_mcg,
+                    timing: pep.timing || "AM",
                     protocol_name: prot.name,
                   });
                 }
@@ -135,120 +147,86 @@ Deno.serve(async (req) => {
             }
           }
 
-          if (reminders.length === 0 && supplementReminders.length === 0) continue;
+          if (window === "AM" && Array.isArray(prot.supplements)) {
+            for (const supp of prot.supplements as Array<{ name: string; dose: string; frequency: string }>) {
+              if (supp.name && !seenSupplements.has(supp.name)) {
+                seenSupplements.add(supp.name);
+                supplementReminders.push({
+                  name: supp.name,
+                  dose: supp.dose || "",
+                  frequency: supp.frequency || "daily",
+                  protocol_name: prot.name,
+                });
+              }
+            }
+          }
+        }
 
+        if (reminders.length === 0 && supplementReminders.length === 0) continue;
+
+        // ── FOLLOW-UP PHASE: only send if doses are still incomplete ──
+        if (isFollowup) {
+          const { data: completedLogs } = await supabase
+            .from("injection_logs")
+            .select("id")
+            .eq("user_id", userId)
+            .eq("status", "completed")
+            .gte("scheduled_time", `${today}T00:00:00`)
+            .lte("scheduled_time", `${today}T23:59:59`);
+
+          const completedCount = completedLogs?.length || 0;
+          const totalDue = reminders.length;
+
+          // Also check supplement logs
+          const { data: completedSuppLogs } = await supabase
+            .from("supplement_logs")
+            .select("id")
+            .eq("user_id", userId)
+            .eq("date", today)
+            .eq("completed", true);
+
+          const suppCompletedCount = completedSuppLogs?.length || 0;
+          const totalSuppDue = supplementReminders.length;
+
+          const allPeptidesDone = completedCount >= totalDue;
+          const allSuppsDone = suppCompletedCount >= totalSuppDue;
+
+          if (allPeptidesDone && allSuppsDone) {
+            console.log(`Follow-up skipped for ${userId}: all doses complete`);
+            continue;
+          }
+
+          // Filter down to only incomplete items
+          const incompletePeptideNames = new Set<string>();
+          if (!allPeptidesDone) {
+            const { data: todayLogs } = await supabase
+              .from("injection_logs")
+              .select("peptide_name")
+              .eq("user_id", userId)
+              .eq("status", "completed")
+              .gte("scheduled_time", `${today}T00:00:00`)
+              .lte("scheduled_time", `${today}T23:59:59`);
+
+            const donePeptides = new Set((todayLogs || []).map((l: any) => l.peptide_name));
+            for (const r of reminders) {
+              if (!donePeptides.has(r.peptide_name)) incompletePeptideNames.add(r.peptide_name);
+            }
+          }
+
+          const incompleteReminders = reminders.filter(r => incompletePeptideNames.has(r.peptide_name));
+          const incompleteSuppReminders = allSuppsDone ? [] : supplementReminders;
+
+          if (incompleteReminders.length === 0 && incompleteSuppReminders.length === 0) continue;
+
+          // Send follow-up with different messaging
           let emailSent = false;
-          let whatsappSent = false;
-          let errorMsg: string | undefined;
-
-          // Send email via Resend
-          if (profile.notify_email && resendApiKey && userEmail) {
-            try {
-              const emailHtml = buildReminderEmail(reminders, supplementReminders, window, today);
-              const totalCount = reminders.length + supplementReminders.length;
-
-              const emailPayload = {
-                from: "Peptyl <reminders@peptyl.co.uk>",
-                to: [userEmail],
-                subject: `⏰ Action Required: ${totalCount} item${totalCount > 1 ? "s" : ""} to complete on your dashboard`,
-                html: emailHtml,
-              };
-
-              console.log(`Sending email to ${userEmail} with ${totalCount} items...`);
-
-              const emailRes = await fetch("https://api.resend.com/emails", {
-                method: "POST",
-                headers: {
-                  Authorization: `Bearer ${resendApiKey}`,
-                  "Content-Type": "application/json",
-                },
-                body: JSON.stringify(emailPayload),
-              });
-
-              const emailResBody = await emailRes.text();
-              emailSent = emailRes.ok;
-
-              if (!emailRes.ok) {
-                console.error(`Resend API error (${emailRes.status}): ${emailResBody}`);
-                errorMsg = `Resend ${emailRes.status}: ${emailResBody}`;
-              } else {
-                console.log(`Email sent to ${userEmail}: ${emailResBody}`);
-              }
-            } catch (emailErr) {
-              console.error(`Email send exception for ${userEmail}:`, emailErr);
-              errorMsg = emailErr instanceof Error ? emailErr.message : "Email send failed";
-            }
-          } else {
-            console.log(`Email skipped for ${userId}: notify=${profile.notify_email}, hasKey=${!!resendApiKey}, email=${userEmail}`);
-          }
-
-          // Send WhatsApp via Meta Cloud API
-          if (profile.notify_whatsapp && profile.whatsapp_verified && whatsappToken && whatsappPhoneNumberId && profile.whatsapp_number) {
-            const formattedWa = formatWhatsAppNumber(profile.whatsapp_number);
-            if (!formattedWa) {
-              console.warn(`Invalid WhatsApp number for ${userId}: ${profile.whatsapp_number}, skipping`);
-            } else {
-              // Get protocol context for day counter + streak
-              const firstProt = userProts[0];
-              const daysActive = firstProt ? Math.floor((Date.now() - new Date(firstProt.start_date || today).getTime()) / 86400000) : 0;
-
-              // Check streak from injection_logs
-              let streak = 0;
-              try {
-                const { data: recentLogs } = await supabase
-                  .from("injection_logs")
-                  .select("scheduled_time, status")
-                  .eq("user_id", userId)
-                  .eq("status", "completed")
-                  .order("scheduled_time", { ascending: false })
-                  .limit(30);
-                if (recentLogs) {
-                  const seen = new Set<string>();
-                  for (const log of recentLogs) {
-                    seen.add(new Date(log.scheduled_time).toISOString().split("T")[0]);
-                  }
-                  const d = new Date();
-                  for (let i = 1; i <= 30; i++) {
-                    d.setDate(d.getDate() - 1);
-                    if (seen.has(d.toISOString().split("T")[0])) streak++;
-                    else break;
-                  }
-                }
-              } catch (_) { /* ignore streak calc errors */ }
-
-              const waMessage = buildWhatsAppMessage(reminders, supplementReminders, window, firstProt?.name, daysActive, streak);
-              try {
-                const waRes = await fetch(
-                  `https://graph.facebook.com/v21.0/${whatsappPhoneNumberId}/messages`,
-                  {
-                    method: "POST",
-                    headers: {
-                      Authorization: `Bearer ${whatsappToken}`,
-                      "Content-Type": "application/json",
-                    },
-                    body: JSON.stringify({
-                      messaging_product: "whatsapp",
-                      to: formattedWa,
-                      type: "text",
-                      text: { body: waMessage },
-                    }),
-                  }
-                );
-                const waData = await waRes.json();
-                whatsappSent = waRes.ok;
-                console.log(`WhatsApp to ${formattedWa}: ${waRes.ok ? "sent" : "failed"}`, waData);
-              } catch (waErr) {
-                console.error("WhatsApp send error:", waErr);
-              }
-            }
-          }
-
-          // Send push notification via OneSignal
           let pushSent = false;
+
+          const totalMissing = incompleteReminders.length + incompleteSuppReminders.length;
+
+          // Push notification (follow-up)
           if (onesignalApiKey) {
-          try {
-              const pushMessage = buildPushMessage(reminders, supplementReminders, window);
-              const totalCount = reminders.length + supplementReminders.length;
+            try {
               const pushRes = await fetch("https://onesignal.com/api/v1/notifications", {
                 method: "POST",
                 headers: {
@@ -258,46 +236,172 @@ Deno.serve(async (req) => {
                 body: JSON.stringify({
                   app_id: onesignalAppId,
                   include_external_user_ids: [userId],
-                  headings: { en: pushMessage.title },
-                  contents: { en: pushMessage.body },
+                  headings: { en: `⚠️ ${totalMissing} dose${totalMissing > 1 ? "s" : ""} still incomplete` },
+                  contents: { en: `You haven't logged ${totalMissing > 1 ? "some" : "your"} ${window} doses yet. Tap to complete now.` },
                   url: "https://peptyl.co.uk/dashboard",
                   chrome_web_icon: "https://peptyl.co.uk/icon-192.png",
                   chrome_web_badge: "https://peptyl.co.uk/favicon.png",
                   priority: 10,
                   ios_interruption_level: "time-sensitive",
                   ios_relevance_score: 1.0,
-                  ios_badge_type: "SetTo",
-                  ios_badge_count: totalCount,
-                  android_channel_id: undefined,
                   ttl: 3600,
                   web_buttons: [
-                    { id: "log-dose", text: "✅ Log Doses", url: "https://peptyl.co.uk/dashboard" },
-                    { id: "snooze", text: "⏰ Remind Later", url: "https://peptyl.co.uk/dashboard?snooze=true" },
+                    { id: "log-dose", text: "✅ Log Now", url: "https://peptyl.co.uk/dashboard" },
                   ],
-                  android_group: "peptyl_dose_reminders",
-                  thread_id: "peptyl_dose_reminders",
-                  summary_arg: `${totalCount} items due`,
-                  collapse_id: `dose_${window}_${today}`,
+                  collapse_id: `dose_followup_${window}_${today}`,
                 }),
               });
               const pushData = await pushRes.json();
               pushSent = pushRes.ok && pushData.recipients > 0;
-              console.log(`Push to ${userId}: ${pushSent ? "sent" : "no recipients"}`, pushData);
-            } catch (pushErr) {
-              console.error("OneSignal push error:", pushErr);
+              console.log(`Follow-up push to ${userId}: ${pushSent ? "sent" : "no recipients"}`);
+            } catch (e) {
+              console.error("Follow-up push error:", e);
             }
           }
 
+          // Email (follow-up)
+          if (profile.notify_email && resendApiKey && userEmail) {
+            try {
+              const emailHtml = buildFollowupEmail(incompleteReminders, incompleteSuppReminders, window, today);
+              const emailRes = await fetch("https://api.resend.com/emails", {
+                method: "POST",
+                headers: {
+                  Authorization: `Bearer ${resendApiKey}`,
+                  "Content-Type": "application/json",
+                },
+                body: JSON.stringify({
+                  from: "Peptyl <reminders@peptyl.co.uk>",
+                  to: [userEmail],
+                  subject: `⚠️ ${totalMissing} dose${totalMissing > 1 ? "s" : ""} still need logging`,
+                  html: emailHtml,
+                }),
+              });
+              emailSent = emailRes.ok;
+              if (!emailRes.ok) {
+                const body = await emailRes.text();
+                console.error(`Follow-up email error: ${body}`);
+              }
+            } catch (e) {
+              console.error("Follow-up email error:", e);
+            }
+          }
+
+          // Log the follow-up nudge
+          await supabase.from("nudge_log").insert({
+            user_id: userId,
+            nudge_type: nudgeType,
+          });
+
           results.push({
             user_id: userId,
+            phase: "followup",
             email_sent: emailSent,
-            whatsapp_sent: whatsappSent,
             push_sent: pushSent,
-            peptides_count: reminders.length,
-            supplements_count: supplementReminders.length,
-            ...(errorMsg ? { error: errorMsg } : {}),
+            peptides_count: incompleteReminders.length,
+            supplements_count: incompleteSuppReminders.length,
           });
+
+          continue; // don't also send initial
         }
+
+        // ── INITIAL REMINDER PHASE ──
+        let emailSent = false;
+        let pushSent = false;
+        let errorMsg: string | undefined;
+
+        // Send email via Resend
+        if (profile.notify_email && resendApiKey && userEmail) {
+          try {
+            const emailHtml = buildReminderEmail(reminders, supplementReminders, window, today);
+            const totalCount = reminders.length + supplementReminders.length;
+
+            const emailRes = await fetch("https://api.resend.com/emails", {
+              method: "POST",
+              headers: {
+                Authorization: `Bearer ${resendApiKey}`,
+                "Content-Type": "application/json",
+              },
+              body: JSON.stringify({
+                from: "Peptyl <reminders@peptyl.co.uk>",
+                to: [userEmail],
+                subject: `⏰ Action Required: ${totalCount} item${totalCount > 1 ? "s" : ""} to complete on your dashboard`,
+                html: emailHtml,
+              }),
+            });
+
+            const emailResBody = await emailRes.text();
+            emailSent = emailRes.ok;
+
+            if (!emailRes.ok) {
+              console.error(`Resend API error (${emailRes.status}): ${emailResBody}`);
+              errorMsg = `Resend ${emailRes.status}: ${emailResBody}`;
+            } else {
+              console.log(`Email sent to ${userEmail}: ${emailResBody}`);
+            }
+          } catch (emailErr) {
+            console.error(`Email send exception for ${userEmail}:`, emailErr);
+            errorMsg = emailErr instanceof Error ? emailErr.message : "Email send failed";
+          }
+        }
+
+        // Send push notification via OneSignal
+        if (onesignalApiKey) {
+          try {
+            const pushMessage = buildPushMessage(reminders, supplementReminders, window);
+            const totalCount = reminders.length + supplementReminders.length;
+            const pushRes = await fetch("https://onesignal.com/api/v1/notifications", {
+              method: "POST",
+              headers: {
+                Authorization: `Basic ${onesignalApiKey}`,
+                "Content-Type": "application/json",
+              },
+              body: JSON.stringify({
+                app_id: onesignalAppId,
+                include_external_user_ids: [userId],
+                headings: { en: pushMessage.title },
+                contents: { en: pushMessage.body },
+                url: "https://peptyl.co.uk/dashboard",
+                chrome_web_icon: "https://peptyl.co.uk/icon-192.png",
+                chrome_web_badge: "https://peptyl.co.uk/favicon.png",
+                priority: 10,
+                ios_interruption_level: "time-sensitive",
+                ios_relevance_score: 1.0,
+                ios_badge_type: "SetTo",
+                ios_badge_count: totalCount,
+                ttl: 3600,
+                web_buttons: [
+                  { id: "log-dose", text: "✅ Log Doses", url: "https://peptyl.co.uk/dashboard" },
+                  { id: "snooze", text: "⏰ Remind Later", url: "https://peptyl.co.uk/dashboard?snooze=true" },
+                ],
+                android_group: "peptyl_dose_reminders",
+                thread_id: "peptyl_dose_reminders",
+                summary_arg: `${totalCount} items due`,
+                collapse_id: `dose_${window}_${today}`,
+              }),
+            });
+            const pushData = await pushRes.json();
+            pushSent = pushRes.ok && pushData.recipients > 0;
+            console.log(`Push to ${userId}: ${pushSent ? "sent" : "no recipients"}`, pushData);
+          } catch (pushErr) {
+            console.error("OneSignal push error:", pushErr);
+          }
+        }
+
+        // Log initial nudge to prevent re-send
+        await supabase.from("nudge_log").insert({
+          user_id: userId,
+          nudge_type: nudgeType,
+        });
+
+        results.push({
+          user_id: userId,
+          phase: "initial",
+          email_sent: emailSent,
+          push_sent: pushSent,
+          peptides_count: reminders.length,
+          supplements_count: supplementReminders.length,
+          ...(errorMsg ? { error: errorMsg } : {}),
+        });
       }
     }
 
@@ -365,7 +469,6 @@ Deno.serve(async (req) => {
             });
             const pushData = await pushRes.json();
             pushOk = pushRes.ok && pushData.recipients > 0;
-            console.log(`Nudge push to ${np.user_id}: ${pushOk ? "sent" : "no recipients"}`);
           } catch (e) {
             console.error("Nudge push error:", e);
           }
@@ -415,7 +518,6 @@ Deno.serve(async (req) => {
               }),
             });
             emailOk = emailRes.ok;
-            console.log(`Nudge email to ${nudgeEmail}: ${emailOk ? "sent" : "failed"}`);
           } catch (e) {
             console.error("Nudge email error:", e);
           }
@@ -431,7 +533,7 @@ Deno.serve(async (req) => {
       }
     }
 
-    // ── RESULTS READY NOTIFICATION BLOCK (runs regardless of window) ──
+    // ── RESULTS READY NOTIFICATION BLOCK ──
     const resultsReadyResults: Array<{ user_id: string; protocol: string; push: boolean; email: boolean; whatsapp: boolean }> = [];
 
     const twoHoursAgo = new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString();
@@ -444,7 +546,6 @@ Deno.serve(async (req) => {
 
     if (completedOutcomes && completedOutcomes.length > 0) {
       for (const outcome of completedOutcomes) {
-        // Check if already sent
         const { data: existingNudge } = await supabase
           .from("nudge_log")
           .select("id")
@@ -454,7 +555,6 @@ Deno.serve(async (req) => {
           .maybeSingle();
         if (existingNudge) continue;
 
-        // Get protocol name
         const { data: protocol } = await supabase
           .from("protocols")
           .select("name")
@@ -468,10 +568,8 @@ Deno.serve(async (req) => {
           ? `https://peptyl.co.uk/dna/report/${reportId}`
           : "https://peptyl.co.uk/dashboard";
 
-        // Extract top result from outcome_markers
         const topResult = extractTopResult(outcome.outcome_markers as Record<string, any> | null);
 
-        // Get user info
         const { data: authUser } = await supabase.auth.admin.getUserById(outcome.user_id);
         const userEmail = authUser?.user?.email;
 
@@ -485,7 +583,6 @@ Deno.serve(async (req) => {
         let emailOk = false;
         let whatsappOk = false;
 
-        // Push via OneSignal
         if (onesignalApiKey) {
           try {
             const pushBody = topResult
@@ -520,13 +617,11 @@ Deno.serve(async (req) => {
             });
             const pushData = await pushRes.json();
             pushOk = pushRes.ok && pushData.recipients > 0;
-            console.log(`Results push to ${outcome.user_id}: ${pushOk ? "sent" : "no recipients"}`);
           } catch (e) {
             console.error("Results push error:", e);
           }
         }
 
-        // WhatsApp
         if (profile?.notify_whatsapp && profile?.whatsapp_verified && whatsappToken && whatsappPhoneNumberId && profile.whatsapp_number) {
           const formattedWa = formatWhatsAppNumber(profile.whatsapp_number);
           if (formattedWa) {
@@ -561,14 +656,12 @@ Deno.serve(async (req) => {
                 }
               );
               whatsappOk = waRes.ok;
-              console.log(`Results WhatsApp to ${formattedWa}: ${whatsappOk ? "sent" : "failed"}`);
             } catch (e) {
               console.error("Results WhatsApp error:", e);
             }
           }
         }
 
-        // Email via Resend
         if (profile?.notify_email && resendApiKey && userEmail) {
           try {
             const resultHighlight = topResult
@@ -616,13 +709,11 @@ Deno.serve(async (req) => {
               }),
             });
             emailOk = emailRes.ok;
-            console.log(`Results email to ${userEmail}: ${emailOk ? "sent" : "failed"}`);
           } catch (e) {
             console.error("Results email error:", e);
           }
         }
 
-        // Log the nudge
         await supabase.from("nudge_log").insert({
           user_id: outcome.user_id,
           protocol_id: outcome.protocol_id,
@@ -660,28 +751,21 @@ Deno.serve(async (req) => {
   }
 });
 
-// ── Helper: extract top result from outcome_markers ──
+// ── Helpers ──
+
 function extractTopResult(markers: Record<string, any> | null): string | null {
   if (!markers || typeof markers !== "object") return null;
-
   let topMarker = "";
   let topPct = 0;
-
   for (const [key, val] of Object.entries(markers)) {
     if (val && typeof val === "object" && "pct_change" in val) {
       const pct = Math.abs(Number(val.pct_change) || 0);
-      if (pct > topPct) {
-        topPct = pct;
-        topMarker = key;
-      }
+      if (pct > topPct) { topPct = pct; topMarker = key; }
     }
   }
-
   if (!topMarker || topPct === 0) return null;
-
   const markerVal = markers[topMarker];
   const direction = Number(markerVal.pct_change) > 0 ? "improved" : "changed";
-  // Format marker name: snake_case → Title Case
   const name = topMarker.replace(/_/g, " ").replace(/\b\w/g, (c: string) => c.toUpperCase());
   return `${name} ${direction} ${Math.round(topPct)}%`;
 }
@@ -702,57 +786,25 @@ function checkFrequencyDue(frequency: string, todayStr: string): boolean {
 function formatWhatsAppNumber(raw: string): string | null {
   let n = raw.replace(/[\s\-\(\)\.]/g, "");
   if (n.startsWith("+")) n = n.slice(1);
-  if (n.startsWith("07")) n = "44" + n.slice(1); // UK mobile
-  if (n.startsWith("00")) n = n.slice(2); // international prefix
+  if (n.startsWith("07")) n = "44" + n.slice(1);
+  if (n.startsWith("00")) n = n.slice(2);
   if (!/^\d{10,15}$/.test(n)) return null;
-  if (n.startsWith("0")) return null; // still local format
+  if (n.startsWith("0")) return null;
   return n;
 }
 
-function buildWhatsAppMessage(
+function buildPushMessage(
   reminders: PeptideReminder[],
   supplements: SupplementReminder[],
-  window: string,
-  protocolName?: string,
-  daysActive?: number,
-  streak?: number,
-): string {
+  window: string
+): { title: string; body: string } {
   const totalCount = reminders.length + supplements.length;
-  const lines = [
-    `🧬 *Action Required — Your ${window} Protocol*`,
-    `━━━━━━━━━━━━━━━━`,
-  ];
-
-  if (protocolName && daysActive && daysActive > 0) {
-    lines.push(`_Day ${daysActive} of your ${protocolName} protocol_`);
-  }
-
-  lines.push(`You have *${totalCount} item${totalCount > 1 ? "s" : ""}* to complete.\n`);
-
-  if (reminders.length > 0) {
-    for (const r of reminders) {
-      lines.push(`💉 *${r.peptide_name}* — ${r.dose_mcg} mcg`);
-      lines.push(`   📋 Protocol: ${r.protocol_name}\n`);
-    }
-  }
-
-  if (supplements.length > 0) {
-    lines.push(`💊 *Supplements*`);
-    for (const s of supplements) {
-      lines.push(`   • ${s.name} — ${s.dose}`);
-    }
-    lines.push("");
-  }
-
-  if (streak && streak > 7) {
-    lines.push(`🔥 ${streak}-day streak — keep going!\n`);
-  }
-
-  lines.push(`━━━━━━━━━━━━━━━━`);
-  lines.push(`✅ *Log your doses on your dashboard:*`);
-  lines.push(`https://peptyl.co.uk/dashboard`);
-
-  return lines.join("\n");
+  const title = `⏰ ${window} Protocol — ${totalCount} item${totalCount > 1 ? "s" : ""} due`;
+  const items: string[] = [];
+  for (const r of reminders) items.push(`💉 ${r.peptide_name} ${r.dose_mcg}mcg`);
+  for (const s of supplements) items.push(`💊 ${s.name} ${s.dose}`);
+  const body = items.slice(0, 3).join(", ") + (items.length > 3 ? ` +${items.length - 3} more` : "") + " — tap to log";
+  return { title, body };
 }
 
 function buildReminderEmail(
@@ -764,101 +816,80 @@ function buildReminderEmail(
   const totalCount = reminders.length + supplements.length;
 
   const peptideRows = reminders
-    .map(
-      (r) =>
-        `<tr>
-          <td style="padding:12px 16px;border-bottom:1px solid #e5e7eb">
-            <span style="font-size:18px">💉</span>
-            <strong style="color:#111827;margin-left:6px">${r.peptide_name}</strong>
-          </td>
-          <td style="padding:12px 16px;border-bottom:1px solid #e5e7eb;color:#374151;font-weight:500">${r.dose_mcg} mcg</td>
-          <td style="padding:12px 16px;border-bottom:1px solid #e5e7eb;color:#6b7280">${r.protocol_name}</td>
-        </tr>`
-    )
-    .join("");
+    .map(r => `<tr>
+      <td style="padding:12px 16px;border-bottom:1px solid #e5e7eb"><span style="font-size:18px">💉</span><strong style="color:#111827;margin-left:6px">${r.peptide_name}</strong></td>
+      <td style="padding:12px 16px;border-bottom:1px solid #e5e7eb;color:#374151;font-weight:500">${r.dose_mcg} mcg</td>
+      <td style="padding:12px 16px;border-bottom:1px solid #e5e7eb;color:#6b7280">${r.protocol_name}</td>
+    </tr>`).join("");
 
   const supplementRows = supplements
-    .map(
-      (s) =>
-        `<tr>
-          <td style="padding:12px 16px;border-bottom:1px solid #e5e7eb">
-            <span style="font-size:18px">💊</span>
-            <strong style="color:#111827;margin-left:6px">${s.name}</strong>
-          </td>
-          <td style="padding:12px 16px;border-bottom:1px solid #e5e7eb;color:#374151;font-weight:500">${s.dose}</td>
-          <td style="padding:12px 16px;border-bottom:1px solid #e5e7eb;color:#6b7280">${s.protocol_name}</td>
-        </tr>`
-    )
-    .join("");
+    .map(s => `<tr>
+      <td style="padding:12px 16px;border-bottom:1px solid #e5e7eb"><span style="font-size:18px">💊</span><strong style="color:#111827;margin-left:6px">${s.name}</strong></td>
+      <td style="padding:12px 16px;border-bottom:1px solid #e5e7eb;color:#374151;font-weight:500">${s.dose}</td>
+      <td style="padding:12px 16px;border-bottom:1px solid #e5e7eb;color:#6b7280">${s.protocol_name}</td>
+    </tr>`).join("");
 
   return `
     <div style="font-family:system-ui,-apple-system,sans-serif;max-width:520px;margin:0 auto;padding:0;background:#ffffff">
-      <!-- Header -->
       <div style="background:linear-gradient(135deg,#0d9488,#0f766e);padding:28px 24px;text-align:center;border-radius:12px 12px 0 0">
         <h1 style="color:#ffffff;font-size:22px;margin:0;font-weight:700">⏰ Action Required</h1>
         <p style="color:#d1fae5;font-size:14px;margin:8px 0 0;font-weight:400">
           You have <strong style="color:#ffffff">${totalCount} item${totalCount > 1 ? "s" : ""}</strong> to complete in your <strong style="color:#ffffff">${window}</strong> window
         </p>
       </div>
-
-      <!-- Body -->
       <div style="padding:24px;border:1px solid #e5e7eb;border-top:none;border-radius:0 0 12px 12px">
-        <p style="margin:0 0 16px;font-size:15px;color:#374151;line-height:1.5">
-          Hi there 👋 — here's what's due today. Please log in to your dashboard to mark each item as complete.
-        </p>
-
-        <!-- Items table -->
+        <p style="margin:0 0 16px;font-size:15px;color:#374151;line-height:1.5">Hi there 👋 — here's what's due today. Please log in to your dashboard to mark each item as complete.</p>
         <table style="width:100%;border-collapse:collapse;font-size:14px;margin-bottom:20px;border:1px solid #e5e7eb;border-radius:8px;overflow:hidden">
-          <thead>
-            <tr style="background:#f0fdfa">
-              <th style="padding:10px 16px;text-align:left;font-weight:600;color:#0d9488;font-size:12px;text-transform:uppercase;letter-spacing:0.5px">Item</th>
-              <th style="padding:10px 16px;text-align:left;font-weight:600;color:#0d9488;font-size:12px;text-transform:uppercase;letter-spacing:0.5px">Dose</th>
-              <th style="padding:10px 16px;text-align:left;font-weight:600;color:#0d9488;font-size:12px;text-transform:uppercase;letter-spacing:0.5px">Protocol</th>
-            </tr>
-          </thead>
+          <thead><tr style="background:#f0fdfa">
+            <th style="padding:10px 16px;text-align:left;font-weight:600;color:#0d9488;font-size:12px;text-transform:uppercase;letter-spacing:0.5px">Item</th>
+            <th style="padding:10px 16px;text-align:left;font-weight:600;color:#0d9488;font-size:12px;text-transform:uppercase;letter-spacing:0.5px">Dose</th>
+            <th style="padding:10px 16px;text-align:left;font-weight:600;color:#0d9488;font-size:12px;text-transform:uppercase;letter-spacing:0.5px">Protocol</th>
+          </tr></thead>
           <tbody>${peptideRows}${supplementRows}</tbody>
         </table>
-
-        <!-- CTA Button -->
         <div style="text-align:center;margin:24px 0 8px">
-          <a href="https://peptyl.co.uk/dashboard" 
-             style="display:inline-block;background:#0d9488;color:#ffffff;text-decoration:none;padding:14px 32px;border-radius:8px;font-weight:600;font-size:15px;letter-spacing:0.3px">
-            ✅ Go to Dashboard & Complete
-          </a>
+          <a href="https://peptyl.co.uk/dashboard" style="display:inline-block;background:#0d9488;color:#ffffff;text-decoration:none;padding:14px 32px;border-radius:8px;font-weight:600;font-size:15px;letter-spacing:0.3px">✅ Go to Dashboard & Complete</a>
         </div>
-        <p style="text-align:center;font-size:12px;color:#9ca3af;margin:8px 0 0">
-          Log your doses to keep your streak going!
-        </p>
+        <p style="text-align:center;font-size:12px;color:#9ca3af;margin:8px 0 0">Log your doses to keep your streak going!</p>
       </div>
-
-      <!-- Footer -->
       <div style="padding:20px 24px;text-align:center">
-        <p style="font-size:11px;color:#9ca3af;margin:0;line-height:1.6">
-          This is an automated reminder from Peptyl. For educational and research purposes only.
-          <br/>Manage notification preferences in your <a href="https://peptyl.co.uk/dashboard" style="color:#0d9488;text-decoration:underline">dashboard settings</a>.
-        </p>
+        <p style="font-size:11px;color:#9ca3af;margin:0;line-height:1.6">This is an automated reminder from Peptyl. For educational and research purposes only.<br/>Manage notification preferences in your <a href="https://peptyl.co.uk/dashboard" style="color:#0d9488;text-decoration:underline">dashboard settings</a>.</p>
       </div>
-    </div>
-  `;
+    </div>`;
 }
 
-function buildPushMessage(
+function buildFollowupEmail(
   reminders: PeptideReminder[],
   supplements: SupplementReminder[],
-  window: string
-): { title: string; body: string } {
+  window: string,
+  date: string
+): string {
   const totalCount = reminders.length + supplements.length;
-  const title = `⏰ ${window} Protocol — ${totalCount} item${totalCount > 1 ? "s" : ""} due`;
 
-  const items: string[] = [];
-  for (const r of reminders) {
-    items.push(`💉 ${r.peptide_name} ${r.dose_mcg}mcg`);
-  }
-  for (const s of supplements) {
-    items.push(`💊 ${s.name} ${s.dose}`);
-  }
+  const itemList = [
+    ...reminders.map(r => `<li style="padding:6px 0;color:#374151">💉 <strong>${r.peptide_name}</strong> — ${r.dose_mcg} mcg</li>`),
+    ...supplements.map(s => `<li style="padding:6px 0;color:#374151">💊 <strong>${s.name}</strong> — ${s.dose}</li>`),
+  ].join("");
 
-  const body = items.slice(0, 3).join(", ") + (items.length > 3 ? ` +${items.length - 3} more` : "") + " — tap to log";
-
-  return { title, body };
+  return `
+    <div style="font-family:system-ui,-apple-system,sans-serif;max-width:520px;margin:0 auto;padding:0;background:#ffffff">
+      <div style="background:linear-gradient(135deg,#d97706,#b45309);padding:28px 24px;text-align:center;border-radius:12px 12px 0 0">
+        <h1 style="color:#ffffff;font-size:22px;margin:0;font-weight:700">⚠️ Doses Still Incomplete</h1>
+        <p style="color:#fef3c7;font-size:14px;margin:8px 0 0;font-weight:400">
+          ${totalCount} item${totalCount > 1 ? "s" : ""} from your ${window} window ${totalCount > 1 ? "haven't" : "hasn't"} been logged yet
+        </p>
+      </div>
+      <div style="padding:24px;border:1px solid #e5e7eb;border-top:none;border-radius:0 0 12px 12px">
+        <p style="margin:0 0 16px;font-size:15px;color:#374151;line-height:1.5">
+          Hey — it looks like you still have outstanding items today. Don't break your streak!
+        </p>
+        <ul style="margin:0 0 20px;padding:0 0 0 16px;font-size:14px">${itemList}</ul>
+        <div style="text-align:center;margin:24px 0 8px">
+          <a href="https://peptyl.co.uk/dashboard" style="display:inline-block;background:#d97706;color:#ffffff;text-decoration:none;padding:14px 32px;border-radius:8px;font-weight:600;font-size:15px;letter-spacing:0.3px">✅ Complete Now</a>
+        </div>
+      </div>
+      <div style="padding:20px 24px;text-align:center">
+        <p style="font-size:11px;color:#9ca3af;margin:0;line-height:1.6">This is an automated reminder from Peptyl. For educational and research purposes only.<br/>Manage notification preferences in your <a href="https://peptyl.co.uk/dashboard" style="color:#0d9488;text-decoration:underline">dashboard settings</a>.</p>
+      </div>
+    </div>`;
 }
