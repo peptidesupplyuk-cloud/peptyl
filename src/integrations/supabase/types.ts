@@ -2207,6 +2207,45 @@ export type Database = {
         }
         Relationships: []
       }
+      user_activity: {
+        Row: {
+          created_at: string
+          device_type: string | null
+          display_mode: string | null
+          id: string
+          is_pwa: boolean
+          page_path: string | null
+          referrer: string | null
+          screen_width: number | null
+          session_id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          device_type?: string | null
+          display_mode?: string | null
+          id?: string
+          is_pwa?: boolean
+          page_path?: string | null
+          referrer?: string | null
+          screen_width?: number | null
+          session_id: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          device_type?: string | null
+          display_mode?: string | null
+          id?: string
+          is_pwa?: boolean
+          page_path?: string | null
+          referrer?: string | null
+          screen_width?: number | null
+          session_id?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       user_biomarker_results: {
         Row: {
           biomarker_name: string

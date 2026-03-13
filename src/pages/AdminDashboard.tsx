@@ -13,9 +13,9 @@ import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
 import {
   AlertTriangle, Users, Globe, Mail, Activity, FlaskConical, Droplets, Loader2,
-  Upload, CheckCircle, XCircle, Clock, FileText, ExternalLink, Twitter, BarChart3, Target, Sparkles, Megaphone, Search, Copy, Link as LinkIcon, MessageSquare, Trash2, BookOpen, TrendingUp, CreditCard, Star, Dna,
+  Upload, CheckCircle, XCircle, Clock, FileText, ExternalLink, Twitter, BarChart3, Target, Sparkles, Megaphone, Search, Copy, Link as LinkIcon, MessageSquare, Trash2, BookOpen, TrendingUp, CreditCard, Star, Dna, Smartphone, Monitor, Tablet, RotateCcw, Eye,
 } from "lucide-react";
-import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from "recharts";
+import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, LineChart, Line } from "recharts";
 import MonitoredAccounts from "@/components/admin/MonitoredAccounts";
 import { campaigns } from "@/data/campaigns";
 import IngestChat from "@/components/admin/IngestChat";
@@ -1433,6 +1433,205 @@ const KnowledgeBaseTab = () => {
   );
 };
 
+/* ========== USERS / ENGAGEMENT TAB ========== */
+
+const UsersTab = () => {
+  const { user } = useAuth();
+
+  const { data: stats, isLoading } = useQuery({
+    queryKey: ["admin-stats"],
+    queryFn: async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      const resp = await fetch(
+        `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/admin-stats`,
+        { headers: { Authorization: `Bearer ${session?.access_token}`, "Content-Type": "application/json" } }
+      );
+      if (!resp.ok) throw new Error("Failed to load stats");
+      return resp.json();
+    },
+    enabled: user?.email === ADMIN_EMAIL,
+  });
+
+  if (isLoading) return <div className="flex items-center justify-center py-12"><Loader2 className="h-6 w-6 animate-spin text-muted-foreground" /></div>;
+
+  const eng = stats?.engagement;
+  if (!eng) return <p className="text-muted-foreground text-sm text-center py-12">No engagement data yet. Data will appear once users start visiting.</p>;
+
+  const deviceData = Object.entries(eng.device_counts as Record<string, number>)
+    .map(([name, value]) => ({ name: name.charAt(0).toUpperCase() + name.slice(1), value }));
+
+  const sessionData = Object.entries(eng.session_distribution as Record<string, number>)
+    .map(([name, value]) => ({ name: name + " sessions", value }));
+
+  const pwaVsBrowser = [
+    { name: "PWA / Standalone", value: eng.pwa_users },
+    { name: "Browser", value: eng.browser_users },
+  ].filter(d => d.value > 0);
+
+  return (
+    <div className="space-y-6">
+      {/* Key metrics */}
+      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
+        <StatCard icon={Eye} label="DAU (Today)" value={eng.dau} />
+        <StatCard icon={Activity} label="WAU (7d)" value={eng.wau} />
+        <StatCard icon={Users} label="MAU (30d)" value={eng.mau} />
+        <StatCard icon={Smartphone} label="PWA Users" value={eng.pwa_users} />
+        <StatCard icon={RotateCcw} label="Return Rate" value={`${eng.return_rate}%`} />
+        <StatCard icon={Eye} label="Page Views (30d)" value={eng.total_page_views} />
+      </div>
+
+      {/* DAU Trend + PWA vs Browser */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        {eng.dau_trend?.length > 0 && (
+          <div className="bg-card border border-border rounded-xl p-5">
+            <h3 className="font-heading font-semibold text-foreground text-sm mb-4">Daily Active Users (30 Days)</h3>
+            <ResponsiveContainer width="100%" height={200}>
+              <LineChart data={eng.dau_trend}>
+                <XAxis dataKey="date" tick={{ fontSize: 10 }} stroke="hsl(var(--muted-foreground))" />
+                <YAxis tick={{ fontSize: 10 }} stroke="hsl(var(--muted-foreground))" allowDecimals={false} />
+                <Tooltip contentStyle={{ backgroundColor: "hsl(var(--card))", border: "1px solid hsl(var(--border))", borderRadius: "8px", fontSize: "12px" }} />
+                <Line type="monotone" dataKey="count" stroke="hsl(var(--primary))" strokeWidth={2} dot={false} />
+              </LineChart>
+            </ResponsiveContainer>
+          </div>
+        )}
+
+        <div className="bg-card border border-border rounded-xl p-5">
+          <h3 className="font-heading font-semibold text-foreground text-sm mb-4">PWA vs Browser</h3>
+          <div className="flex items-center gap-4">
+            <ResponsiveContainer width="50%" height={180}>
+              <PieChart>
+                <Pie data={pwaVsBrowser} dataKey="value" cx="50%" cy="50%" outerRadius={70} stroke="none">
+                  {pwaVsBrowser.map((_, i) => <Cell key={i} fill={COLORS[i % COLORS.length]} />)}
+                </Pie>
+                <Tooltip contentStyle={{ backgroundColor: "hsl(var(--card))", border: "1px solid hsl(var(--border))", borderRadius: "8px", fontSize: "12px" }} />
+              </PieChart>
+            </ResponsiveContainer>
+            <div className="flex flex-col gap-2">
+              {pwaVsBrowser.map((d, i) => (
+                <div key={d.name} className="flex items-center gap-2 text-xs">
+                  <div className="w-2.5 h-2.5 rounded-full flex-shrink-0" style={{ backgroundColor: COLORS[i % COLORS.length] }} />
+                  <span className="text-muted-foreground">{d.name} ({d.value})</span>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Device Types + Session Frequency */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <div className="bg-card border border-border rounded-xl p-5">
+          <h3 className="font-heading font-semibold text-foreground text-sm mb-4 flex items-center gap-2">
+            <Monitor className="h-4 w-4 text-primary" /> Device Breakdown
+          </h3>
+          {deviceData.length > 0 ? (
+            <div className="flex items-center gap-4">
+              <ResponsiveContainer width="50%" height={160}>
+                <PieChart>
+                  <Pie data={deviceData} dataKey="value" cx="50%" cy="50%" outerRadius={60} stroke="none">
+                    {deviceData.map((_, i) => <Cell key={i} fill={COLORS[(i + 2) % COLORS.length]} />)}
+                  </Pie>
+                  <Tooltip contentStyle={{ backgroundColor: "hsl(var(--card))", border: "1px solid hsl(var(--border))", borderRadius: "8px", fontSize: "12px" }} />
+                </PieChart>
+              </ResponsiveContainer>
+              <div className="flex flex-col gap-1.5">
+                {deviceData.map((d, i) => (
+                  <div key={d.name} className="flex items-center gap-2 text-xs">
+                    <div className="w-2.5 h-2.5 rounded-full flex-shrink-0" style={{ backgroundColor: COLORS[(i + 2) % COLORS.length] }} />
+                    <span className="text-muted-foreground">{d.name} ({d.value})</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          ) : (
+            <p className="text-xs text-muted-foreground">No device data yet.</p>
+          )}
+        </div>
+
+        <div className="bg-card border border-border rounded-xl p-5">
+          <h3 className="font-heading font-semibold text-foreground text-sm mb-4 flex items-center gap-2">
+            <RotateCcw className="h-4 w-4 text-primary" /> Session Frequency
+          </h3>
+          <p className="text-xs text-muted-foreground mb-3">
+            {eng.returning_users} of {eng.total_tracked} tracked users have returned ({eng.return_rate}%)
+          </p>
+          <ResponsiveContainer width="100%" height={160}>
+            <BarChart data={sessionData}>
+              <XAxis dataKey="name" tick={{ fontSize: 10 }} stroke="hsl(var(--muted-foreground))" />
+              <YAxis tick={{ fontSize: 10 }} stroke="hsl(var(--muted-foreground))" allowDecimals={false} />
+              <Tooltip contentStyle={{ backgroundColor: "hsl(var(--card))", border: "1px solid hsl(var(--border))", borderRadius: "8px", fontSize: "12px" }} />
+              <Bar dataKey="value" fill="hsl(var(--accent))" radius={[4, 4, 0, 0]} />
+            </BarChart>
+          </ResponsiveContainer>
+        </div>
+      </div>
+
+      {/* Top Pages */}
+      <div className="bg-card border border-border rounded-xl p-5">
+        <h3 className="font-heading font-semibold text-foreground text-sm mb-4 flex items-center gap-2">
+          <Eye className="h-4 w-4 text-primary" /> Top Pages (30 Days)
+        </h3>
+        {(eng.top_pages || []).length > 0 ? (
+          <div className="space-y-1.5">
+            {(eng.top_pages as { path: string; views: number }[]).map((p) => (
+              <div key={p.path} className="flex items-center justify-between text-xs">
+                <span className="text-foreground font-medium font-mono">{p.path}</span>
+                <div className="flex items-center gap-2">
+                  <div className="h-1.5 rounded-full bg-primary/20 w-24">
+                    <div className="h-1.5 rounded-full bg-primary" style={{ width: `${Math.min(100, (p.views / (eng.top_pages as any[])[0].views) * 100)}%` }} />
+                  </div>
+                  <span className="text-muted-foreground w-10 text-right">{p.views}</span>
+                </div>
+              </div>
+            ))}
+          </div>
+        ) : (
+          <p className="text-xs text-muted-foreground">No page view data yet.</p>
+        )}
+      </div>
+
+      {/* Most Active Users */}
+      <div className="bg-card border border-border rounded-xl p-5">
+        <h3 className="font-heading font-semibold text-foreground text-sm mb-4 flex items-center gap-2">
+          <Users className="h-4 w-4 text-primary" /> Most Active Users (30 Days)
+        </h3>
+        <div className="overflow-x-auto max-h-[400px] overflow-y-auto">
+          <table className="w-full text-xs">
+            <thead className="sticky top-0 bg-card z-10">
+              <tr className="text-[10px] text-muted-foreground font-semibold uppercase tracking-wider border-b border-border">
+                <th className="text-left py-1.5 pr-2">Email</th>
+                <th className="text-right py-1.5 pr-2">Page Views</th>
+                <th className="text-right py-1.5 pr-2">Sessions</th>
+                <th className="text-center py-1.5">PWA</th>
+              </tr>
+            </thead>
+            <tbody>
+              {(eng.most_active_users as { email: string; pageViews: number; sessions: number; isPwa: boolean }[]).map((u, i) => (
+                <tr key={i} className="border-b border-border/30 last:border-0">
+                  <td className="py-1.5 pr-2 text-foreground font-medium">{u.email}</td>
+                  <td className="py-1.5 pr-2 text-right text-muted-foreground">{u.pageViews}</td>
+                  <td className="py-1.5 pr-2 text-right text-muted-foreground">{u.sessions}</td>
+                  <td className="py-1.5 text-center">
+                    {u.isPwa ? (
+                      <span className="inline-flex items-center gap-1 text-[10px] px-1.5 py-0.5 rounded bg-primary/10 text-primary">
+                        <Smartphone className="h-3 w-3" /> Yes
+                      </span>
+                    ) : (
+                      <span className="text-muted-foreground/50">—</span>
+                    )}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+          {(eng.most_active_users || []).length === 0 && <p className="text-xs text-muted-foreground py-2">No activity data yet.</p>}
+        </div>
+      </div>
+    </div>
+  );
+};
+
 /* ========== MAIN PAGE ========== */
 
 const AdminDashboard = () => {
@@ -1472,6 +1671,9 @@ const AdminDashboard = () => {
               <TabsTrigger value="analytics" className="gap-1.5">
                 <BarChart3 className="h-4 w-4" /> Analytics
               </TabsTrigger>
+              <TabsTrigger value="users" className="gap-1.5">
+                <Users className="h-4 w-4" /> Users
+              </TabsTrigger>
               <TabsTrigger value="payments" className="gap-1.5">
                 <CreditCard className="h-4 w-4" /> Payments
               </TabsTrigger>
@@ -1491,6 +1693,9 @@ const AdminDashboard = () => {
 
             <TabsContent value="analytics">
               <AnalyticsTab />
+            </TabsContent>
+            <TabsContent value="users">
+              <UsersTab />
             </TabsContent>
             <TabsContent value="payments">
               <PaymentsTab />
