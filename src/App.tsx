@@ -60,6 +60,18 @@ const PeptidesCancer2026 = lazy(() => import("./pages/articles/PeptidesCancer202
 const PeptideCrazeBiohacking = lazy(() => import("./pages/articles/PeptideCrazeBiohacking"));
 const MotsCMitochondrial = lazy(() => import("./pages/articles/MotsCMitochondrial"));
 const Ss31Elamipretide = lazy(() => import("./pages/articles/Ss31Elamipretide"));
+const Bpc157Dosage = lazy(() => import("./pages/articles/Bpc157Dosage"));
+const Bpc157OralVsInjection = lazy(() => import("./pages/articles/Bpc157OralVsInjection"));
+const Bpc157SideEffects = lazy(() => import("./pages/articles/Bpc157SideEffects"));
+const SemaglutideUkGuide = lazy(() => import("./pages/articles/SemaglutideUkGuide"));
+const TirzepatideVsSemaglutide = lazy(() => import("./pages/articles/TirzepatideVsSemaglutide"));
+const Glp1MuscleLoss = lazy(() => import("./pages/articles/Glp1MuscleLoss"));
+const BodybuilderPeptides = lazy(() => import("./pages/articles/BodybuilderPeptides"));
+const HumaninPeptide = lazy(() => import("./pages/articles/HumaninPeptide"));
+const MyostatinBlockers = lazy(() => import("./pages/articles/MyostatinBlockers"));
+const Fgf21Longevity = lazy(() => import("./pages/articles/Fgf21Longevity"));
+const PeptideStackingGuide = lazy(() => import("./pages/articles/PeptideStackingGuide"));
+const SemaxSelankGuide = lazy(() => import("./pages/articles/SemaxSelankGuide"));
 const Glossary = lazy(() => import("./pages/Glossary"));
 const SiteMapPage = lazy(() => import("./pages/SiteMap"));
 const CampaignPage = lazy(() => import("./pages/CampaignPage"));
@@ -86,7 +98,7 @@ const AppContent = () => {
           <Route path="/reset-password" element={<ResetPassword />} />
           <Route path="/complete-profile" element={<ProtectedRoute><CompleteProfile /></ProtectedRoute>} />
           <Route path="/peptides" element={<Peptides />} />
-          <Route path="/calculators" element={<ProtectedRoute><Calculators /></ProtectedRoute>} />
+          <Route path="/calculators" element={<Calculators />} />
           <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
           <Route path="/improve" element={<Improve />} />
           <Route path="/education" element={<Education />} />
@@ -125,6 +137,18 @@ const AppContent = () => {
           <Route path="/education/peptide-craze-biohacking" element={<PeptideCrazeBiohacking />} />
           <Route path="/education/mots-c-mitochondrial-peptide" element={<MotsCMitochondrial />} />
           <Route path="/education/ss31-elamipretide-mitochondrial-ageing" element={<Ss31Elamipretide />} />
+          <Route path="/education/bpc-157-dosage-guide" element={<Bpc157Dosage />} />
+          <Route path="/education/bpc-157-oral-vs-injection" element={<Bpc157OralVsInjection />} />
+          <Route path="/education/bpc-157-side-effects" element={<Bpc157SideEffects />} />
+          <Route path="/education/semaglutide-uk-guide" element={<SemaglutideUkGuide />} />
+          <Route path="/education/tirzepatide-vs-semaglutide" element={<TirzepatideVsSemaglutide />} />
+          <Route path="/education/glp1-muscle-loss-prevention" element={<Glp1MuscleLoss />} />
+          <Route path="/education/peptides-bodybuilders-use" element={<BodybuilderPeptides />} />
+          <Route path="/education/humanin-longevity-peptide" element={<HumaninPeptide />} />
+          <Route path="/education/myostatin-blockers-bimagrumab" element={<MyostatinBlockers />} />
+          <Route path="/education/fgf21-metabolic-longevity" element={<Fgf21Longevity />} />
+          <Route path="/education/peptide-stacking-guide" element={<PeptideStackingGuide />} />
+          <Route path="/education/semax-selank-dosage-guide" element={<SemaxSelankGuide />} />
           <Route path="/glossary" element={<Glossary />} />
           <Route path="/sitemap" element={<SiteMapPage />} />
           <Route path="/whoop-callback" element={<WhoopCallback />} />
