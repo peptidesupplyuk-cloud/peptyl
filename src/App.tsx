@@ -137,6 +137,18 @@ const AppContent = () => {
           <Route path="/education/peptide-craze-biohacking" element={<PeptideCrazeBiohacking />} />
           <Route path="/education/mots-c-mitochondrial-peptide" element={<MotsCMitochondrial />} />
           <Route path="/education/ss31-elamipretide-mitochondrial-ageing" element={<Ss31Elamipretide />} />
+          <Route path="/education/bpc-157-dosage-guide" element={<Bpc157Dosage />} />
+          <Route path="/education/bpc-157-oral-vs-injection" element={<Bpc157OralVsInjection />} />
+          <Route path="/education/bpc-157-side-effects" element={<Bpc157SideEffects />} />
+          <Route path="/education/semaglutide-uk-guide" element={<SemaglutideUkGuide />} />
+          <Route path="/education/tirzepatide-vs-semaglutide" element={<TirzepatideVsSemaglutide />} />
+          <Route path="/education/glp1-muscle-loss-prevention" element={<Glp1MuscleLoss />} />
+          <Route path="/education/peptides-bodybuilders-use" element={<BodybuilderPeptides />} />
+          <Route path="/education/humanin-longevity-peptide" element={<HumaninPeptide />} />
+          <Route path="/education/myostatin-blockers-bimagrumab" element={<MyostatinBlockers />} />
+          <Route path="/education/fgf21-metabolic-longevity" element={<Fgf21Longevity />} />
+          <Route path="/education/peptide-stacking-guide" element={<PeptideStackingGuide />} />
+          <Route path="/education/semax-selank-dosage-guide" element={<SemaxSelankGuide />} />
           <Route path="/glossary" element={<Glossary />} />
           <Route path="/sitemap" element={<SiteMapPage />} />
           <Route path="/whoop-callback" element={<WhoopCallback />} />
