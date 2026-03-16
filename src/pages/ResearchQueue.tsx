@@ -631,6 +631,8 @@ const ResearchQueue = ({ embedded = false }: { embedded?: boolean }) => {
       </Dialog>
     </div>
   );
+
+  return content;
 };
 
 export default ResearchQueue;
