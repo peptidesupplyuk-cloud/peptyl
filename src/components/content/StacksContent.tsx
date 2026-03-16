@@ -329,7 +329,7 @@ const CompoundRow = ({ c }: { c: Compound }) => {
 // ── Phase Block ────────────────────────────────────────────────────────────
 
 const PhaseBlock = ({ phase, idx }: { phase: Phase; idx: number }) => {
-  const [open, setOpen] = useState(idx === 0);
+  const [open, setOpen] = useState(false);
   return (
     <div className="border border-border rounded-xl bg-card">
       <button onClick={() => setOpen(!open)} className="w-full flex items-center justify-between gap-2 p-3 sm:p-4 text-left hover:bg-muted/10 transition-colors">
