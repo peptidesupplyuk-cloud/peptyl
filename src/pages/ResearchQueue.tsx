@@ -88,7 +88,7 @@ async function checkEntityExists(name: string): Promise<string | null> {
   return byAlias?.id ?? null;
 }
 
-const ResearchQueue = () => {
+const ResearchQueue = ({ embedded = false }: { embedded?: boolean }) => {
   const { user } = useAuth();
   const { toast } = useToast();
   const queryClient = useQueryClient();
