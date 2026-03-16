@@ -150,7 +150,13 @@ const STACKS: CuratedStack[] = [
             name: "TB-500", type: "peptide", role: "Tissue remodelling",
             dose: "500 mcg/day", frequency: "1x daily", timing: "With BPC-157",
             route: "SubQ",
-            why: "Actin polymerisation support helps cells organise into functional tissue structures.",
+            why: "Sustained systemic healing support. Actin polymerisation helps cells organise into functional tissue structures during the critical remodelling window.",
+          },
+          {
+            name: "KPV", type: "peptide", role: "Continued anti-inflammatory",
+            dose: "200-500 mcg/day", frequency: "1x daily", timing: "Morning",
+            route: "SubQ or oral",
+            why: "Maintaining NF-κB suppression through the remodelling phase prevents residual inflammation from disrupting collagen organisation and tissue maturation.",
           },
           {
             name: "GHK-Cu", type: "peptide", role: "Collagen remodelling",
@@ -159,11 +165,11 @@ const STACKS: CuratedStack[] = [
             why: "Dose increased. Collagen remodelling peaks at weeks 3-6. GHK-Cu activates MMPs to clear damaged matrix and stimulates collagen I/III for stronger tissue.",
           },
         ],
-        note: "KPV can be discontinued if inflammation has resolved. GHK-Cu dose increases here because collagen remodelling is most active 3-6 weeks post-injury.",
+        note: "GHK-Cu dose increases here because collagen remodelling is most active 3-6 weeks post-injury. TB-500 and KPV continue throughout for sustained systemic healing and inflammation control.",
       },
       {
         name: "Phase 3: Strengthening",
-        weeks: "Weeks 7-8 (optional)",
+        weeks: "Weeks 7-8",
         compounds: [
           {
             name: "BPC-157", type: "peptide", role: "Maintenance",
@@ -172,13 +178,25 @@ const STACKS: CuratedStack[] = [
             why: "Tapering dose to support final tissue maturation. Can move to every other day.",
           },
           {
+            name: "TB-500", type: "peptide", role: "Final systemic support",
+            dose: "250-500 mcg/day", frequency: "1x daily", timing: "With BPC-157",
+            route: "SubQ",
+            why: "Maintaining TB-500 through the full 8 weeks ensures continued cell migration to the injury site during final tissue maturation, supporting stronger long-term outcomes.",
+          },
+          {
+            name: "KPV", type: "peptide", role: "Residual inflammation control",
+            dose: "200 mcg/day", frequency: "1x daily", timing: "Morning",
+            route: "SubQ or oral",
+            why: "Low-grade inflammation can persist for weeks after apparent healing. Keeping KPV through week 8 ensures complete inflammatory resolution for optimal tissue quality.",
+          },
+          {
             name: "GHK-Cu", type: "peptide", role: "Final collagen support",
             dose: "1 mg/day", frequency: "Daily or every other day", timing: "Evening",
             route: "SubQ or topical",
             why: "Full structural integrity takes 8-12 weeks. GHK-Cu continues supporting collagen maturation.",
           },
         ],
-        note: "TB-500 is typically stopped by week 7. If healing is on track by week 6, Phase 3 can be skipped entirely.",
+        note: "All four peptides run the full 8-week course. BPC-157 and GHK-Cu can taper to every other day if healing is progressing well. TB-500 and KPV at maintenance doses ensure complete systemic recovery.",
       },
     ],
     supplements: [
