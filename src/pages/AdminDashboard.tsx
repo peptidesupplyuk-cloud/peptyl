@@ -1691,6 +1691,9 @@ const AdminDashboard = () => {
               <TabsTrigger value="knowledge" className="gap-1.5">
                 <Sparkles className="h-4 w-4" /> Knowledge Base
               </TabsTrigger>
+              <TabsTrigger value="research" className="gap-1.5">
+                <FlaskConical className="h-4 w-4" /> Research
+              </TabsTrigger>
             </TabsList>
 
             <TabsContent value="analytics">
