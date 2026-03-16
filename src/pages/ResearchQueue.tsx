@@ -549,7 +549,7 @@ const ResearchQueue = ({ embedded = false }: { embedded?: boolean }) => {
           )}
         </div>
       </main>
-      <Footer />
+      {!embedded && <Footer />}
 
       {/* ── Approve confirmation dialog ── */}
       <Dialog open={!!approvePreview} onOpenChange={() => setApprovePreview(null)}>
