@@ -446,22 +446,14 @@ const StackDetail = ({ stack }: { stack: CuratedStack }) => {
         <p className="text-xs text-muted-foreground leading-relaxed">{stack.overview}</p>
       </div>
 
-      {/* Two-column: Who + Benefits */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-        {/* Who */}
-        <div className="bg-card rounded-xl border border-border p-4">
-          <h3 className="font-heading font-bold text-sm text-foreground mb-2">Who Is This For?</h3>
-          <ul className="space-y-1">
-            {stack.forWhom.map((item, i) => (
-              <li key={i} className="flex items-start gap-2">
-                <CheckCircle2 className="h-3.5 w-3.5 text-success shrink-0 mt-0.5" />
-                <span className="text-xs text-muted-foreground">{item}</span>
-              </li>
-            ))}
-          </ul>
-        </div>
+      {/* HERO: Protocol at a Glance — first thing users see */}
+      <div className="bg-card rounded-xl border border-primary/20 p-4 shadow-sm">
+        <h3 className="font-heading font-bold text-sm text-foreground mb-3">Protocol at a Glance</h3>
+        <ProtocolGrid stack={stack} />
+      </div>
 
-        {/* Benefits */}
+      {/* Two-column: Benefits + Who */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-3">
         <div className="bg-card rounded-xl border border-border p-4">
           <h3 className="font-heading font-bold text-sm text-foreground mb-2">Key Benefits</h3>
           <div className="space-y-2.5">
@@ -474,48 +466,43 @@ const StackDetail = ({ stack }: { stack: CuratedStack }) => {
             ))}
           </div>
         </div>
-      </div>
-
-      {/* Protocol Overview Grid */}
-      <div className="bg-card rounded-xl border border-border p-4">
-        <h3 className="font-heading font-bold text-sm text-foreground mb-2">Protocol at a Glance</h3>
-        <ProtocolGrid stack={stack} />
+        <div className="space-y-3">
+          <div className="bg-card rounded-xl border border-border p-4">
+            <h3 className="font-heading font-bold text-sm text-foreground mb-2">Who Is This For?</h3>
+            <ul className="space-y-1">
+              {stack.forWhom.map((item, i) => (
+                <li key={i} className="flex items-start gap-2">
+                  <CheckCircle2 className="h-3.5 w-3.5 text-success shrink-0 mt-0.5" />
+                  <span className="text-xs text-muted-foreground">{item}</span>
+                </li>
+              ))}
+            </ul>
+          </div>
+          {/* Warnings */}
+          <div className="bg-warm/5 border border-warm/10 rounded-xl p-4">
+            <h3 className="font-heading font-bold text-xs text-foreground mb-1.5 flex items-center gap-1.5">
+              <AlertTriangle className="h-3.5 w-3.5 text-warm" />
+              Important
+            </h3>
+            <ul className="space-y-0.5">
+              {stack.warnings.map((w, i) => (
+                <li key={i} className="flex items-start gap-1.5">
+                  <span className="text-warm text-[10px] mt-px">•</span>
+                  <p className="text-[10px] text-muted-foreground leading-relaxed">{w}</p>
+                </li>
+              ))}
+            </ul>
+          </div>
+        </div>
       </div>
 
       {/* Phase Breakdown */}
       <div>
         <h3 className="font-heading font-bold text-sm text-foreground mb-2">Phase Breakdown</h3>
+        <p className="text-[11px] text-muted-foreground mb-2">Expand each phase for detailed compound rationale, timing, and notes.</p>
         <div className="space-y-2">
           {stack.phases.map((p, i) => <PhaseBlock key={p.name} phase={p} idx={i} />)}
         </div>
-      </div>
-
-      {/* Support Supplements */}
-      <div className="bg-card rounded-xl border border-border p-4">
-        <h3 className="font-heading font-bold text-sm text-foreground mb-2 flex items-center gap-1.5">
-          <Zap className="h-3.5 w-3.5 text-warm" />
-          Support Supplements
-        </h3>
-        <p className="text-[11px] text-muted-foreground mb-2">Not required but significantly support healing. Strong safety profiles.</p>
-        <div className="space-y-1.5">
-          {stack.supplements.map((s) => <CompoundRow key={s.name} c={s} />)}
-        </div>
-      </div>
-
-      {/* Warnings */}
-      <div className="bg-warm/5 border border-warm/10 rounded-xl p-4">
-        <h3 className="font-heading font-bold text-sm text-foreground mb-2 flex items-center gap-1.5">
-          <AlertTriangle className="h-3.5 w-3.5 text-warm" />
-          Important
-        </h3>
-        <ul className="space-y-1">
-          {stack.warnings.map((w, i) => (
-            <li key={i} className="flex items-start gap-2">
-              <span className="text-warm text-xs mt-px">•</span>
-              <p className="text-[11px] text-muted-foreground leading-relaxed">{w}</p>
-            </li>
-          ))}
-        </ul>
       </div>
 
       {/* References (collapsible) */}
