@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useSearchParams } from "react-router-dom";
-import { BookOpen, Pill, Calculator, Droplets } from "lucide-react";
+import { BookOpen, Pill, Calculator, Droplets, Layers } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
@@ -11,10 +11,12 @@ import SEO from "@/components/SEO";
 import { lazy, Suspense } from "react";
 
 const TestingContent = lazy(() => import("@/pages/Testing").then(m => ({ default: m.TestingContent })));
+const StacksContent = lazy(() => import("@/components/content/StacksContent"));
 
 const TABS = [
   { value: "peptides", label: "Peptides", icon: BookOpen },
   { value: "supplements", label: "Supplements", icon: Pill },
+  { value: "stacks", label: "Stacks", icon: Layers },
   { value: "calculators", label: "Calculators", icon: Calculator },
   { value: "testing", label: "Testing", icon: Droplets },
 ] as const;
