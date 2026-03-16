@@ -56,6 +56,11 @@ const ImprovePage = () => {
             <TabsContent value="supplements">
               <SupplementsContent />
             </TabsContent>
+            <TabsContent value="stacks">
+              <Suspense fallback={<div className="min-h-[400px]" />}>
+                <StacksContent />
+              </Suspense>
+            </TabsContent>
             <TabsContent value="calculators">
               <CalculatorsContent />
             </TabsContent>
