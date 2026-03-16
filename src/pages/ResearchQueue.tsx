@@ -133,6 +133,7 @@ const ResearchQueue = ({ embedded = false }: { embedded?: boolean }) => {
 
   // ── Access guard (after hooks) ──
   if (!isAdmin) {
+    if (embedded) return <div className="text-center py-12"><AlertTriangle className="h-10 w-10 text-destructive mx-auto mb-3" /><h1 className="text-xl font-heading font-bold text-foreground">Access Denied</h1></div>;
     return (
       <div className="min-h-screen bg-background">
         <Header />
