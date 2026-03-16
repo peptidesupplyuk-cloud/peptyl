@@ -1717,6 +1717,11 @@ const AdminDashboard = () => {
             <TabsContent value="knowledge">
               <KnowledgeBaseTab />
             </TabsContent>
+            <TabsContent value="research">
+              <Suspense fallback={<div className="flex justify-center py-12"><Loader2 className="h-6 w-6 animate-spin" /></div>}>
+                <LazyResearchQueue embedded />
+              </Suspense>
+            </TabsContent>
           </Tabs>
         </div>
       </main>
