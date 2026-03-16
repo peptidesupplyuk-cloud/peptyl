@@ -18,6 +18,8 @@ import {
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, LineChart, Line } from "recharts";
 import MonitoredAccounts from "@/components/admin/MonitoredAccounts";
 import { campaigns } from "@/data/campaigns";
+
+const LazyResearchQueue = lazy(() => import("@/pages/ResearchQueue"));
 import IngestChat from "@/components/admin/IngestChat";
 
 const ADMIN_EMAIL = "peptidesupplyuk@gmail.com";
@@ -1689,6 +1691,9 @@ const AdminDashboard = () => {
               <TabsTrigger value="knowledge" className="gap-1.5">
                 <Sparkles className="h-4 w-4" /> Knowledge Base
               </TabsTrigger>
+              <TabsTrigger value="research" className="gap-1.5">
+                <FlaskConical className="h-4 w-4" /> Research
+              </TabsTrigger>
             </TabsList>
 
             <TabsContent value="analytics">
@@ -1711,6 +1716,11 @@ const AdminDashboard = () => {
             </TabsContent>
             <TabsContent value="knowledge">
               <KnowledgeBaseTab />
+            </TabsContent>
+            <TabsContent value="research">
+              <Suspense fallback={<div className="flex justify-center py-12"><Loader2 className="h-6 w-6 animate-spin" /></div>}>
+                <LazyResearchQueue embedded />
+              </Suspense>
             </TabsContent>
           </Tabs>
         </div>

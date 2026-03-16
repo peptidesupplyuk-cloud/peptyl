@@ -88,7 +88,7 @@ async function checkEntityExists(name: string): Promise<string | null> {
   return byAlias?.id ?? null;
 }
 
-const ResearchQueue = () => {
+const ResearchQueue = ({ embedded = false }: { embedded?: boolean }) => {
   const { user } = useAuth();
   const { toast } = useToast();
   const queryClient = useQueryClient();
@@ -133,6 +133,7 @@ const ResearchQueue = () => {
 
   // ── Access guard (after hooks) ──
   if (!isAdmin) {
+    if (embedded) return <div className="text-center py-12"><AlertTriangle className="h-10 w-10 text-destructive mx-auto mb-3" /><h1 className="text-xl font-heading font-bold text-foreground">Access Denied</h1></div>;
     return (
       <div className="min-h-screen bg-background">
         <Header />
@@ -353,12 +354,12 @@ const ResearchQueue = () => {
     });
   };
 
-  return (
-    <div className="min-h-screen bg-background">
-      <SEO title="Research Queue — Admin" description="Review AI-extracted PubMed findings." path="/admin/research-queue" />
-      <Header />
-      <main className="pt-20 pb-16">
-        <div className="container mx-auto px-4 sm:px-6 max-w-4xl">
+  const content = (
+    <div className={embedded ? "" : "min-h-screen bg-background"}>
+      {!embedded && <SEO title="Research Queue — Admin" description="Review AI-extracted PubMed findings." path="/admin/research-queue" />}
+      {!embedded && <Header />}
+      <main className={embedded ? "" : "pt-20 pb-16"}>
+        <div className={embedded ? "" : "container mx-auto px-4 sm:px-6 max-w-4xl"}>
           {/* Header */}
           <div className="flex items-start justify-between mb-6">
             <div>
@@ -548,7 +549,7 @@ const ResearchQueue = () => {
           )}
         </div>
       </main>
-      <Footer />
+      {!embedded && <Footer />}
 
       {/* ── Approve confirmation dialog ── */}
       <Dialog open={!!approvePreview} onOpenChange={() => setApprovePreview(null)}>
@@ -630,6 +631,8 @@ const ResearchQueue = () => {
       </Dialog>
     </div>
   );
+
+  return content;
 };
 
 export default ResearchQueue;
