@@ -354,12 +354,12 @@ const ResearchQueue = ({ embedded = false }: { embedded?: boolean }) => {
     });
   };
 
-  return (
-    <div className="min-h-screen bg-background">
-      <SEO title="Research Queue — Admin" description="Review AI-extracted PubMed findings." path="/admin/research-queue" />
-      <Header />
-      <main className="pt-20 pb-16">
-        <div className="container mx-auto px-4 sm:px-6 max-w-4xl">
+  const content = (
+    <div className={embedded ? "" : "min-h-screen bg-background"}>
+      {!embedded && <SEO title="Research Queue — Admin" description="Review AI-extracted PubMed findings." path="/admin/research-queue" />}
+      {!embedded && <Header />}
+      <main className={embedded ? "" : "pt-20 pb-16"}>
+        <div className={embedded ? "" : "container mx-auto px-4 sm:px-6 max-w-4xl"}>
           {/* Header */}
           <div className="flex items-start justify-between mb-6">
             <div>
