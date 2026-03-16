@@ -18,6 +18,8 @@ import {
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, LineChart, Line } from "recharts";
 import MonitoredAccounts from "@/components/admin/MonitoredAccounts";
 import { campaigns } from "@/data/campaigns";
+
+const LazyResearchQueue = lazy(() => import("@/pages/ResearchQueue"));
 import IngestChat from "@/components/admin/IngestChat";
 
 const ADMIN_EMAIL = "peptidesupplyuk@gmail.com";
