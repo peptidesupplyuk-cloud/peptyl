@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Check, SkipForward, Clock, FlaskConical, ArrowRight, Target, Pill, CheckCheck, Dna, X, CalendarIcon, CalendarClock } from "lucide-react";
+import { Check, SkipForward, Clock, FlaskConical, ArrowRight, Target, Pill, CheckCheck, Dna, X, CalendarIcon, CalendarClock, ChevronDown, ChevronUp } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useTodayInjections, useDateInjections, useUpdateInjectionStatus } from "@/hooks/use-injections";
 import { useProtocols, type ProtocolSupplement } from "@/hooks/use-protocols";
