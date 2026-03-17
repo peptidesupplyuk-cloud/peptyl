@@ -26,7 +26,7 @@ interface TodaysPlanProps {
 /** Map a protocol goal string to a user-friendly label */
 function formatGoalLabel(goal: string): string {
   const lower = goal.toLowerCase();
-  if (lower.includes("recovery") || lower.includes("injury") || lower.includes("heal")) return "Injury Recovery";
+  if (lower.includes("recovery") || lower.includes("injury") || lower.includes("heal") || lower.includes("repair")) return "Injury Recovery";
   if (lower.includes("weight") || lower.includes("fat") || lower.includes("glp") || lower.includes("lean")) return "Weight Management";
   if (lower.includes("growth") || lower.includes("muscle") || lower.includes("anabolic")) return "Growth & Performance";
   if (lower.includes("longevity") || lower.includes("anti-aging") || lower.includes("aging")) return "Longevity";
