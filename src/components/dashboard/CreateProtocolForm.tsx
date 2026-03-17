@@ -88,6 +88,37 @@ const CreateProtocolForm = ({ disclaimerAccepted, initialPeptide, onInitialPepti
   const { toast } = useToast();
   const formRef = useRef<HTMLDivElement>(null);
 
+  // Load from stack import (sessionStorage)
+  useEffect(() => {
+    const pendingStack = sessionStorage.getItem("pending_stack");
+    if (pendingStack) {
+      try {
+        const stack = JSON.parse(pendingStack);
+        setName(stack.name || "");
+        setGoal(stack.goal || "");
+        if (stack.durationWeeks) setDurationWeeks(stack.durationWeeks);
+        if (stack.peptides?.length) {
+          setPeptideRows(stack.peptides.map((p: any) => ({
+            peptide_name: p.peptide_name || "",
+            dose_mcg: p.dose_mcg || 0,
+            frequency: p.frequency || "daily",
+            timing: p.timing || "PM",
+            route: p.route || "SubQ",
+          })));
+        }
+        if (stack.supplements?.length) {
+          setSupplementRows(stack.supplements.map((s: any) => ({
+            name: s.name || "",
+            dose: s.dose || "",
+            frequency: s.frequency || "Daily",
+          })));
+        }
+        sessionStorage.removeItem("pending_stack");
+        setTimeout(() => formRef.current?.scrollIntoView({ behavior: "smooth", block: "start" }), 100);
+      } catch {}
+    }
+  }, []);
+
   useEffect(() => {
     if (initialPeptide) {
       setPeptideRows([{ ...emptyPeptide, peptide_name: initialPeptide }]);
