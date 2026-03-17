@@ -374,7 +374,8 @@ Deno.serve(async (req) => {
               },
               body: JSON.stringify({
                 app_id: onesignalAppId,
-                include_external_user_ids: [userId],
+                include_aliases: { external_id: [userId] },
+                target_channel: "push",
                 headings: { en: pushMessage.title },
                 contents: { en: pushMessage.body },
                 url: "https://peptyl.co.uk/dashboard",
