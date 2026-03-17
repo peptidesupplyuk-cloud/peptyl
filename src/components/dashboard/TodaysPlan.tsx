@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Check, SkipForward, Clock, FlaskConical, ArrowRight, Target, Pill, CheckCheck, Dna, X, CalendarIcon, CalendarClock, ChevronDown, ChevronUp } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { useTodayInjections, useDateInjections, useUpdateInjectionStatus } from "@/hooks/use-injections";
+import { useTodayInjections, useDateInjections, useUpdateInjectionStatus, type InjectionLog } from "@/hooks/use-injections";
 import { useProtocols, type ProtocolSupplement } from "@/hooks/use-protocols";
 import { useBloodworkPanels } from "@/hooks/use-bloodwork";
 import { useTodaySupplementLogs, useDateSupplementLogs, useToggleSupplement, useBatchCompleteSupplement } from "@/hooks/use-supplement-logs";
