@@ -617,168 +617,19 @@ const TodaysPlan = ({ onActivate, slim = false, selectedDate }: TodaysPlanProps)
               : "All doses completed or none scheduled today."}
           </p>
         ) : (
-          <div className="space-y-2">
-            {/* Scheduled peptide doses */}
-            {scheduled.map((inj) => {
-              const goal = peptideGoalMap.get(inj.peptide_name.toLowerCase());
-              return (
-                <div key={inj.id} className="flex flex-wrap items-center justify-between gap-2 bg-muted/50 rounded-xl px-3 sm:px-4 py-3">
-                  <div className="min-w-0 flex-1">
-                    <div className="flex items-center gap-2">
-                      <Clock className="h-3.5 w-3.5 text-primary shrink-0" />
-                      <span className="text-sm font-medium text-foreground truncate">{inj.peptide_name}</span>
-                      <span className="text-xs text-muted-foreground shrink-0">{inj.dose_mcg}mcg</span>
-                    </div>
-                    <p className="text-xs text-muted-foreground ml-5.5 mt-0.5 truncate">
-                      {format(new Date(inj.scheduled_time), "h:mm a")}
-                      {goal && (
-                        <span className="ml-1.5 text-primary/70">· {goal}</span>
-                      )}
-                    </p>
-                  </div>
-                  {isToday ? (
-                    <div className="flex gap-1.5 shrink-0">
-                      <Button
-                        size="sm"
-                        variant="outline"
-                        className="h-8 text-xs px-2.5 sm:px-3"
-                        onClick={() => updateStatus.mutate({ id: inj.id, status: "skipped" })}
-                      >
-                        <SkipForward className="h-3 w-3 mr-1" /> Skip
-                      </Button>
-                      <Button
-                        size="sm"
-                        className="h-8 text-xs px-2.5 sm:px-3 shadow-brand"
-                        onClick={() => updateStatus.mutate({ id: inj.id, status: "completed" })}
-                      >
-                        <Check className="h-3 w-3 mr-1" /> Done
-                      </Button>
-                    </div>
-                  ) : (
-                    <span className="text-xs text-muted-foreground">
-                      {isFutureDate ? "Planned" : "Missed"}
-                    </span>
-                  )}
-                </div>
-              );
-            })}
-
-            {/* Pending supplements */}
-            {pendingSupplements.map((supp) => (
-              <div key={`supp-${supp.name}`} className="flex flex-wrap items-center justify-between gap-2 bg-muted/50 rounded-xl px-3 sm:px-4 py-3">
-                <div className="min-w-0 flex-1">
-                  <div className="flex items-center gap-2">
-                    <Pill className="h-3.5 w-3.5 text-accent-foreground/70 shrink-0" />
-                    <span className="text-sm font-medium text-foreground truncate">{supp.name}</span>
-                    <span className="text-xs text-muted-foreground shrink-0">{supp.dose}</span>
-                  </div>
-                  <p className="text-xs text-muted-foreground ml-5.5 mt-0.5 truncate">
-                    {supp.frequency}
-                    {supp.goal && (
-                      <span className="ml-1.5 text-primary/70">· {supp.goal}</span>
-                    )}
-                  </p>
-                  {supp.drivenBy && supp.drivenBy.length > 0 && (
-                    <span className="text-[10px] text-primary/70 flex items-center gap-1 ml-5.5 mt-0.5">
-                      <Dna className="h-2.5 w-2.5" /> {supp.drivenBy[0]}
-                    </span>
-                  )}
-                </div>
-                {isToday ? (
-                  <div className="flex gap-1.5 shrink-0">
-                    <Button
-                      size="sm"
-                      variant="outline"
-                      className="h-8 text-xs px-2.5 sm:px-3"
-                      onClick={() => toggleSupplement.mutate({ item: supp.name, completed: false })}
-                    >
-                      <SkipForward className="h-3 w-3 mr-1" /> Skip
-                    </Button>
-                    <Button
-                      size="sm"
-                      className="h-8 text-xs px-2.5 sm:px-3 shadow-brand"
-                      onClick={() => toggleSupplement.mutate({ item: supp.name, completed: true })}
-                    >
-                      <Check className="h-3 w-3 mr-1" /> Done
-                    </Button>
-                  </div>
-                ) : (
-                  <span className="text-xs text-muted-foreground">
-                    {isFutureDate ? "Planned" : "Missed"}
-                  </span>
-                )}
-              </div>
-            ))}
-
-            {/* Completed peptide doses */}
-            {completed.map((inj) => {
-              const goal = peptideGoalMap.get(inj.peptide_name.toLowerCase());
-              return (
-                <div key={inj.id} className="flex items-center justify-between bg-primary/5 border border-primary/10 rounded-xl px-4 py-3">
-                  <div>
-                    <div className="flex items-center gap-2">
-                      <Check className="h-3.5 w-3.5 text-primary" />
-                      <span className="text-sm font-medium text-foreground line-through opacity-60">{inj.peptide_name}</span>
-                      <span className="text-xs text-muted-foreground">{inj.dose_mcg}mcg</span>
-                    </div>
-                    {goal && (
-                      <p className="text-[11px] text-muted-foreground ml-5.5 mt-0.5">{goal}</p>
-                    )}
-                  </div>
-                  <span className="text-xs text-primary">Completed</span>
-                </div>
-              );
-            })}
-
-            {/* Completed supplements */}
-            {doneSupplements.map((supp) => (
-              <div key={`supp-done-${supp.name}`} className="flex items-center justify-between bg-primary/5 border border-primary/10 rounded-xl px-4 py-3">
-                <div>
-                  <div className="flex items-center gap-2">
-                    <Check className="h-3.5 w-3.5 text-primary" />
-                    <span className="text-sm font-medium text-foreground line-through opacity-60">{supp.name}</span>
-                    <span className="text-xs text-muted-foreground">{supp.dose}</span>
-                  </div>
-                  {supp.goal && (
-                    <p className="text-[11px] text-muted-foreground ml-5.5 mt-0.5">{supp.goal}</p>
-                  )}
-                </div>
-                <span className="text-xs text-primary">Completed</span>
-              </div>
-            ))}
-
-            {/* Skipped peptide doses */}
-            {skipped.map((inj) => {
-              const goal = peptideGoalMap.get(inj.peptide_name.toLowerCase());
-              return (
-                <div key={inj.id} className="flex items-center justify-between bg-muted/30 rounded-xl px-4 py-3 opacity-50">
-                  <div>
-                    <div className="flex items-center gap-2">
-                      <SkipForward className="h-3.5 w-3.5 text-muted-foreground" />
-                      <span className="text-sm font-medium text-foreground line-through">{inj.peptide_name}</span>
-                    </div>
-                    {goal && (
-                      <p className="text-[11px] text-muted-foreground ml-5.5 mt-0.5">{goal}</p>
-                    )}
-                  </div>
-                  <span className="text-xs text-muted-foreground">Skipped</span>
-                </div>
-              );
-            })}
-
-            {/* Skipped supplements */}
-            {skippedSuppList.map((supp) => (
-              <div key={`supp-skip-${supp.name}`} className="flex items-center justify-between bg-muted/30 rounded-xl px-4 py-3 opacity-50">
-                <div>
-                  <div className="flex items-center gap-2">
-                    <SkipForward className="h-3.5 w-3.5 text-muted-foreground" />
-                    <span className="text-sm font-medium text-foreground line-through">{supp.name}</span>
-                  </div>
-                </div>
-                <span className="text-xs text-muted-foreground">Skipped</span>
-              </div>
-            ))}
-          </div>
+          <ProtocolGroupedDoses
+            injections={injections}
+            todaySupplements={todaySupplements}
+            completedSupplements={completedSupplements}
+            skippedSupplements={skippedSupplements}
+            peptideProtocolMap={peptideProtocolMap}
+            peptideGoalMap={peptideGoalMap}
+            protocols={protocols}
+            isToday={isToday}
+            isFutureDate={isFutureDate}
+            updateStatus={updateStatus}
+            toggleSupplement={toggleSupplement}
+          />
         )}
 
         {totalItems > 0 && (
