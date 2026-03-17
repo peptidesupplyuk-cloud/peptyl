@@ -6,9 +6,9 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { lazy, Suspense } from "react";
 import { AuthProvider } from "@/contexts/AuthContext";
 import ProtectedRoute from "@/components/ProtectedRoute";
-import PeptideChat from "@/components/PeptideChat";
-import SignupBanner from "@/components/SignupBanner";
-import PWAUpdatePrompt from "@/components/PWAUpdatePrompt";
+const PeptideChat = lazy(() => import("@/components/PeptideChat"));
+const SignupBanner = lazy(() => import("@/components/SignupBanner"));
+const PWAUpdatePrompt = lazy(() => import("@/components/PWAUpdatePrompt"));
 import { useActivityTracker } from "@/hooks/use-activity-tracker";
 
 import SitewideDisclaimer from "@/components/SitewideDisclaimer";
