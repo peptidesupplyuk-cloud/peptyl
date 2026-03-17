@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import { useNavigate } from "react-router-dom";
 import {
   Shield,
   Clock,
@@ -11,7 +12,9 @@ import {
   Beaker,
   Zap,
   BookOpen,
+  Play,
 } from "lucide-react";
+import { Button } from "@/components/ui/button";
 
 // ── Types ──────────────────────────────────────────────────────────────────
 
