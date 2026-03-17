@@ -930,7 +930,8 @@ async function saveReport(fullContent: string, method: string, userId: string | 
           },
           body: JSON.stringify({
             app_id: "7dd6be24-0dca-45af-b8b6-15cc95db293d",
-            include_external_user_ids: [userId],
+            include_aliases: { external_id: [userId] },
+            target_channel: "push",
             headings: { en: "Your DNA Report is Ready" },
             contents: { en: `Health Score: ${overallScore ?? "N/A"}/100. Tap to view your personalised assessment.` },
             url: `https://peptyl.co.uk/dna/report/${data.id}`,
