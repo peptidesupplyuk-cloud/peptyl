@@ -166,6 +166,7 @@ const AppContent = () => {
           <Route path="*" element={<NotFound />} />
         </Routes>
       </Suspense>
+      <GlobalMobileNav />
       <PeptideChat />
       <SignupBanner />
       
