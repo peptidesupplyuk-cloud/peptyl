@@ -248,7 +248,8 @@ Deno.serve(async (req) => {
                 },
                 body: JSON.stringify({
                   app_id: onesignalAppId,
-                  include_external_user_ids: [userId],
+                  include_aliases: { external_id: [userId] },
+                  target_channel: "push",
                   headings: { en: `⚠️ ${totalMissing} dose${totalMissing > 1 ? "s" : ""} still incomplete` },
                   contents: { en: `You haven't logged ${totalMissing > 1 ? "some" : "your"} ${window} doses yet. Tap to complete now.` },
                   url: "https://peptyl.co.uk/dashboard",
