@@ -450,10 +450,7 @@ const StackDetail = ({ stack }: { stack: CuratedStack }) => {
       </div>
 
       {/* HERO: Protocol at a Glance — first thing users see */}
-      <div className="bg-card rounded-xl border border-primary/20 p-4 shadow-sm">
-        <h3 className="font-heading font-bold text-sm text-foreground mb-3">Protocol at a Glance</h3>
-        <ProtocolGrid stack={stack} />
-      </div>
+      <ProtocolAtAGlance stack={stack} />
 
       {/* Two-column: Benefits + Who */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-3">
