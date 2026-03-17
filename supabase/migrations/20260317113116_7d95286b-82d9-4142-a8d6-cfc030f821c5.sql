@@ -1,0 +1,1 @@
+DELETE FROM nudge_log WHERE user_id = '7946e67b-5326-4729-a58f-4594c8a68d99' AND nudge_type = 'dose_followup_AM_2026-03-17';

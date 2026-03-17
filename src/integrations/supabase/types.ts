@@ -997,23 +997,32 @@ export type Database = {
       }
       nudge_log: {
         Row: {
+          email_sent: boolean | null
+          error_message: string | null
           id: string
           nudge_type: string
           protocol_id: string | null
+          push_sent: boolean | null
           sent_at: string
           user_id: string
         }
         Insert: {
+          email_sent?: boolean | null
+          error_message?: string | null
           id?: string
           nudge_type: string
           protocol_id?: string | null
+          push_sent?: boolean | null
           sent_at?: string
           user_id: string
         }
         Update: {
+          email_sent?: boolean | null
+          error_message?: string | null
           id?: string
           nudge_type?: string
           protocol_id?: string | null
+          push_sent?: boolean | null
           sent_at?: string
           user_id?: string
         }

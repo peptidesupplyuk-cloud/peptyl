@@ -299,11 +299,14 @@ Deno.serve(async (req) => {
             }
           }
 
-          // Log the follow-up nudge
+          // Log the follow-up nudge with delivery status
           await supabase.from("nudge_log").insert({
             user_id: userId,
             nudge_type: nudgeType,
-          });
+            email_sent: emailSent,
+            push_sent: pushSent,
+            error_message: null,
+          } as any);
 
           results.push({
             user_id: userId,
@@ -400,11 +403,14 @@ Deno.serve(async (req) => {
           }
         }
 
-        // Log initial nudge to prevent re-send
+        // Log initial nudge to prevent re-send (with delivery status)
         await supabase.from("nudge_log").insert({
           user_id: userId,
           nudge_type: nudgeType,
-        });
+          email_sent: emailSent,
+          push_sent: pushSent,
+          error_message: errorMsg || null,
+        } as any);
 
         results.push({
           user_id: userId,

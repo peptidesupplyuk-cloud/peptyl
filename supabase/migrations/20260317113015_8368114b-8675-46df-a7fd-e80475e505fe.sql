@@ -1,0 +1,1 @@
+ALTER TABLE public.nudge_log ADD COLUMN IF NOT EXISTS email_sent boolean DEFAULT false, ADD COLUMN IF NOT EXISTS push_sent boolean DEFAULT false, ADD COLUMN IF NOT EXISTS error_message text;
