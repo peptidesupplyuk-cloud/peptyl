@@ -129,76 +129,7 @@ const Header = () => {
         )}
       </div>
 
-      {/* Mobile header */}
-      <div
-        className={`md:hidden w-full pointer-events-auto transition-all duration-300 ${
-          scrolled
-            ? "bg-card/90 backdrop-blur-xl border-b border-border shadow-sm"
-            : isHeroPage
-            ? "bg-transparent"
-            : "bg-card/90 backdrop-blur-xl"
-        } ${!scrolled && isHeroPage ? "dark-section" : ""}`}
-      >
-        <div className="w-full px-4 h-14 flex items-center justify-between safe-area-top">
-          <Link to="/">
-            <Logo size="sm" inverted={!scrolled && isHeroPage} hideTagline />
-          </Link>
-          <button
-            onClick={() => setIsOpen(!isOpen)}
-            className={`p-2 ${!scrolled && isHeroPage ? "text-primary-foreground" : "text-foreground"}`}
-          >
-            {isOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
-          </button>
-        </div>
-
-        <AnimatePresence>
-          {isOpen && (
-            <motion.div
-              initial={{ opacity: 0, height: 0 }}
-              animate={{ opacity: 1, height: "auto" }}
-              exit={{ opacity: 0, height: 0 }}
-              className="bg-card/95 backdrop-blur-xl border-b border-border max-h-[calc(100dvh-3.5rem)] overflow-y-auto"
-            >
-              <nav className="container mx-auto px-4 py-3 flex flex-col gap-0.5">
-                {navItems.filter(item => !item.adminOnly || user?.email === ADMIN_EMAIL).map((item) => {
-                  const Icon = item.icon;
-                  return (
-                    <Link
-                      key={item.href}
-                      to={item.href}
-                      onClick={() => setIsOpen(false)}
-                      className={`px-3 py-2.5 rounded-lg text-sm font-medium transition-colors flex items-center gap-2.5 ${
-                        isActive(item.href)
-                          ? "text-primary bg-accent"
-                          : "text-foreground hover:bg-muted"
-                      }`}
-                    >
-                      <Icon className="h-4 w-4" />
-                      {t(item.labelKey)}
-                    </Link>
-                  );
-                })}
-                <div className="px-3 py-2 flex items-center gap-2">
-                  <LanguageToggle />
-                  <ThemeToggle />
-                </div>
-                {user ? (
-                  <button
-                    onClick={() => { handleSignOut(); setIsOpen(false); }}
-                    className="px-3 py-2.5 rounded-lg text-sm font-medium text-foreground hover:bg-muted transition-colors text-left flex items-center gap-2"
-                  >
-                    <LogOut className="h-4 w-4" /> {t("nav.signOut")}
-                  </button>
-                ) : (
-                  <Link to="/auth" onClick={() => setIsOpen(false)}>
-                    <Button className="mt-2 shadow-brand w-full">{t("nav.signIn")}</Button>
-                  </Link>
-                )}
-              </nav>
-            </motion.div>
-          )}
-        </AnimatePresence>
-      </div>
+      {/* Mobile header - hidden, navigation handled by GlobalMobileNav bottom bar */}
     </header>
   );
 };

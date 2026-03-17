@@ -27,7 +27,7 @@ const SitewideDisclaimer = () => {
   };
 
   return (
-    <div className="fixed bottom-0 left-0 right-0 z-40 bg-card border-t border-border py-3 px-4 pb-[max(0.75rem,env(safe-area-inset-bottom))]">
+    <div className="fixed bottom-0 left-0 right-0 z-30 bg-card border-t border-border py-3 px-4 pb-[max(0.75rem,env(safe-area-inset-bottom))] hidden md:block">
       <div className="container mx-auto flex items-center justify-between gap-4">
         <p className="text-xs text-muted-foreground min-w-0">
           ⚠ Peptyl is an educational platform. Not medical advice. We are not medical professionals. Research use only.

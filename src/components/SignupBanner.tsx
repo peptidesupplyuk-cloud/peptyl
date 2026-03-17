@@ -13,7 +13,7 @@ const SignupBanner = () => {
   if (user || dismissed) return null;
 
   return (
-    <div className="fixed bottom-0 left-0 right-0 z-40 bg-primary text-primary-foreground py-3 px-6 shadow-lg">
+    <div className="fixed bottom-0 left-0 right-0 z-30 bg-primary text-primary-foreground py-3 px-6 shadow-lg hidden md:block">
       <div className="container mx-auto flex items-center justify-between gap-4">
         <p className="text-sm font-medium">
           {t("signupBanner.text")}

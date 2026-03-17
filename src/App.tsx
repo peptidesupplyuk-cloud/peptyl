@@ -14,6 +14,7 @@ import { useActivityTracker } from "@/hooks/use-activity-tracker";
 const SitewideDisclaimer = lazy(() => import("@/components/SitewideDisclaimer"));
 import ScrollToTop from "@/components/ScrollToTop";
 import GeoGate from "@/components/GeoGate";
+const GlobalMobileNav = lazy(() => import("@/components/GlobalMobileNav"));
 
 // Lazy-load ALL pages for faster initial load
 const Index = lazy(() => import("./pages/Index"));
@@ -165,6 +166,7 @@ const AppContent = () => {
           <Route path="*" element={<NotFound />} />
         </Routes>
       </Suspense>
+      <GlobalMobileNav />
       <PeptideChat />
       <SignupBanner />
       
