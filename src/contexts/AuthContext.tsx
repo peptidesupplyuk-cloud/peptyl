@@ -50,19 +50,24 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
         // Link OneSignal external_user_id for targeted push notifications
         if (session?.user?.id && typeof window !== "undefined" && (window as any).OneSignalDeferred) {
-          (window as any).OneSignalDeferred.push(async (OneSignal: any) => {
-            try {
-              // Wait for SDK to be fully initialized before calling login
-              if (typeof OneSignal.User?.addAlias === "function") {
-                await OneSignal.login(session.user.id);
+          const linkOneSignal = async () => {
+            const maxAttempts = 3;
+            for (let attempt = 1; attempt <= maxAttempts; attempt++) {
+              try {
+                await new Promise(r => setTimeout(r, attempt * 2000)); // 2s, 4s, 6s
+                await (window as any).OneSignalDeferred.push(async (OneSignal: any) => {
+                  await OneSignal.login(session.user.id);
+                });
                 console.log("OneSignal: linked external_user_id", session.user.id);
-              } else {
-                console.warn("OneSignal SDK not fully ready, skipping login");
+                return; // success
+              } catch (e) {
+                if (attempt === maxAttempts) {
+                  console.warn("OneSignal login failed after retries:", e);
+                }
               }
-            } catch (e) {
-              console.warn("OneSignal login failed:", e);
             }
-          });
+          };
+          linkOneSignal();
         }
       }
     );
