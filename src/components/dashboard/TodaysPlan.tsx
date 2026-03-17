@@ -46,7 +46,295 @@ interface SupplementItem {
   drivenBy?: string[];
 }
 
-const TodaysPlan = ({ onActivate, slim = false, selectedDate }: TodaysPlanProps) => {
+/** Frequency badge helper */
+function frequencyLabel(freq: string): { label: string; color: string } {
+  const f = freq.toLowerCase();
+  if (f === "daily" || f.includes("daily")) return { label: "Daily", color: "bg-primary/10 text-primary" };
+  if (f === "eod" || f.includes("every other")) return { label: "Every other day", color: "bg-info/10 text-info" };
+  if (f.includes("2x")) return { label: "Mon · Thu", color: "bg-warm/10 text-warm" };
+  if (f.includes("3x")) return { label: "Mon · Wed · Fri", color: "bg-warm/10 text-warm" };
+  if (f === "weekly" || f.includes("1x")) return { label: "Weekly", color: "bg-accent/50 text-accent-foreground" };
+  return { label: freq, color: "bg-muted text-muted-foreground" };
+}
+
+/** Get the frequency for a peptide from its protocol */
+function getPeptideFrequency(peptideName: string, protocols: any[]): string {
+  for (const p of protocols.filter((pr: any) => pr.status === "active")) {
+    const pep = p.peptides.find((pp: any) => pp.peptide_name.toLowerCase() === peptideName.toLowerCase());
+    if (pep) return pep.frequency;
+  }
+  return "daily";
+}
+
+/** Grouped dose list by protocol */
+const ProtocolGroupedDoses = ({
+  injections,
+  todaySupplements,
+  completedSupplements,
+  skippedSupplements,
+  peptideProtocolMap,
+  peptideGoalMap,
+  protocols,
+  isToday,
+  isFutureDate,
+  updateStatus,
+  toggleSupplement,
+}: {
+  injections: InjectionLog[];
+  todaySupplements: SupplementItem[];
+  completedSupplements: Set<string>;
+  skippedSupplements: Set<string>;
+  peptideProtocolMap: Map<string, { protocolName: string; protocolId: string; goal: string }>;
+  peptideGoalMap: Map<string, string>;
+  protocols: any[];
+  isToday: boolean;
+  isFutureDate: boolean;
+  updateStatus: any;
+  toggleSupplement: any;
+}) => {
+  // Group injections + supplements by protocol
+  interface GroupedProtocol {
+    protocolName: string;
+    goal: string;
+    scheduled: InjectionLog[];
+    completed: InjectionLog[];
+    skipped: InjectionLog[];
+    pendingSupps: SupplementItem[];
+    doneSupps: SupplementItem[];
+    skippedSupps: SupplementItem[];
+  }
+
+  const groupMap = new Map<string, GroupedProtocol>();
+
+  const getOrCreate = (key: string, name: string, goal: string): GroupedProtocol => {
+    if (!groupMap.has(key)) {
+      groupMap.set(key, {
+        protocolName: name,
+        goal,
+        scheduled: [],
+        completed: [],
+        skipped: [],
+        pendingSupps: [],
+        doneSupps: [],
+        skippedSupps: [],
+      });
+    }
+    return groupMap.get(key)!;
+  };
+
+  // Group injections
+  for (const inj of injections) {
+    const info = peptideProtocolMap.get(inj.peptide_name.toLowerCase());
+    const key = info?.protocolId || "ungrouped";
+    const name = info?.protocolName || "Other";
+    const goal = info?.goal || "";
+    const group = getOrCreate(key, name, goal);
+    if (inj.status === "completed") group.completed.push(inj);
+    else if (inj.status === "skipped") group.skipped.push(inj);
+    else group.scheduled.push(inj);
+  }
+
+  // Group supplements
+  for (const supp of todaySupplements) {
+    // Find which protocol this supplement belongs to
+    const protocol = protocols.find((p: any) => p.status === "active" && p.name === supp.protocolName);
+    const key = protocol?.id || "ungrouped";
+    const name = supp.protocolName || "Other";
+    const goal = supp.goal || "";
+    const group = getOrCreate(key, name, goal);
+    if (completedSupplements.has(supp.name)) group.doneSupps.push(supp);
+    else if (skippedSupplements.has(supp.name)) group.skippedSupps.push(supp);
+    else group.pendingSupps.push(supp);
+  }
+
+  const groups = Array.from(groupMap.entries());
+  // Default: collapse completed groups, expand groups with pending items
+  const [expandedGroups, setExpandedGroups] = useState<Set<string>>(() => {
+    const initial = new Set<string>();
+    for (const [key, g] of groups) {
+      if (g.scheduled.length > 0 || g.pendingSupps.length > 0) initial.add(key);
+    }
+    return initial;
+  });
+
+  const toggleGroup = (key: string) => {
+    setExpandedGroups((prev) => {
+      const next = new Set(prev);
+      if (next.has(key)) next.delete(key);
+      else next.add(key);
+      return next;
+    });
+  };
+
+  return (
+    <div className="space-y-2">
+      {groups.map(([key, group]) => {
+        const totalInGroup = group.scheduled.length + group.completed.length + group.skipped.length + group.pendingSupps.length + group.doneSupps.length + group.skippedSupps.length;
+        const completedInGroup = group.completed.length + group.doneSupps.length;
+        const pendingInGroup = group.scheduled.length + group.pendingSupps.length;
+        const isExpanded = expandedGroups.has(key);
+        const allDone = pendingInGroup === 0 && totalInGroup > 0;
+
+        return (
+          <div key={key} className={`rounded-xl border transition-colors ${allDone ? "border-primary/20 bg-primary/[0.02]" : "border-border bg-card"}`}>
+            {/* Collapsed summary header */}
+            <button
+              onClick={() => toggleGroup(key)}
+              className="w-full flex items-center justify-between gap-2 px-4 py-3 text-left hover:bg-muted/20 transition-colors rounded-xl"
+            >
+              <div className="flex items-center gap-2.5 min-w-0">
+                {allDone ? (
+                  <Check className="h-4 w-4 text-primary shrink-0" />
+                ) : (
+                  <FlaskConical className="h-4 w-4 text-primary shrink-0" />
+                )}
+                <div className="min-w-0">
+                  <span className="text-sm font-heading font-semibold text-foreground block truncate">
+                    {group.goal || group.protocolName}
+                  </span>
+                  <span className="text-[11px] text-muted-foreground">
+                    {completedInGroup}/{totalInGroup} done
+                    {group.scheduled.length > 0 && <> · {group.scheduled.length} peptide{group.scheduled.length !== 1 ? "s" : ""} pending</>}
+                    {group.pendingSupps.length > 0 && <> · {group.pendingSupps.length} supp{group.pendingSupps.length !== 1 ? "s" : ""} pending</>}
+                  </span>
+                </div>
+              </div>
+              <div className="flex items-center gap-2 shrink-0">
+                <span className="text-[10px] text-muted-foreground">{totalInGroup} items</span>
+                {isExpanded ? <ChevronUp className="h-3.5 w-3.5 text-muted-foreground" /> : <ChevronDown className="h-3.5 w-3.5 text-muted-foreground" />}
+              </div>
+            </button>
+
+            {/* Expanded detail */}
+            {isExpanded && (
+              <div className="px-3 pb-3 space-y-1.5">
+                {/* Scheduled peptide doses */}
+                {group.scheduled.map((inj) => {
+                  const freq = getPeptideFrequency(inj.peptide_name, protocols);
+                  const badge = frequencyLabel(freq);
+                  return (
+                    <div key={inj.id} className="flex flex-wrap items-center justify-between gap-2 bg-muted/50 rounded-lg px-3 py-2.5">
+                      <div className="min-w-0 flex-1">
+                        <div className="flex items-center gap-2">
+                          <Clock className="h-3.5 w-3.5 text-primary shrink-0" />
+                          <span className="text-sm font-medium text-foreground truncate">{inj.peptide_name}</span>
+                          <span className="text-xs text-muted-foreground shrink-0">{inj.dose_mcg}mcg</span>
+                          <span className={`text-[9px] font-medium px-1.5 py-0.5 rounded-full ${badge.color}`}>{badge.label}</span>
+                        </div>
+                        <p className="text-[11px] text-muted-foreground ml-5.5 mt-0.5">
+                          {format(new Date(inj.scheduled_time), "h:mm a")}
+                        </p>
+                      </div>
+                      {isToday ? (
+                        <div className="flex gap-1.5 shrink-0">
+                          <Button size="sm" variant="outline" className="h-7 text-xs px-2" onClick={() => updateStatus.mutate({ id: inj.id, status: "skipped" })}>
+                            <SkipForward className="h-3 w-3 mr-1" /> Skip
+                          </Button>
+                          <Button size="sm" className="h-7 text-xs px-2 shadow-brand" onClick={() => updateStatus.mutate({ id: inj.id, status: "completed" })}>
+                            <Check className="h-3 w-3 mr-1" /> Done
+                          </Button>
+                        </div>
+                      ) : (
+                        <span className="text-xs text-muted-foreground">{isFutureDate ? "Planned" : "Missed"}</span>
+                      )}
+                    </div>
+                  );
+                })}
+
+                {/* Pending supplements */}
+                {group.pendingSupps.map((supp) => {
+                  const badge = frequencyLabel(supp.frequency);
+                  return (
+                    <div key={`supp-${supp.name}`} className="flex flex-wrap items-center justify-between gap-2 bg-muted/50 rounded-lg px-3 py-2.5">
+                      <div className="min-w-0 flex-1">
+                        <div className="flex items-center gap-2">
+                          <Pill className="h-3.5 w-3.5 text-accent-foreground/70 shrink-0" />
+                          <span className="text-sm font-medium text-foreground truncate">{supp.name}</span>
+                          <span className="text-xs text-muted-foreground shrink-0">{supp.dose}</span>
+                          <span className={`text-[9px] font-medium px-1.5 py-0.5 rounded-full ${badge.color}`}>{badge.label}</span>
+                        </div>
+                        {supp.drivenBy && supp.drivenBy.length > 0 && (
+                          <span className="text-[10px] text-primary/70 flex items-center gap-1 ml-5.5 mt-0.5">
+                            <Dna className="h-2.5 w-2.5" /> {supp.drivenBy[0]}
+                          </span>
+                        )}
+                      </div>
+                      {isToday ? (
+                        <div className="flex gap-1.5 shrink-0">
+                          <Button size="sm" variant="outline" className="h-7 text-xs px-2" onClick={() => toggleSupplement.mutate({ item: supp.name, completed: false })}>
+                            <SkipForward className="h-3 w-3 mr-1" /> Skip
+                          </Button>
+                          <Button size="sm" className="h-7 text-xs px-2 shadow-brand" onClick={() => toggleSupplement.mutate({ item: supp.name, completed: true })}>
+                            <Check className="h-3 w-3 mr-1" /> Done
+                          </Button>
+                        </div>
+                      ) : (
+                        <span className="text-xs text-muted-foreground">{isFutureDate ? "Planned" : "Missed"}</span>
+                      )}
+                    </div>
+                  );
+                })}
+
+                {/* Completed peptide doses */}
+                {group.completed.map((inj) => {
+                  const freq = getPeptideFrequency(inj.peptide_name, protocols);
+                  const badge = frequencyLabel(freq);
+                  return (
+                    <div key={inj.id} className="flex items-center justify-between bg-primary/5 border border-primary/10 rounded-lg px-3 py-2">
+                      <div className="flex items-center gap-2">
+                        <Check className="h-3.5 w-3.5 text-primary" />
+                        <span className="text-sm font-medium text-foreground line-through opacity-60">{inj.peptide_name}</span>
+                        <span className="text-xs text-muted-foreground">{inj.dose_mcg}mcg</span>
+                        <span className={`text-[9px] font-medium px-1.5 py-0.5 rounded-full ${badge.color}`}>{badge.label}</span>
+                      </div>
+                      <span className="text-xs text-primary">✓</span>
+                    </div>
+                  );
+                })}
+
+                {/* Completed supplements */}
+                {group.doneSupps.map((supp) => {
+                  const badge = frequencyLabel(supp.frequency);
+                  return (
+                    <div key={`supp-done-${supp.name}`} className="flex items-center justify-between bg-primary/5 border border-primary/10 rounded-lg px-3 py-2">
+                      <div className="flex items-center gap-2">
+                        <Check className="h-3.5 w-3.5 text-primary" />
+                        <span className="text-sm font-medium text-foreground line-through opacity-60">{supp.name}</span>
+                        <span className="text-xs text-muted-foreground">{supp.dose}</span>
+                        <span className={`text-[9px] font-medium px-1.5 py-0.5 rounded-full ${badge.color}`}>{badge.label}</span>
+                      </div>
+                      <span className="text-xs text-primary">✓</span>
+                    </div>
+                  );
+                })}
+
+                {/* Skipped */}
+                {group.skipped.map((inj) => (
+                  <div key={inj.id} className="flex items-center justify-between bg-muted/30 rounded-lg px-3 py-2 opacity-50">
+                    <div className="flex items-center gap-2">
+                      <SkipForward className="h-3.5 w-3.5 text-muted-foreground" />
+                      <span className="text-sm font-medium text-foreground line-through">{inj.peptide_name}</span>
+                    </div>
+                    <span className="text-xs text-muted-foreground">Skipped</span>
+                  </div>
+                ))}
+                {group.skippedSupps.map((supp) => (
+                  <div key={`supp-skip-${supp.name}`} className="flex items-center justify-between bg-muted/30 rounded-lg px-3 py-2 opacity-50">
+                    <div className="flex items-center gap-2">
+                      <SkipForward className="h-3.5 w-3.5 text-muted-foreground" />
+                      <span className="text-sm font-medium text-foreground line-through">{supp.name}</span>
+                    </div>
+                    <span className="text-xs text-muted-foreground">Skipped</span>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        );
+      })}
+    </div>
+  );
+};
   const navigate = useNavigate();
   const { user } = useAuth();
   const { toast } = useToast();
