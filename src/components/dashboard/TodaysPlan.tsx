@@ -335,6 +335,8 @@ const ProtocolGroupedDoses = ({
     </div>
   );
 };
+
+const TodaysPlan = ({ onActivate, slim = false, selectedDate }: TodaysPlanProps) => {
   const navigate = useNavigate();
   const { user } = useAuth();
   const { toast } = useToast();
