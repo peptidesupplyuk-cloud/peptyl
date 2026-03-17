@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import { useNavigate } from "react-router-dom";
 import {
   Shield,
   Clock,
@@ -11,7 +12,9 @@ import {
   Beaker,
   Zap,
   BookOpen,
+  Play,
 } from "lucide-react";
+import { Button } from "@/components/ui/button";
 
 // ── Types ──────────────────────────────────────────────────────────────────
 
@@ -332,7 +335,78 @@ const ProtocolGrid = ({ stack }: { stack: CuratedStack }) => {
   );
 };
 
-// ── Compound Row (compact) ─────────────────────────────────────────────────
+// ── Protocol at a Glance (with Start button) ──────────────────────────────
+
+const ProtocolAtAGlance = ({ stack }: { stack: CuratedStack }) => {
+  const navigate = useNavigate();
+
+  const handleStartProtocol = () => {
+    // Extract Phase 1 compounds as the starting point, user can edit in dashboard
+    const allCompounds = stack.phases.flatMap((p) => p.compounds);
+    const peptides = allCompounds
+      .filter((c) => c.type === "peptide")
+      .reduce<{ peptide_name: string; dose_mcg: number; frequency: string; timing: string; route: string }[]>((acc, c) => {
+        if (!acc.find((a) => a.peptide_name === c.name)) {
+          const doseMatch = c.dose.match(/(\d+)\s*(mcg|mg)/i);
+          let doseMcg = 0;
+          if (doseMatch) {
+            doseMcg = parseInt(doseMatch[1]);
+            if (doseMatch[2].toLowerCase() === "mg") doseMcg *= 1000;
+          }
+          const freq = c.frequency.toLowerCase().includes("daily") ? "daily"
+            : c.frequency.toLowerCase().includes("eod") ? "EOD"
+            : c.frequency.toLowerCase().includes("2x") ? "2x/week"
+            : c.frequency.toLowerCase().includes("3x") ? "3x/week"
+            : c.frequency.toLowerCase().includes("weekly") || c.frequency.toLowerCase().includes("1x") ? "weekly"
+            : "daily";
+          const timing = c.timing.toLowerCase().includes("am") && c.timing.toLowerCase().includes("pm") ? "AM+PM"
+            : c.timing.toLowerCase().includes("am") || c.timing.toLowerCase().includes("morning") ? "AM"
+            : c.timing.toLowerCase().includes("bed") ? "Pre-bed"
+            : "PM";
+          const route = c.route.toLowerCase().includes("oral") ? "Oral"
+            : c.route.toLowerCase().includes("nasal") ? "Nasal"
+            : c.route.toLowerCase().includes("im") ? "IM"
+            : "SubQ";
+          acc.push({ peptide_name: c.name, dose_mcg: doseMcg, frequency: freq, timing, route });
+        }
+        return acc;
+      }, []);
+
+    const supplements = stack.supplements.map((s) => ({
+      name: s.name,
+      dose: s.dose,
+      frequency: s.frequency,
+    }));
+
+    const durationMatch = stack.duration.match(/(\d+)/);
+    const durationWeeks = durationMatch ? parseInt(durationMatch[1]) : 8;
+
+    sessionStorage.setItem("pending_stack", JSON.stringify({
+      name: stack.name,
+      goal: stack.tagline,
+      durationWeeks,
+      peptides,
+      supplements,
+    }));
+
+    navigate("/dashboard?tab=protocols");
+  };
+
+  return (
+    <div className="bg-card rounded-xl border border-primary/20 p-4 shadow-sm">
+      <div className="flex items-center justify-between mb-3">
+        <h3 className="font-heading font-bold text-sm text-foreground">Protocol at a Glance</h3>
+        <Button onClick={handleStartProtocol} size="sm" className="shadow-brand gap-1.5 text-xs">
+          <Play className="h-3.5 w-3.5" />
+          Start Protocol
+        </Button>
+      </div>
+      <ProtocolGrid stack={stack} />
+    </div>
+  );
+};
+
+
 
 const CompoundRow = ({ c }: { c: Compound }) => {
   const [open, setOpen] = useState(false);
@@ -447,10 +521,7 @@ const StackDetail = ({ stack }: { stack: CuratedStack }) => {
       </div>
 
       {/* HERO: Protocol at a Glance — first thing users see */}
-      <div className="bg-card rounded-xl border border-primary/20 p-4 shadow-sm">
-        <h3 className="font-heading font-bold text-sm text-foreground mb-3">Protocol at a Glance</h3>
-        <ProtocolGrid stack={stack} />
-      </div>
+      <ProtocolAtAGlance stack={stack} />
 
       {/* Two-column: Benefits + Who */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-3">
