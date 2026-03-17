@@ -619,7 +619,8 @@ Deno.serve(async (req) => {
               },
               body: JSON.stringify({
                 app_id: onesignalAppId,
-                include_external_user_ids: [outcome.user_id],
+                include_aliases: { external_id: [outcome.user_id] },
+                target_channel: "push",
                 headings: { en: "🧬 Your results are ready" },
                 contents: { en: pushBody },
                 url: reportUrl,
