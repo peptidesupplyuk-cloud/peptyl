@@ -11,27 +11,29 @@ const SignupBanner = lazy(() => import("@/components/SignupBanner"));
 const PWAUpdatePrompt = lazy(() => import("@/components/PWAUpdatePrompt"));
 import { useActivityTracker } from "@/hooks/use-activity-tracker";
 
-import SitewideDisclaimer from "@/components/SitewideDisclaimer";
+const SitewideDisclaimer = lazy(() => import("@/components/SitewideDisclaimer"));
 import ScrollToTop from "@/components/ScrollToTop";
 import GeoGate from "@/components/GeoGate";
-import Index from "./pages/Index";
-import Auth from "./pages/Auth";
+
+// Lazy-load ALL pages for faster initial load
+const Index = lazy(() => import("./pages/Index"));
+const Auth = lazy(() => import("./pages/Auth"));
 const ResetPassword = lazy(() => import("./pages/ResetPassword"));
 const CompleteProfile = lazy(() => import("./pages/CompleteProfile"));
-import Peptides from "./pages/Peptides";
-import Calculators from "./pages/Calculators";
-import Education from "./pages/Education";
-import Dashboard from "./pages/Dashboard";
-import Improve from "./pages/Improve";
-import ShopHub from "./pages/ShopHub";
+const Peptides = lazy(() => import("./pages/Peptides"));
+const Calculators = lazy(() => import("./pages/Calculators"));
+const Education = lazy(() => import("./pages/Education"));
+const Dashboard = lazy(() => import("./pages/Dashboard"));
+const Improve = lazy(() => import("./pages/Improve"));
+const ShopHub = lazy(() => import("./pages/ShopHub"));
 const Testing = lazy(() => import("./pages/Testing"));
-import NotFound from "./pages/NotFound";
-import About from "./pages/About";
+const NotFound = lazy(() => import("./pages/NotFound"));
+const About = lazy(() => import("./pages/About"));
 const FAQ = lazy(() => import("./pages/FAQ"));
-import Shop from "./pages/Shop";
-import Suppliers from "./pages/Suppliers";
-import PrivacyPolicy from "./pages/PrivacyPolicy";
-import TermsOfService from "./pages/TermsOfService";
+const Shop = lazy(() => import("./pages/Shop"));
+const Suppliers = lazy(() => import("./pages/Suppliers"));
+const PrivacyPolicy = lazy(() => import("./pages/PrivacyPolicy"));
+const TermsOfService = lazy(() => import("./pages/TermsOfService"));
 const AdminDashboard = lazy(() => import("./pages/AdminDashboard"));
 const ResearchQueue = lazy(() => import("./pages/ResearchQueue"));
 
