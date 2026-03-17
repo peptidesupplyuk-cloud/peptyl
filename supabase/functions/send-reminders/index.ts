@@ -472,7 +472,8 @@ Deno.serve(async (req) => {
               },
               body: JSON.stringify({
                 app_id: onesignalAppId,
-                include_external_user_ids: [np.user_id],
+                include_aliases: { external_id: [np.user_id] },
+                target_channel: "push",
                 headings: { en: "🔬 Time to retest your bloods" },
                 contents: { en: `${np.name} — 10 weeks in. Book a follow-up test to see your results.` },
                 url: retestUrl,
