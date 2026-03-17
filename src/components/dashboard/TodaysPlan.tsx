@@ -203,12 +203,21 @@ const TodaysPlan = ({ onActivate, slim = false, selectedDate }: TodaysPlanProps)
   const showMilestone30 = daysActive === 30 && !dismissed30 && actionPlan?.["30_days"]?.[0];
   const showMilestone90 = daysActive === 90 && !dismissed90 && actionPlan?.["90_days"]?.[0];
 
-  // Build a map from peptide name → formatted protocol goal for active protocols
+  // Build maps from peptide name → goal + protocol info for active protocols
   const peptideGoalMap = new Map<string, string>();
+  const peptideProtocolMap = new Map<string, { protocolName: string; protocolId: string; goal: string }>();
   for (const protocol of protocols.filter((p) => p.status === "active")) {
     for (const pep of protocol.peptides) {
-      if (protocol.goal && !peptideGoalMap.has(pep.peptide_name.toLowerCase())) {
-        peptideGoalMap.set(pep.peptide_name.toLowerCase(), formatGoalLabel(protocol.goal));
+      const key = pep.peptide_name.toLowerCase();
+      if (!peptideGoalMap.has(key)) {
+        peptideGoalMap.set(key, protocol.goal ? formatGoalLabel(protocol.goal) : "");
+      }
+      if (!peptideProtocolMap.has(key)) {
+        peptideProtocolMap.set(key, {
+          protocolName: protocol.name,
+          protocolId: protocol.id,
+          goal: protocol.goal ? formatGoalLabel(protocol.goal) : "",
+        });
       }
     }
   }
