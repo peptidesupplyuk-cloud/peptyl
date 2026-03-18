@@ -113,6 +113,7 @@ const CreateProtocolForm = ({ disclaimerAccepted, initialPeptide, onInitialPepti
             name: s.name || "",
             dose: s.dose || "",
             frequency: s.frequency || "Daily",
+            timing: s.timing || "AM",
           })));
         }
         sessionStorage.removeItem("pending_stack");
