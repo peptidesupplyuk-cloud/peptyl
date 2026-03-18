@@ -123,9 +123,11 @@ const ProtocolGroupedDoses = ({
     return groupMap.get(key)!;
   };
 
-  // Group injections
+  // Group injections — use protocol_peptide_id to correctly assign to protocol
   for (const inj of injections) {
-    const info = peptideProtocolMap.get(inj.peptide_name.toLowerCase());
+    // First try exact match via protocol_peptide_id
+    const infoById = inj.protocol_peptide_id ? protocolPeptideMap.get(inj.protocol_peptide_id) : null;
+    const info = infoById || peptideProtocolMap.get(inj.peptide_name.toLowerCase());
     const key = info?.protocolId || "ungrouped";
     const name = info?.protocolName || "Other";
     const goal = info?.goal || "";
