@@ -599,9 +599,9 @@ const TodaysPlan = ({ onActivate, slim = false, selectedDate }: TodaysPlanProps)
     for (const inj of scheduled) {
       updateStatus.mutate({ id: inj.id, status: "completed" });
     }
-    const pendingNames = pendingSupplements.map((s) => s.name);
-    if (pendingNames.length > 0) {
-      batchComplete.mutate(pendingNames);
+    const pendingItems = pendingSupplements.map((s) => ({ item: s.name, protocolId: s.protocolId }));
+    if (pendingItems.length > 0) {
+      batchComplete.mutate(pendingItems);
     }
   };
 
