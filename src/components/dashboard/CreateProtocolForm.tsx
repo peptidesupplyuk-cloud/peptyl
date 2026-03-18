@@ -348,7 +348,7 @@ const CreateProtocolForm = ({ disclaimerAccepted, initialPeptide, onInitialPepti
         )}
 
         {supplementRows.map((row, i) => (
-          <div key={i} className="grid grid-cols-[1fr_100px_100px_32px] gap-2 items-end">
+          <div key={i} className="grid grid-cols-[1fr_100px_100px_80px_32px] gap-2 items-end">
             <Input
               placeholder="Supplement name"
               value={row.name}
@@ -370,6 +370,17 @@ const CreateProtocolForm = ({ disclaimerAccepted, initialPeptide, onInitialPepti
                 {["Daily", "Twice daily", "With meals", "Before bed", "Morning", "Weekly"].map(f => (
                   <SelectItem key={f} value={f} className="text-xs">{f}</SelectItem>
                 ))}
+              </SelectContent>
+            </Select>
+            <Select
+              value={row.timing}
+              onValueChange={(v) => setSupplementRows(p => p.map((r, idx) => idx === i ? { ...r, timing: v } : r))}
+            >
+              <SelectTrigger className="text-xs h-9"><SelectValue /></SelectTrigger>
+              <SelectContent>
+                <SelectItem value="AM" className="text-xs">AM</SelectItem>
+                <SelectItem value="PM" className="text-xs">PM</SelectItem>
+                <SelectItem value="AM+PM" className="text-xs">AM+PM</SelectItem>
               </SelectContent>
             </Select>
             <Button variant="ghost" size="icon" className="h-9 w-9" onClick={() => setSupplementRows(p => p.filter((_, idx) => idx !== i))}>

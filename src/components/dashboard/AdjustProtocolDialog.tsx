@@ -264,6 +264,17 @@ const AdjustProtocolDialog = ({ protocol, open, onOpenChange }: Props) => {
                 </Select>
               </div>
             </div>
+            <div>
+              <label className="text-xs text-muted-foreground mb-1 block">When to take</label>
+              <Select value={suppTiming} onValueChange={setSuppTiming}>
+                <SelectTrigger className="text-sm h-9"><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="AM">AM (Morning)</SelectItem>
+                  <SelectItem value="PM">PM (Evening)</SelectItem>
+                  <SelectItem value="AM+PM">AM + PM (Both)</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
             <Button
               className="w-full"
               onClick={handleAddSupplement}
