@@ -57,8 +57,14 @@ function frequencyLabel(freq: string): { label: string; color: string } {
   return { label: freq, color: "bg-muted text-muted-foreground" };
 }
 
-/** Get the frequency for a peptide from its protocol */
-function getPeptideFrequency(peptideName: string, protocols: any[]): string {
+/** Get the frequency for a peptide from its protocol, using protocol_peptide_id for exact match */
+function getPeptideFrequency(peptideName: string, protocols: any[], protocolPeptideId?: string | null): string {
+  if (protocolPeptideId) {
+    for (const p of protocols.filter((pr: any) => pr.status === "active")) {
+      const pep = p.peptides.find((pp: any) => pp.id === protocolPeptideId);
+      if (pep) return pep.frequency;
+    }
+  }
   for (const p of protocols.filter((pr: any) => pr.status === "active")) {
     const pep = p.peptides.find((pp: any) => pp.peptide_name.toLowerCase() === peptideName.toLowerCase());
     if (pep) return pep.frequency;
@@ -73,6 +79,7 @@ const ProtocolGroupedDoses = ({
   completedSupplements,
   skippedSupplements,
   peptideProtocolMap,
+  protocolPeptideMap,
   peptideGoalMap,
   protocols,
   isToday,
@@ -85,6 +92,7 @@ const ProtocolGroupedDoses = ({
   completedSupplements: Set<string>;
   skippedSupplements: Set<string>;
   peptideProtocolMap: Map<string, { protocolName: string; protocolId: string; goal: string }>;
+  protocolPeptideMap: Map<string, { protocolName: string; protocolId: string; goal: string }>;
   peptideGoalMap: Map<string, string>;
   protocols: any[];
   isToday: boolean;
@@ -122,9 +130,11 @@ const ProtocolGroupedDoses = ({
     return groupMap.get(key)!;
   };
 
-  // Group injections
+  // Group injections — use protocol_peptide_id to correctly assign to protocol
   for (const inj of injections) {
-    const info = peptideProtocolMap.get(inj.peptide_name.toLowerCase());
+    // First try exact match via protocol_peptide_id
+    const infoById = inj.protocol_peptide_id ? protocolPeptideMap.get(inj.protocol_peptide_id) : null;
+    const info = infoById || peptideProtocolMap.get(inj.peptide_name.toLowerCase());
     const key = info?.protocolId || "ungrouped";
     const name = info?.protocolName || "Other";
     const goal = info?.goal || "";
@@ -210,7 +220,7 @@ const ProtocolGroupedDoses = ({
               <div className="px-3 pb-3 space-y-1.5">
                 {/* Scheduled peptide doses */}
                 {group.scheduled.map((inj) => {
-                  const freq = getPeptideFrequency(inj.peptide_name, protocols);
+                  const freq = getPeptideFrequency(inj.peptide_name, protocols, inj.protocol_peptide_id);
                   const badge = frequencyLabel(freq);
                   return (
                     <div key={inj.id} className="flex flex-wrap items-center justify-between gap-2 bg-muted/50 rounded-lg px-3 py-2.5">
@@ -277,7 +287,7 @@ const ProtocolGroupedDoses = ({
 
                 {/* Completed peptide doses */}
                 {group.completed.map((inj) => {
-                  const freq = getPeptideFrequency(inj.peptide_name, protocols);
+                  const freq = getPeptideFrequency(inj.peptide_name, protocols, inj.protocol_peptide_id);
                   const badge = frequencyLabel(freq);
                   return (
                     <div key={inj.id} className="flex items-center justify-between bg-primary/5 border border-primary/10 rounded-lg px-3 py-2">
@@ -496,6 +506,8 @@ const TodaysPlan = ({ onActivate, slim = false, selectedDate }: TodaysPlanProps)
   // Build maps from peptide name → goal + protocol info for active protocols
   const peptideGoalMap = new Map<string, string>();
   const peptideProtocolMap = new Map<string, { protocolName: string; protocolId: string; goal: string }>();
+  // Map protocol_peptide_id → protocol info for exact matching
+  const protocolPeptideMap = new Map<string, { protocolName: string; protocolId: string; goal: string }>();
   for (const protocol of protocols.filter((p) => p.status === "active")) {
     for (const pep of protocol.peptides) {
       const key = pep.peptide_name.toLowerCase();
@@ -509,6 +521,12 @@ const TodaysPlan = ({ onActivate, slim = false, selectedDate }: TodaysPlanProps)
           goal: protocol.goal ? formatGoalLabel(protocol.goal) : "",
         });
       }
+      // Always map protocol_peptide_id (unique per protocol)
+      protocolPeptideMap.set(pep.id, {
+        protocolName: protocol.name,
+        protocolId: protocol.id,
+        goal: protocol.goal ? formatGoalLabel(protocol.goal) : "",
+      });
     }
   }
 
@@ -913,6 +931,7 @@ const TodaysPlan = ({ onActivate, slim = false, selectedDate }: TodaysPlanProps)
             completedSupplements={completedSupplements}
             skippedSupplements={skippedSupplements}
             peptideProtocolMap={peptideProtocolMap}
+            protocolPeptideMap={protocolPeptideMap}
             peptideGoalMap={peptideGoalMap}
             protocols={protocols}
             isToday={isToday}
