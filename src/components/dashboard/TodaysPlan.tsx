@@ -41,10 +41,28 @@ interface SupplementItem {
   name: string;
   dose: string;
   frequency: string;
+  timing: string; // "AM" | "PM" | "AM+PM"
   protocolName: string;
   protocolId: string;
   goal: string;
   drivenBy?: string[];
+}
+
+/** Derive timing window for a supplement from its explicit timing or frequency hint */
+function resolveSupplementTiming(supp: { timing?: string; frequency?: string }): string {
+  if (supp.timing) return supp.timing.toUpperCase();
+  // Infer from frequency keywords
+  const freq = (supp.frequency || "").toLowerCase();
+  if (freq.includes("morning") || freq.includes("fasted")) return "AM";
+  if (freq.includes("bed") || freq.includes("evening") || freq.includes("night")) return "PM";
+  if (freq.includes("twice") || freq.includes("2x") || freq.includes("with meals")) return "AM+PM";
+  return "AM"; // sensible default
+}
+
+/** Derive timing window for a peptide injection */
+function resolveInjectionTiming(scheduledTime: string): "AM" | "PM" {
+  const hour = new Date(scheduledTime).getUTCHours();
+  return hour < 14 ? "AM" : "PM";
 }
 
 /** Frequency badge helper */
