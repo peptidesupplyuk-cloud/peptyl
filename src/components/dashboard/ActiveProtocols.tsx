@@ -270,19 +270,19 @@ const ActiveProtocols = () => {
           <p className="text-[10px] text-muted-foreground italic border-t border-border/50 pt-2 truncate">{p.notes}</p>
         )}
 
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-3 text-xs text-muted-foreground">
-            <span className="flex items-center gap-1"><Clock className="h-3 w-3" />Day {daysActive + 1}</span>
+        <div className="flex items-center justify-between gap-2 min-w-0">
+          <div className="flex items-center gap-3 text-xs text-muted-foreground min-w-0 shrink">
+            <span className="flex items-center gap-1 shrink-0"><Clock className="h-3 w-3" />Day {daysActive + 1}</span>
             {progress !== null && (
-              <div className="flex items-center gap-2">
-                <div className="w-20 h-1.5 bg-muted rounded-full overflow-hidden">
+              <div className="flex items-center gap-2 min-w-0">
+                <div className="w-16 h-1.5 bg-muted rounded-full overflow-hidden shrink-0">
                   <div className="h-full bg-primary rounded-full transition-all" style={{ width: `${progress}%` }} />
                 </div>
-                <span>{progress}%</span>
+                <span className="shrink-0">{progress}%</span>
               </div>
             )}
           </div>
-          <div className="flex gap-1">
+          <div className="flex gap-1 shrink-0 flex-wrap justify-end">
             {p.status === "active" && (
               <>
                 <Button size="sm" variant="outline" className="h-7 text-xs gap-1" onClick={() => setAdjustTarget(p)}>
