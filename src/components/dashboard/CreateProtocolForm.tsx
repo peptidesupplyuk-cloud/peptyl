@@ -152,10 +152,49 @@ const CreateProtocolForm = ({ disclaimerAccepted, initialPeptide, onInitialPepti
       return;
     }
     const validPeptides = peptideRows.filter((p) => p.peptide_name && p.dose_mcg > 0);
-    const validSupplements = supplementRows.filter(s => s.name.trim() && s.dose.trim());
+    const validSupplements = supplementRows
+      .filter(s => s.name.trim() && s.dose.trim())
+      .map(s => ({ ...s, name: normaliseSupplementName(s.name) }));
 
     if (validPeptides.length === 0 && validSupplements.length === 0) {
       toast({ title: "Add peptides or supplements", description: "Add at least one peptide or supplement.", variant: "destructive" });
+      return;
+    }
+
+    // Check for duplicate supplements within this protocol (after normalisation)
+    const seen = new Set<string>();
+    const dupeSupps: string[] = [];
+    for (const s of validSupplements) {
+      const key = s.name.toLowerCase();
+      if (seen.has(key)) dupeSupps.push(s.name);
+      seen.add(key);
+    }
+    if (dupeSupps.length > 0) {
+      toast({
+        title: "Duplicate supplement",
+        description: `${[...new Set(dupeSupps)].join(", ")} is listed more than once. Please remove the duplicate.`,
+        variant: "destructive",
+      });
+      return;
+    }
+
+    // Check for supplements already in other active protocols
+    const activeSupps = existingProtocols
+      .filter(p => p.status === "active" || p.status === "paused")
+      .flatMap(p => (p.supplements || []).map((s: any) => ({ name: normaliseSupplementName(s.name), protocolName: p.name })));
+    const crossDupes = validSupplements.filter(s =>
+      activeSupps.some(as => isSameSupplement(as.name, s.name))
+    );
+    if (crossDupes.length > 0) {
+      const details = crossDupes.map(d => {
+        const match = activeSupps.find(as => isSameSupplement(as.name, d.name));
+        return `${d.name} (already in "${match?.protocolName}")`;
+      }).join(", ");
+      toast({
+        title: "Supplement already active",
+        description: `${details}. Update the existing protocol's dosage instead of creating a duplicate.`,
+        variant: "destructive",
+      });
       return;
     }
 
