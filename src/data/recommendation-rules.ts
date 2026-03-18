@@ -659,7 +659,7 @@ export const DNA_SUPPLEMENT_SIGNALS: {
       type: "supplements_only",
       peptides: [],
       supplements: [
-        { name: "Omega-3 Fish Oil", dose: "3000mg EPA/DHA", frequency: "Daily", driven_by: ["APOE e3/e4"] },
+        { name: "Omega-3 (EPA/DHA)", dose: "3000mg EPA/DHA", frequency: "Daily", driven_by: ["APOE e3/e4"] },
         { name: "CoQ10", dose: "200mg", frequency: "Daily with fat", driven_by: ["APOE e4"] },
         { name: "Berberine HCl", dose: "500mg", frequency: "With meals, twice daily", driven_by: ["APOE e4 — lipid metabolism"] },
       ],
