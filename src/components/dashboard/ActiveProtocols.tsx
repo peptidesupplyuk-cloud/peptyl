@@ -226,11 +226,11 @@ const ActiveProtocols = () => {
     const progress = totalDays ? Math.min(100, Math.round((daysActive / totalDays) * 100)) : null;
 
     return (
-      <div key={p.id} className="bg-muted/50 rounded-xl p-4 space-y-3">
-        <div className="flex items-start justify-between">
-          <div>
-            <h4 className="font-heading font-semibold text-foreground text-sm">{p.name}</h4>
-            {p.goal && <p className="text-xs text-muted-foreground mt-0.5">{p.goal}</p>}
+      <div key={p.id} className="bg-muted/50 rounded-xl p-4 space-y-3 overflow-hidden">
+        <div className="flex items-start justify-between gap-2 min-w-0">
+          <div className="min-w-0 flex-1">
+            <h4 className="font-heading font-semibold text-foreground text-sm truncate">{p.name}</h4>
+            {p.goal && <p className="text-xs text-muted-foreground mt-0.5 line-clamp-2">{p.goal}</p>}
           </div>
           <span className={`text-[10px] px-2 py-0.5 rounded-full font-medium ${
             p.status === "active" ? "bg-green-500/10 text-green-500" :
@@ -242,47 +242,47 @@ const ActiveProtocols = () => {
         </div>
 
         {p.peptides.length > 0 && (
-          <div className="space-y-1">
+          <div className="space-y-1 overflow-hidden">
             {p.peptides.map((pp) => (
-              <div key={pp.id} className="flex items-center justify-between text-xs">
-                <span className="text-foreground flex items-center gap-1.5">{pp.peptide_name} <PeptideInfoTooltip peptideName={pp.peptide_name} /></span>
-                <span className="text-muted-foreground">{pp.dose_mcg}mcg · {pp.frequency} · {pp.timing}</span>
+              <div key={pp.id} className="flex items-center justify-between text-xs gap-2 min-w-0">
+                <span className="text-foreground flex items-center gap-1.5 shrink-0">{pp.peptide_name} <PeptideInfoTooltip peptideName={pp.peptide_name} /></span>
+                <span className="text-muted-foreground truncate text-right min-w-0">{pp.dose_mcg}mcg · {pp.frequency} · {pp.timing}</span>
               </div>
             ))}
           </div>
         )}
 
         {p.supplements && p.supplements.length > 0 && (
-          <div className="space-y-1 border-t border-border/50 pt-2">
+          <div className="space-y-1 border-t border-border/50 pt-2 overflow-hidden">
             <p className="text-[10px] font-medium text-muted-foreground uppercase tracking-wider flex items-center gap-1">
               <Pill className="h-3 w-3" /> Suggested Supplements
             </p>
             {p.supplements.map((s, i) => (
-              <div key={i} className="flex items-center justify-between text-xs">
-                <span className="text-foreground">{s.name}</span>
-                <span className="text-muted-foreground">{s.dose} · {s.frequency}</span>
+              <div key={i} className="flex items-center justify-between text-xs gap-2 min-w-0">
+                <span className="text-foreground shrink-0">{s.name}</span>
+                <span className="text-muted-foreground truncate text-right min-w-0">{s.dose} · {s.frequency}</span>
               </div>
             ))}
           </div>
         )}
 
         {p.notes && (
-          <p className="text-[10px] text-muted-foreground italic border-t border-border/50 pt-2">{p.notes}</p>
+          <p className="text-[10px] text-muted-foreground italic border-t border-border/50 pt-2 truncate">{p.notes}</p>
         )}
 
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-3 text-xs text-muted-foreground">
-            <span className="flex items-center gap-1"><Clock className="h-3 w-3" />Day {daysActive + 1}</span>
+        <div className="flex items-center justify-between gap-2 min-w-0">
+          <div className="flex items-center gap-3 text-xs text-muted-foreground min-w-0 shrink">
+            <span className="flex items-center gap-1 shrink-0"><Clock className="h-3 w-3" />Day {daysActive + 1}</span>
             {progress !== null && (
-              <div className="flex items-center gap-2">
-                <div className="w-20 h-1.5 bg-muted rounded-full overflow-hidden">
+              <div className="flex items-center gap-2 min-w-0">
+                <div className="w-16 h-1.5 bg-muted rounded-full overflow-hidden shrink-0">
                   <div className="h-full bg-primary rounded-full transition-all" style={{ width: `${progress}%` }} />
                 </div>
-                <span>{progress}%</span>
+                <span className="shrink-0">{progress}%</span>
               </div>
             )}
           </div>
-          <div className="flex gap-1">
+          <div className="flex gap-1 shrink-0 flex-wrap justify-end">
             {p.status === "active" && (
               <>
                 <Button size="sm" variant="outline" className="h-7 text-xs gap-1" onClick={() => setAdjustTarget(p)}>

@@ -40,7 +40,8 @@ const GlobalMobileNav = () => {
     { href: "/shop", label: t("nav.shop"), icon: Store },
   ], [t, dnaHref]);
 
-  if (!isMobile) return null;
+  // Hide on dashboard — MobileTabNav handles sub-navigation there
+  if (!isMobile || location.pathname === "/dashboard") return null;
 
   const isActive = (href: string) => {
     if (href === "/improve") return location.pathname === "/improve" || location.pathname === "/calculators" || location.pathname === "/testing";
