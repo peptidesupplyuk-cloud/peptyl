@@ -127,7 +127,7 @@ export function useTodayInjections() {
         status: string;
       }> = [];
 
-      for (const protocol of protocols) {
+      for (const protocol of activeProtocols) {
         const { data: peptides } = await supabase
           .from("protocol_peptides")
           .select("*")
