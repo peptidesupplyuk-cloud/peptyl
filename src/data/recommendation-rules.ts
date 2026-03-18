@@ -99,7 +99,7 @@ export const RECOMMENDATION_RULES: Rule[] = [
         { name: "BPC-157", dose_mcg: 250, frequency: "daily", timing: "AM+PM", route: "SubQ" },
       ],
       supplements: [
-        { name: "Omega-3 Fish Oil", dose: "2000mg EPA/DHA", frequency: "Daily" },
+        { name: "Omega-3 (EPA/DHA)", dose: "2000mg EPA/DHA", frequency: "Daily" },
         { name: "NAC", dose: "600mg", frequency: "Twice daily" },
       ],
       durationWeeks: 4,
