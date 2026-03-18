@@ -103,13 +103,19 @@ export function useTodayInjections() {
       }
       generatingForDate = today;
 
-      // No logs yet — auto-generate from active protocols
+      // No logs yet — auto-generate from active protocols (exclude expired ones)
       const { data: protocols } = await supabase
         .from("protocols")
         .select("*")
         .eq("status", "active");
 
-      if (!protocols || protocols.length === 0) return [];
+      // Filter out protocols whose end_date has passed
+      const activeProtocols = (protocols || []).filter(p => {
+        if (!p.end_date) return true;
+        return p.end_date >= today;
+      });
+
+      if (activeProtocols.length === 0) return [];
 
       // Gather all peptides from all active protocols
       const logsToInsert: Array<{
