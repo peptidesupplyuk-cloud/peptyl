@@ -53,9 +53,10 @@ function resolveSupplementTiming(supp: { timing?: string; frequency?: string }):
   if (supp.timing) return supp.timing.toUpperCase();
   // Infer from frequency keywords
   const freq = (supp.frequency || "").toLowerCase();
+  if (freq.includes("split") || freq.includes("am/pm") || freq.includes("twice") || freq.includes("2x")) return "AM+PM";
   if (freq.includes("morning") || freq.includes("fasted")) return "AM";
   if (freq.includes("bed") || freq.includes("evening") || freq.includes("night")) return "PM";
-  if (freq.includes("twice") || freq.includes("2x") || freq.includes("with meals")) return "AM+PM";
+  if (freq.includes("with meals")) return "AM+PM";
   return "AM"; // sensible default
 }
 
@@ -65,15 +66,21 @@ function resolveInjectionTiming(scheduledTime: string): "AM" | "PM" {
   return hour < 14 ? "AM" : "PM";
 }
 
-/** Frequency badge helper */
+/** Frequency badge helper — handles both peptide and supplement frequency labels */
 function frequencyLabel(freq: string): { label: string; color: string } {
   const f = freq.toLowerCase();
-  if (f === "daily" || f.includes("daily")) return { label: "Daily", color: "bg-primary/10 text-primary" };
+  // Daily patterns (including supplement-specific daily frequencies)
+  if (f === "daily" || f.includes("daily") || f === "morning" || f === "evening"
+    || f.includes("with meals") || f.includes("before bed") || f.includes("fasted")
+    || f.includes("before exercise") || f.includes("with fat") || f.includes("split")) {
+    return { label: "Daily", color: "bg-primary/10 text-primary" };
+  }
+  if (f === "twice daily" || f.includes("twice") || f.includes("2x/day")) return { label: "Twice daily", color: "bg-primary/10 text-primary" };
   if (f === "eod" || f.includes("every other")) return { label: "Every other day", color: "bg-info/10 text-info" };
   if (f.includes("2x")) return { label: "Mon · Thu", color: "bg-warm/10 text-warm" };
   if (f.includes("3x")) return { label: "Mon · Wed · Fri", color: "bg-warm/10 text-warm" };
   if (f === "weekly" || f.includes("1x")) return { label: "Weekly", color: "bg-accent/50 text-accent-foreground" };
-  return { label: freq, color: "bg-muted text-muted-foreground" };
+  return { label: "Daily", color: "bg-primary/10 text-primary" };
 }
 
 /** Get the frequency for a peptide from its protocol, using protocol_peptide_id for exact match */
