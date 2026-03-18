@@ -372,11 +372,22 @@ const ProtocolAtAGlance = ({ stack }: { stack: CuratedStack }) => {
         return acc;
       }, []);
 
-    const supplements = stack.supplements.map((s) => ({
-      name: s.name,
-      dose: s.dose,
-      frequency: s.frequency,
-    }));
+    const supplements = stack.supplements.map((s) => {
+      // Normalise frequency to the standard set used by CreateProtocolForm
+      const fl = s.frequency.toLowerCase();
+      const normFreq = fl.includes("twice") || fl.includes("2x") || fl.includes("split") ? "Twice daily"
+        : fl.includes("bed") || fl.includes("evening") || fl.includes("night") ? "Before bed"
+        : fl.includes("morning") || fl.includes("fasted") ? "Morning"
+        : fl.includes("meal") || fl.includes("with fat") ? "With meals"
+        : fl.includes("weekly") ? "Weekly"
+        : "Daily";
+      // Derive timing from the raw frequency/timing data
+      const tl = (s.timing || "").toLowerCase();
+      const normTiming = (fl.includes("split") || fl.includes("am/pm") || fl.includes("twice") || (tl.includes("am") && tl.includes("pm"))) ? "AM+PM"
+        : (fl.includes("bed") || fl.includes("evening") || fl.includes("night") || tl.includes("bed") || tl.includes("evening")) ? "PM"
+        : "AM";
+      return { name: s.name, dose: s.dose, frequency: normFreq, timing: normTiming };
+    });
 
     const durationMatch = stack.duration.match(/(\d+)/);
     const durationWeeks = durationMatch ? parseInt(durationMatch[1]) : 8;
