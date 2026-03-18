@@ -9,6 +9,7 @@ import { useToast } from "@/hooks/use-toast";
 import { format, addWeeks } from "date-fns";
 import { checkDoseEscalation, type EscalationWarning } from "@/data/titration-rules";
 import DoseEscalationWarning from "./DoseEscalationWarning";
+import { normaliseSupplementName, isSameSupplement } from "@/lib/supplement-normalise";
 
 interface PeptideRow {
   peptide_name: string;
