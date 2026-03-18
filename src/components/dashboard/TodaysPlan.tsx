@@ -925,6 +925,7 @@ const TodaysPlan = ({ onActivate, slim = false, selectedDate }: TodaysPlanProps)
             completedSupplements={completedSupplements}
             skippedSupplements={skippedSupplements}
             peptideProtocolMap={peptideProtocolMap}
+            protocolPeptideMap={protocolPeptideMap}
             peptideGoalMap={peptideGoalMap}
             protocols={protocols}
             isToday={isToday}
