@@ -560,6 +560,7 @@ const TodaysPlan = ({ onActivate, slim = false, selectedDate }: TodaysPlanProps)
             name: supp.name,
             dose: supp.dose,
             frequency: supp.frequency,
+            timing: resolveSupplementTiming(supp),
             protocolName: protocol.name,
             protocolId: protocol.id,
             goal: protocol.goal && !isDnaGoal ? formatGoalLabel(protocol.goal) : "",
