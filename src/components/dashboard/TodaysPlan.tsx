@@ -57,8 +57,14 @@ function frequencyLabel(freq: string): { label: string; color: string } {
   return { label: freq, color: "bg-muted text-muted-foreground" };
 }
 
-/** Get the frequency for a peptide from its protocol */
-function getPeptideFrequency(peptideName: string, protocols: any[]): string {
+/** Get the frequency for a peptide from its protocol, using protocol_peptide_id for exact match */
+function getPeptideFrequency(peptideName: string, protocols: any[], protocolPeptideId?: string | null): string {
+  if (protocolPeptideId) {
+    for (const p of protocols.filter((pr: any) => pr.status === "active")) {
+      const pep = p.peptides.find((pp: any) => pp.id === protocolPeptideId);
+      if (pep) return pep.frequency;
+    }
+  }
   for (const p of protocols.filter((pr: any) => pr.status === "active")) {
     const pep = p.peptides.find((pp: any) => pp.peptide_name.toLowerCase() === peptideName.toLowerCase());
     if (pep) return pep.frequency;
