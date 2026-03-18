@@ -248,6 +248,9 @@ const ProtocolGroupedDoses = ({
                           <Clock className="h-3.5 w-3.5 text-primary shrink-0" />
                           <span className="text-sm font-medium text-foreground truncate">{inj.peptide_name}</span>
                           <span className="text-xs text-muted-foreground shrink-0">{inj.dose_mcg}mcg</span>
+                          <span className={`text-[9px] font-medium px-1.5 py-0.5 rounded-full ${resolveInjectionTiming(inj.scheduled_time) === "AM" ? "bg-amber-500/10 text-amber-600" : "bg-indigo-500/10 text-indigo-500"}`}>
+                            {resolveInjectionTiming(inj.scheduled_time) === "AM" ? "☀ AM" : "🌙 PM"}
+                          </span>
                           <span className={`text-[9px] font-medium px-1.5 py-0.5 rounded-full ${badge.color}`}>{badge.label}</span>
                         </div>
                         <p className="text-[11px] text-muted-foreground ml-5.5 mt-0.5">
