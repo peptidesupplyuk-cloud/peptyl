@@ -246,6 +246,7 @@ const CreateProtocolForm = ({ disclaimerAccepted, initialPeptide, onInitialPepti
           name: s.name.trim(),
           dose: s.dose.trim(),
           frequency: s.frequency,
+          timing: s.timing,
         })),
       });
       toast({ title: "Protocol created", description: `${name} is now active.` });
