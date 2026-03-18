@@ -226,11 +226,11 @@ const ActiveProtocols = () => {
     const progress = totalDays ? Math.min(100, Math.round((daysActive / totalDays) * 100)) : null;
 
     return (
-      <div key={p.id} className="bg-muted/50 rounded-xl p-4 space-y-3">
-        <div className="flex items-start justify-between">
-          <div>
-            <h4 className="font-heading font-semibold text-foreground text-sm">{p.name}</h4>
-            {p.goal && <p className="text-xs text-muted-foreground mt-0.5">{p.goal}</p>}
+      <div key={p.id} className="bg-muted/50 rounded-xl p-4 space-y-3 overflow-hidden">
+        <div className="flex items-start justify-between gap-2 min-w-0">
+          <div className="min-w-0 flex-1">
+            <h4 className="font-heading font-semibold text-foreground text-sm truncate">{p.name}</h4>
+            {p.goal && <p className="text-xs text-muted-foreground mt-0.5 line-clamp-2">{p.goal}</p>}
           </div>
           <span className={`text-[10px] px-2 py-0.5 rounded-full font-medium ${
             p.status === "active" ? "bg-green-500/10 text-green-500" :
