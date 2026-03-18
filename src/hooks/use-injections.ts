@@ -176,7 +176,7 @@ export function useTodayInjections() {
           .lte("scheduled_time", `${today}T23:59:59.999Z`)
           .order("scheduled_time", { ascending: true });
 
-        return (final ?? inserted ?? []) as InjectionLog[];
+        return (final ?? []) as InjectionLog[];
       } finally {
         generatingForDate = null;
       }
