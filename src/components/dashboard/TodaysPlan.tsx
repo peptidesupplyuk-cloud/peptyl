@@ -938,16 +938,41 @@ const TodaysPlan = ({ onActivate, slim = false, selectedDate }: TodaysPlanProps)
         )}
 
 
-        {remainingScheduled > 1 && isToday && (
-          <Button
-            variant="outline"
-            size="sm"
-            className="w-full text-xs h-8 border-primary/20 text-primary hover:bg-primary/5"
-            onClick={handleCompleteAll}
-          >
-            <CheckCheck className="h-3.5 w-3.5 mr-1.5" />
-            Complete All ({remainingScheduled} remaining)
-          </Button>
+        {isToday && remainingScheduled > 1 && (
+          <div className="flex gap-2">
+            {amRemaining > 0 && (
+              <Button
+                variant="outline"
+                size="sm"
+                className="flex-1 text-xs h-8 border-primary/20 text-primary hover:bg-primary/5"
+                onClick={() => handleCompleteWindow("AM")}
+              >
+                <CheckCheck className="h-3.5 w-3.5 mr-1.5" />
+                Complete AM Doses ({amRemaining})
+              </Button>
+            )}
+            {pmRemaining > 0 && (
+              <Button
+                variant="outline"
+                size="sm"
+                className="flex-1 text-xs h-8 border-primary/20 text-primary hover:bg-primary/5"
+                onClick={() => handleCompleteWindow("PM")}
+              >
+                <CheckCheck className="h-3.5 w-3.5 mr-1.5" />
+                Complete PM Doses ({pmRemaining})
+              </Button>
+            )}
+            {amRemaining > 0 && pmRemaining > 0 && (
+              <Button
+                variant="outline"
+                size="sm"
+                className="text-xs h-8 border-border text-muted-foreground hover:bg-muted/50 px-3"
+                onClick={() => handleCompleteWindow("ALL")}
+              >
+                All
+              </Button>
+            )}
+          </div>
         )}
 
         {!hasAnyItems ? (
