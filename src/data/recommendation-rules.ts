@@ -371,7 +371,7 @@ export const POPULAR_PROTOCOLS: PopularProtocol[] = [
       { name: "Resveratrol", dose: "500mg", frequency: "With fat-containing meal" },
       { name: "CoQ10 (Ubiquinol)", dose: "200mg", frequency: "Daily with fat" },
       { name: "Alpha Lipoic Acid", dose: "600mg", frequency: "Daily" },
-      { name: "Omega-3 Fish Oil", dose: "3000mg EPA/DHA", frequency: "Daily" },
+      { name: "Omega-3 (EPA/DHA)", dose: "3000mg EPA/DHA", frequency: "Daily" },
     ],
     durationWeeks: 12,
     retestWeeks: 12,
