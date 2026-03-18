@@ -73,6 +73,7 @@ const ProtocolGroupedDoses = ({
   completedSupplements,
   skippedSupplements,
   peptideProtocolMap,
+  protocolPeptideMap,
   peptideGoalMap,
   protocols,
   isToday,
