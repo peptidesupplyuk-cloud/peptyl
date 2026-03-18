@@ -99,7 +99,7 @@ export const RECOMMENDATION_RULES: Rule[] = [
         { name: "BPC-157", dose_mcg: 250, frequency: "daily", timing: "AM+PM", route: "SubQ" },
       ],
       supplements: [
-        { name: "Omega-3 Fish Oil", dose: "2000mg EPA/DHA", frequency: "Daily" },
+        { name: "Omega-3 (EPA/DHA)", dose: "2000mg EPA/DHA", frequency: "Daily" },
         { name: "NAC", dose: "600mg", frequency: "Twice daily" },
       ],
       durationWeeks: 4,
@@ -179,7 +179,7 @@ export const RECOMMENDATION_RULES: Rule[] = [
         { name: "TB-500", dose_mcg: 500, frequency: "daily", timing: "AM", route: "SubQ" },
       ],
       supplements: [
-        { name: "Omega-3 Fish Oil", dose: "1000mg EPA/DHA", frequency: "Daily" },
+        { name: "Omega-3 (EPA/DHA)", dose: "1000mg EPA/DHA", frequency: "Daily" },
         { name: "L-Glutamine", dose: "5g", frequency: "Twice daily" },
       ],
       durationWeeks: 6,
@@ -300,7 +300,7 @@ export const RECOMMENDATION_RULES: Rule[] = [
       peptides: [],
       supplements: [
         { name: "Berberine HCl", dose: "500mg", frequency: "Twice daily with meals" },
-        { name: "Omega-3 Fish Oil", dose: "3000mg EPA/DHA", frequency: "Daily" },
+        { name: "Omega-3 (EPA/DHA)", dose: "3000mg EPA/DHA", frequency: "Daily" },
         { name: "Red Yeast Rice", dose: "1200mg", frequency: "Daily" },
         { name: "CoQ10", dose: "200mg", frequency: "Daily" },
       ],
@@ -349,7 +349,7 @@ export const POPULAR_PROTOCOLS: PopularProtocol[] = [
     peptides: [],
     supplements: [
       { name: "Vitamin D3 + K2", dose: "5000 IU D3 / 100mcg K2", frequency: "Daily with fat" },
-      { name: "Omega-3 Fish Oil", dose: "2000mg EPA/DHA", frequency: "Daily" },
+      { name: "Omega-3 (EPA/DHA)", dose: "2000mg EPA/DHA", frequency: "Daily" },
       { name: "Magnesium Glycinate", dose: "400mg", frequency: "Before bed" },
       { name: "Zinc Picolinate", dose: "30mg", frequency: "Daily" },
     ],
@@ -371,7 +371,7 @@ export const POPULAR_PROTOCOLS: PopularProtocol[] = [
       { name: "Resveratrol", dose: "500mg", frequency: "With fat-containing meal" },
       { name: "CoQ10 (Ubiquinol)", dose: "200mg", frequency: "Daily with fat" },
       { name: "Alpha Lipoic Acid", dose: "600mg", frequency: "Daily" },
-      { name: "Omega-3 Fish Oil", dose: "3000mg EPA/DHA", frequency: "Daily" },
+      { name: "Omega-3 (EPA/DHA)", dose: "3000mg EPA/DHA", frequency: "Daily" },
     ],
     durationWeeks: 12,
     retestWeeks: 12,
@@ -413,7 +413,7 @@ export const POPULAR_PROTOCOLS: PopularProtocol[] = [
     ],
     supplements: [
       { name: "Collagen Peptides", dose: "10g", frequency: "Daily" },
-      { name: "Omega-3 Fish Oil", dose: "2000mg EPA/DHA", frequency: "Daily" },
+      { name: "Omega-3 (EPA/DHA)", dose: "2000mg EPA/DHA", frequency: "Daily" },
     ],
     durationWeeks: 6,
     retestWeeks: 6,
@@ -474,7 +474,7 @@ export const POPULAR_PROTOCOLS: PopularProtocol[] = [
     supplements: [
       { name: "Lion's Mane", dose: "1000mg", frequency: "Daily" },
       { name: "Alpha-GPC", dose: "300mg", frequency: "Daily" },
-      { name: "Omega-3 Fish Oil", dose: "2000mg EPA/DHA", frequency: "Daily" },
+      { name: "Omega-3 (EPA/DHA)", dose: "2000mg EPA/DHA", frequency: "Daily" },
     ],
     durationWeeks: 8,
     retestWeeks: 8,
@@ -649,7 +649,7 @@ export const DNA_SUPPLEMENT_SIGNALS: {
     gene: "APOE",
     variantPattern: "e3/e4",
     supplements: [
-      { name: "Omega-3 Fish Oil", dose: "3000mg EPA/DHA", frequency: "Daily", driven_by: ["APOE e3/e4 — cardiovascular risk"] },
+      { name: "Omega-3 (EPA/DHA)", dose: "3000mg EPA/DHA", frequency: "Daily", driven_by: ["APOE e3/e4 — cardiovascular risk"] },
       { name: "CoQ10", dose: "200mg", frequency: "Daily with fat", driven_by: ["APOE e4 — mitochondrial support"] },
     ],
     standalone: true,
@@ -659,7 +659,7 @@ export const DNA_SUPPLEMENT_SIGNALS: {
       type: "supplements_only",
       peptides: [],
       supplements: [
-        { name: "Omega-3 Fish Oil", dose: "3000mg EPA/DHA", frequency: "Daily", driven_by: ["APOE e3/e4"] },
+        { name: "Omega-3 (EPA/DHA)", dose: "3000mg EPA/DHA", frequency: "Daily", driven_by: ["APOE e3/e4"] },
         { name: "CoQ10", dose: "200mg", frequency: "Daily with fat", driven_by: ["APOE e4"] },
         { name: "Berberine HCl", dose: "500mg", frequency: "With meals, twice daily", driven_by: ["APOE e4 — lipid metabolism"] },
       ],
@@ -723,7 +723,7 @@ export function getBiometricRecommendations(bio: {
         description: `BMI ${bmi.toFixed(1)} — consider metabolic support alongside lifestyle changes.`,
         supplements: [
           { name: "Berberine HCl", dose: "500mg", frequency: "With meals" },
-          { name: "Omega-3 Fish Oil", dose: "2000mg EPA/DHA", frequency: "Daily" },
+          { name: "Omega-3 (EPA/DHA)", dose: "2000mg EPA/DHA", frequency: "Daily" },
           { name: "Creatine Monohydrate", dose: "5g", frequency: "Daily" },
         ],
         source: "Metabolic health guidelines",
@@ -735,7 +735,7 @@ export function getBiometricRecommendations(bio: {
         description: `BMI ${bmi.toFixed(1)} — consider supporting metabolic health.`,
         supplements: [
           { name: "Berberine HCl", dose: "500mg", frequency: "With meals" },
-          { name: "Omega-3 Fish Oil", dose: "1000mg EPA/DHA", frequency: "Daily" },
+          { name: "Omega-3 (EPA/DHA)", dose: "1000mg EPA/DHA", frequency: "Daily" },
         ],
         source: "Metabolic health research",
       });
@@ -750,7 +750,7 @@ export function getBiometricRecommendations(bio: {
         description: `BP ${bio.bp_systolic}/${bio.bp_diastolic} mmHg — consider cardiovascular support supplements.`,
         supplements: [
           { name: "Magnesium Glycinate", dose: "400mg", frequency: "Before bed" },
-          { name: "Omega-3 Fish Oil", dose: "2000mg EPA/DHA", frequency: "Daily" },
+          { name: "Omega-3 (EPA/DHA)", dose: "2000mg EPA/DHA", frequency: "Daily" },
         ],
         source: "Cardiovascular health guidelines",
       });
