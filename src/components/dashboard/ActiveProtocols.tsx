@@ -242,25 +242,25 @@ const ActiveProtocols = () => {
         </div>
 
         {p.peptides.length > 0 && (
-          <div className="space-y-1">
+          <div className="space-y-1 overflow-hidden">
             {p.peptides.map((pp) => (
-              <div key={pp.id} className="flex items-center justify-between text-xs">
-                <span className="text-foreground flex items-center gap-1.5">{pp.peptide_name} <PeptideInfoTooltip peptideName={pp.peptide_name} /></span>
-                <span className="text-muted-foreground">{pp.dose_mcg}mcg · {pp.frequency} · {pp.timing}</span>
+              <div key={pp.id} className="flex items-center justify-between text-xs gap-2 min-w-0">
+                <span className="text-foreground flex items-center gap-1.5 shrink-0">{pp.peptide_name} <PeptideInfoTooltip peptideName={pp.peptide_name} /></span>
+                <span className="text-muted-foreground truncate text-right min-w-0">{pp.dose_mcg}mcg · {pp.frequency} · {pp.timing}</span>
               </div>
             ))}
           </div>
         )}
 
         {p.supplements && p.supplements.length > 0 && (
-          <div className="space-y-1 border-t border-border/50 pt-2">
+          <div className="space-y-1 border-t border-border/50 pt-2 overflow-hidden">
             <p className="text-[10px] font-medium text-muted-foreground uppercase tracking-wider flex items-center gap-1">
               <Pill className="h-3 w-3" /> Suggested Supplements
             </p>
             {p.supplements.map((s, i) => (
-              <div key={i} className="flex items-center justify-between text-xs">
-                <span className="text-foreground">{s.name}</span>
-                <span className="text-muted-foreground">{s.dose} · {s.frequency}</span>
+              <div key={i} className="flex items-center justify-between text-xs gap-2 min-w-0">
+                <span className="text-foreground shrink-0">{s.name}</span>
+                <span className="text-muted-foreground truncate text-right min-w-0">{s.dose} · {s.frequency}</span>
               </div>
             ))}
           </div>
