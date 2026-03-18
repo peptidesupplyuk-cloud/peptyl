@@ -267,7 +267,7 @@ const ActiveProtocols = () => {
         )}
 
         {p.notes && (
-          <p className="text-[10px] text-muted-foreground italic border-t border-border/50 pt-2">{p.notes}</p>
+          <p className="text-[10px] text-muted-foreground italic border-t border-border/50 pt-2 truncate">{p.notes}</p>
         )}
 
         <div className="flex items-center justify-between">
