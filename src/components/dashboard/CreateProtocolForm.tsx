@@ -23,6 +23,7 @@ interface SupplementRow {
   name: string;
   dose: string;
   frequency: string;
+  timing: string;
 }
 
 const emptyPeptide: PeptideRow = {
