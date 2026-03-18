@@ -160,7 +160,7 @@ Deno.serve(async (req) => {
             }
           }
 
-          if (window === "AM" && Array.isArray(prot.supplements)) {
+          if (Array.isArray(prot.supplements)) {
             for (const supp of prot.supplements as Array<{ name: string; dose: string; frequency: string; timing?: string }>) {
               // Use explicit timing if set, otherwise infer from frequency
               const suppTiming = (supp.timing || "").toUpperCase();
