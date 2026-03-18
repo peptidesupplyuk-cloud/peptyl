@@ -69,14 +69,26 @@ Deno.serve(async (req) => {
     const results: Array<{ user_id: string; phase: string; email_sent: boolean; push_sent: boolean; peptides_count: number; supplements_count: number; error?: string }> = [];
 
     // Fetch all active protocols
-    const { data: protocols, error: protErr } = await supabase
+    const { data: rawProtocols, error: protErr } = await supabase
       .from("protocols")
-      .select("id, user_id, name, status, supplements, start_date")
+      .select("id, user_id, name, status, supplements, start_date, end_date")
       .eq("status", "active");
 
     if (protErr) throw protErr;
 
-    if (protocols && protocols.length > 0) {
+    // Filter out protocols past their end_date and auto-complete them
+    const protocols = [];
+    for (const p of rawProtocols || []) {
+      if (p.end_date && p.end_date < today) {
+        // Auto-complete expired protocol
+        await supabase.from("protocols").update({ status: "completed" }).eq("id", p.id);
+        console.log(`Auto-completed expired protocol ${p.id} (${p.name}), end_date: ${p.end_date}`);
+        continue;
+      }
+      protocols.push(p);
+    }
+
+    if (protocols.length > 0) {
       const userProtocols: Record<string, typeof protocols> = {};
       for (const p of protocols) {
         if (!userProtocols[p.user_id]) userProtocols[p.user_id] = [];
