@@ -474,7 +474,7 @@ export const POPULAR_PROTOCOLS: PopularProtocol[] = [
     supplements: [
       { name: "Lion's Mane", dose: "1000mg", frequency: "Daily" },
       { name: "Alpha-GPC", dose: "300mg", frequency: "Daily" },
-      { name: "Omega-3 Fish Oil", dose: "2000mg EPA/DHA", frequency: "Daily" },
+      { name: "Omega-3 (EPA/DHA)", dose: "2000mg EPA/DHA", frequency: "Daily" },
     ],
     durationWeeks: 8,
     retestWeeks: 8,
