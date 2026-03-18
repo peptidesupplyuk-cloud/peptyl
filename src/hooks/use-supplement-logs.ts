@@ -8,9 +8,12 @@ export type SupplementLog = {
   item: string;
   completed: boolean;
   date: string;
+  protocol_id: string | null;
 };
 
 const todayStr = () => format(new Date(), "yyyy-MM-dd");
+
+export const supplementLogKey = (item: string, protocolId?: string | null) => `${protocolId ?? "none"}::${item}`;
 
 export const useDateSupplementLogs = (date: Date) => {
   const { user } = useAuth();
@@ -21,7 +24,7 @@ export const useDateSupplementLogs = (date: Date) => {
       if (!user) return [];
       const { data, error } = await supabase
         .from("supplement_logs")
-        .select("id, item, completed, date")
+        .select("id, item, completed, date, protocol_id")
         .eq("user_id", user.id)
         .eq("date", dateStr);
       if (error) throw error;
@@ -39,7 +42,7 @@ export const useTodaySupplementLogs = () => {
       if (!user) return [];
       const { data, error } = await supabase
         .from("supplement_logs")
-        .select("id, item, completed, date")
+        .select("id, item, completed, date, protocol_id")
         .eq("user_id", user.id)
         .eq("date", todayStr());
       if (error) throw error;
@@ -54,18 +57,22 @@ export const useToggleSupplement = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async ({ item, completed }: { item: string; completed: boolean }) => {
+    mutationFn: async ({ item, protocolId, completed }: { item: string; protocolId?: string | null; completed: boolean }) => {
       if (!user) throw new Error("Not authenticated");
       const date = todayStr();
 
-      // Check if a log already exists for this item + date
-      const { data: existing } = await supabase
+      const existingQuery = supabase
         .from("supplement_logs")
         .select("id")
         .eq("user_id", user.id)
         .eq("item", item)
-        .eq("date", date)
-        .maybeSingle();
+        .eq("date", date);
+
+      const { data: existing, error: selectError } = protocolId
+        ? await existingQuery.eq("protocol_id", protocolId).maybeSingle()
+        : await existingQuery.is("protocol_id", null).maybeSingle();
+
+      if (selectError) throw selectError;
 
       if (existing) {
         const { error } = await supabase
@@ -76,18 +83,26 @@ export const useToggleSupplement = () => {
       } else {
         const { error } = await supabase
           .from("supplement_logs")
-          .insert({ user_id: user.id, item, date, completed });
+          .insert({ user_id: user.id, item, date, completed, protocol_id: protocolId ?? null });
         if (error) throw error;
       }
     },
-    onMutate: async ({ item, completed }) => {
+    onMutate: async ({ item, protocolId, completed }) => {
       const key = ["supplement-logs", user?.id, todayStr()];
       await queryClient.cancelQueries({ queryKey: key });
       const previous = queryClient.getQueryData<SupplementLog[]>(key);
       queryClient.setQueryData<SupplementLog[]>(key, (old = []) => {
-        const exists = old.find((l) => l.item === item);
-        if (exists) return old.map((l) => l.item === item ? { ...l, completed } : l);
-        return [...old, { id: "temp-" + item, item, completed, date: todayStr() }];
+        const matchKey = supplementLogKey(item, protocolId);
+        const exists = old.find((l) => supplementLogKey(l.item, l.protocol_id) === matchKey);
+        if (exists) {
+          return old.map((l) =>
+            supplementLogKey(l.item, l.protocol_id) === matchKey ? { ...l, completed } : l
+          );
+        }
+        return [
+          ...old,
+          { id: `temp-${matchKey}`, item, completed, date: todayStr(), protocol_id: protocolId ?? null },
+        ];
       });
       return { previous };
     },
@@ -98,6 +113,7 @@ export const useToggleSupplement = () => {
     },
     onSettled: () => {
       queryClient.invalidateQueries({ queryKey: ["supplement-logs", user?.id, todayStr()] });
+      queryClient.invalidateQueries({ queryKey: ["supplement-logs"] });
     },
   });
 };
@@ -107,29 +123,43 @@ export const useBatchCompleteSupplement = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async (items: string[]) => {
+    mutationFn: async (items: Array<{ item: string; protocolId?: string | null }>) => {
       if (!user) throw new Error("Not authenticated");
       const date = todayStr();
 
-      // Fetch existing logs for today
-      const { data: existing } = await supabase
+      const { data: existing, error: existingError } = await supabase
         .from("supplement_logs")
-        .select("id, item")
+        .select("id, item, protocol_id")
         .eq("user_id", user.id)
         .eq("date", date);
 
-      const existingItems = new Set((existing || []).map((e) => e.item));
-      const toInsert = items.filter((i) => !existingItems.has(i));
-      const toUpdate = items.filter((i) => existingItems.has(i));
+      if (existingError) throw existingError;
+
+      const existingMap = new Map(
+        (existing || []).map((entry) => [supplementLogKey(entry.item, entry.protocol_id), entry.id])
+      );
+
+      const toInsert = items.filter(({ item, protocolId }) => !existingMap.has(supplementLogKey(item, protocolId)));
+      const updateIds = items
+        .map(({ item, protocolId }) => existingMap.get(supplementLogKey(item, protocolId)))
+        .filter((id): id is string => Boolean(id));
 
       if (toInsert.length > 0) {
         const { error } = await supabase
           .from("supplement_logs")
-          .insert(toInsert.map((item) => ({ user_id: user.id, item, date, completed: true })));
+          .insert(
+            toInsert.map(({ item, protocolId }) => ({
+              user_id: user.id,
+              item,
+              date,
+              completed: true,
+              protocol_id: protocolId ?? null,
+            }))
+          );
         if (error) throw error;
       }
-      if (toUpdate.length > 0) {
-        const updateIds = (existing || []).filter((e) => toUpdate.includes(e.item)).map((e) => e.id);
+
+      if (updateIds.length > 0) {
         const { error } = await supabase
           .from("supplement_logs")
           .update({ completed: true })
