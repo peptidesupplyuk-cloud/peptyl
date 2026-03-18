@@ -85,6 +85,7 @@ const ProtocolGroupedDoses = ({
   completedSupplements: Set<string>;
   skippedSupplements: Set<string>;
   peptideProtocolMap: Map<string, { protocolName: string; protocolId: string; goal: string }>;
+  protocolPeptideMap: Map<string, { protocolName: string; protocolId: string; goal: string }>;
   peptideGoalMap: Map<string, string>;
   protocols: any[];
   isToday: boolean;
