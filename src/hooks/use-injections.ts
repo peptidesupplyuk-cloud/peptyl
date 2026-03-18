@@ -257,8 +257,13 @@ async function backfillMissingDays(userId: string) {
         status: string;
       }> = [];
 
-      // Iterate from protocol start to yesterday (today is handled by useTodayInjections)
-      for (let d = new Date(protocolStart); d < today; d.setDate(d.getDate() + 1)) {
+      // Determine the effective end for backfill (don't backfill past end_date)
+      const backfillEnd = protocol.end_date && new Date(protocol.end_date) < today
+        ? new Date(protocol.end_date)
+        : today;
+
+      // Iterate from protocol start to the effective end (today is handled by useTodayInjections)
+      for (let d = new Date(protocolStart); d <= backfillEnd; d.setDate(d.getDate() + 1)) {
         const dateStr = d.toISOString().split("T")[0];
         if (dateStr === todayStr) continue; // Skip today
 
