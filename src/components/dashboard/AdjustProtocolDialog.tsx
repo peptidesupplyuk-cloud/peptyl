@@ -92,6 +92,7 @@ const AdjustProtocolDialog = ({ protocol, open, onOpenChange }: Props) => {
   const [suppName, setSuppName] = useState("");
   const [suppDose, setSuppDose] = useState("");
   const [suppFreq, setSuppFreq] = useState("Daily");
+  const [suppTiming, setSuppTiming] = useState("AM");
 
   const handleAddPeptide = async () => {
     if (!pepName.trim() || pepDose <= 0) {
