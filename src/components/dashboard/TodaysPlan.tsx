@@ -500,6 +500,8 @@ const TodaysPlan = ({ onActivate, slim = false, selectedDate }: TodaysPlanProps)
   // Build maps from peptide name → goal + protocol info for active protocols
   const peptideGoalMap = new Map<string, string>();
   const peptideProtocolMap = new Map<string, { protocolName: string; protocolId: string; goal: string }>();
+  // Map protocol_peptide_id → protocol info for exact matching
+  const protocolPeptideMap = new Map<string, { protocolName: string; protocolId: string; goal: string }>();
   for (const protocol of protocols.filter((p) => p.status === "active")) {
     for (const pep of protocol.peptides) {
       const key = pep.peptide_name.toLowerCase();
@@ -513,6 +515,12 @@ const TodaysPlan = ({ onActivate, slim = false, selectedDate }: TodaysPlanProps)
           goal: protocol.goal ? formatGoalLabel(protocol.goal) : "",
         });
       }
+      // Always map protocol_peptide_id (unique per protocol)
+      protocolPeptideMap.set(pep.id, {
+        protocolName: protocol.name,
+        protocolId: protocol.id,
+        goal: protocol.goal ? formatGoalLabel(protocol.goal) : "",
+      });
     }
   }
 
