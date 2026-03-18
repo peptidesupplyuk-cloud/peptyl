@@ -649,7 +649,7 @@ export const DNA_SUPPLEMENT_SIGNALS: {
     gene: "APOE",
     variantPattern: "e3/e4",
     supplements: [
-      { name: "Omega-3 Fish Oil", dose: "3000mg EPA/DHA", frequency: "Daily", driven_by: ["APOE e3/e4 — cardiovascular risk"] },
+      { name: "Omega-3 (EPA/DHA)", dose: "3000mg EPA/DHA", frequency: "Daily", driven_by: ["APOE e3/e4 — cardiovascular risk"] },
       { name: "CoQ10", dose: "200mg", frequency: "Daily with fat", driven_by: ["APOE e4 — mitochondrial support"] },
     ],
     standalone: true,
