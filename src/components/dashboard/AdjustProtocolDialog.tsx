@@ -126,7 +126,7 @@ const AdjustProtocolDialog = ({ protocol, open, onOpenChange }: Props) => {
     try {
       await addSupplement.mutateAsync({
         protocol_id: protocol.id,
-        supplement: { name: suppName.trim(), dose: suppDose.trim(), frequency: suppFreq },
+        supplement: { name: suppName.trim(), dose: suppDose.trim(), frequency: suppFreq, timing: suppTiming },
         day_number: dayNumber,
         current_supplements: protocol.supplements || [],
       });
