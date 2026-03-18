@@ -287,7 +287,7 @@ const ProtocolGroupedDoses = ({
 
                 {/* Completed peptide doses */}
                 {group.completed.map((inj) => {
-                  const freq = getPeptideFrequency(inj.peptide_name, protocols);
+                  const freq = getPeptideFrequency(inj.peptide_name, protocols, inj.protocol_peptide_id);
                   const badge = frequencyLabel(freq);
                   return (
                     <div key={inj.id} className="flex items-center justify-between bg-primary/5 border border-primary/10 rounded-lg px-3 py-2">
