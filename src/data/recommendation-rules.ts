@@ -349,7 +349,7 @@ export const POPULAR_PROTOCOLS: PopularProtocol[] = [
     peptides: [],
     supplements: [
       { name: "Vitamin D3 + K2", dose: "5000 IU D3 / 100mcg K2", frequency: "Daily with fat" },
-      { name: "Omega-3 Fish Oil", dose: "2000mg EPA/DHA", frequency: "Daily" },
+      { name: "Omega-3 (EPA/DHA)", dose: "2000mg EPA/DHA", frequency: "Daily" },
       { name: "Magnesium Glycinate", dose: "400mg", frequency: "Before bed" },
       { name: "Zinc Picolinate", dose: "30mg", frequency: "Daily" },
     ],
