@@ -49,8 +49,19 @@ export function useProtocols() {
         .order("created_at", { ascending: false });
       if (error) throw error;
 
+      const today = new Date().toISOString().split("T")[0];
       const results: Protocol[] = [];
+
       for (const p of protocols ?? []) {
+        // Auto-complete protocols that have passed their end_date
+        if (p.status === "active" && p.end_date && p.end_date < today) {
+          await supabase
+            .from("protocols")
+            .update({ status: "completed" })
+            .eq("id", p.id);
+          p.status = "completed";
+        }
+
         const { data: peptides } = await supabase
           .from("protocol_peptides")
           .select("*")

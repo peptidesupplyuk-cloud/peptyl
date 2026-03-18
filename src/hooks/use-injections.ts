@@ -103,13 +103,19 @@ export function useTodayInjections() {
       }
       generatingForDate = today;
 
-      // No logs yet — auto-generate from active protocols
+      // No logs yet — auto-generate from active protocols (exclude expired ones)
       const { data: protocols } = await supabase
         .from("protocols")
         .select("*")
         .eq("status", "active");
 
-      if (!protocols || protocols.length === 0) return [];
+      // Filter out protocols whose end_date has passed
+      const activeProtocols = (protocols || []).filter(p => {
+        if (!p.end_date) return true;
+        return p.end_date >= today;
+      });
+
+      if (activeProtocols.length === 0) return [];
 
       // Gather all peptides from all active protocols
       const logsToInsert: Array<{
@@ -121,7 +127,7 @@ export function useTodayInjections() {
         status: string;
       }> = [];
 
-      for (const protocol of protocols) {
+      for (const protocol of activeProtocols) {
         const { data: peptides } = await supabase
           .from("protocol_peptides")
           .select("*")
@@ -249,8 +255,13 @@ async function backfillMissingDays(userId: string) {
         status: string;
       }> = [];
 
-      // Iterate from protocol start to yesterday (today is handled by useTodayInjections)
-      for (let d = new Date(protocolStart); d < today; d.setDate(d.getDate() + 1)) {
+      // Determine the effective end for backfill (don't backfill past end_date)
+      const backfillEnd = protocol.end_date && new Date(protocol.end_date) < today
+        ? new Date(protocol.end_date)
+        : today;
+
+      // Iterate from protocol start to the effective end (today is handled by useTodayInjections)
+      for (let d = new Date(protocolStart); d <= backfillEnd; d.setDate(d.getDate() + 1)) {
         const dateStr = d.toISOString().split("T")[0];
         if (dateStr === todayStr) continue; // Skip today
 
