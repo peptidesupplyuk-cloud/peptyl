@@ -750,7 +750,7 @@ export function getBiometricRecommendations(bio: {
         description: `BP ${bio.bp_systolic}/${bio.bp_diastolic} mmHg — consider cardiovascular support supplements.`,
         supplements: [
           { name: "Magnesium Glycinate", dose: "400mg", frequency: "Before bed" },
-          { name: "Omega-3 Fish Oil", dose: "2000mg EPA/DHA", frequency: "Daily" },
+          { name: "Omega-3 (EPA/DHA)", dose: "2000mg EPA/DHA", frequency: "Daily" },
         ],
         source: "Cardiovascular health guidelines",
       });
