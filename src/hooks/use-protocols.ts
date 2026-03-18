@@ -127,7 +127,13 @@ export function useCreateProtocol() {
 
       return protocol;
     },
-    onSuccess: () => qc.invalidateQueries({ queryKey: ["protocols"] }),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["protocols"] });
+      qc.invalidateQueries({ queryKey: ["injections_today"] });
+      qc.invalidateQueries({ queryKey: ["injections_all"] });
+      qc.invalidateQueries({ queryKey: ["injections_date"] });
+      qc.invalidateQueries({ queryKey: ["supplement-logs"] });
+    },
   });
 }
 

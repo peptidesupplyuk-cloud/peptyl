@@ -112,9 +112,13 @@ export function useTodayInjections() {
       if (!protocols || protocols.length === 0) return [];
 
       // Gather all peptides from all active protocols
-      const allPeptides: Array<{
-        pep: any;
-        protocolStartDate: string;
+      const logsToInsert: Array<{
+        user_id: string;
+        peptide_name: string;
+        dose_mcg: number;
+        scheduled_time: string;
+        protocol_peptide_id: string;
+        status: string;
       }> = [];
 
       for (const protocol of protocols) {
@@ -127,47 +131,25 @@ export function useTodayInjections() {
 
         for (const pep of peptides) {
           if (!isDueToday(pep.frequency, protocol.start_date)) continue;
-          allPeptides.push({ pep, protocolStartDate: protocol.start_date });
-        }
-      }
 
-      // Deduplicate: merge same compound + same timing slot, sum doses
-      const mergeKey = (name: string, time: string) => `${name}||${time}`;
-      const merged = new Map<string, {
-        peptide_name: string;
-        dose_mcg: number;
-        scheduled_time: string;
-        protocol_peptide_id: string;
-      }>();
+          const timings: string[] = [];
+          const timing = (pep.timing || "AM").toUpperCase();
+          if (timing.includes("AM")) timings.push("09:00");
+          if (timing.includes("PM") || timing.includes("BED")) timings.push("21:00");
+          if (timings.length === 0) timings.push("09:00");
 
-      for (const { pep } of allPeptides) {
-        const timings: string[] = [];
-        const timing = (pep.timing || "AM").toUpperCase();
-        if (timing.includes("AM")) timings.push("09:00");
-        if (timing.includes("PM") || timing.includes("BED")) timings.push("21:00");
-        if (timings.length === 0) timings.push("09:00");
-
-        for (const t of timings) {
-          const key = mergeKey(pep.peptide_name, t);
-          const existing = merged.get(key);
-          if (existing) {
-            existing.dose_mcg += pep.dose_mcg;
-          } else {
-            merged.set(key, {
+          for (const t of timings) {
+            logsToInsert.push({
+              user_id: user!.id,
               peptide_name: pep.peptide_name,
               dose_mcg: pep.dose_mcg,
               scheduled_time: `${today}T${t}:00.000Z`,
               protocol_peptide_id: pep.id,
+              status: "scheduled",
             });
           }
         }
       }
-
-      const logsToInsert = Array.from(merged.values()).map((entry) => ({
-        user_id: user!.id,
-        ...entry,
-        status: "scheduled",
-      }));
 
       if (logsToInsert.length === 0) {
         generatingForDate = null;
@@ -175,23 +157,12 @@ export function useTodayInjections() {
       }
 
       try {
-        const { data: inserted, error: insertErr } = await supabase
+        const { error: insertErr } = await supabase
           .from("injection_logs")
-          .upsert(logsToInsert, { onConflict: "user_id,peptide_name,scheduled_time", ignoreDuplicates: true })
-          .select();
-        if (insertErr) throw insertErr;
+          .insert(logsToInsert);
 
-        // Link any existing unlinked logs for today to their protocol peptides
-        for (const entry of logsToInsert) {
-          if (entry.protocol_peptide_id) {
-            await supabase
-              .from("injection_logs")
-              .update({ protocol_peptide_id: entry.protocol_peptide_id })
-              .eq("user_id", user!.id)
-              .eq("peptide_name", entry.peptide_name)
-              .eq("scheduled_time", entry.scheduled_time)
-              .is("protocol_peptide_id", null);
-          }
+        if (insertErr && !String(insertErr.message || "").toLowerCase().includes("duplicate")) {
+          throw insertErr;
         }
 
         // Backfill past days too
@@ -205,7 +176,7 @@ export function useTodayInjections() {
           .lte("scheduled_time", `${today}T23:59:59.999Z`)
           .order("scheduled_time", { ascending: true });
 
-        return (final ?? inserted ?? []) as InjectionLog[];
+        return (final ?? []) as InjectionLog[];
       } finally {
         generatingForDate = null;
       }
@@ -306,24 +277,28 @@ async function backfillMissingDays(userId: string) {
       }
 
       if (logsToInsert.length > 0) {
-        // Upsert with ignoreDuplicates so existing completed/skipped logs aren't overwritten
-        for (let i = 0; i < logsToInsert.length; i += 100) {
-          const batch = logsToInsert.slice(i, i + 100);
-          await supabase
-            .from("injection_logs")
-            .upsert(batch, { onConflict: "user_id,peptide_name,scheduled_time", ignoreDuplicates: true });
-        }
-      }
-
-      // Always link any existing unlinked logs to the correct protocol_peptide_id
-      for (const pep of peptides) {
-        await supabase
+        const { data: existingLogs } = await supabase
           .from("injection_logs")
-          .update({ protocol_peptide_id: pep.id })
+          .select("protocol_peptide_id, scheduled_time")
           .eq("user_id", userId)
-          .eq("peptide_name", pep.peptide_name)
-          .is("protocol_peptide_id", null)
-          .gte("scheduled_time", `${protocol.start_date}T00:00:00.000Z`);
+          .in("protocol_peptide_id", peptides.map((pep) => pep.id))
+          .gte("scheduled_time", `${protocol.start_date}T00:00:00.000Z`)
+          .lt("scheduled_time", `${todayStr}T00:00:00.000Z`);
+
+        const existingKeys = new Set(
+          (existingLogs || []).map((log) => `${log.protocol_peptide_id}||${log.scheduled_time}`)
+        );
+
+        const missingLogs = logsToInsert.filter(
+          (log) => !existingKeys.has(`${log.protocol_peptide_id}||${log.scheduled_time}`)
+        );
+
+        if (missingLogs.length > 0) {
+          for (let i = 0; i < missingLogs.length; i += 100) {
+            const batch = missingLogs.slice(i, i + 100);
+            await supabase.from("injection_logs").insert(batch);
+          }
+        }
       }
     }
   } finally {
