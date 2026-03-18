@@ -735,7 +735,7 @@ export function getBiometricRecommendations(bio: {
         description: `BMI ${bmi.toFixed(1)} — consider supporting metabolic health.`,
         supplements: [
           { name: "Berberine HCl", dose: "500mg", frequency: "With meals" },
-          { name: "Omega-3 Fish Oil", dose: "1000mg EPA/DHA", frequency: "Daily" },
+          { name: "Omega-3 (EPA/DHA)", dose: "1000mg EPA/DHA", frequency: "Daily" },
         ],
         source: "Metabolic health research",
       });
