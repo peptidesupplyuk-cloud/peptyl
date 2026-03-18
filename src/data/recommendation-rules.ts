@@ -179,7 +179,7 @@ export const RECOMMENDATION_RULES: Rule[] = [
         { name: "TB-500", dose_mcg: 500, frequency: "daily", timing: "AM", route: "SubQ" },
       ],
       supplements: [
-        { name: "Omega-3 Fish Oil", dose: "1000mg EPA/DHA", frequency: "Daily" },
+        { name: "Omega-3 (EPA/DHA)", dose: "1000mg EPA/DHA", frequency: "Daily" },
         { name: "L-Glutamine", dose: "5g", frequency: "Twice daily" },
       ],
       durationWeeks: 6,
