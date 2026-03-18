@@ -34,7 +34,7 @@ const emptyPeptide: PeptideRow = {
   route: "SubQ",
 };
 
-const emptySupp: SupplementRow = { name: "", dose: "", frequency: "Daily" };
+const emptySupp: SupplementRow = { name: "", dose: "", frequency: "Daily", timing: "AM" };
 
 // ─── Searchable peptide input ────────────────────────────────────────────────
 
