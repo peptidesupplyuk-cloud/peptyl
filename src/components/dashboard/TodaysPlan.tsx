@@ -42,6 +42,7 @@ interface SupplementItem {
   dose: string;
   frequency: string;
   protocolName: string;
+  protocolId: string;
   goal: string;
   drivenBy?: string[];
 }
