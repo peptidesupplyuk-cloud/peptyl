@@ -413,7 +413,7 @@ export const POPULAR_PROTOCOLS: PopularProtocol[] = [
     ],
     supplements: [
       { name: "Collagen Peptides", dose: "10g", frequency: "Daily" },
-      { name: "Omega-3 Fish Oil", dose: "2000mg EPA/DHA", frequency: "Daily" },
+      { name: "Omega-3 (EPA/DHA)", dose: "2000mg EPA/DHA", frequency: "Daily" },
     ],
     durationWeeks: 6,
     retestWeeks: 6,
