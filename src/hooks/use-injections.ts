@@ -277,24 +277,28 @@ async function backfillMissingDays(userId: string) {
       }
 
       if (logsToInsert.length > 0) {
-        // Upsert with ignoreDuplicates so existing completed/skipped logs aren't overwritten
-        for (let i = 0; i < logsToInsert.length; i += 100) {
-          const batch = logsToInsert.slice(i, i + 100);
-          await supabase
-            .from("injection_logs")
-            .upsert(batch, { onConflict: "user_id,peptide_name,scheduled_time", ignoreDuplicates: true });
-        }
-      }
-
-      // Always link any existing unlinked logs to the correct protocol_peptide_id
-      for (const pep of peptides) {
-        await supabase
+        const { data: existingLogs } = await supabase
           .from("injection_logs")
-          .update({ protocol_peptide_id: pep.id })
+          .select("protocol_peptide_id, scheduled_time")
           .eq("user_id", userId)
-          .eq("peptide_name", pep.peptide_name)
-          .is("protocol_peptide_id", null)
-          .gte("scheduled_time", `${protocol.start_date}T00:00:00.000Z`);
+          .in("protocol_peptide_id", peptides.map((pep) => pep.id))
+          .gte("scheduled_time", `${protocol.start_date}T00:00:00.000Z`)
+          .lt("scheduled_time", `${todayStr}T00:00:00.000Z`);
+
+        const existingKeys = new Set(
+          (existingLogs || []).map((log) => `${log.protocol_peptide_id}||${log.scheduled_time}`)
+        );
+
+        const missingLogs = logsToInsert.filter(
+          (log) => !existingKeys.has(`${log.protocol_peptide_id}||${log.scheduled_time}`)
+        );
+
+        if (missingLogs.length > 0) {
+          for (let i = 0; i < missingLogs.length; i += 100) {
+            const batch = missingLogs.slice(i, i + 100);
+            await supabase.from("injection_logs").insert(batch);
+          }
+        }
       }
     }
   } finally {
