@@ -543,6 +543,7 @@ const TodaysPlan = ({ onActivate, slim = false, selectedDate }: TodaysPlanProps)
             dose: supp.dose,
             frequency: supp.frequency,
             protocolName: protocol.name,
+            protocolId: protocol.id,
             goal: protocol.goal && !isDnaGoal ? formatGoalLabel(protocol.goal) : "",
             drivenBy: (supp as any).drivenBy || [],
           });
