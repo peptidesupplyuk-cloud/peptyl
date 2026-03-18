@@ -300,7 +300,7 @@ export const RECOMMENDATION_RULES: Rule[] = [
       peptides: [],
       supplements: [
         { name: "Berberine HCl", dose: "500mg", frequency: "Twice daily with meals" },
-        { name: "Omega-3 Fish Oil", dose: "3000mg EPA/DHA", frequency: "Daily" },
+        { name: "Omega-3 (EPA/DHA)", dose: "3000mg EPA/DHA", frequency: "Daily" },
         { name: "Red Yeast Rice", dose: "1200mg", frequency: "Daily" },
         { name: "CoQ10", dose: "200mg", frequency: "Daily" },
       ],
