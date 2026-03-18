@@ -616,11 +616,24 @@ const TodaysPlan = ({ onActivate, slim = false, selectedDate }: TodaysPlanProps)
   const completedItems = completed.length + doneSupplements.length;
   const remainingScheduled = scheduled.length + pendingSupplements.length;
 
-  const handleCompleteAll = () => {
-    for (const inj of scheduled) {
+  // Split pending items by AM/PM window
+  const amScheduled = scheduled.filter(inj => resolveInjectionTiming(inj.scheduled_time) === "AM");
+  const pmScheduled = scheduled.filter(inj => resolveInjectionTiming(inj.scheduled_time) === "PM");
+  const amPendingSupps = pendingSupplements.filter(s => s.timing === "AM" || s.timing === "AM+PM");
+  const pmPendingSupps = pendingSupplements.filter(s => s.timing === "PM" || s.timing === "AM+PM");
+
+  const amRemaining = amScheduled.length + amPendingSupps.length;
+  const pmRemaining = pmScheduled.length + pmPendingSupps.length;
+
+  const handleCompleteWindow = (window: "AM" | "PM" | "ALL") => {
+    const injsToComplete = window === "ALL" ? scheduled 
+      : window === "AM" ? amScheduled : pmScheduled;
+    for (const inj of injsToComplete) {
       updateStatus.mutate({ id: inj.id, status: "completed" });
     }
-    const pendingItems = pendingSupplements.map((s) => ({ item: s.name, protocolId: s.protocolId }));
+    const suppsToComplete = window === "ALL" ? pendingSupplements
+      : window === "AM" ? amPendingSupps : pmPendingSupps;
+    const pendingItems = suppsToComplete.map((s) => ({ item: s.name, protocolId: s.protocolId }));
     if (pendingItems.length > 0) {
       batchComplete.mutate(pendingItems);
     }
