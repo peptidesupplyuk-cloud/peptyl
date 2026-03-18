@@ -538,6 +538,8 @@ const Dashboard = () => {
             </p>
           </motion.div>
 
+          <MobileTabNav activeTab={activeTab} onTabChange={setActiveTab} />
+
           <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
             <TabsList className="hidden md:flex w-full overflow-x-auto max-w-3xl no-scrollbar">
               <TabsTrigger value="overview" className="text-xs sm:text-sm">
@@ -1059,7 +1061,8 @@ const Dashboard = () => {
               <ResultsTab />
             </TabsContent>
           </Tabs>
-          <MobileTabNav activeTab={activeTab} onTabChange={setActiveTab} />
+
+
         </div>
       </main>
       {!isMobile && <Footer />}
