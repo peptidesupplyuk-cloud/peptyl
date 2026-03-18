@@ -338,7 +338,7 @@ export function useAddSupplementToProtocol() {
   return useMutation({
     mutationFn: async (params: {
       protocol_id: string;
-      supplement: { name: string; dose: string; frequency: string };
+      supplement: { name: string; dose: string; frequency: string; timing?: string };
       day_number: number;
       current_supplements: any[];
     }) => {

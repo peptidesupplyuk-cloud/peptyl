@@ -92,6 +92,7 @@ const AdjustProtocolDialog = ({ protocol, open, onOpenChange }: Props) => {
   const [suppName, setSuppName] = useState("");
   const [suppDose, setSuppDose] = useState("");
   const [suppFreq, setSuppFreq] = useState("Daily");
+  const [suppTiming, setSuppTiming] = useState("AM");
 
   const handleAddPeptide = async () => {
     if (!pepName.trim() || pepDose <= 0) {
@@ -125,7 +126,7 @@ const AdjustProtocolDialog = ({ protocol, open, onOpenChange }: Props) => {
     try {
       await addSupplement.mutateAsync({
         protocol_id: protocol.id,
-        supplement: { name: suppName.trim(), dose: suppDose.trim(), frequency: suppFreq },
+        supplement: { name: suppName.trim(), dose: suppDose.trim(), frequency: suppFreq, timing: suppTiming },
         day_number: dayNumber,
         current_supplements: protocol.supplements || [],
       });
@@ -263,6 +264,17 @@ const AdjustProtocolDialog = ({ protocol, open, onOpenChange }: Props) => {
                   </SelectContent>
                 </Select>
               </div>
+            </div>
+            <div>
+              <label className="text-xs text-muted-foreground mb-1 block">When to take</label>
+              <Select value={suppTiming} onValueChange={setSuppTiming}>
+                <SelectTrigger className="text-sm h-9"><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="AM">AM (Morning)</SelectItem>
+                  <SelectItem value="PM">PM (Evening)</SelectItem>
+                  <SelectItem value="AM+PM">AM + PM (Both)</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
             <Button
               className="w-full"

@@ -160,10 +160,32 @@ Deno.serve(async (req) => {
             }
           }
 
-          if (window === "AM" && Array.isArray(prot.supplements)) {
-            for (const supp of prot.supplements as Array<{ name: string; dose: string; frequency: string }>) {
-              if (supp.name && !seenSupplements.has(supp.name)) {
-                seenSupplements.add(supp.name);
+          if (Array.isArray(prot.supplements)) {
+            for (const supp of prot.supplements as Array<{ name: string; dose: string; frequency: string; timing?: string }>) {
+              // Use explicit timing if set, otherwise infer from frequency
+              const suppTiming = (supp.timing || "").toUpperCase();
+              const freq = (supp.frequency || "").toLowerCase();
+              let matchesWindow = false;
+
+              if (suppTiming === "AM+PM") {
+                matchesWindow = true; // Show in both windows
+              } else if (suppTiming === "AM") {
+                matchesWindow = window === "AM";
+              } else if (suppTiming === "PM") {
+                matchesWindow = window === "PM";
+              } else {
+                // Legacy: no timing set — infer from frequency
+                if (freq.includes("morning") || freq.includes("fasted")) {
+                  matchesWindow = window === "AM";
+                } else if (freq.includes("bed") || freq.includes("evening")) {
+                  matchesWindow = window === "PM";
+                } else {
+                  matchesWindow = window === "AM"; // default AM
+                }
+              }
+
+              if (matchesWindow && supp.name && !seenSupplements.has(`${window}::${supp.name}`)) {
+                seenSupplements.add(`${window}::${supp.name}`);
                 supplementReminders.push({
                   name: supp.name,
                   dose: supp.dose || "",

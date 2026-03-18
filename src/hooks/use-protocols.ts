@@ -17,6 +17,7 @@ export interface ProtocolSupplement {
   name: string;
   dose: string;
   frequency: string;
+  timing?: string; // "AM" | "PM" | "AM+PM"
   drivenBy?: string[];
 }
 
