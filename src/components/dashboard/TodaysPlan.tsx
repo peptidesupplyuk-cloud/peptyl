@@ -283,6 +283,9 @@ const ProtocolGroupedDoses = ({
                           <Pill className="h-3.5 w-3.5 text-accent-foreground/70 shrink-0" />
                           <span className="text-sm font-medium text-foreground truncate">{supp.name}</span>
                           <span className="text-xs text-muted-foreground shrink-0">{supp.dose}</span>
+                          <span className={`text-[9px] font-medium px-1.5 py-0.5 rounded-full ${supp.timing.includes("AM") ? "bg-amber-500/10 text-amber-600" : "bg-indigo-500/10 text-indigo-500"}`}>
+                            {supp.timing === "AM+PM" ? "☀🌙 Both" : supp.timing === "AM" ? "☀ AM" : "🌙 PM"}
+                          </span>
                           <span className={`text-[9px] font-medium px-1.5 py-0.5 rounded-full ${badge.color}`}>{badge.label}</span>
                         </div>
                         {supp.drivenBy && supp.drivenBy.length > 0 && (
