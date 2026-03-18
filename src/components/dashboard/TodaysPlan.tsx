@@ -538,8 +538,9 @@ const TodaysPlan = ({ onActivate, slim = false, selectedDate }: TodaysPlanProps)
   // Build maps from peptide name → goal + protocol info for active protocols
   const peptideGoalMap = new Map<string, string>();
   const peptideProtocolMap = new Map<string, { protocolName: string; protocolId: string; goal: string }>();
-  // Map protocol_peptide_id → protocol info for exact matching
   const protocolPeptideMap = new Map<string, { protocolName: string; protocolId: string; goal: string }>();
+  const activeProtocolPeptideIds = new Set<string>();
+
   for (const protocol of protocols.filter((p) => p.status === "active")) {
     for (const pep of protocol.peptides) {
       const key = pep.peptide_name.toLowerCase();
@@ -553,12 +554,12 @@ const TodaysPlan = ({ onActivate, slim = false, selectedDate }: TodaysPlanProps)
           goal: protocol.goal ? formatGoalLabel(protocol.goal) : "",
         });
       }
-      // Always map protocol_peptide_id (unique per protocol)
       protocolPeptideMap.set(pep.id, {
         protocolName: protocol.name,
         protocolId: protocol.id,
         goal: protocol.goal ? formatGoalLabel(protocol.goal) : "",
       });
+      activeProtocolPeptideIds.add(pep.id);
     }
   }
 
@@ -584,7 +585,6 @@ const TodaysPlan = ({ onActivate, slim = false, selectedDate }: TodaysPlanProps)
     }
   }
 
-  // Filter supplements that are due today based on frequency
   const todaySupplements = supplements.filter((s) => {
     const freq = s.frequency.toLowerCase();
     if (freq.includes("daily") || freq.includes("day")) return true;
@@ -598,14 +598,12 @@ const TodaysPlan = ({ onActivate, slim = false, selectedDate }: TodaysPlanProps)
   const doneSupplements = todaySupplements.filter((s) => completedSupplements.has(s.name));
   const skippedSuppList = todaySupplements.filter((s) => skippedSupplements.has(s.name));
 
-  // Collect unique active goals for summary display
   const activeGoals = [...new Set(
     protocols
       .filter((p) => p.status === "active" && p.goal)
       .map((p) => formatGoalLabel(p.goal!))
   )];
 
-  // Detect issues from bloodwork (secondary context)
   const latestPanel = panels[0];
   const detectedIssues: string[] = [];
   if (latestPanel) {
@@ -621,11 +619,20 @@ const TodaysPlan = ({ onActivate, slim = false, selectedDate }: TodaysPlanProps)
     }
   }
 
-  const scheduled = injections.filter((i) => i.status === "scheduled");
-  const completed = injections.filter((i) => i.status === "completed");
-  const skipped = injections.filter((i) => i.status === "skipped");
+  const visibleInjections = isToday
+    ? injections.filter(
+        (injection) =>
+          injection.status !== "scheduled" ||
+          !injection.protocol_peptide_id ||
+          activeProtocolPeptideIds.has(injection.protocol_peptide_id)
+      )
+    : injections;
 
-  const totalItems = injections.length + todaySupplements.length;
+  const scheduled = visibleInjections.filter((i) => i.status === "scheduled");
+  const completed = visibleInjections.filter((i) => i.status === "completed");
+  const skipped = visibleInjections.filter((i) => i.status === "skipped");
+
+  const totalItems = visibleInjections.length + todaySupplements.length;
   const completedItems = completed.length + doneSupplements.length;
   const remainingScheduled = scheduled.length + pendingSupplements.length;
 

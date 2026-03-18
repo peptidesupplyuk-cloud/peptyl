@@ -55,11 +55,8 @@ const ActiveProtocols = () => {
   const handleFinalComplete = async (p: Protocol, consent: boolean) => {
     if (!user) return;
     setCompleting(true);
-    try {
-      // 1. Mark protocol complete
-      await supabase.from("protocols").update({ status: "completed" }).eq("id", p.id);
 
-      // 2. Build outcome record
+    try {
       const protocolSnapshot = p.peptides.map((pp) => ({
         peptide_name: pp.peptide_name,
         dose_mcg: pp.dose_mcg,
@@ -70,7 +67,6 @@ const ActiveProtocols = () => {
         protocolSnapshot.push(...(p.supplements as any));
       }
 
-      // Genotype signals from latest DNA report
       let dnaReportId: string | null = null;
       let genotypeSignals: Record<string, string> = {};
       let aggregationGenotypeKey: string | null = null;
@@ -81,23 +77,24 @@ const ActiveProtocols = () => {
         .order("created_at", { ascending: false })
         .limit(1)
         .maybeSingle();
+
       if (latestDna) {
         dnaReportId = latestDna.id;
         const report = latestDna.report_json as any;
         const geneResults = report?.gene_results ?? report?.genes ?? [];
+
         if (Array.isArray(geneResults)) {
           for (const g of geneResults) {
             if (g.gene && g.genotype) {
               genotypeSignals[g.gene] = g.genotype;
             }
           }
-          // Top 3 genes for aggregation key
+
           const top3 = geneResults.slice(0, 3).map((g: any) => `${g.gene}_${g.genotype}`);
           if (top3.length > 0) aggregationGenotypeKey = top3.join("+");
         }
       }
 
-      // Baseline panel (earliest panel linked to this protocol)
       let baselinePanelId: string | null = null;
       let baselineDate: string | null = null;
       let baselineMarkers: Record<string, number> = {};
@@ -108,6 +105,7 @@ const ActiveProtocols = () => {
         .order("created_at", { ascending: true })
         .limit(1)
         .maybeSingle();
+
       if (baselinePanel) {
         baselinePanelId = baselinePanel.id;
         baselineDate = baselinePanel.test_date;
@@ -115,12 +113,12 @@ const ActiveProtocols = () => {
           .from("bloodwork_markers")
           .select("marker_name, value")
           .eq("panel_id", baselinePanel.id);
+
         for (const m of markers ?? []) {
           if (m.value != null) baselineMarkers[m.marker_name] = Number(m.value);
         }
       }
 
-      // Adherence: completed / total past-due injection logs
       const { count: totalLogs } = await supabase
         .from("injection_logs")
         .select("id", { count: "exact", head: true })
@@ -131,11 +129,10 @@ const ActiveProtocols = () => {
         .from("injection_logs")
         .select("id", { count: "exact", head: true })
         .eq("user_id", user.id)
-        .eq("status", "done")
+        .eq("status", "completed")
         .in("protocol_peptide_id", p.peptides.map((pp) => pp.id));
       const adherence = totalLogs && totalLogs > 0 ? Math.round(((completedLogs ?? 0) / totalLogs) * 100) : null;
 
-      // Whoop baseline: 14 days before protocol start
       const protocolStart = new Date(p.start_date);
       const baselineStart = format(subDays(protocolStart, 14), "yyyy-MM-dd");
       const baselineEnd = format(subDays(protocolStart, 1), "yyyy-MM-dd");
@@ -148,38 +145,44 @@ const ActiveProtocols = () => {
 
       const avg = (arr: (number | null)[]): number | null => {
         const valid = arr.filter((v): v is number => v != null);
-        return valid.length > 0 ? Math.round(valid.reduce((a, b) => a + b, 0) / valid.length * 10) / 10 : null;
+        return valid.length > 0 ? Math.round((valid.reduce((a, b) => a + b, 0) / valid.length) * 10) / 10 : null;
       };
 
-      const avgHrvBaseline = avg(whoopBaseline?.map((w) => w.hrv != null ? Number(w.hrv) : null) ?? []);
-      const avgRecoveryBaseline = avg(whoopBaseline?.map((w) => w.recovery_score != null ? Number(w.recovery_score) : null) ?? []);
-      const avgSleepBaseline = avg(whoopBaseline?.map((w) => w.sleep_score != null ? Number(w.sleep_score) : null) ?? []);
-
+      const avgHrvBaseline = avg(whoopBaseline?.map((w) => (w.hrv != null ? Number(w.hrv) : null)) ?? []);
+      const avgRecoveryBaseline = avg(whoopBaseline?.map((w) => (w.recovery_score != null ? Number(w.recovery_score) : null)) ?? []);
+      const avgSleepBaseline = avg(whoopBaseline?.map((w) => (w.sleep_score != null ? Number(w.sleep_score) : null)) ?? []);
       const weeksOnProtocol = Math.round(differenceInDays(new Date(), protocolStart) / 7);
-
-      // Insert outcome record
-      await supabase.from("outcome_records").insert({
-        user_id: user.id,
-        protocol_id: p.id,
-        protocol_start_date: p.start_date,
-        protocol_snapshot: protocolSnapshot as any,
-        genotype_signals: genotypeSignals as any,
-        dna_report_id: dnaReportId,
-        baseline_panel_id: baselinePanelId,
-        baseline_date: baselineDate,
-        baseline_markers: baselineMarkers as any,
-        adherence_percentage: adherence,
-        avg_hrv_baseline: avgHrvBaseline,
-        avg_recovery_baseline: avgRecoveryBaseline,
-        avg_sleep_score_baseline: avgSleepBaseline,
-        aggregation_genotype_key: aggregationGenotypeKey,
-        consented_to_aggregate: consent,
-        weeks_on_protocol: weeksOnProtocol,
-        status: "in_progress",
-      } as any);
-
-      // Generate scorecard on completion
       const dayNum = Math.max(1, Math.round((new Date().getTime() - new Date(p.start_date).getTime()) / 86400000) + 1);
+
+      await updateStatus.mutateAsync({ id: p.id, status: "completed" });
+
+      let summaryWarning = false;
+
+      try {
+        await supabase.from("outcome_records").insert({
+          user_id: user.id,
+          protocol_id: p.id,
+          protocol_start_date: p.start_date,
+          protocol_snapshot: protocolSnapshot as any,
+          genotype_signals: genotypeSignals as any,
+          dna_report_id: dnaReportId,
+          baseline_panel_id: baselinePanelId,
+          baseline_date: baselineDate,
+          baseline_markers: baselineMarkers as any,
+          adherence_percentage: adherence,
+          avg_hrv_baseline: avgHrvBaseline,
+          avg_recovery_baseline: avgRecoveryBaseline,
+          avg_sleep_score_baseline: avgSleepBaseline,
+          aggregation_genotype_key: aggregationGenotypeKey,
+          consented_to_aggregate: consent,
+          weeks_on_protocol: weeksOnProtocol,
+          status: "in_progress",
+        } as any);
+      } catch (e) {
+        summaryWarning = true;
+        console.warn("Outcome record generation failed:", e);
+      }
+
       try {
         await generateScorecard.mutateAsync({
           protocolId: p.id,
@@ -187,14 +190,16 @@ const ActiveProtocols = () => {
           dayNumber: dayNum,
         });
       } catch (e) {
-        // Non-critical — scorecard generation failure shouldn't block completion
+        summaryWarning = true;
         console.warn("Scorecard generation failed:", e);
       }
 
-      // Invalidate queries
-      updateStatus.mutate({ id: p.id, status: "completed" });
-
-      toast({ title: "Protocol completed", description: `${p.name} has been marked as complete. Your scorecard has been generated.` });
+      toast({
+        title: "Protocol completed",
+        description: summaryWarning
+          ? `${p.name} was completed, but some summary records could not be generated automatically.`
+          : `${p.name} has been marked as complete. Your scorecard has been generated.`,
+      });
     } catch (err: any) {
       toast({ title: "Error completing protocol", description: err?.message || "Please try again.", variant: "destructive" });
     } finally {

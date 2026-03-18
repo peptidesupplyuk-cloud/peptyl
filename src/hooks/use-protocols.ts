@@ -151,12 +151,86 @@ export function useCreateProtocol() {
 
 export function useUpdateProtocolStatus() {
   const qc = useQueryClient();
+  const { user } = useAuth();
+
   return useMutation({
     mutationFn: async ({ id, status }: { id: string; status: string }) => {
-      const { error } = await supabase.from("protocols").update({ status }).eq("id", id);
+      const nowIso = new Date().toISOString();
+      const today = nowIso.split("T")[0];
+      const isClosingStatus = status === "completed" || status === "archived";
+
+      const { data: protocol, error: protocolError } = await supabase
+        .from("protocols")
+        .select("id, user_id, status, start_date, end_date")
+        .eq("id", id)
+        .single();
+      if (protocolError) throw protocolError;
+
+      const updatePayload: { status: string; updated_at: string; end_date?: string | null } = {
+        status,
+        updated_at: nowIso,
+      };
+
+      if (isClosingStatus) {
+        updatePayload.end_date = !protocol.end_date || protocol.end_date > today ? today : protocol.end_date;
+      }
+
+      const { error } = await supabase.from("protocols").update(updatePayload).eq("id", id);
       if (error) throw error;
+
+      if (isClosingStatus) {
+        const { data: peptides, error: peptideError } = await supabase
+          .from("protocol_peptides")
+          .select("id")
+          .eq("protocol_id", id);
+        if (peptideError) throw peptideError;
+
+        const peptideIds = (peptides ?? []).map((peptide) => peptide.id);
+        if (peptideIds.length > 0) {
+          const { error: logError } = await supabase
+            .from("injection_logs")
+            .delete()
+            .in("protocol_peptide_id", peptideIds)
+            .eq("status", "scheduled")
+            .gte("scheduled_time", `${today}T00:00:00.000Z`);
+          if (logError) throw logError;
+        }
+      }
+
+      if (user && protocol.status !== status) {
+        const dayNumber = Math.max(
+          1,
+          Math.floor(
+            (new Date(`${today}T00:00:00`).getTime() - new Date(protocol.start_date).getTime()) /
+              (1000 * 60 * 60 * 24)
+          ) + 1
+        );
+
+        const { error: changeLogError } = await supabase.from("protocol_change_log").insert({
+          protocol_id: id,
+          user_id: user.id,
+          change_type: "status_changed",
+          change_detail: {
+            from: protocol.status,
+            to: status,
+            effective_end_date: updatePayload.end_date ?? protocol.end_date ?? null,
+          },
+          day_number: dayNumber,
+        } as any);
+
+        if (changeLogError) throw changeLogError;
+      }
+
+      return { id, status };
     },
-    onSuccess: () => qc.invalidateQueries({ queryKey: ["protocols"] }),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["protocols"] });
+      qc.invalidateQueries({ queryKey: ["injections_today"] });
+      qc.invalidateQueries({ queryKey: ["injections_all"] });
+      qc.invalidateQueries({ queryKey: ["injections_date"] });
+      qc.invalidateQueries({ queryKey: ["supplement-logs"] });
+      qc.invalidateQueries({ queryKey: ["protocol_change_log"] });
+    },
   });
 }
 
