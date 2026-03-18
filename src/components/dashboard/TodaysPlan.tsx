@@ -53,9 +53,10 @@ function resolveSupplementTiming(supp: { timing?: string; frequency?: string }):
   if (supp.timing) return supp.timing.toUpperCase();
   // Infer from frequency keywords
   const freq = (supp.frequency || "").toLowerCase();
+  if (freq.includes("split") || freq.includes("am/pm") || freq.includes("twice") || freq.includes("2x")) return "AM+PM";
   if (freq.includes("morning") || freq.includes("fasted")) return "AM";
   if (freq.includes("bed") || freq.includes("evening") || freq.includes("night")) return "PM";
-  if (freq.includes("twice") || freq.includes("2x") || freq.includes("with meals")) return "AM+PM";
+  if (freq.includes("with meals")) return "AM+PM";
   return "AM"; // sensible default
 }
 
