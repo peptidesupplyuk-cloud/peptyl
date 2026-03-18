@@ -220,7 +220,7 @@ const ProtocolGroupedDoses = ({
               <div className="px-3 pb-3 space-y-1.5">
                 {/* Scheduled peptide doses */}
                 {group.scheduled.map((inj) => {
-                  const freq = getPeptideFrequency(inj.peptide_name, protocols);
+                  const freq = getPeptideFrequency(inj.peptide_name, protocols, inj.protocol_peptide_id);
                   const badge = frequencyLabel(freq);
                   return (
                     <div key={inj.id} className="flex flex-wrap items-center justify-between gap-2 bg-muted/50 rounded-lg px-3 py-2.5">
