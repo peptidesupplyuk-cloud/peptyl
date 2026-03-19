@@ -1,6 +1,7 @@
 import { useMemo } from "react";
 import { motion } from "framer-motion";
-import { Activity, Heart, Dna, Droplets, Zap, TrendingUp, ChevronRight } from "lucide-react";
+import { Activity, Heart, Dna, Droplets, Zap, TrendingUp, ChevronRight, Info } from "lucide-react";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { useBloodworkPanels } from "@/hooks/use-bloodwork";
 import { useProtocols } from "@/hooks/use-protocols";
 import { useAuth } from "@/contexts/AuthContext";
