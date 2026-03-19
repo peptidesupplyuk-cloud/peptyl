@@ -1030,9 +1030,11 @@ export type Database = {
       }
       nudge_log: {
         Row: {
+          clinical_tier: string | null
           email_sent: boolean | null
           error_message: string | null
           id: string
+          message_content: string | null
           nudge_type: string
           protocol_id: string | null
           push_sent: boolean | null
@@ -1040,9 +1042,11 @@ export type Database = {
           user_id: string
         }
         Insert: {
+          clinical_tier?: string | null
           email_sent?: boolean | null
           error_message?: string | null
           id?: string
+          message_content?: string | null
           nudge_type: string
           protocol_id?: string | null
           push_sent?: boolean | null
@@ -1050,9 +1054,11 @@ export type Database = {
           user_id: string
         }
         Update: {
+          clinical_tier?: string | null
           email_sent?: boolean | null
           error_message?: string | null
           id?: string
+          message_content?: string | null
           nudge_type?: string
           protocol_id?: string | null
           push_sent?: boolean | null
@@ -1360,6 +1366,122 @@ export type Database = {
         }
         Relationships: []
       }
+      pip_product_recommendations: {
+        Row: {
+          created_at: string | null
+          id: string
+          link_clicked: boolean | null
+          message_sent: string | null
+          product_id: string | null
+          symptom_trigger: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          link_clicked?: boolean | null
+          message_sent?: string | null
+          product_id?: string | null
+          symptom_trigger?: string | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          link_clicked?: boolean | null
+          message_sent?: string | null
+          product_id?: string | null
+          symptom_trigger?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "pip_product_recommendations_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "support_products"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      pip_protocol_debriefs: {
+        Row: {
+          created_at: string | null
+          debrief_complete: boolean | null
+          id: string
+          protocol_id: string
+          q1_answered_at: string | null
+          q1_rating: number | null
+          q2_answered_at: string | null
+          q2_changes: string | null
+          q3_adjustments: string | null
+          q3_answered_at: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          debrief_complete?: boolean | null
+          id?: string
+          protocol_id: string
+          q1_answered_at?: string | null
+          q1_rating?: number | null
+          q2_answered_at?: string | null
+          q2_changes?: string | null
+          q3_adjustments?: string | null
+          q3_answered_at?: string | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          debrief_complete?: boolean | null
+          id?: string
+          protocol_id?: string
+          q1_answered_at?: string | null
+          q1_rating?: number | null
+          q2_answered_at?: string | null
+          q2_changes?: string | null
+          q3_adjustments?: string | null
+          q3_answered_at?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
+      pip_wellness_notes: {
+        Row: {
+          context: string | null
+          created_at: string | null
+          escalated_to: string | null
+          id: string
+          note_type: string
+          protocol_day: number | null
+          protocol_id: string | null
+          resolved: boolean | null
+          user_id: string
+        }
+        Insert: {
+          context?: string | null
+          created_at?: string | null
+          escalated_to?: string | null
+          id?: string
+          note_type: string
+          protocol_day?: number | null
+          protocol_id?: string | null
+          resolved?: boolean | null
+          user_id: string
+        }
+        Update: {
+          context?: string | null
+          created_at?: string | null
+          escalated_to?: string | null
+          id?: string
+          note_type?: string
+          protocol_day?: number | null
+          protocol_id?: string | null
+          resolved?: boolean | null
+          user_id?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           age: number | null
@@ -1383,6 +1505,11 @@ export type Database = {
           notify_email: boolean
           notify_pm_time: string
           notify_whatsapp: boolean
+          pip_frequency: string | null
+          pip_last_contacted_at: string | null
+          pip_onboarding_done: boolean | null
+          pip_paused_until: string | null
+          pip_weekly_message_count: number | null
           primary_health_goal: string | null
           research_goal: string | null
           risk_tolerance: string | null
@@ -1429,6 +1556,11 @@ export type Database = {
           notify_email?: boolean
           notify_pm_time?: string
           notify_whatsapp?: boolean
+          pip_frequency?: string | null
+          pip_last_contacted_at?: string | null
+          pip_onboarding_done?: boolean | null
+          pip_paused_until?: string | null
+          pip_weekly_message_count?: number | null
           primary_health_goal?: string | null
           research_goal?: string | null
           risk_tolerance?: string | null
@@ -1475,6 +1607,11 @@ export type Database = {
           notify_email?: boolean
           notify_pm_time?: string
           notify_whatsapp?: boolean
+          pip_frequency?: string | null
+          pip_last_contacted_at?: string | null
+          pip_onboarding_done?: boolean | null
+          pip_paused_until?: string | null
+          pip_weekly_message_count?: number | null
           primary_health_goal?: string | null
           research_goal?: string | null
           risk_tolerance?: string | null
@@ -1729,6 +1866,42 @@ export type Database = {
           supplements?: Json | null
           updated_at?: string
           user_id?: string
+        }
+        Relationships: []
+      }
+      referrals: {
+        Row: {
+          benefit_granted: boolean | null
+          created_at: string | null
+          expires_at: string | null
+          id: string
+          referral_code: string
+          referred_name: string | null
+          referred_user_id: string | null
+          referrer_user_id: string
+          status: string | null
+        }
+        Insert: {
+          benefit_granted?: boolean | null
+          created_at?: string | null
+          expires_at?: string | null
+          id?: string
+          referral_code: string
+          referred_name?: string | null
+          referred_user_id?: string | null
+          referrer_user_id: string
+          status?: string | null
+        }
+        Update: {
+          benefit_granted?: boolean | null
+          created_at?: string | null
+          expires_at?: string | null
+          id?: string
+          referral_code?: string
+          referred_name?: string | null
+          referred_user_id?: string | null
+          referrer_user_id?: string
+          status?: string | null
         }
         Relationships: []
       }
@@ -2249,6 +2422,48 @@ export type Database = {
         }
         Relationships: []
       }
+      trajectory_scores: {
+        Row: {
+          adherence_component: number | null
+          biomarker_component: number | null
+          created_at: string | null
+          data_completeness: number | null
+          direction: string
+          id: string
+          score: number
+          user_id: string
+          wearable_component: number | null
+          week_start: string
+          wellbeing_component: number | null
+        }
+        Insert: {
+          adherence_component?: number | null
+          biomarker_component?: number | null
+          created_at?: string | null
+          data_completeness?: number | null
+          direction: string
+          id?: string
+          score: number
+          user_id: string
+          wearable_component?: number | null
+          week_start: string
+          wellbeing_component?: number | null
+        }
+        Update: {
+          adherence_component?: number | null
+          biomarker_component?: number | null
+          created_at?: string | null
+          data_completeness?: number | null
+          direction?: string
+          id?: string
+          score?: number
+          user_id?: string
+          wearable_component?: number | null
+          week_start?: string
+          wellbeing_component?: number | null
+        }
+        Relationships: []
+      }
       user_activity: {
         Row: {
           created_at: string
@@ -2448,6 +2663,42 @@ export type Database = {
           id?: string
           user_id?: string | null
           video_name?: string
+        }
+        Relationships: []
+      }
+      whatsapp_conversations: {
+        Row: {
+          created_at: string | null
+          direction: string
+          id: string
+          intent_classified: string | null
+          message: string
+          message_type: string | null
+          trigger_type: string | null
+          user_id: string
+          wa_message_id: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          direction: string
+          id?: string
+          intent_classified?: string | null
+          message: string
+          message_type?: string | null
+          trigger_type?: string | null
+          user_id: string
+          wa_message_id?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          direction?: string
+          id?: string
+          intent_classified?: string | null
+          message?: string
+          message_type?: string | null
+          trigger_type?: string | null
+          user_id?: string
+          wa_message_id?: string | null
         }
         Relationships: []
       }
