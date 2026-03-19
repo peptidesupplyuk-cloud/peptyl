@@ -69,50 +69,64 @@ const DNAAnalysing = () => {
         const reader = resp.body!.getReader();
         const decoder = new TextDecoder();
         let fullText = "";
+        let buffer = "";
+
+        const handleLine = async (line: string) => {
+          if (line === "data: [DONE]") {
+            const parts = fullText.split("---NARRATIVE---");
+            const jsonStr = parts[0].trim().replace(/^```json\s*/i, "").replace(/```\s*$/i, "").trim();
+            try {
+              JSON.parse(jsonStr);
+              const { createClient } = await import("@supabase/supabase-js");
+              const sb = createClient(supabaseUrl, import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY);
+              const { data } = await sb
+                .from("dna_reports")
+                .select("id")
+                .eq("user_id", userId)
+                .order("created_at", { ascending: false })
+                .limit(1)
+                .maybeSingle();
+              if (data?.id) {
+                navigate(`/dna/report/${data.id}`, { replace: true });
+              } else {
+                navigate("/dna/dashboard", { replace: true });
+              }
+            } catch {
+              navigate("/dna/dashboard", { replace: true });
+            }
+            return true;
+          }
+
+          if (!line.startsWith("data: ")) return false;
+          try {
+            const parsed = JSON.parse(line.slice(6));
+            if (parsed.text) {
+              fullText += parsed.text;
+              setStreamText(fullText.slice(-300));
+            }
+          } catch {
+            // wait for the rest of the split line in the next chunk
+          }
+          return false;
+        };
 
         while (true) {
           const { done, value } = await reader.read();
           if (done) break;
-          const chunk = decoder.decode(value, { stream: true });
-          const lines = chunk.split("\n");
-          for (const line of lines) {
-            if (line === "data: [DONE]") {
-              // Parse report and redirect
-              const parts = fullText.split("---NARRATIVE---");
-              let jsonStr = parts[0].trim().replace(/^```json\s*/i, "").replace(/```\s*$/i, "").trim();
-              try {
-                const report = JSON.parse(jsonStr);
-                // Fetch the saved report ID
-                const { createClient } = await import("@supabase/supabase-js");
-                const sb = createClient(supabaseUrl, import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY);
-                const { data } = await sb
-                  .from("dna_reports")
-                  .select("id")
-                  .eq("user_id", userId)
-                  .order("created_at", { ascending: false })
-                  .limit(1)
-                  .single();
-                if (data?.id) {
-                  navigate(`/dna/report/${data.id}`, { replace: true });
-                } else {
-                  navigate("/dna/dashboard", { replace: true });
-                }
-              } catch {
-                navigate("/dna/dashboard", { replace: true });
-              }
-              return;
-            }
-            if (!line.startsWith("data: ")) continue;
-            try {
-              const parsed = JSON.parse(line.slice(6));
-              if (parsed.text) {
-                fullText += parsed.text;
-                setStreamText(fullText.slice(-300));
-              }
-            } catch {
-              // skip
-            }
+          buffer += decoder.decode(value, { stream: true });
+          const lines = buffer.split("\n");
+          buffer = lines.pop() ?? "";
+
+          for (const rawLine of lines) {
+            const shouldStop = await handleLine(rawLine.trim());
+            if (shouldStop) return;
           }
+        }
+
+        buffer += decoder.decode();
+        if (buffer.trim()) {
+          const shouldStop = await handleLine(buffer.trim());
+          if (shouldStop) return;
         }
 
         // If stream ends without [DONE]
