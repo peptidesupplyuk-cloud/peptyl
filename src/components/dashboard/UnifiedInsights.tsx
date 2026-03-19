@@ -75,8 +75,8 @@ const UnifiedInsights = () => {
       : null;
 
     // 1. DNA + Bloodwork cross-reference: Inflammation
-    if (report?.flags && markerMap.hscrp !== undefined) {
-      const inflammationFlags = (report.flags as any[])?.filter(
+    if (report?.flags && Array.isArray(report.flags) && markerMap.hscrp !== undefined) {
+      const inflammationFlags = (report.flags as any[]).filter(
         (f: any) => f.category?.toLowerCase().includes("inflam") || f.gene?.toLowerCase().includes("il6") || f.gene?.toLowerCase().includes("tnf")
       );
       if (inflammationFlags?.length > 0 && markerMap.hscrp > 1.0) {
