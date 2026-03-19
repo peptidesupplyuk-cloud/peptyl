@@ -58,32 +58,48 @@ function rangePosition(value: number, marker: BiomarkerDef): number {
 
 const ScoreRing = ({ score, total, improving }: { score: number; total: number; improving: number }) => {
   const pct = total > 0 ? score / total : 0;
-  const r = 52;
+  const scale = 2; // 2x for retina clarity
+  const size = 130;
+  const vb = size * scale;
+  const strokeW = 7 * scale;
+  const r = (vb / 2) - strokeW - 4;
   const circ = 2 * Math.PI * r;
   const offset = circ * (1 - pct);
 
   return (
-    <div className="relative flex items-center justify-center">
-      <svg width="130" height="130" viewBox="0 0 120 120" className="transform -rotate-90">
+    <div className="relative flex items-center justify-center" style={{ width: size, height: size }}>
+      <svg
+        width={size}
+        height={size}
+        viewBox={`0 0 ${vb} ${vb}`}
+        className="transform -rotate-90"
+        style={{ shapeRendering: "geometricPrecision" }}
+      >
         {/* track */}
-        <circle cx="60" cy="60" r={r} fill="none" stroke="hsl(var(--muted))" strokeWidth="8" />
+        <circle cx={vb / 2} cy={vb / 2} r={r} fill="none" stroke="hsl(var(--muted) / 0.25)" strokeWidth={strokeW} />
         {/* progress */}
-        <circle
-          cx="60" cy="60" r={r} fill="none"
+        <motion.circle
+          cx={vb / 2} cy={vb / 2} r={r} fill="none"
           stroke="hsl(var(--primary))"
-          strokeWidth="8"
+          strokeWidth={strokeW}
           strokeLinecap="round"
           strokeDasharray={circ}
-          strokeDashoffset={offset}
-          className="transition-all duration-700 ease-out"
-          style={{ filter: "drop-shadow(0 0 6px hsl(var(--primary) / 0.4))" }}
+          initial={{ strokeDashoffset: circ }}
+          animate={{ strokeDashoffset: offset }}
+          transition={{ duration: 1.4, ease: "easeOut", delay: 0.3 }}
+          style={{ filter: `drop-shadow(0 0 ${6 * scale}px hsl(var(--primary) / 0.4))` }}
         />
       </svg>
       <div className="absolute inset-0 flex flex-col items-center justify-center">
-        <span className="text-3xl font-heading font-bold text-foreground tracking-tight">
+        <motion.span
+          className="text-[2rem] font-heading font-bold text-foreground tracking-tight leading-none"
+          initial={{ opacity: 0, scale: 0.5 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ delay: 0.8, type: "spring", stiffness: 200 }}
+        >
           {score}/{total}
-        </span>
-        <span className="text-[10px] text-muted-foreground font-medium">optimal</span>
+        </motion.span>
+        <span className="text-[10px] text-muted-foreground font-semibold uppercase tracking-widest mt-0.5">optimal</span>
       </div>
     </div>
   );
