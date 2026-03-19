@@ -147,7 +147,7 @@ const DNAUpload = () => {
   const handlePurchase = async () => {
     if (!user) {
       toast({ title: "Sign in required", description: "Please sign in to purchase.", variant: "destructive" });
-      navigate("/auth");
+      navigate(`/auth?redirect=${encodeURIComponent(`/dna/upload?tier=${tier}`)}`);
       return;
     }
     setPurchasing(true);

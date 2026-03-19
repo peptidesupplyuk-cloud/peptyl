@@ -44,6 +44,7 @@ const Auth = () => {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const refCode = searchParams.get("ref");
+  const redirectPath = searchParams.get("redirect");
 
   const RESEARCH_GOALS = [
     { value: "weight_loss", label: t("authPage.goalWeightLoss") },
