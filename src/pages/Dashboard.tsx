@@ -36,6 +36,10 @@ import { Checkbox } from "@/components/ui/checkbox";
 import SEO from "@/components/SEO";
 import ExperienceChat from "@/components/dashboard/ExperienceChat";
 import ProtocolNudges from "@/components/dashboard/ProtocolNudges";
+import BioAgeScore from "@/components/dashboard/BioAgeScore";
+import WearableNudges from "@/components/dashboard/WearableNudges";
+import RecommendedTests from "@/components/dashboard/RecommendedTests";
+import UnifiedInsights from "@/components/dashboard/UnifiedInsights";
 
 // OnboardingRecommendations removed — unified engine handles onboarding-based recs
 import MobileTabNav from "@/components/dashboard/MobileTabNav";
