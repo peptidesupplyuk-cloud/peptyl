@@ -322,34 +322,35 @@ const BioAgeScore = () => {
 
   return (
     <motion.div
-      className="relative overflow-hidden rounded-2xl border border-border bg-card"
+      className="relative overflow-hidden rounded-2xl border border-border bg-card shadow-sm"
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.5 }}
+      style={{ willChange: "transform" }}
     >
       {/* Ambient glow */}
       <div
-        className="pointer-events-none absolute -top-12 -right-12 w-40 h-40 rounded-full opacity-20 blur-[60px]"
+        className="pointer-events-none absolute -top-16 -right-16 w-56 h-56 rounded-full opacity-15 blur-[80px]"
         style={{ background: total >= 60 ? "hsl(var(--primary))" : "hsl(var(--warm))" }}
       />
 
       <div className="relative p-5 sm:p-6">
         {/* Header */}
-        <div className="flex items-center gap-2 mb-4">
+        <div className="flex items-center gap-2.5 mb-5">
           <Heart className="h-4 w-4 text-primary" />
-          <h3 className="text-sm font-heading font-semibold text-foreground">Health Intelligence Score</h3>
+          <h3 className="text-sm font-heading font-bold text-foreground tracking-tight">Health Intelligence Score</h3>
         </div>
 
         {/* Score + Breakdown */}
-        <div className="flex items-start gap-6">
+        <div className="flex items-start gap-7">
           {/* Ring */}
-          <div className="shrink-0">
+          <div className="shrink-0 flex flex-col items-center">
             <ScoreRing score={total} />
-            <p className="text-[10px] text-muted-foreground text-center mt-1 max-w-[120px]">{statusText}</p>
+            <p className="text-[11px] text-muted-foreground text-center mt-2 max-w-[128px] leading-snug font-medium">{statusText}</p>
           </div>
 
           {/* Bars */}
-          <div className="flex-1 space-y-3 min-w-0">
+          <div className="flex-1 space-y-3.5 min-w-0">
             {breakdown.map((item, idx) => (
               <BreakdownBar key={item.label} item={item} delay={0.1 + idx * 0.1} />
             ))}
