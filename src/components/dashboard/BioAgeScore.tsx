@@ -354,7 +354,6 @@ const BioAgeScore = () => {
             </Tooltip>
           </TooltipProvider>
         </div>
-        </div>
 
         {/* Score + Breakdown */}
         <div className="flex items-start gap-7">
