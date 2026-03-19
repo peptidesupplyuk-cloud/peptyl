@@ -29,6 +29,7 @@ const AdherenceTracker = () => {
   const [logPage, setLogPage] = useState(0);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [filter, setFilter] = useState<"all" | "peptide" | "supplement">("all");
+  const [showFullHistory, setShowFullHistory] = useState(false);
   const LOG_PAGE_SIZE = 15;
   const isLoading = injLoading || suppLoading;
 
