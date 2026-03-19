@@ -709,12 +709,17 @@ const MarkerRequestsTab = () => {
     },
   });
 
-  // Group by marker name and count
-  const grouped = requests.reduce<Record<string, { count: number; status: string; latest: string }>>((acc, r: any) => {
+  // Group by marker name and count, collect unique requesters
+  const grouped = requests.reduce<Record<string, { count: number; status: string; latest: string; requesters: { email: string; name: string }[] }>>((acc, r: any) => {
     const name = r.marker_name;
-    if (!acc[name]) acc[name] = { count: 0, status: r.status, latest: r.created_at };
+    if (!acc[name]) acc[name] = { count: 0, status: r.status, latest: r.created_at, requesters: [] };
     acc[name].count++;
     if (new Date(r.created_at) > new Date(acc[name].latest)) acc[name].latest = r.created_at;
+    const email = r.user_email || r.user_id?.slice(0, 8);
+    const rName = r.user_name || email;
+    if (email && !acc[name].requesters.some((req: any) => req.email === email)) {
+      acc[name].requesters.push({ email, name: rName });
+    }
     return acc;
   }, {});
 
@@ -728,21 +733,31 @@ const MarkerRequestsTab = () => {
         <h3 className="font-heading font-semibold text-lg">Marker Tracking Requests</h3>
         <Badge variant="outline">{requests.length} total requests</Badge>
       </div>
+      <p className="text-xs text-muted-foreground">Users who requested tracking — notify them when you add support.</p>
       {sorted.length === 0 ? (
         <p className="text-sm text-muted-foreground text-center py-8">No marker requests yet.</p>
       ) : (
         <div className="space-y-2">
           {sorted.map(([name, info]) => (
-            <div key={name} className="flex items-center justify-between rounded-lg border border-border bg-card p-4">
-              <div>
-                <p className="font-medium text-foreground">{name}</p>
-                <p className="text-xs text-muted-foreground">{info.count} request{info.count > 1 ? "s" : ""} • Latest: {new Date(info.latest).toLocaleDateString()}</p>
-              </div>
-              <div className="flex items-center gap-2">
+            <div key={name} className="rounded-lg border border-border bg-card p-4 space-y-2">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="font-medium text-foreground">{name}</p>
+                  <p className="text-xs text-muted-foreground">{info.count} request{info.count > 1 ? "s" : ""} • Latest: {new Date(info.latest).toLocaleDateString()}</p>
+                </div>
                 <Badge variant={info.count >= 3 ? "default" : "outline"} className={info.count >= 3 ? "bg-primary" : ""}>
                   {info.count >= 3 ? "High demand" : info.count >= 2 ? "Growing" : "New"}
                 </Badge>
               </div>
+              {info.requesters.length > 0 && (
+                <div className="flex flex-wrap gap-1.5">
+                  {info.requesters.map((r) => (
+                    <span key={r.email} className="inline-flex items-center gap-1 text-[11px] bg-muted rounded-full px-2 py-0.5 text-muted-foreground" title={r.email}>
+                      <Mail className="h-2.5 w-2.5" /> {r.name}
+                    </span>
+                  ))}
+                </div>
+              )}
             </div>
           ))}
         </div>
