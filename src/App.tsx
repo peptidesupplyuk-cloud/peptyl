@@ -85,6 +85,7 @@ const DNAUpload = lazy(() => import("./pages/dna/DNAUpload"));
 const DNAAnalysing = lazy(() => import("./pages/dna/DNAAnalysing"));
 const DNAReport = lazy(() => import("./pages/dna/DNAReport"));
 const DNADashboard = lazy(() => import("./pages/dna/DNADashboard"));
+const JoinReferral = lazy(() => import("./pages/JoinReferral"));
 
 const queryClient = new QueryClient();
 
