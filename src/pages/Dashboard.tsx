@@ -913,6 +913,18 @@ const Dashboard = () => {
                   {/* C2 — Protocol nudges */}
                   <ProtocolNudges onNavigate={setActiveTab} />
 
+                  {/* C2.1 — Wearable-aware nudges */}
+                  <WearableNudges />
+
+                  {/* C2.2 — Bio-Age Score */}
+                  <BioAgeScore />
+
+                  {/* C2.3 — Unified health insights */}
+                  <UnifiedInsights />
+
+                  {/* C2.4 — Recommended blood tests */}
+                  <RecommendedTests />
+
                   {/* C2.5 — Research insights feed */}
                   <ResearchInsightsFeed />
 
