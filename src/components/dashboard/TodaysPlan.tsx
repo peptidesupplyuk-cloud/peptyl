@@ -449,21 +449,37 @@ const TodaysPlan = ({ onActivate, slim = false, selectedDate }: TodaysPlanProps)
     },
   });
 
-  // Compute active protocol progress
-  const activeProtocol = protocols.find(
-    (p) => p.status === "active" && outcomeRecord?.protocol_id === p.id
-  ) || protocols.find((p) => p.status === "active");
+  // Compute per-protocol progress for ALL active protocols
+  const activeProtocols = protocols.filter((p) => p.status === "active");
+  const activeProtocol = activeProtocols.find(
+    (p) => outcomeRecord?.protocol_id === p.id
+  ) || activeProtocols[0] || null;
 
-  const protocolStartDate = outcomeRecord?.protocol_start_date || activeProtocol?.start_date;
+  // Per-protocol progress data
+  const protocolProgressList = activeProtocols.map((p) => {
+    const start = p.start_date;
+    const end = p.end_date;
+    const elapsed = start ? Math.max(0, differenceInCalendarDays(new Date(), new Date(start))) : 0;
+    const total = start && end ? Math.max(1, differenceInCalendarDays(new Date(end), new Date(start)) + 1) : null;
+    const dayNum = total ? Math.min(total, elapsed + 1) : elapsed + 1;
+    const pct = total ? Math.min(100, Math.round((dayNum / total) * 100)) : null;
+    const daysLeft = total ? Math.max(0, total - dayNum) : null;
+    const hasPeptides = p.peptides.length > 0;
+    const hasSupps = (p.supplements?.length ?? 0) > 0;
+    const typeLabel = hasPeptides && hasSupps ? "" : hasPeptides ? "Peptides only" : hasSupps ? "Supplements only" : "";
+    return { protocol: p, dayNum, total, pct, daysLeft, elapsed, typeLabel };
+  });
+
+  // Legacy compat — pick first active for milestones
+  const protocolStartDate = activeProtocol?.start_date;
   const protocolEndDate = activeProtocol?.end_date;
-
   const daysActive = protocolStartDate
     ? Math.max(0, differenceInCalendarDays(new Date(), new Date(protocolStartDate)))
     : 0;
   const totalDays = protocolStartDate && protocolEndDate
-    ? Math.max(1, differenceInCalendarDays(new Date(protocolEndDate), new Date(protocolStartDate)))
+    ? Math.max(1, differenceInCalendarDays(new Date(protocolEndDate), new Date(protocolStartDate)) + 1)
     : 90;
-  const progressPct = Math.min(100, Math.round((daysActive / totalDays) * 100));
+  const progressPct = Math.min(100, Math.round(((daysActive + 1) / totalDays) * 100));
 
   // Fetch the user's latest DNA report (independent of outcome record)
   const { data: latestDnaReport } = useQuery({
@@ -522,7 +538,7 @@ const TodaysPlan = ({ onActivate, slim = false, selectedDate }: TodaysPlanProps)
     }
   }
 
-  const showProgressStrip = hasActiveProtocol && protocolStartDate && (dnaReportId || protocolEndDate);
+  const showProgressStrip = hasActiveProtocol && protocolProgressList.length > 0;
 
   // Milestone celebration banners (day 30 and 90)
   const [dismissed30, setDismissed30] = useState(() =>
@@ -849,34 +865,39 @@ const TodaysPlan = ({ onActivate, slim = false, selectedDate }: TodaysPlanProps)
           </div>
         )}
 
-        {/* J2: Day X of N progress strip — only in full mode */}
+        {/* Per-protocol progress strips — only in full mode */}
         {!slim && showProgressStrip && (
-          <button
-            onClick={() => dnaReportId && navigate(`/dna/report/${dnaReportId}`)}
-            className="w-full bg-muted/30 rounded-xl px-4 py-3 flex items-center gap-4 text-left hover:bg-muted/50 transition-colors"
-          >
-            <div className="flex-1 min-w-0">
-              <p className="font-heading font-semibold text-sm text-foreground">
-                Day {daysActive + 1} of {totalDays}
-              </p>
-              <div className="w-full h-1 bg-muted rounded-full mt-1.5">
+          <div className="space-y-2">
+            {protocolProgressList.map(({ protocol: p, dayNum, total, pct, daysLeft, typeLabel }) => {
+              const goalLabel = p.goal ? formatGoalLabel(p.goal) : p.name;
+              return (
                 <div
-                  className="h-1 bg-primary rounded-full transition-all duration-500"
-                  style={{ width: `${progressPct}%` }}
-                />
-              </div>
-            </div>
-            {milestoneLabel && (
-              <div className="max-w-[180px] shrink-0 text-right">
-                {milestonePrefix && (
-                  <p className="text-[10px] text-muted-foreground">{milestonePrefix}</p>
-                )}
-                <p className={`text-xs truncate ${milestoneAmber ? "text-amber-400 font-medium" : "text-muted-foreground"}`}>
-                  {milestoneLabel}
-                </p>
-              </div>
-            )}
-          </button>
+                  key={p.id}
+                  className="bg-muted/30 rounded-xl px-4 py-3 space-y-1.5"
+                >
+                  <div className="flex items-center justify-between">
+                    <p className="font-heading font-semibold text-sm text-foreground truncate">
+                      {goalLabel}
+                    </p>
+                    <span className="text-xs text-muted-foreground shrink-0 ml-2">
+                      {daysLeft != null ? `${daysLeft} days remaining` : `Day ${dayNum}`}
+                    </span>
+                  </div>
+                  {total && pct != null && (
+                    <div className="w-full h-1.5 bg-muted rounded-full">
+                      <div
+                        className="h-1.5 bg-primary rounded-full transition-all duration-500"
+                        style={{ width: `${pct}%` }}
+                      />
+                    </div>
+                  )}
+                  {typeLabel && (
+                    <p className="text-[10px] text-muted-foreground">{typeLabel}</p>
+                  )}
+                </div>
+              );
+            })}
+          </div>
         )}
 
         {/* Active goal summary + detected issues — only in full mode */}
