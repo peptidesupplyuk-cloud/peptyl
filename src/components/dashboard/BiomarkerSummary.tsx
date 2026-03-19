@@ -432,16 +432,28 @@ const BiomarkerSummary = ({ panels }: BiomarkerSummaryProps) => {
   return (
     <>
       {/* ── HERO SUMMARY CARD ── */}
-      <div className="bg-card rounded-2xl border border-border overflow-hidden">
+      <motion.div
+        className="relative overflow-hidden rounded-2xl border border-border bg-card shadow-sm"
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5 }}
+        style={{ willChange: "transform" }}
+      >
+        {/* Ambient glow */}
+        <div
+          className="pointer-events-none absolute -top-16 -right-16 w-48 h-48 rounded-full opacity-12 blur-[80px]"
+          style={{ background: needsAttentionCount > 0 ? "hsl(var(--warm))" : "hsl(var(--primary))" }}
+        />
+
         {/* Top section: ring + stats */}
-        <div className="px-5 pt-5 pb-4">
+        <div className="relative px-5 pt-5 pb-4">
           <div className="flex items-center gap-5">
             {/* Score ring */}
             <ScoreRing score={optimalCount} total={summaryMarkers.length} improving={improvingCount} />
 
             {/* Right side info */}
             <div className="flex-1 space-y-1.5">
-              <h2 className="font-heading font-semibold text-foreground text-sm">Biomarker Status</h2>
+              <h2 className="font-heading font-bold text-foreground text-sm tracking-tight">Biomarker Status</h2>
               <p className="text-[10px] text-muted-foreground leading-relaxed">
                 {summaryExplanation}
               </p>
