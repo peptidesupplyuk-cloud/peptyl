@@ -10,6 +10,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import LanguageToggle from "./LanguageToggle";
 import ThemeToggle from "./ThemeToggle";
+import { useHeaderState } from "@/hooks/use-header-state";
 
 const ADMIN_EMAIL = "peptidesupplyuk@gmail.com";
 
