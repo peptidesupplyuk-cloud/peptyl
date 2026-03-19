@@ -42,6 +42,8 @@ const Auth = () => {
   const [googleLoading, setGoogleLoading] = useState(false);
   const { signIn, signUp, user } = useAuth();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const refCode = searchParams.get("ref");
 
   const RESEARCH_GOALS = [
     { value: "weight_loss", label: t("authPage.goalWeightLoss") },
