@@ -75,6 +75,7 @@ const DNAReport = () => {
 
   const r = report.report_json || {};
   const isAdvanced = report.assessment_tier === "advanced";
+  const parseFailed = !!r.parse_failed || !!r.raw_text;
 
   const buildGenotypeKey = (geneResults: any[]) => {
     if (!geneResults?.length) return null;
@@ -92,6 +93,32 @@ const DNAReport = () => {
       <Header />
       <main className="min-h-screen pt-24 pb-16 bg-background">
         <div className="container mx-auto px-6 max-w-4xl space-y-8">
+          {parseFailed ? (
+            <div className="bg-card border border-destructive/30 rounded-xl p-8 text-center space-y-4">
+              <div className="h-16 w-16 mx-auto rounded-full bg-destructive/10 flex items-center justify-center">
+                <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-destructive"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+              </div>
+              <h1 className="text-xl font-heading font-bold text-foreground">Report Generation Issue</h1>
+              <p className="text-sm text-muted-foreground max-w-md mx-auto">
+                The AI produced a malformed response and your report couldn't be fully processed. This occasionally happens with complex analyses. Please try running your assessment again — it's free to retry.
+              </p>
+              <div className="flex gap-3 justify-center pt-2">
+                <button
+                  onClick={() => navigate("/dna/upload", { replace: true })}
+                  className="px-6 py-2.5 bg-primary text-primary-foreground rounded-lg font-medium text-sm"
+                >
+                  Re-run Analysis
+                </button>
+                <button
+                  onClick={() => navigate("/dna/dashboard", { replace: true })}
+                  className="px-6 py-2.5 border border-border text-foreground rounded-lg font-medium text-sm hover:bg-muted/30"
+                >
+                  Back to Dashboard
+                </button>
+              </div>
+            </div>
+          ) : (
+          <>
           {/* Tier badge + PDF button */}
           <div className="flex items-center justify-between">
             <span className={`text-xs font-semibold px-3 py-1 rounded-full ${
@@ -147,6 +174,8 @@ const DNAReport = () => {
           <LegalDisclaimer />
           {review !== undefined && (
             <ReportReview reportId={id!} existingReview={review} />
+          )}
+          </>
           )}
         </div>
       </main>
