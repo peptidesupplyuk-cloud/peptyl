@@ -1694,6 +1694,9 @@ const AdminDashboard = () => {
               <TabsTrigger value="research" className="gap-1.5">
                 <FlaskConical className="h-4 w-4" /> Research
               </TabsTrigger>
+              <TabsTrigger value="marker-requests" className="gap-1.5">
+                <Droplets className="h-4 w-4" /> Marker Requests
+              </TabsTrigger>
             </TabsList>
 
             <TabsContent value="analytics">
@@ -1721,6 +1724,9 @@ const AdminDashboard = () => {
               <Suspense fallback={<div className="flex justify-center py-12"><Loader2 className="h-6 w-6 animate-spin" /></div>}>
                 <LazyResearchQueue embedded />
               </Suspense>
+            </TabsContent>
+            <TabsContent value="marker-requests">
+              <MarkerRequestsTab />
             </TabsContent>
           </Tabs>
         </div>
