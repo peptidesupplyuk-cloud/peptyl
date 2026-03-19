@@ -156,10 +156,13 @@ function computeBioAge(args: {
   return { total, breakdown };
 }
 
-/* ── Animated ring ── */
+/* ── Animated ring (2× internal resolution for HiDPI) ── */
 
-const ScoreRing = ({ score, size = 120 }: { score: number; size?: number }) => {
-  const r = (size / 2) - 10;
+const ScoreRing = ({ score, size = 128 }: { score: number; size?: number }) => {
+  const scale = 2; // render at 2x for retina clarity
+  const vb = size * scale;
+  const strokeW = 7 * scale;
+  const r = (vb / 2) - strokeW - 4;
   const circ = 2 * Math.PI * r;
   const pct = score / 100;
   const offset = circ * (1 - pct);
@@ -167,36 +170,46 @@ const ScoreRing = ({ score, size = 120 }: { score: number; size?: number }) => {
 
   return (
     <div className="relative flex items-center justify-center" style={{ width: size, height: size }}>
-      <svg width={size} height={size} viewBox={`0 0 ${size} ${size}`} className="transform -rotate-90">
+      <svg
+        width={size}
+        height={size}
+        viewBox={`0 0 ${vb} ${vb}`}
+        className="transform -rotate-90"
+        style={{ shapeRendering: "geometricPrecision" }}
+      >
+        {/* Track */}
         <circle
-          cx={size / 2} cy={size / 2} r={r}
+          cx={vb / 2} cy={vb / 2} r={r}
           fill="none"
-          stroke="hsl(var(--muted) / 0.3)"
-          strokeWidth="6"
+          stroke="hsl(var(--muted) / 0.25)"
+          strokeWidth={strokeW}
         />
+        {/* Scored arc */}
         <motion.circle
-          cx={size / 2} cy={size / 2} r={r}
+          cx={vb / 2} cy={vb / 2} r={r}
           fill="none"
           stroke={color}
-          strokeWidth="6"
+          strokeWidth={strokeW}
           strokeLinecap="round"
           strokeDasharray={circ}
           initial={{ strokeDashoffset: circ }}
           animate={{ strokeDashoffset: offset }}
-          transition={{ duration: 1.5, ease: "easeOut", delay: 0.3 }}
-          style={{ filter: `drop-shadow(0 0 8px ${color})` }}
+          transition={{ duration: 1.4, ease: "easeOut", delay: 0.3 }}
+          style={{ filter: `drop-shadow(0 0 ${6 * scale}px ${color})` }}
         />
       </svg>
       <div className="absolute inset-0 flex flex-col items-center justify-center">
         <motion.span
-          className="text-3xl font-heading font-bold text-foreground"
+          className="text-[2rem] font-heading font-bold text-foreground leading-none tracking-tight"
           initial={{ opacity: 0, scale: 0.5 }}
           animate={{ opacity: 1, scale: 1 }}
           transition={{ delay: 0.8, type: "spring", stiffness: 200 }}
         >
           {score}
         </motion.span>
-        <span className="text-[10px] text-muted-foreground font-medium uppercase tracking-wider">Bio Score</span>
+        <span className="text-[11px] text-muted-foreground font-semibold uppercase tracking-widest mt-0.5">
+          Bio Score
+        </span>
       </div>
     </div>
   );
@@ -209,31 +222,35 @@ const BreakdownBar = ({ item, delay }: { item: ScoreBreakdown; delay: number }) 
 
   return (
     <motion.div
-      className="space-y-1"
+      className="space-y-1.5"
       initial={{ opacity: 0, x: -10 }}
       animate={{ opacity: 1, x: 0 }}
       transition={{ delay, duration: 0.3 }}
     >
       <div className="flex items-center justify-between">
-        <div className="flex items-center gap-1.5">
+        <div className="flex items-center gap-2">
           <span className={item.color}>{item.icon}</span>
-          <span className="text-xs font-medium text-foreground">{item.label}</span>
+          <span className="text-[13px] font-semibold text-foreground tracking-tight">{item.label}</span>
         </div>
-        <span className="text-xs text-muted-foreground">{item.score}/{item.maxScore}</span>
+        <span className="text-[13px] font-medium text-muted-foreground tabular-nums">{item.score}/{item.maxScore}</span>
       </div>
-      <div className="h-1.5 bg-muted/40 rounded-full overflow-hidden">
+      <div className="h-2 bg-muted/30 rounded-full overflow-hidden">
         <motion.div
           className="h-full rounded-full"
           style={{
-            background: pct >= 70 ? "hsl(var(--primary))" : pct >= 40 ? "hsl(var(--warm))" : "hsl(var(--destructive) / 0.7)",
-            boxShadow: pct >= 70 ? "0 0 6px hsl(var(--primary) / 0.4)" : undefined,
+            background: pct >= 70
+              ? "linear-gradient(90deg, hsl(var(--primary)), hsl(var(--teal-glow)))"
+              : pct >= 40
+              ? "linear-gradient(90deg, hsl(var(--warm)), hsl(var(--warm) / 0.8))"
+              : "hsl(var(--destructive) / 0.7)",
+            boxShadow: pct >= 70 ? "0 0 8px hsl(var(--primary) / 0.35)" : undefined,
           }}
           initial={{ width: 0 }}
           animate={{ width: `${pct}%` }}
           transition={{ duration: 0.8, ease: "easeOut", delay: delay + 0.2 }}
         />
       </div>
-      <p className="text-[10px] text-muted-foreground">{item.detail}</p>
+      <p className="text-[11px] text-muted-foreground leading-snug">{item.detail}</p>
     </motion.div>
   );
 };
@@ -305,34 +322,35 @@ const BioAgeScore = () => {
 
   return (
     <motion.div
-      className="relative overflow-hidden rounded-2xl border border-border bg-card"
+      className="relative overflow-hidden rounded-2xl border border-border bg-card shadow-sm"
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.5 }}
+      style={{ willChange: "transform" }}
     >
       {/* Ambient glow */}
       <div
-        className="pointer-events-none absolute -top-12 -right-12 w-40 h-40 rounded-full opacity-20 blur-[60px]"
+        className="pointer-events-none absolute -top-16 -right-16 w-56 h-56 rounded-full opacity-15 blur-[80px]"
         style={{ background: total >= 60 ? "hsl(var(--primary))" : "hsl(var(--warm))" }}
       />
 
       <div className="relative p-5 sm:p-6">
         {/* Header */}
-        <div className="flex items-center gap-2 mb-4">
+        <div className="flex items-center gap-2.5 mb-5">
           <Heart className="h-4 w-4 text-primary" />
-          <h3 className="text-sm font-heading font-semibold text-foreground">Health Intelligence Score</h3>
+          <h3 className="text-sm font-heading font-bold text-foreground tracking-tight">Health Intelligence Score</h3>
         </div>
 
         {/* Score + Breakdown */}
-        <div className="flex items-start gap-6">
+        <div className="flex items-start gap-7">
           {/* Ring */}
-          <div className="shrink-0">
+          <div className="shrink-0 flex flex-col items-center">
             <ScoreRing score={total} />
-            <p className="text-[10px] text-muted-foreground text-center mt-1 max-w-[120px]">{statusText}</p>
+            <p className="text-[11px] text-muted-foreground text-center mt-2 max-w-[128px] leading-snug font-medium">{statusText}</p>
           </div>
 
           {/* Bars */}
-          <div className="flex-1 space-y-3 min-w-0">
+          <div className="flex-1 space-y-3.5 min-w-0">
             {breakdown.map((item, idx) => (
               <BreakdownBar key={item.label} item={item} delay={0.1 + idx * 0.1} />
             ))}

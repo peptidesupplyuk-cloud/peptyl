@@ -132,6 +132,11 @@
     font-family: var(--font-body);
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+    -webkit-text-size-adjust: 100%;
+  }
+  img, svg, video, canvas {
+    image-rendering: -webkit-optimize-contrast;
   }
   h1, h2, h3, h4, h5, h6 {
     font-family: var(--font-heading);
