@@ -135,23 +135,49 @@ const RecommendedTests = () => {
       return groups; // nothing else to say without data
     }
 
-    // ── 2. Out-of-range markers → retest priority ──
-    if (outOfRange.length > 0) {
-      const categories = [...new Set(outOfRange.map((m) => m.category))];
-      const markerSummary = outOfRange.map((m) => `${m.name} (${m.value} ${BIOMARKERS.find((b) => b.key === m.key)?.unit ?? ""})`).join(", ");
+    // ── 2. Off-track markers → combined recommendation ──
+    if (offTrackMarkers.length > 0) {
+      const allCategories = [...new Set(offTrackMarkers.map((m) => m.category))];
+      const bestPanel = pickBestPanel(allCategories, comprehensiveKey);
+      const panelDef = MEDICHECKS_PANELS[bestPanel];
 
-      // Pick the best single panel that covers the most categories
-      const bestPanel = pickBestPanel(categories, comprehensiveKey);
+      // Check which off-track markers the suggested panel actually covers
+      const coveredCategories = new Set(panelDef?.categories ?? []);
+      const uncoveredMarkers = offTrackMarkers.filter((m) => !coveredCategories.has(m.category));
+
+      // Build reason text combining out-of-range and suboptimal
+      const reasons: string[] = [];
+      if (outOfRange.length > 0) {
+        const summary = outOfRange.map((m) => `${m.name} (${m.value} ${BIOMARKERS.find((b) => b.key === m.key)?.unit ?? ""})`).join(", ");
+        reasons.push(`${summary} ${outOfRange.length > 1 ? "are" : "is"} outside reference range. Retest to confirm and track response to any changes you make.`);
+      }
+      if (suboptimal.length > 0) {
+        const subNames = suboptimal.slice(0, 4).map((m) => m.name).join(", ");
+        const extra = suboptimal.length > 4 ? ` and ${suboptimal.length - 4} more` : "";
+        reasons.push(`${subNames}${extra} ${suboptimal.length > 1 ? "are" : "is"} suboptimal — tracking these will show if your interventions are working.`);
+      }
+
+      // Coverage gap: if the cheaper panel misses some markers, suggest upgrade
+      if (uncoveredMarkers.length > 0 && bestPanel !== comprehensiveKey) {
+        const compPanel = MEDICHECKS_PANELS[comprehensiveKey];
+        const uncoveredNames = uncoveredMarkers.map((m) => m.name).join(", ");
+        reasons.push(`⚠ This panel doesn't cover ${uncoveredNames}. The ${compPanel.name} (${compPanel.price}) covers all ${offTrackMarkers.length} markers in one test.`);
+      }
+
+      // If gaps exist, auto-upgrade to comprehensive
+      const finalPanel = uncoveredMarkers.length > 0 ? comprehensiveKey : bestPanel;
+      const urgency: Urgency = outOfRange.length > 0 ? "now" : "soon";
 
       groups.push({
-        id: "out-of-range-retest",
-        urgency: "now",
-        title: `${outOfRange.length} Marker${outOfRange.length > 1 ? "s" : ""} Need Attention`,
-        reasons: [
-          `${markerSummary} ${outOfRange.length > 1 ? "are" : "is"} outside reference range. Retest to confirm and track response to any changes you make.`,
+        id: "off-track-combined",
+        urgency,
+        title: `${offTrackMarkers.length} Marker${offTrackMarkers.length > 1 ? "s" : ""} to Track`,
+        reasons,
+        suggestedPanel: finalPanel,
+        focusMarkers: [
+          ...outOfRange.map((m) => m.name),
+          ...suboptimal.slice(0, 6 - outOfRange.length).map((m) => m.name),
         ],
-        suggestedPanel: bestPanel,
-        focusMarkers: outOfRange.map((m) => m.name),
       });
     }
 
@@ -162,7 +188,6 @@ const RecommendedTests = () => {
         (panel) => panel.protocol_id === p.id && panel.panel_type?.startsWith("retest")
       );
       if (daysActive >= 56 && !hasRetest) {
-        // Don't duplicate if we already have an out-of-range group with same panel
         const weeksActive = Math.round(daysActive / 7);
         groups.push({
           id: `retest-${p.id}`,
@@ -213,21 +238,6 @@ const RecommendedTests = () => {
         reasons: ["Immune-modulating peptides can occasionally affect thyroid function. Monitor for stability."],
         suggestedPanel: "thyroid",
         focusMarkers: ["TSH", "Free T3", "Free T4"],
-      });
-    }
-
-    // ── 5. Suboptimal markers (not out-of-range) → routine follow-up ──
-    if (suboptimal.length > 0 && !groups.some((g) => g.id === "out-of-range-retest")) {
-      const topSuboptimal = suboptimal.slice(0, 4);
-      groups.push({
-        id: "suboptimal-followup",
-        urgency: "routine",
-        title: `${suboptimal.length} Marker${suboptimal.length > 1 ? "s" : ""} Suboptimal`,
-        reasons: [
-          `${topSuboptimal.map((m) => m.name).join(", ")}${suboptimal.length > 4 ? ` and ${suboptimal.length - 4} more` : ""} — not critical, but worth tracking over time to optimise.`,
-        ],
-        suggestedPanel: comprehensiveKey,
-        focusMarkers: topSuboptimal.map((m) => m.name),
       });
     }
 
