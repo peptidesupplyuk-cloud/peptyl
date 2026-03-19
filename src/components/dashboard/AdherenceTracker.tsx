@@ -4,7 +4,7 @@ import { useProtocols } from "@/hooks/use-protocols";
 import { useAllSupplementLogs } from "@/hooks/use-supplement-logs";
 import { format, isSameDay, startOfDay, startOfWeek, subDays } from "date-fns";
 import { toast } from "sonner";
-import { CalendarDays, TrendingUp, TrendingDown, CheckCircle2, XCircle, SkipForward, ChevronLeft, ChevronRight, Pill, FlaskConical } from "lucide-react";
+import { CalendarDays, TrendingUp, TrendingDown, CheckCircle2, XCircle, SkipForward, ChevronLeft, ChevronRight, Pill, FlaskConical, History } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 const STATUS_OPTIONS = ["completed", "skipped", "missed"] as const;
@@ -18,6 +18,7 @@ type UnifiedLogEntry = {
   status: string;
   sortTime: number;
   originalInjectionId?: string;
+  protocolId?: string | null;
 };
 
 const AdherenceTracker = () => {
@@ -28,19 +29,22 @@ const AdherenceTracker = () => {
   const [logPage, setLogPage] = useState(0);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [filter, setFilter] = useState<"all" | "peptide" | "supplement">("all");
+  const [showFullHistory, setShowFullHistory] = useState(false);
   const LOG_PAGE_SIZE = 15;
   const isLoading = injLoading || suppLoading;
 
-  const protocolPeptideNames = useMemo(() => {
+  const activeProtocols = useMemo(() => protocols.filter((p) => p.status === "active"), [protocols]);
+  const activeProtocolIds = useMemo(() => new Set(activeProtocols.map((p) => p.id)), [activeProtocols]);
+  const activeProtocolPeptideNames = useMemo(() => {
     return new Set(
-      protocols.flatMap((protocol) => protocol.peptides?.map((pep) => pep.peptide_name) ?? [])
+      activeProtocols.flatMap((protocol) => protocol.peptides?.map((pep) => pep.peptide_name) ?? [])
     );
-  }, [protocols]);
-
-  const activeProtocol = protocols.find((p) => p.status === "active");
-  const protocolStart = activeProtocol?.start_date
-    ? startOfDay(new Date(activeProtocol.start_date))
-    : null;
+  }, [activeProtocols]);
+  const activeProtocolSupplementNames = useMemo(() => {
+    return new Set(
+      activeProtocols.flatMap((protocol) => protocol.supplements?.map((s) => s.name) ?? [])
+    );
+  }, [activeProtocols]);
 
   const handleStatusChange = (id: string, newStatus: string) => {
     updateStatus.mutate({ id, status: newStatus }, {
@@ -66,6 +70,7 @@ const AdherenceTracker = () => {
         status: inj.status === "completed" ? "completed" : inj.status === "skipped" ? "skipped" : "missed",
         sortTime: new Date(inj.scheduled_time).getTime(),
         originalInjectionId: inj.id,
+        protocolId: inj.protocol_peptide_id, // links to active protocol
       });
     }
 
@@ -78,17 +83,35 @@ const AdherenceTracker = () => {
         date: new Date(log.date + "T12:00:00"),
         status: log.completed ? "completed" : "missed",
         sortTime: new Date(log.date + "T12:00:00").getTime(),
+        protocolId: log.protocol_id,
       });
     }
 
     return entries;
   }, [injections, supplementLogs]);
 
+  // Filter to active protocols only (default view)
+  const activeLog = useMemo(() => {
+    if (activeProtocols.length === 0) return unifiedLog; // no active → show all
+    return unifiedLog.filter((e) => {
+      if (e.type === "peptide") {
+        // Show if injection is linked to active protocol peptide OR name matches active protocol
+        return e.protocolId != null || activeProtocolPeptideNames.has(e.name);
+      }
+      // Supplement: show if protocol_id is active OR name matches active protocol supplements
+      if (e.protocolId && activeProtocolIds.has(e.protocolId)) return true;
+      return activeProtocolSupplementNames.has(e.name);
+    });
+  }, [unifiedLog, activeProtocols, activeProtocolIds, activeProtocolPeptideNames, activeProtocolSupplementNames]);
+
+  const displayLog = showFullHistory ? unifiedLog : activeLog;
+  const historyCount = unifiedLog.length - activeLog.length;
+
   const stats = useMemo(() => {
-    if (unifiedLog.length === 0) return null;
+    if (displayLog.length === 0) return null;
 
     const now = new Date();
-    const eligible = unifiedLog.filter((e) => e.date <= now);
+    const eligible = displayLog.filter((e) => e.date <= now);
 
     const completed = eligible.filter((e) => e.status === "completed").length;
     const skipped = eligible.filter((e) => e.status === "skipped").length;
@@ -113,14 +136,14 @@ const AdherenceTracker = () => {
     const supplementCount = eligible.filter((e) => e.type === "supplement").length;
 
     return { completed, skipped, missed, total, rate, byItem, weekCompleted, weekTotal, weekRate, peptideCount, supplementCount };
-  }, [unifiedLog]);
+  }, [displayLog]);
 
   const heatmapData = useMemo(() => {
     const today = startOfDay(new Date());
     const days: Array<{ date: Date; status: "full" | "partial" | "missed" | "none" }> = [];
     for (let d = 89; d >= 0; d--) {
       const day = subDays(today, d);
-      const dayEntries = unifiedLog.filter((e) => isSameDay(e.date, day));
+      const dayEntries = displayLog.filter((e) => isSameDay(e.date, day));
       if (dayEntries.length === 0) {
         days.push({ date: day, status: "none" });
       } else {
@@ -130,15 +153,15 @@ const AdherenceTracker = () => {
       }
     }
     return days;
-  }, [unifiedLog]);
+  }, [displayLog]);
 
   const filteredLog = useMemo(() => {
-    const past = unifiedLog
+    const past = displayLog
       .filter((e) => e.status !== "scheduled" && e.date < new Date())
       .sort((a, b) => b.sortTime - a.sortTime);
     if (filter === "all") return past;
     return past.filter((e) => e.type === filter);
-  }, [unifiedLog, filter]);
+  }, [displayLog, filter]);
 
   const logPageCount = Math.ceil(filteredLog.length / LOG_PAGE_SIZE);
   const pagedLog = filteredLog.slice(logPage * LOG_PAGE_SIZE, (logPage + 1) * LOG_PAGE_SIZE);
@@ -358,6 +381,19 @@ const AdherenceTracker = () => {
           </div>
         )}
       </div>
+
+      {/* Full history toggle */}
+      {historyCount > 0 && (
+        <button
+          onClick={() => { setShowFullHistory((v) => !v); setLogPage(0); }}
+          className="w-full flex items-center justify-center gap-2 py-3 rounded-xl border border-border bg-card text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-muted/50 transition-colors"
+        >
+          <History className="h-4 w-4" />
+          {showFullHistory
+            ? "Hide past protocol history"
+            : `Show full history (+${historyCount} from past protocols)`}
+        </button>
+      )}
     </div>
   );
 };
