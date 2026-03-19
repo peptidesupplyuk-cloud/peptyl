@@ -52,6 +52,35 @@ export const useTodaySupplementLogs = () => {
   });
 };
 
+export type SupplementLogFull = {
+  id: string;
+  item: string;
+  completed: boolean;
+  date: string;
+  protocol_id: string | null;
+  dose_amount: number | null;
+  dose_unit: string | null;
+};
+
+export const useAllSupplementLogs = () => {
+  const { user } = useAuth();
+  return useQuery({
+    queryKey: ["supplement-logs-all", user?.id],
+    queryFn: async () => {
+      if (!user) return [];
+      const { data, error } = await supabase
+        .from("supplement_logs")
+        .select("id, item, completed, date, protocol_id, dose_amount, dose_unit")
+        .eq("user_id", user.id)
+        .order("date", { ascending: false })
+        .limit(1000);
+      if (error) throw error;
+      return (data || []) as SupplementLogFull[];
+    },
+    enabled: !!user,
+  });
+};
+
 export const useToggleSupplement = () => {
   const { user } = useAuth();
   const queryClient = useQueryClient();
