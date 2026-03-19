@@ -12,6 +12,7 @@ import { BIOMARKERS, getMarkerStatus, getStatusBg, getStatusColor, type Biomarke
 import { useSaveBloodwork } from "@/hooks/use-bloodwork";
 import { useProtocols } from "@/hooks/use-protocols";
 import { useToast } from "@/hooks/use-toast";
+import BloodworkUpload from "./BloodworkUpload";
 
 interface BloodworkFormProps {
   onSaved?: () => void;
