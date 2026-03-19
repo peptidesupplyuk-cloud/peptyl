@@ -123,9 +123,10 @@ const DNAUpload = () => {
 
       const p = profile as any;
       const hasPermanentUnlock = !!p?.dna_assessment_unlocked;
-      const unlocked = hasPermanentUnlock || (tier === "advanced"
-        ? !!p?.dna_advanced_unlocked
-        : !!p?.dna_standard_unlocked);
+      // TEMPORARY: bypass paywall for advanced tier during testing
+      const unlocked = tier === "advanced"
+        ? true
+        : (hasPermanentUnlock || !!p?.dna_standard_unlocked);
       setIsUnlocked(unlocked);
 
       // Pre-fill all lifestyle fields from profile
