@@ -538,38 +538,56 @@ serve(async (req) => {
     const stream = new ReadableStream({
       async start(controller) {
         const encoder = new TextEncoder();
+        let buffer = "";
+
+        const processLine = async (line: string) => {
+          if (!line.startsWith("data: ")) return false;
+          if (line === "data: [DONE]") {
+            try {
+              await saveReport(fullContent, method, userId, tier, lifestyleContext);
+            } catch (saveErr) {
+              console.error("Save error:", saveErr);
+            }
+            controller.enqueue(encoder.encode(`data: [DONE]\n\n`));
+            controller.close();
+            return true;
+          }
+
+          try {
+            const parsed = JSON.parse(line.slice(6));
+            const text = parsed.choices?.[0]?.delta?.content || "";
+            if (text) {
+              fullContent += text;
+              controller.enqueue(encoder.encode(`data: ${JSON.stringify({ text })}\n\n`));
+            }
+          } catch {
+            // Wait for more data if this line was split across chunks
+          }
+
+          return false;
+        };
+
         try {
           while (true) {
             const { done, value } = await reader.read();
             if (done) break;
-            const chunk = decoder.decode(value, { stream: true });
-            const lines = chunk.split("\n");
+
+            buffer += decoder.decode(value, { stream: true });
+            const lines = buffer.split("\n");
+            buffer = lines.pop() ?? "";
+
             for (const line of lines) {
-              if (!line.startsWith("data: ")) continue;
-              if (line === "data: [DONE]") {
-                // Save to database
-                try {
-                  await saveReport(fullContent, method, userId, tier, lifestyleContext);
-                } catch (saveErr) {
-                  console.error("Save error:", saveErr);
-                }
-                controller.enqueue(encoder.encode(`data: [DONE]\n\n`));
-                controller.close();
-                return;
-              }
-              try {
-                const parsed = JSON.parse(line.slice(6));
-                const text = parsed.choices?.[0]?.delta?.content || "";
-                if (text) {
-                  fullContent += text;
-                  controller.enqueue(encoder.encode(`data: ${JSON.stringify({ text })}\n\n`));
-                }
-              } catch {
-                // skip malformed lines
-              }
+              const shouldStop = await processLine(line.trim());
+              if (shouldStop) return;
             }
           }
-          // If we exit the loop without [DONE], still save
+
+          buffer += decoder.decode();
+          if (buffer.trim()) {
+            const shouldStop = await processLine(buffer.trim());
+            if (shouldStop) return;
+          }
+
           if (fullContent) {
             try {
               await saveReport(fullContent, method, userId, tier, lifestyleContext);
