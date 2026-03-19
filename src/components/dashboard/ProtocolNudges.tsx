@@ -51,7 +51,18 @@ const ProtocolNudges = ({ onNavigate }: { onNavigate?: (tab: string) => void }) 
 
     // Baseline-missing nudge (days 1-7)
     if (daysActive >= 1 && daysActive <= 7) {
-      const hasBaseline = panels.some(panel => panel.protocol_id === p.id);
+      // Check if any panel is linked to this protocol OR if any panel exists near the protocol start date
+      const protocolStart = new Date(p.start_date);
+      const hasBaseline = panels.some(panel => {
+        if (panel.protocol_id === p.id) return true;
+        // Also count any panel with a test_date within ±14 days of protocol start
+        if (panel.test_date) {
+          const testDate = new Date(panel.test_date);
+          const daysDiff = Math.abs(differenceInDays(testDate, protocolStart));
+          return daysDiff <= 14;
+        }
+        return false;
+      });
       if (!hasBaseline) {
         nudges.push({
           id: `baseline-${p.id}`,
