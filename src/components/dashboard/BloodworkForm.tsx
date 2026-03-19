@@ -55,6 +55,16 @@ const BloodworkForm = ({ onSaved, filterCategories, defaultProtocolId, defaultIs
     setValues((prev) => ({ ...prev, [key]: val }));
   };
 
+  const handlePdfParsed = (markers: Record<string, string>, parsedDate?: Date) => {
+    setValues((prev) => ({ ...prev, ...markers }));
+    if (parsedDate) setTestDate(parsedDate);
+    // Auto-show advanced panel if any advanced markers were parsed
+    const advKeys = new Set(allAdvanced.map(m => m.key));
+    if (Object.keys(markers).some(k => advKeys.has(k))) {
+      setShowAdvanced(true);
+    }
+  };
+
   const handleSubmit = async () => {
     const relevantMarkers = filterCategories
       ? BIOMARKERS.filter((m) => filterCategories.includes(m.category))
