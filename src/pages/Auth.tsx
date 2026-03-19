@@ -44,6 +44,7 @@ const Auth = () => {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const refCode = searchParams.get("ref");
+  const redirectPath = searchParams.get("redirect");
 
   const RESEARCH_GOALS = [
     { value: "weight_loss", label: t("authPage.goalWeightLoss") },
@@ -60,7 +61,7 @@ const Auth = () => {
   }, [refCode]);
 
   if (user) {
-    return <Navigate to="/dashboard" replace />;
+    return <Navigate to={redirectPath || "/dashboard"} replace />;
   }
 
   const handleForgotPassword = async (e: React.FormEvent) => {
@@ -165,8 +166,7 @@ const Auth = () => {
                 .eq("status", "pending");
             } catch {}
           }
-          // New signup → peptides for discovery
-          navigate("/peptides", { replace: true });
+          navigate(redirectPath || "/peptides", { replace: true });
         }
       } else {
         const { error } = await signIn(emailResult.data, password);
@@ -183,7 +183,7 @@ const Auth = () => {
             .select("id")
             .eq("status", "active")
             .limit(1);
-          navigate(activeProtocols && activeProtocols.length > 0 ? "/dashboard" : "/peptides", { replace: true });
+          navigate(redirectPath || (activeProtocols && activeProtocols.length > 0 ? "/dashboard" : "/peptides"), { replace: true });
         }
       }
     } catch {
