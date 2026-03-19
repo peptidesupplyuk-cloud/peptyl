@@ -18,6 +18,7 @@ type UnifiedLogEntry = {
   status: string;
   sortTime: number;
   originalInjectionId?: string;
+  protocolId?: string | null;
 };
 
 const AdherenceTracker = () => {
