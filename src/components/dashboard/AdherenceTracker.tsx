@@ -33,16 +33,18 @@ const AdherenceTracker = () => {
   const LOG_PAGE_SIZE = 15;
   const isLoading = injLoading || suppLoading;
 
-  const protocolPeptideNames = useMemo(() => {
+  const activeProtocols = useMemo(() => protocols.filter((p) => p.status === "active"), [protocols]);
+  const activeProtocolIds = useMemo(() => new Set(activeProtocols.map((p) => p.id)), [activeProtocols]);
+  const activeProtocolPeptideNames = useMemo(() => {
     return new Set(
-      protocols.flatMap((protocol) => protocol.peptides?.map((pep) => pep.peptide_name) ?? [])
+      activeProtocols.flatMap((protocol) => protocol.peptides?.map((pep) => pep.peptide_name) ?? [])
     );
-  }, [protocols]);
-
-  const activeProtocol = protocols.find((p) => p.status === "active");
-  const protocolStart = activeProtocol?.start_date
-    ? startOfDay(new Date(activeProtocol.start_date))
-    : null;
+  }, [activeProtocols]);
+  const activeProtocolSupplementNames = useMemo(() => {
+    return new Set(
+      activeProtocols.flatMap((protocol) => protocol.supplements?.map((s) => s.name) ?? [])
+    );
+  }, [activeProtocols]);
 
   const handleStatusChange = (id: string, newStatus: string) => {
     updateStatus.mutate({ id, status: newStatus }, {
