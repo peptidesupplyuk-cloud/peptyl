@@ -164,6 +164,8 @@ const BloodworkUpload = ({ onParsed }: BloodworkUploadProps) => {
         user_id: user.id,
         marker_name: markerName,
         source: "pdf_upload",
+        user_email: user.email ?? null,
+        user_name: (user.user_metadata?.full_name || user.user_metadata?.name || user.email || "").slice(0, 100),
       } as any);
       setRequestedMarkers(prev => new Set(prev).add(markerName));
     } catch {
