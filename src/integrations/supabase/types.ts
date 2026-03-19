@@ -948,7 +948,9 @@ export type Database = {
           marker_name: string
           source: string | null
           status: string
+          user_email: string | null
           user_id: string
+          user_name: string | null
         }
         Insert: {
           created_at?: string
@@ -956,7 +958,9 @@ export type Database = {
           marker_name: string
           source?: string | null
           status?: string
+          user_email?: string | null
           user_id: string
+          user_name?: string | null
         }
         Update: {
           created_at?: string
@@ -964,7 +968,9 @@ export type Database = {
           marker_name?: string
           source?: string | null
           status?: string
+          user_email?: string | null
           user_id?: string
+          user_name?: string | null
         }
         Relationships: []
       }
