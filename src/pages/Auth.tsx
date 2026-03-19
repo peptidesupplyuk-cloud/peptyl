@@ -166,8 +166,7 @@ const Auth = () => {
                 .eq("status", "pending");
             } catch {}
           }
-          // New signup → peptides for discovery
-          navigate("/peptides", { replace: true });
+          navigate(redirectPath || "/peptides", { replace: true });
         }
       } else {
         const { error } = await signIn(emailResult.data, password);
