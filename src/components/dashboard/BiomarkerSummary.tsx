@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { motion } from "framer-motion";
 import { BIOMARKERS, getMarkerStatus, type BiomarkerDef, type MarkerStatus } from "@/data/biomarker-ranges";
 import { cn } from "@/lib/utils";
 import type { BloodworkPanel } from "@/hooks/use-bloodwork";
