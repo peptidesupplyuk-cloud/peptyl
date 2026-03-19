@@ -449,21 +449,37 @@ const TodaysPlan = ({ onActivate, slim = false, selectedDate }: TodaysPlanProps)
     },
   });
 
-  // Compute active protocol progress
-  const activeProtocol = protocols.find(
-    (p) => p.status === "active" && outcomeRecord?.protocol_id === p.id
-  ) || protocols.find((p) => p.status === "active");
+  // Compute per-protocol progress for ALL active protocols
+  const activeProtocols = protocols.filter((p) => p.status === "active");
+  const activeProtocol = activeProtocols.find(
+    (p) => outcomeRecord?.protocol_id === p.id
+  ) || activeProtocols[0] || null;
 
-  const protocolStartDate = outcomeRecord?.protocol_start_date || activeProtocol?.start_date;
+  // Per-protocol progress data
+  const protocolProgressList = activeProtocols.map((p) => {
+    const start = p.start_date;
+    const end = p.end_date;
+    const elapsed = start ? Math.max(0, differenceInCalendarDays(new Date(), new Date(start))) : 0;
+    const total = start && end ? Math.max(1, differenceInCalendarDays(new Date(end), new Date(start)) + 1) : null;
+    const dayNum = total ? Math.min(total, elapsed + 1) : elapsed + 1;
+    const pct = total ? Math.min(100, Math.round((dayNum / total) * 100)) : null;
+    const daysLeft = total ? Math.max(0, total - dayNum) : null;
+    const hasPeptides = p.peptides.length > 0;
+    const hasSupps = (p.supplements?.length ?? 0) > 0;
+    const typeLabel = hasPeptides && hasSupps ? "" : hasPeptides ? "Peptides only" : hasSupps ? "Supplements only" : "";
+    return { protocol: p, dayNum, total, pct, daysLeft, elapsed, typeLabel };
+  });
+
+  // Legacy compat — pick first active for milestones
+  const protocolStartDate = activeProtocol?.start_date;
   const protocolEndDate = activeProtocol?.end_date;
-
   const daysActive = protocolStartDate
     ? Math.max(0, differenceInCalendarDays(new Date(), new Date(protocolStartDate)))
     : 0;
   const totalDays = protocolStartDate && protocolEndDate
-    ? Math.max(1, differenceInCalendarDays(new Date(protocolEndDate), new Date(protocolStartDate)))
+    ? Math.max(1, differenceInCalendarDays(new Date(protocolEndDate), new Date(protocolStartDate)) + 1)
     : 90;
-  const progressPct = Math.min(100, Math.round((daysActive / totalDays) * 100));
+  const progressPct = Math.min(100, Math.round(((daysActive + 1) / totalDays) * 100));
 
   // Fetch the user's latest DNA report (independent of outcome record)
   const { data: latestDnaReport } = useQuery({
