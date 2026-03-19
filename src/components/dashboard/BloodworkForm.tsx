@@ -150,6 +150,9 @@ const BloodworkForm = ({ onSaved, filterCategories, defaultProtocolId, defaultIs
 
   return (
     <div className="space-y-6">
+      {/* PDF Upload */}
+      <BloodworkUpload onParsed={handlePdfParsed} />
+
       {/* Date Picker */}
       <div className="flex items-center gap-4 flex-wrap">
         <div>
