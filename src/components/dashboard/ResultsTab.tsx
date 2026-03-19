@@ -334,36 +334,55 @@ const OverallStatsBanner = ({
   longestStreak: number;
   protocolName: string;
 }) => (
-  <div className="relative overflow-hidden bg-card rounded-2xl border border-border">
-    {/* Gradient glow */}
-    <div className="absolute -top-20 -right-20 w-40 h-40 bg-primary/10 rounded-full blur-3xl" />
-    <div className="absolute -bottom-16 -left-16 w-32 h-32 bg-primary/5 rounded-full blur-3xl" />
+  <motion.div
+    className="relative overflow-hidden bg-card rounded-2xl border border-border shadow-sm"
+    initial={{ opacity: 0, y: 20 }}
+    animate={{ opacity: 1, y: 0 }}
+    transition={{ duration: 0.5 }}
+    style={{ willChange: "transform" }}
+  >
+    {/* Ambient glow */}
+    <div className="pointer-events-none absolute -top-20 -right-20 w-56 h-56 bg-primary/10 rounded-full blur-[80px] opacity-15" />
+    <div className="pointer-events-none absolute -bottom-16 -left-16 w-40 h-40 bg-primary/5 rounded-full blur-[60px] opacity-15" />
     
     <div className="relative p-5 sm:p-6 space-y-4">
       <div className="flex items-center gap-3">
-        <div className="h-10 w-10 rounded-xl bg-primary/10 flex items-center justify-center">
+        <div
+          className="h-10 w-10 rounded-xl bg-primary/10 flex items-center justify-center"
+          style={{ boxShadow: "0 0 16px hsl(var(--primary) / 0.15)" }}
+        >
           <Trophy className="h-5 w-5 text-primary" />
         </div>
         <div>
-          <h2 className="font-heading font-bold text-foreground text-lg leading-tight">Your Journey</h2>
+          <h2 className="font-heading font-bold text-foreground text-lg leading-tight tracking-tight">Your Journey</h2>
           <p className="text-xs text-muted-foreground">{protocolName}</p>
         </div>
       </div>
 
-      <div className="grid grid-cols-2 gap-3">
+      <div className="grid grid-cols-2 gap-2.5">
         <StatPill icon={<Calendar className="h-3.5 w-3.5" />} label="Weeks" value={String(weeks)} />
         <StatPill icon={<Target className="h-3.5 w-3.5" />} label="Adherence" value={`${adherence}%`} highlight={adherence >= 80} />
       </div>
     </div>
-  </div>
+  </motion.div>
 );
 
 const StatPill = ({ icon, label, value, highlight }: { icon: React.ReactNode; label: string; value: string; highlight?: boolean }) => (
-  <div className={`rounded-xl p-3 text-center space-y-1 ${highlight ? "bg-primary/10 border border-primary/20" : "bg-muted/50"}`}>
-    <div className="flex justify-center text-muted-foreground">{icon}</div>
-    <p className={`text-lg font-heading font-bold ${highlight ? "text-primary" : "text-foreground"}`}>{value}</p>
-    <p className="text-[10px] text-muted-foreground uppercase tracking-wider">{label}</p>
-  </div>
+  <motion.div
+    className={`relative overflow-hidden rounded-xl p-3.5 text-center space-y-1 border ${highlight ? "bg-primary/10 border-primary/20" : "bg-muted/10 border-border/50"}`}
+    initial={{ opacity: 0, y: 8 }}
+    animate={{ opacity: 1, y: 0 }}
+    transition={{ delay: 0.2, duration: 0.35 }}
+  >
+    {highlight && (
+      <div className="pointer-events-none absolute -bottom-4 -right-4 w-16 h-16 rounded-full opacity-25 blur-xl" style={{ background: "hsl(var(--primary) / 0.3)" }} />
+    )}
+    <div className="relative">
+      <div className="flex justify-center text-muted-foreground">{icon}</div>
+      <p className={`text-xl font-heading font-bold tracking-tight leading-none ${highlight ? "text-primary" : "text-foreground"}`}>{value}</p>
+      <p className="text-[10px] text-muted-foreground uppercase tracking-widest font-semibold mt-1">{label}</p>
+    </div>
+  </motion.div>
 );
 
 /* ═══════════════════════════════════════════════════════
@@ -379,69 +398,88 @@ const MilestoneTrack = ({ weekSummaries }: { weekSummaries: WeekSummary[] }) => 
   ];
 
   return (
-    <div className="bg-card rounded-2xl border border-border p-4 sm:p-5">
-      <h3 className="text-xs font-medium text-muted-foreground uppercase tracking-wider mb-4">Milestones</h3>
-      
-      {/* Progress bar */}
-      <div className="relative h-2 bg-muted rounded-full mb-6">
-        <motion.div
-          className="absolute inset-y-0 left-0 rounded-full bg-gradient-to-r from-primary to-primary/60"
-          initial={{ width: 0 }}
-          animate={{ width: `${Math.min(100, (totalDays / 90) * 100)}%` }}
-          transition={{ duration: 1.2, ease: "easeOut" }}
-        />
-        {/* Milestone markers */}
-        {milestones.map((m) => {
-          const pct = (m.day / 90) * 100;
-          const reached = totalDays >= m.day;
-          return (
-            <div
-              key={m.day}
-              className="absolute top-1/2 -translate-y-1/2"
-              style={{ left: `${pct}%` }}
-            >
-              <div className={`h-4 w-4 rounded-full border-2 -ml-2 transition-all duration-500 ${
-                reached
-                  ? "bg-primary border-primary scale-110"
-                  : "bg-card border-border"
-              }`}>
-                {reached && (
-                  <CheckCircle2 className="h-4 w-4 text-primary-foreground" />
-                )}
-              </div>
-            </div>
-          );
-        })}
-      </div>
+    <motion.div
+      className="relative overflow-hidden rounded-2xl border border-border bg-card shadow-sm"
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.5, delay: 0.1 }}
+      style={{ willChange: "transform" }}
+    >
+      <div className="pointer-events-none absolute -top-12 -left-12 w-40 h-40 rounded-full opacity-10 blur-[60px]" style={{ background: "hsl(var(--primary))" }} />
 
-      {/* Milestone labels */}
-      <div className="grid grid-cols-3 gap-2">
-        {milestones.map((m) => {
-          const reached = totalDays >= m.day;
-          const Icon = m.icon;
-          return (
-            <motion.div
-              key={m.day}
-              className={`rounded-xl border p-3 text-center transition-all ${
-                reached ? m.bg : "bg-muted/30 border-border/50 opacity-50"
-              }`}
-              animate={reached ? { scale: [1, 1.05, 1] } : {}}
-              transition={{ duration: 0.5, delay: 0.3 }}
-            >
-              <Icon className={`h-5 w-5 mx-auto mb-1 ${reached ? m.color : "text-muted-foreground"}`} />
-              <p className={`text-xs font-semibold ${reached ? "text-foreground" : "text-muted-foreground"}`}>
-                {m.label}
-              </p>
-              {reached ? (
-                <p className="text-[10px] text-primary mt-0.5">Unlocked ✓</p>
-              ) : (
-                <p className="text-[10px] text-muted-foreground mt-0.5">{m.day - totalDays} days left</p>
-              )}
-            </motion.div>
-          );
-        })}
+      <div className="relative p-5 sm:p-6">
+        <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-widest mb-4">Milestones</h3>
+        
+        {/* Progress bar */}
+        <div className="relative h-2.5 bg-muted/30 rounded-full mb-6 overflow-hidden">
+          <motion.div
+            className="absolute inset-y-0 left-0 rounded-full"
+            style={{
+              background: "linear-gradient(90deg, hsl(var(--primary)), hsl(var(--teal-glow, var(--primary))))",
+              boxShadow: "0 0 12px hsl(var(--primary) / 0.35)",
+            }}
+            initial={{ width: 0 }}
+            animate={{ width: `${Math.min(100, (totalDays / 90) * 100)}%` }}
+            transition={{ duration: 1.4, ease: "easeOut", delay: 0.3 }}
+          />
+          {milestones.map((m) => {
+            const pct = (m.day / 90) * 100;
+            const reached = totalDays >= m.day;
+            return (
+              <div
+                key={m.day}
+                className="absolute top-1/2 -translate-y-1/2"
+                style={{ left: `${pct}%` }}
+              >
+                <div className={`h-4 w-4 rounded-full border-2 -ml-2 transition-all duration-500 ${
+                  reached
+                    ? "bg-primary border-primary scale-110"
+                    : "bg-card border-border"
+                }`}
+                  style={reached ? { boxShadow: "0 0 8px hsl(var(--primary) / 0.4)" } : {}}
+                >
+                  {reached && (
+                    <CheckCircle2 className="h-4 w-4 text-primary-foreground" />
+                  )}
+                </div>
+              </div>
+            );
+          })}
+        </div>
+
+        {/* Milestone labels */}
+        <div className="grid grid-cols-3 gap-2.5">
+          {milestones.map((m, idx) => {
+            const reached = totalDays >= m.day;
+            const Icon = m.icon;
+            return (
+              <motion.div
+                key={m.day}
+                className={`relative overflow-hidden rounded-xl border p-3.5 text-center transition-all ${
+                  reached ? m.bg : "bg-muted/10 border-border/50 opacity-50"
+                }`}
+                initial={{ opacity: 0, y: 8 }}
+                animate={reached ? { opacity: 1, y: 0, scale: [1, 1.04, 1] } : { opacity: 0.5, y: 0 }}
+                transition={{ duration: 0.5, delay: 0.2 + idx * 0.1 }}
+              >
+                {reached && (
+                  <div className="pointer-events-none absolute -bottom-4 -right-4 w-14 h-14 rounded-full opacity-25 blur-xl" style={{ background: m.color.replace("text-", "") }} />
+                )}
+                <Icon className={`h-5 w-5 mx-auto mb-1.5 ${reached ? m.color : "text-muted-foreground"}`} />
+                <p className={`text-xs font-semibold tracking-tight ${reached ? "text-foreground" : "text-muted-foreground"}`}>
+                  {m.label}
+                </p>
+                {reached ? (
+                  <p className="text-[10px] text-primary font-semibold mt-0.5">Unlocked ✓</p>
+                ) : (
+                  <p className="text-[10px] text-muted-foreground mt-0.5">{m.day - totalDays} days left</p>
+                )}
+              </motion.div>
+            );
+          })}
+        </div>
       </div>
-    </div>
+    </motion.div>
   );
 };
 
@@ -463,42 +501,56 @@ const WeeklyCard = ({ week }: { week: WeekSummary }) => {
     : "stroke-red-400 text-red-400";
 
   return (
-    <div className={`bg-card rounded-2xl border p-4 flex items-center gap-4 ${
-      week.isCurrentWeek ? "border-primary/30 shadow-[0_0_15px_-5px_hsl(var(--primary)/0.15)]" : "border-border"
-    }`}>
-      {/* Adherence ring */}
-      <div className="relative shrink-0">
-        <svg width={ringSize} height={ringSize} className="-rotate-90">
-          <circle cx={ringSize / 2} cy={ringSize / 2} r={radius} fill="none" strokeWidth={strokeWidth} className="stroke-muted" />
+    <div className={`relative overflow-hidden bg-card rounded-2xl border p-4 flex items-center gap-4 shadow-sm ${
+      week.isCurrentWeek ? "border-primary/30" : "border-border"
+    }`}
+      style={week.isCurrentWeek ? { boxShadow: "0 0 20px -5px hsl(var(--primary) / 0.12)" } : {}}
+    >
+      {/* Subtle glow for current week */}
+      {week.isCurrentWeek && (
+        <div className="pointer-events-none absolute -top-8 -left-8 w-24 h-24 rounded-full opacity-15 blur-2xl" style={{ background: "hsl(var(--primary))" }} />
+      )}
+
+      {/* Adherence ring — 2x for retina */}
+      <div className="relative shrink-0" style={{ width: ringSize, height: ringSize }}>
+        <svg
+          width={ringSize}
+          height={ringSize}
+          viewBox={`0 0 ${ringSize * 2} ${ringSize * 2}`}
+          className="-rotate-90"
+          style={{ shapeRendering: "geometricPrecision" }}
+        >
+          <circle cx={ringSize} cy={ringSize} r={radius * 2} fill="none" strokeWidth={strokeWidth * 2} stroke="hsl(var(--muted) / 0.25)" />
           <motion.circle
-            cx={ringSize / 2} cy={ringSize / 2} r={radius} fill="none"
-            strokeWidth={strokeWidth}
+            cx={ringSize} cy={ringSize} r={radius * 2} fill="none"
+            strokeWidth={strokeWidth * 2}
             strokeLinecap="round"
-            className={adherenceColor}
-            initial={{ strokeDashoffset: circumference }}
-            animate={{ strokeDashoffset: offset }}
-            transition={{ duration: 0.8, ease: "easeOut" }}
-            strokeDasharray={circumference}
+            stroke={week.adherenceRate >= 90 ? "hsl(var(--primary))" : week.adherenceRate >= 70 ? "hsl(38, 92%, 50%)" : "hsl(0, 84%, 60%)"}
+            initial={{ strokeDashoffset: circumference * 2 }}
+            animate={{ strokeDashoffset: offset * 2 }}
+            transition={{ duration: 1, ease: "easeOut" }}
+            strokeDasharray={circumference * 2}
+            style={{ filter: `drop-shadow(0 0 ${week.adherenceRate >= 90 ? 6 : 3}px ${week.adherenceRate >= 90 ? "hsl(var(--primary) / 0.4)" : "transparent"})` }}
           />
         </svg>
         <div className="absolute inset-0 flex items-center justify-center">
-          <span className={`text-xs font-bold ${adherenceColor.split(" ")[0]}`}>{week.adherenceRate}%</span>
+          <span className={`text-xs font-heading font-bold ${adherenceColor.split(" ")[0]}`}>{week.adherenceRate}%</span>
         </div>
       </div>
 
       {/* Info */}
       <div className="flex-1 min-w-0 space-y-1">
         <div className="flex items-center gap-2">
-          <h4 className="text-sm font-heading font-semibold text-foreground">
+          <h4 className="text-sm font-heading font-semibold text-foreground tracking-tight">
             Week {week.weekNumber}
           </h4>
           {week.isCurrentWeek && (
-            <span className="text-[10px] font-medium px-1.5 py-0.5 rounded-full bg-primary/10 text-primary">
+            <span className="text-[10px] font-semibold px-1.5 py-0.5 rounded-full bg-primary/10 text-primary">
               Current
             </span>
           )}
           {week.adherenceRate === 100 && (
-            <span className="text-[10px] font-medium px-1.5 py-0.5 rounded-full bg-primary/10 text-primary flex items-center gap-0.5">
+            <span className="text-[10px] font-semibold px-1.5 py-0.5 rounded-full bg-primary/10 text-primary flex items-center gap-0.5">
               <Star className="h-2.5 w-2.5" /> Perfect
             </span>
           )}

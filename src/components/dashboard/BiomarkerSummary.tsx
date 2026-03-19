@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { motion } from "framer-motion";
 import { BIOMARKERS, getMarkerStatus, type BiomarkerDef, type MarkerStatus } from "@/data/biomarker-ranges";
 import { cn } from "@/lib/utils";
 import type { BloodworkPanel } from "@/hooks/use-bloodwork";
@@ -58,32 +59,48 @@ function rangePosition(value: number, marker: BiomarkerDef): number {
 
 const ScoreRing = ({ score, total, improving }: { score: number; total: number; improving: number }) => {
   const pct = total > 0 ? score / total : 0;
-  const r = 52;
+  const scale = 2; // 2x for retina clarity
+  const size = 130;
+  const vb = size * scale;
+  const strokeW = 7 * scale;
+  const r = (vb / 2) - strokeW - 4;
   const circ = 2 * Math.PI * r;
   const offset = circ * (1 - pct);
 
   return (
-    <div className="relative flex items-center justify-center">
-      <svg width="130" height="130" viewBox="0 0 120 120" className="transform -rotate-90">
+    <div className="relative flex items-center justify-center" style={{ width: size, height: size }}>
+      <svg
+        width={size}
+        height={size}
+        viewBox={`0 0 ${vb} ${vb}`}
+        className="transform -rotate-90"
+        style={{ shapeRendering: "geometricPrecision" }}
+      >
         {/* track */}
-        <circle cx="60" cy="60" r={r} fill="none" stroke="hsl(var(--muted))" strokeWidth="8" />
+        <circle cx={vb / 2} cy={vb / 2} r={r} fill="none" stroke="hsl(var(--muted) / 0.25)" strokeWidth={strokeW} />
         {/* progress */}
-        <circle
-          cx="60" cy="60" r={r} fill="none"
+        <motion.circle
+          cx={vb / 2} cy={vb / 2} r={r} fill="none"
           stroke="hsl(var(--primary))"
-          strokeWidth="8"
+          strokeWidth={strokeW}
           strokeLinecap="round"
           strokeDasharray={circ}
-          strokeDashoffset={offset}
-          className="transition-all duration-700 ease-out"
-          style={{ filter: "drop-shadow(0 0 6px hsl(var(--primary) / 0.4))" }}
+          initial={{ strokeDashoffset: circ }}
+          animate={{ strokeDashoffset: offset }}
+          transition={{ duration: 1.4, ease: "easeOut", delay: 0.3 }}
+          style={{ filter: `drop-shadow(0 0 ${6 * scale}px hsl(var(--primary) / 0.4))` }}
         />
       </svg>
       <div className="absolute inset-0 flex flex-col items-center justify-center">
-        <span className="text-3xl font-heading font-bold text-foreground tracking-tight">
+        <motion.span
+          className="text-[2rem] font-heading font-bold text-foreground tracking-tight leading-none"
+          initial={{ opacity: 0, scale: 0.5 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ delay: 0.8, type: "spring", stiffness: 200 }}
+        >
           {score}/{total}
-        </span>
-        <span className="text-[10px] text-muted-foreground font-medium">optimal</span>
+        </motion.span>
+        <span className="text-[10px] text-muted-foreground font-semibold uppercase tracking-widest mt-0.5">optimal</span>
       </div>
     </div>
   );
@@ -415,16 +432,28 @@ const BiomarkerSummary = ({ panels }: BiomarkerSummaryProps) => {
   return (
     <>
       {/* ── HERO SUMMARY CARD ── */}
-      <div className="bg-card rounded-2xl border border-border overflow-hidden">
+      <motion.div
+        className="relative overflow-hidden rounded-2xl border border-border bg-card shadow-sm"
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5 }}
+        style={{ willChange: "transform" }}
+      >
+        {/* Ambient glow */}
+        <div
+          className="pointer-events-none absolute -top-16 -right-16 w-48 h-48 rounded-full opacity-12 blur-[80px]"
+          style={{ background: needsAttentionCount > 0 ? "hsl(var(--warm))" : "hsl(var(--primary))" }}
+        />
+
         {/* Top section: ring + stats */}
-        <div className="px-5 pt-5 pb-4">
+        <div className="relative px-5 pt-5 pb-4">
           <div className="flex items-center gap-5">
             {/* Score ring */}
             <ScoreRing score={optimalCount} total={summaryMarkers.length} improving={improvingCount} />
 
             {/* Right side info */}
             <div className="flex-1 space-y-1.5">
-              <h2 className="font-heading font-semibold text-foreground text-sm">Biomarker Status</h2>
+              <h2 className="font-heading font-bold text-foreground text-sm tracking-tight">Biomarker Status</h2>
               <p className="text-[10px] text-muted-foreground leading-relaxed">
                 {summaryExplanation}
               </p>
@@ -487,7 +516,7 @@ const BiomarkerSummary = ({ panels }: BiomarkerSummaryProps) => {
             </div>
           </DrawerContent>
         </Drawer>
-      </div>
+      </motion.div>
     </>
   );
 };

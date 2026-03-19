@@ -192,38 +192,45 @@ const UnifiedInsights = () => {
 
   return (
     <motion.div
-      className="rounded-2xl border border-border bg-card overflow-hidden"
-      initial={{ opacity: 0, y: 10 }}
+      className="relative overflow-hidden rounded-2xl border border-border bg-card shadow-sm"
+      initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.4 }}
+      transition={{ duration: 0.5 }}
+      style={{ willChange: "transform" }}
     >
-      {/* Header with ambient glow */}
-      <div className="relative p-5">
-        <div
-          className="pointer-events-none absolute -top-8 left-1/2 -translate-x-1/2 w-32 h-32 rounded-full opacity-15 blur-[40px]"
-          style={{ background: "hsl(var(--primary))" }}
-        />
-        <div className="relative flex items-center gap-2 mb-4">
+      {/* Ambient glow */}
+      <div
+        className="pointer-events-none absolute -top-16 left-1/2 -translate-x-1/2 w-48 h-48 rounded-full opacity-12 blur-[80px]"
+        style={{ background: "hsl(var(--primary))" }}
+      />
+
+      <div className="relative p-5 sm:p-6">
+        <div className="flex items-center gap-2 mb-4">
           <Sparkles className="h-4 w-4 text-primary" />
-          <h3 className="text-sm font-heading font-semibold text-foreground">Unified Health Insights</h3>
-          <span className="text-[10px] bg-primary/10 text-primary px-2 py-0.5 rounded-full font-medium ml-auto">
+          <h3 className="text-sm font-heading font-bold text-foreground tracking-tight">Unified Health Insights</h3>
+          <span className="text-[10px] bg-primary/10 text-primary px-2 py-0.5 rounded-full font-semibold ml-auto">
             AI Cross-Reference
           </span>
         </div>
 
-        <div className="space-y-3">
+        <div className="space-y-2.5">
           {insights.map((insight, idx) => (
             <motion.div
               key={insight.id}
-              className="rounded-xl border border-border/40 bg-muted/10 p-4 space-y-2"
-              initial={{ opacity: 0, x: -10 }}
+              className="relative overflow-hidden rounded-xl border border-border/40 bg-muted/10 p-4 space-y-2"
+              initial={{ opacity: 0, x: -12 }}
               animate={{ opacity: 1, x: 0 }}
-              transition={{ delay: 0.2 + idx * 0.15 }}
+              transition={{ delay: 0.15 + idx * 0.12, duration: 0.35 }}
             >
-              <div className="flex items-start gap-2.5">
+              {/* Inner card glow */}
+              <div
+                className="pointer-events-none absolute -bottom-6 -right-6 w-20 h-20 rounded-full opacity-25 blur-2xl"
+                style={{ background: insight.type === "cross-reference" ? "rgba(251,146,60,0.2)" : insight.type === "opportunity" ? "hsl(var(--primary) / 0.2)" : "rgba(52,211,153,0.2)" }}
+              />
+              <div className="relative flex items-start gap-2.5">
                 <div className="shrink-0 mt-0.5">{insight.icon}</div>
                 <div className="min-w-0">
-                  <p className="text-sm font-medium text-foreground">{insight.title}</p>
+                  <p className="text-[13px] font-semibold text-foreground tracking-tight">{insight.title}</p>
                   <p className="text-xs text-muted-foreground mt-1 leading-relaxed">{insight.body}</p>
                   <div className="flex items-center gap-1.5 mt-2">
                     {insight.sources.map(sourceBadge)}
