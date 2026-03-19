@@ -58,6 +58,8 @@ import OnboardingSummaryBanner from "@/components/dashboard/OnboardingSummaryBan
 import ResearchInsightsFeed from "@/components/dashboard/ResearchInsightsFeed";
 import QuickStackImport from "@/components/dashboard/QuickStackImport";
 import CollaborativeRecommendations from "@/components/dashboard/CollaborativeRecommendations";
+import PipMemoryCard from "@/components/dashboard/PipMemoryCard";
+import GpSummarySection from "@/components/dashboard/GpSummarySection";
 
 /* ─── Compact Journal for Overview ─── */
 const CompactJournal = ({ onExpandJournal }: { onExpandJournal: () => void }) => {
