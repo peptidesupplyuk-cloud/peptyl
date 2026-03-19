@@ -150,6 +150,16 @@ const Auth = () => {
             setError(error.message);
           }
         } else {
+          // Link referral if present
+          if (refCode) {
+            try {
+              await supabase
+                .from("referrals")
+                .update({ status: "signed_up" } as any)
+                .eq("referral_code", refCode)
+                .eq("status", "pending");
+            } catch {}
+          }
           // New signup → peptides for discovery
           navigate("/peptides", { replace: true });
         }
