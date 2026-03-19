@@ -54,6 +54,11 @@ const Auth = () => {
     { value: "general", label: t("authPage.goalGeneral") },
   ];
 
+  // Auto-switch to signup mode when arriving via referral
+  useEffect(() => {
+    if (refCode) setIsSignUp(true);
+  }, [refCode]);
+
   if (user) {
     return <Navigate to="/dashboard" replace />;
   }
