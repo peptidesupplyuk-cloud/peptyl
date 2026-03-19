@@ -12,6 +12,7 @@ import { BIOMARKERS, getMarkerStatus, getStatusBg, getStatusColor, type Biomarke
 import { useSaveBloodwork } from "@/hooks/use-bloodwork";
 import { useProtocols } from "@/hooks/use-protocols";
 import { useToast } from "@/hooks/use-toast";
+import BloodworkUpload from "./BloodworkUpload";
 
 interface BloodworkFormProps {
   onSaved?: () => void;
@@ -52,6 +53,16 @@ const BloodworkForm = ({ onSaved, filterCategories, defaultProtocolId, defaultIs
 
   const setValue = (key: string, val: string) => {
     setValues((prev) => ({ ...prev, [key]: val }));
+  };
+
+  const handlePdfParsed = (markers: Record<string, string>, parsedDate?: Date) => {
+    setValues((prev) => ({ ...prev, ...markers }));
+    if (parsedDate) setTestDate(parsedDate);
+    // Auto-show advanced panel if any advanced markers were parsed
+    const advKeys = new Set(allAdvanced.map(m => m.key));
+    if (Object.keys(markers).some(k => advKeys.has(k))) {
+      setShowAdvanced(true);
+    }
   };
 
   const handleSubmit = async () => {
@@ -139,6 +150,9 @@ const BloodworkForm = ({ onSaved, filterCategories, defaultProtocolId, defaultIs
 
   return (
     <div className="space-y-6">
+      {/* PDF Upload */}
+      <BloodworkUpload onParsed={handlePdfParsed} />
+
       {/* Date Picker */}
       <div className="flex items-center gap-4 flex-wrap">
         <div>

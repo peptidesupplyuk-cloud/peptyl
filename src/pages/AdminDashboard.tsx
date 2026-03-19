@@ -694,6 +694,63 @@ const FEEDBACK_CATEGORIES = [
   { value: "uncategorised", label: "Uncategorised", color: "" },
 ];
 
+/* ========== MARKER REQUESTS TAB ========== */
+
+const MarkerRequestsTab = () => {
+  const { data: requests = [], isLoading } = useQuery({
+    queryKey: ["admin-marker-requests"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("marker_requests")
+        .select("*")
+        .order("created_at", { ascending: false });
+      if (error) throw error;
+      return data ?? [];
+    },
+  });
+
+  // Group by marker name and count
+  const grouped = requests.reduce<Record<string, { count: number; status: string; latest: string }>>((acc, r: any) => {
+    const name = r.marker_name;
+    if (!acc[name]) acc[name] = { count: 0, status: r.status, latest: r.created_at };
+    acc[name].count++;
+    if (new Date(r.created_at) > new Date(acc[name].latest)) acc[name].latest = r.created_at;
+    return acc;
+  }, {});
+
+  const sorted = Object.entries(grouped).sort((a, b) => b[1].count - a[1].count);
+
+  if (isLoading) return <div className="flex justify-center py-12"><Loader2 className="h-6 w-6 animate-spin" /></div>;
+
+  return (
+    <div className="space-y-4">
+      <div className="flex items-center justify-between">
+        <h3 className="font-heading font-semibold text-lg">Marker Tracking Requests</h3>
+        <Badge variant="outline">{requests.length} total requests</Badge>
+      </div>
+      {sorted.length === 0 ? (
+        <p className="text-sm text-muted-foreground text-center py-8">No marker requests yet.</p>
+      ) : (
+        <div className="space-y-2">
+          {sorted.map(([name, info]) => (
+            <div key={name} className="flex items-center justify-between rounded-lg border border-border bg-card p-4">
+              <div>
+                <p className="font-medium text-foreground">{name}</p>
+                <p className="text-xs text-muted-foreground">{info.count} request{info.count > 1 ? "s" : ""} • Latest: {new Date(info.latest).toLocaleDateString()}</p>
+              </div>
+              <div className="flex items-center gap-2">
+                <Badge variant={info.count >= 3 ? "default" : "outline"} className={info.count >= 3 ? "bg-primary" : ""}>
+                  {info.count >= 3 ? "High demand" : info.count >= 2 ? "Growing" : "New"}
+                </Badge>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+};
+
 const FeedbackTab = () => {
   const queryClient = useQueryClient();
   const { toast } = useToast();
@@ -1694,6 +1751,9 @@ const AdminDashboard = () => {
               <TabsTrigger value="research" className="gap-1.5">
                 <FlaskConical className="h-4 w-4" /> Research
               </TabsTrigger>
+              <TabsTrigger value="marker-requests" className="gap-1.5">
+                <Droplets className="h-4 w-4" /> Marker Requests
+              </TabsTrigger>
             </TabsList>
 
             <TabsContent value="analytics">
@@ -1721,6 +1781,9 @@ const AdminDashboard = () => {
               <Suspense fallback={<div className="flex justify-center py-12"><Loader2 className="h-6 w-6 animate-spin" /></div>}>
                 <LazyResearchQueue embedded />
               </Suspense>
+            </TabsContent>
+            <TabsContent value="marker-requests">
+              <MarkerRequestsTab />
             </TabsContent>
           </Tabs>
         </div>

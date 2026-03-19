@@ -941,6 +941,33 @@ export type Database = {
           },
         ]
       }
+      marker_requests: {
+        Row: {
+          created_at: string
+          id: string
+          marker_name: string
+          source: string | null
+          status: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          marker_name: string
+          source?: string | null
+          status?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          marker_name?: string
+          source?: string | null
+          status?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       monitored_accounts: {
         Row: {
           added_by: string | null
