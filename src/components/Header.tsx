@@ -30,6 +30,7 @@ const Header = () => {
   const navigate = useNavigate();
   const { user, signOut } = useAuth();
   const { t } = useTranslation();
+  const headerCTA = useHeaderState();
 
   const { data: hasDnaReports } = useQuery({
     queryKey: ["has-dna-reports", user?.id],
