@@ -610,25 +610,63 @@ async function saveReport(fullContent: string, method: string, userId: string | 
   // Strip code fences
   jsonStr = jsonStr.replace(/^```json\s*/i, "").replace(/```\s*$/i, "").trim();
 
+  // JSON repair: fix common LLM output issues
+  function repairJson(str: string): string {
+    let s = str;
+    // Remove trailing commas before } or ]
+    s = s.replace(/,\s*([}\]])/g, '$1');
+    // Fix missing colons after property names: "key" "value" → "key": "value"
+    s = s.replace(/"(\w+)"\s+"([^"]*?)"/g, '"$1": "$2"');
+    // Fix truncated strings at end (unclosed quotes)
+    const openQuotes = (s.match(/"/g) || []).length;
+    if (openQuotes % 2 !== 0) {
+      // Find the last unclosed quote and close it
+      s = s + '"';
+    }
+    // Ensure we end with proper closing braces
+    let braceCount = 0;
+    let bracketCount = 0;
+    for (const ch of s) {
+      if (ch === '{') braceCount++;
+      if (ch === '}') braceCount--;
+      if (ch === '[') bracketCount++;
+      if (ch === ']') bracketCount--;
+    }
+    while (bracketCount > 0) { s += ']'; bracketCount--; }
+    while (braceCount > 0) { s += '}'; braceCount--; }
+    return s;
+  }
+
   let reportJson: any = {};
   let overallScore: number | null = null;
   let confidence: string | null = null;
 
-  try {
-    reportJson = JSON.parse(jsonStr);
-    overallScore = reportJson?.health_score?.overall ?? null;
-    confidence = reportJson?.meta?.confidence ?? null;
-  } catch {
-    // If JSON parsing fails, try regex
-    const match = fullContent.match(/\{[\s\S]*\}/);
-    if (match) {
-      try {
-        reportJson = JSON.parse(match[0]);
-        overallScore = reportJson?.health_score?.overall ?? null;
-        confidence = reportJson?.meta?.confidence ?? null;
-      } catch {
-        console.error("Failed to parse report JSON even with regex fallback");
-        reportJson = { raw_text: fullContent };
+  const tryParse = (str: string): boolean => {
+    try {
+      reportJson = JSON.parse(str);
+      overallScore = reportJson?.health_score?.overall ?? null;
+      confidence = reportJson?.meta?.confidence ?? null;
+      return true;
+    } catch {
+      return false;
+    }
+  };
+
+  // Attempt 1: direct parse
+  if (!tryParse(jsonStr)) {
+    // Attempt 2: repair then parse
+    if (!tryParse(repairJson(jsonStr))) {
+      // Attempt 3: regex extract largest JSON object
+      const match = fullContent.match(/\{[\s\S]*\}/);
+      if (match) {
+        if (!tryParse(match[0]) && !tryParse(repairJson(match[0]))) {
+          console.error("Failed to parse report JSON even with repair + regex fallback");
+          console.error("First 500 chars of raw:", fullContent.slice(0, 500));
+          reportJson = { raw_text: fullContent, parse_failed: true };
+        }
+      } else {
+        console.error("No JSON object found in LLM output");
+        reportJson = { raw_text: fullContent, parse_failed: true };
       }
     }
   }
