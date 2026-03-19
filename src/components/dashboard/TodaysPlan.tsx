@@ -328,6 +328,9 @@ const ProtocolGroupedDoses = ({
                         <span className="text-sm font-medium text-foreground line-through opacity-60">{inj.peptide_name}</span>
                         <span className="text-xs text-muted-foreground">{inj.dose_mcg}mcg</span>
                         <span className={`text-[9px] font-medium px-1.5 py-0.5 rounded-full ${badge.color}`}>{badge.label}</span>
+                        {inj.notes?.includes("via WhatsApp") && (
+                          <span className="text-[10px] text-muted-foreground italic">via WhatsApp</span>
+                        )}
                       </div>
                       <span className="text-xs text-primary">✓</span>
                     </div>

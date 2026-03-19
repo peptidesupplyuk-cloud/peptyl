@@ -919,6 +919,9 @@ const Dashboard = () => {
                   {/* C1 — Biomarker summary */}
                   {hasBloodwork && <BiomarkerSummary panels={panels} />}
 
+                  {/* GP Summary — clinical flags from Pip */}
+                  <GpSummarySection />
+
                   {/* C2 — Protocol nudges */}
                   <ProtocolNudges onNavigate={setActiveTab} />
 

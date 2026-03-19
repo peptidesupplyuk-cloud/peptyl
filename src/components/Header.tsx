@@ -110,6 +110,17 @@ const Header = () => {
 
         {user ? (
           <div className="flex items-center gap-1 ml-1">
+            {headerCTA && headerCTA.variant !== "default" && (
+              <Link to={headerCTA.href}>
+                <Button
+                  size="sm"
+                  variant={headerCTA.variant === "primary" ? "default" : "outline"}
+                  className="h-7 text-xs px-3 bg-[#00d4aa] hover:bg-[#00d4aa]/90 text-background border-0"
+                >
+                  {headerCTA.label}
+                </Button>
+              </Link>
+            )}
             <span className="text-xs font-medium truncate max-w-[100px] text-muted-foreground">
               {user.email}
             </span>

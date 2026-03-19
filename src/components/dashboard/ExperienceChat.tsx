@@ -266,6 +266,12 @@ const ExperienceChat = () => {
               <p className="text-[11px] text-muted-foreground line-clamp-2">
                 {entry.summary || entry.content.slice(0, 200)}
               </p>
+              {(entry.summary?.startsWith("Check-in Day") || entry.summary?.includes("via WhatsApp")) && (
+                <div className="flex items-center gap-1 mt-1">
+                  <MessageCircle className="h-3 w-3 text-muted-foreground/60" />
+                  <span className="text-[10px] text-muted-foreground/60 italic">via Pip</span>
+                </div>
+              )}
             </div>
           ))}
         </div>
