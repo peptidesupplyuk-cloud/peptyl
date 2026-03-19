@@ -381,6 +381,19 @@ const AdherenceTracker = () => {
           </div>
         )}
       </div>
+
+      {/* Full history toggle */}
+      {historyCount > 0 && (
+        <button
+          onClick={() => { setShowFullHistory((v) => !v); setLogPage(0); }}
+          className="w-full flex items-center justify-center gap-2 py-3 rounded-xl border border-border bg-card text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-muted/50 transition-colors"
+        >
+          <History className="h-4 w-4" />
+          {showFullHistory
+            ? "Hide past protocol history"
+            : `Show full history (+${historyCount} from past protocols)`}
+        </button>
+      )}
     </div>
   );
 };
