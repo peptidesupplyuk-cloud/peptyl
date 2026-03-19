@@ -773,6 +773,9 @@ const Dashboard = () => {
               {/* Health Intelligence Score — top of Today */}
               <BioAgeScore />
 
+              {/* Pip AI Companion */}
+              <PipMemoryCard />
+
               {/* ═══ ZONE B — Today's doses (active) OR Next step (inactive) ═══ */}
               {hasActiveProtocol ? (
                 <TodaysPlan slim onActivate={() => setActiveTab("protocols")} selectedDate={selectedDate} />
