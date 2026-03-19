@@ -4,7 +4,7 @@ import { useProtocols } from "@/hooks/use-protocols";
 import { useAllSupplementLogs } from "@/hooks/use-supplement-logs";
 import { format, isSameDay, startOfDay, startOfWeek, subDays } from "date-fns";
 import { toast } from "sonner";
-import { CalendarDays, TrendingUp, TrendingDown, CheckCircle2, XCircle, SkipForward, ChevronLeft, ChevronRight, Pill, FlaskConical } from "lucide-react";
+import { CalendarDays, TrendingUp, TrendingDown, CheckCircle2, XCircle, SkipForward, ChevronLeft, ChevronRight, Pill, FlaskConical, History } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 const STATUS_OPTIONS = ["completed", "skipped", "missed"] as const;
