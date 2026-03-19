@@ -340,6 +340,20 @@ const BioAgeScore = () => {
         <div className="flex items-center gap-2.5 mb-5">
           <Heart className="h-4 w-4 text-primary" />
           <h3 className="text-sm font-heading font-bold text-foreground tracking-tight">Health Intelligence Score</h3>
+          <TooltipProvider delayDuration={200}>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <button className="text-muted-foreground hover:text-foreground transition-colors">
+                  <Info className="h-3.5 w-3.5" />
+                </button>
+              </TooltipTrigger>
+              <TooltipContent side="bottom" className="max-w-[280px] text-xs leading-relaxed">
+                <p className="font-semibold mb-1">How is this calculated?</p>
+                <p>Your Bio Score combines five data streams: bloodwork markers (30pts), protocol adherence &amp; streaks (25pts), genetic insights from DNA (20pts), wearable device data (15pts), and overall data coverage (10pts). Add more data sources to increase your score.</p>
+              </TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
+        </div>
         </div>
 
         {/* Score + Breakdown */}
