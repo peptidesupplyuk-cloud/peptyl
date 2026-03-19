@@ -70,6 +70,7 @@ const AdherenceTracker = () => {
         status: inj.status === "completed" ? "completed" : inj.status === "skipped" ? "skipped" : "missed",
         sortTime: new Date(inj.scheduled_time).getTime(),
         originalInjectionId: inj.id,
+        protocolId: inj.protocol_peptide_id, // links to active protocol
       });
     }
 
@@ -82,17 +83,35 @@ const AdherenceTracker = () => {
         date: new Date(log.date + "T12:00:00"),
         status: log.completed ? "completed" : "missed",
         sortTime: new Date(log.date + "T12:00:00").getTime(),
+        protocolId: log.protocol_id,
       });
     }
 
     return entries;
   }, [injections, supplementLogs]);
 
+  // Filter to active protocols only (default view)
+  const activeLog = useMemo(() => {
+    if (activeProtocols.length === 0) return unifiedLog; // no active → show all
+    return unifiedLog.filter((e) => {
+      if (e.type === "peptide") {
+        // Show if injection is linked to active protocol peptide OR name matches active protocol
+        return e.protocolId != null || activeProtocolPeptideNames.has(e.name);
+      }
+      // Supplement: show if protocol_id is active OR name matches active protocol supplements
+      if (e.protocolId && activeProtocolIds.has(e.protocolId)) return true;
+      return activeProtocolSupplementNames.has(e.name);
+    });
+  }, [unifiedLog, activeProtocols, activeProtocolIds, activeProtocolPeptideNames, activeProtocolSupplementNames]);
+
+  const displayLog = showFullHistory ? unifiedLog : activeLog;
+  const historyCount = unifiedLog.length - activeLog.length;
+
   const stats = useMemo(() => {
-    if (unifiedLog.length === 0) return null;
+    if (displayLog.length === 0) return null;
 
     const now = new Date();
-    const eligible = unifiedLog.filter((e) => e.date <= now);
+    const eligible = displayLog.filter((e) => e.date <= now);
 
     const completed = eligible.filter((e) => e.status === "completed").length;
     const skipped = eligible.filter((e) => e.status === "skipped").length;
@@ -117,14 +136,14 @@ const AdherenceTracker = () => {
     const supplementCount = eligible.filter((e) => e.type === "supplement").length;
 
     return { completed, skipped, missed, total, rate, byItem, weekCompleted, weekTotal, weekRate, peptideCount, supplementCount };
-  }, [unifiedLog]);
+  }, [displayLog]);
 
   const heatmapData = useMemo(() => {
     const today = startOfDay(new Date());
     const days: Array<{ date: Date; status: "full" | "partial" | "missed" | "none" }> = [];
     for (let d = 89; d >= 0; d--) {
       const day = subDays(today, d);
-      const dayEntries = unifiedLog.filter((e) => isSameDay(e.date, day));
+      const dayEntries = displayLog.filter((e) => isSameDay(e.date, day));
       if (dayEntries.length === 0) {
         days.push({ date: day, status: "none" });
       } else {
@@ -134,15 +153,15 @@ const AdherenceTracker = () => {
       }
     }
     return days;
-  }, [unifiedLog]);
+  }, [displayLog]);
 
   const filteredLog = useMemo(() => {
-    const past = unifiedLog
+    const past = displayLog
       .filter((e) => e.status !== "scheduled" && e.date < new Date())
       .sort((a, b) => b.sortTime - a.sortTime);
     if (filter === "all") return past;
     return past.filter((e) => e.type === filter);
-  }, [unifiedLog, filter]);
+  }, [displayLog, filter]);
 
   const logPageCount = Math.ceil(filteredLog.length / LOG_PAGE_SIZE);
   const pagedLog = filteredLog.slice(logPage * LOG_PAGE_SIZE, (logPage + 1) * LOG_PAGE_SIZE);
