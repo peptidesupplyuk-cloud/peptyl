@@ -501,42 +501,56 @@ const WeeklyCard = ({ week }: { week: WeekSummary }) => {
     : "stroke-red-400 text-red-400";
 
   return (
-    <div className={`bg-card rounded-2xl border p-4 flex items-center gap-4 ${
-      week.isCurrentWeek ? "border-primary/30 shadow-[0_0_15px_-5px_hsl(var(--primary)/0.15)]" : "border-border"
-    }`}>
-      {/* Adherence ring */}
-      <div className="relative shrink-0">
-        <svg width={ringSize} height={ringSize} className="-rotate-90">
-          <circle cx={ringSize / 2} cy={ringSize / 2} r={radius} fill="none" strokeWidth={strokeWidth} className="stroke-muted" />
+    <div className={`relative overflow-hidden bg-card rounded-2xl border p-4 flex items-center gap-4 shadow-sm ${
+      week.isCurrentWeek ? "border-primary/30" : "border-border"
+    }`}
+      style={week.isCurrentWeek ? { boxShadow: "0 0 20px -5px hsl(var(--primary) / 0.12)" } : {}}
+    >
+      {/* Subtle glow for current week */}
+      {week.isCurrentWeek && (
+        <div className="pointer-events-none absolute -top-8 -left-8 w-24 h-24 rounded-full opacity-15 blur-2xl" style={{ background: "hsl(var(--primary))" }} />
+      )}
+
+      {/* Adherence ring — 2x for retina */}
+      <div className="relative shrink-0" style={{ width: ringSize, height: ringSize }}>
+        <svg
+          width={ringSize}
+          height={ringSize}
+          viewBox={`0 0 ${ringSize * 2} ${ringSize * 2}`}
+          className="-rotate-90"
+          style={{ shapeRendering: "geometricPrecision" }}
+        >
+          <circle cx={ringSize} cy={ringSize} r={radius * 2} fill="none" strokeWidth={strokeWidth * 2} stroke="hsl(var(--muted) / 0.25)" />
           <motion.circle
-            cx={ringSize / 2} cy={ringSize / 2} r={radius} fill="none"
-            strokeWidth={strokeWidth}
+            cx={ringSize} cy={ringSize} r={radius * 2} fill="none"
+            strokeWidth={strokeWidth * 2}
             strokeLinecap="round"
-            className={adherenceColor}
-            initial={{ strokeDashoffset: circumference }}
-            animate={{ strokeDashoffset: offset }}
-            transition={{ duration: 0.8, ease: "easeOut" }}
-            strokeDasharray={circumference}
+            stroke={week.adherenceRate >= 90 ? "hsl(var(--primary))" : week.adherenceRate >= 70 ? "hsl(38, 92%, 50%)" : "hsl(0, 84%, 60%)"}
+            initial={{ strokeDashoffset: circumference * 2 }}
+            animate={{ strokeDashoffset: offset * 2 }}
+            transition={{ duration: 1, ease: "easeOut" }}
+            strokeDasharray={circumference * 2}
+            style={{ filter: `drop-shadow(0 0 ${week.adherenceRate >= 90 ? 6 : 3}px ${week.adherenceRate >= 90 ? "hsl(var(--primary) / 0.4)" : "transparent"})` }}
           />
         </svg>
         <div className="absolute inset-0 flex items-center justify-center">
-          <span className={`text-xs font-bold ${adherenceColor.split(" ")[0]}`}>{week.adherenceRate}%</span>
+          <span className={`text-xs font-heading font-bold ${adherenceColor.split(" ")[0]}`}>{week.adherenceRate}%</span>
         </div>
       </div>
 
       {/* Info */}
       <div className="flex-1 min-w-0 space-y-1">
         <div className="flex items-center gap-2">
-          <h4 className="text-sm font-heading font-semibold text-foreground">
+          <h4 className="text-sm font-heading font-semibold text-foreground tracking-tight">
             Week {week.weekNumber}
           </h4>
           {week.isCurrentWeek && (
-            <span className="text-[10px] font-medium px-1.5 py-0.5 rounded-full bg-primary/10 text-primary">
+            <span className="text-[10px] font-semibold px-1.5 py-0.5 rounded-full bg-primary/10 text-primary">
               Current
             </span>
           )}
           {week.adherenceRate === 100 && (
-            <span className="text-[10px] font-medium px-1.5 py-0.5 rounded-full bg-primary/10 text-primary flex items-center gap-0.5">
+            <span className="text-[10px] font-semibold px-1.5 py-0.5 rounded-full bg-primary/10 text-primary flex items-center gap-0.5">
               <Star className="h-2.5 w-2.5" /> Perfect
             </span>
           )}
