@@ -516,7 +516,7 @@ const BiomarkerSummary = ({ panels }: BiomarkerSummaryProps) => {
             </div>
           </DrawerContent>
         </Drawer>
-      </div>
+      </motion.div>
     </>
   );
 };
