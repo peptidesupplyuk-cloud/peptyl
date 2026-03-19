@@ -75,6 +75,7 @@ const DNAReport = () => {
 
   const r = report.report_json || {};
   const isAdvanced = report.assessment_tier === "advanced";
+  const parseFailed = !!r.parse_failed || !!r.raw_text;
 
   const buildGenotypeKey = (geneResults: any[]) => {
     if (!geneResults?.length) return null;
