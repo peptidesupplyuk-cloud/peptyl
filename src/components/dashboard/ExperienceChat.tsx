@@ -3,7 +3,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { useJournalEntries, useAddJournalEntry } from "@/hooks/use-journal";
 import { peptides as peptideData } from "@/data/peptides";
-import { Send, Loader2, Bot, User, BookOpen, ChevronDown, ChevronUp, Sparkles, X } from "lucide-react";
+import { Send, Loader2, Bot, User, BookOpen, ChevronDown, ChevronUp, Sparkles, X, MessageCircle } from "lucide-react";
 
 type Msg = { role: "user" | "system"; content: string };
 
