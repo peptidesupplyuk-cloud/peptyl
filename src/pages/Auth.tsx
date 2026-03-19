@@ -61,7 +61,7 @@ const Auth = () => {
   }, [refCode]);
 
   if (user) {
-    return <Navigate to="/dashboard" replace />;
+    return <Navigate to={redirectPath || "/dashboard"} replace />;
   }
 
   const handleForgotPassword = async (e: React.FormEvent) => {
