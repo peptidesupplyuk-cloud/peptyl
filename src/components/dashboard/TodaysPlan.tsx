@@ -538,7 +538,7 @@ const TodaysPlan = ({ onActivate, slim = false, selectedDate }: TodaysPlanProps)
     }
   }
 
-  const showProgressStrip = hasActiveProtocol && protocolStartDate && (dnaReportId || protocolEndDate);
+  const showProgressStrip = hasActiveProtocol && protocolProgressList.length > 0;
 
   // Milestone celebration banners (day 30 and 90)
   const [dismissed30, setDismissed30] = useState(() =>
