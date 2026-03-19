@@ -269,18 +269,25 @@ const RecommendedTests = () => {
 
   return (
     <motion.div
-      className="rounded-2xl border border-border bg-card overflow-hidden"
-      initial={{ opacity: 0, y: 10 }}
+      className="relative overflow-hidden rounded-2xl border border-border bg-card shadow-sm"
+      initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.4 }}
+      transition={{ duration: 0.5 }}
+      style={{ willChange: "transform" }}
     >
-      <div className="p-5">
+      {/* Ambient glow */}
+      <div
+        className="pointer-events-none absolute -top-16 -right-16 w-56 h-56 rounded-full opacity-10 blur-[80px]"
+        style={{ background: "hsl(var(--primary))" }}
+      />
+
+      <div className="relative p-5 sm:p-6">
         <div className="flex items-center justify-between mb-4">
           <div className="flex items-center gap-2">
             <FlaskConical className="h-4 w-4 text-primary" />
-            <h3 className="text-sm font-heading font-semibold text-foreground">Recommended Blood Tests</h3>
+            <h3 className="text-sm font-heading font-bold text-foreground tracking-tight">Recommended Blood Tests</h3>
           </div>
-          <span className="text-[10px] text-muted-foreground">via Medichecks</span>
+          <span className="text-[10px] text-muted-foreground font-medium">via Medichecks</span>
         </div>
 
         <div className="space-y-3">
@@ -291,16 +298,21 @@ const RecommendedTests = () => {
               return (
                 <motion.div
                   key={rec.id}
-                  className="rounded-xl border border-border/50 bg-muted/20 p-4 space-y-3"
-                  initial={{ opacity: 0, y: 10 }}
+                  className="relative overflow-hidden rounded-xl border border-border/50 bg-muted/10 p-4 space-y-3"
+                  initial={{ opacity: 0, y: 12 }}
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0 }}
-                  transition={{ delay: idx * 0.1 }}
+                  transition={{ delay: idx * 0.1, duration: 0.35 }}
                 >
-                  <div className="flex items-start justify-between gap-2">
+                  {/* Card glow */}
+                  <div
+                    className="pointer-events-none absolute -bottom-8 -left-8 w-24 h-24 rounded-full opacity-20 blur-2xl"
+                    style={{ background: rec.urgency === "now" ? "hsl(var(--primary) / 0.3)" : rec.urgency === "soon" ? "rgba(251,191,36,0.2)" : "hsl(var(--muted) / 0.2)" }}
+                  />
+                  <div className="relative flex items-start justify-between gap-2">
                     <div className="min-w-0">
                       <div className="flex items-center gap-2 flex-wrap">
-                        <p className="text-sm font-medium text-foreground">{rec.title}</p>
+                        <p className="text-[13px] font-semibold text-foreground tracking-tight">{rec.title}</p>
                         <span className={`inline-flex items-center gap-1 text-[10px] font-semibold px-2 py-0.5 rounded-full ${urg.cls}`}>
                           {urg.icon} {urg.label}
                         </span>
@@ -310,7 +322,7 @@ const RecommendedTests = () => {
                       ))}
                     </div>
                     {panel && (
-                      <span className="text-sm font-heading font-bold text-foreground shrink-0">{panel.price}</span>
+                      <span className="text-base font-heading font-bold text-foreground shrink-0">{panel.price}</span>
                     )}
                   </div>
 
@@ -318,10 +330,10 @@ const RecommendedTests = () => {
                   {rec.focusMarkers.length > 0 && (
                     <div className="flex flex-wrap gap-1">
                       {rec.focusMarkers.slice(0, 6).map((m) => (
-                        <span key={m} className="text-[10px] bg-muted px-2 py-0.5 rounded-full text-muted-foreground">{m}</span>
+                        <span key={m} className="text-[10px] bg-muted/60 px-2 py-0.5 rounded-full text-muted-foreground font-medium">{m}</span>
                       ))}
                       {rec.focusMarkers.length > 6 && (
-                        <span className="text-[10px] bg-muted px-2 py-0.5 rounded-full text-muted-foreground">+{rec.focusMarkers.length - 6} more</span>
+                        <span className="text-[10px] bg-muted/60 px-2 py-0.5 rounded-full text-muted-foreground">+{rec.focusMarkers.length - 6} more</span>
                       )}
                     </div>
                   )}
@@ -334,7 +346,7 @@ const RecommendedTests = () => {
                         href={panel.url}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="inline-flex items-center gap-1.5 text-xs font-medium text-primary hover:underline"
+                        className="inline-flex items-center gap-1.5 text-xs font-semibold text-primary hover:underline"
                       >
                         Order <ExternalLink className="h-3 w-3" />
                       </a>
@@ -349,7 +361,7 @@ const RecommendedTests = () => {
         {recommendations.length > 2 && (
           <button
             onClick={() => setExpanded(!expanded)}
-            className="flex items-center gap-1 text-xs text-primary hover:underline mt-3 mx-auto"
+            className="flex items-center gap-1 text-xs text-primary font-medium hover:underline mt-3 mx-auto"
           >
             {expanded ? "Show less" : `Show ${recommendations.length - 2} more`}
             {expanded ? <ChevronUp className="h-3 w-3" /> : <ChevronDown className="h-3 w-3" />}
