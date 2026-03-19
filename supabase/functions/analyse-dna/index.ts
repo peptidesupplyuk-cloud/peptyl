@@ -496,6 +496,7 @@ serve(async (req) => {
       userContent = `${tierPrefix}${instruction}\n\nGenetic/health data from ${methodLabel}:${lifestyleStr}\n\n${inputText}`;
     }
 
+    const maxTokens = tier === "advanced" ? 16000 : 8000;
     const response = await fetch("https://api.openai.com/v1/chat/completions", {
       method: "POST",
       headers: {
@@ -504,7 +505,7 @@ serve(async (req) => {
       },
       body: JSON.stringify({
         model: "gpt-4o",
-        max_tokens: 8000,
+        max_tokens: maxTokens,
         temperature: 0.3,
         stream: true,
         messages: [
