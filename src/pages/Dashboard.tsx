@@ -36,6 +36,10 @@ import { Checkbox } from "@/components/ui/checkbox";
 import SEO from "@/components/SEO";
 import ExperienceChat from "@/components/dashboard/ExperienceChat";
 import ProtocolNudges from "@/components/dashboard/ProtocolNudges";
+import BioAgeScore from "@/components/dashboard/BioAgeScore";
+import WearableNudges from "@/components/dashboard/WearableNudges";
+import RecommendedTests from "@/components/dashboard/RecommendedTests";
+import UnifiedInsights from "@/components/dashboard/UnifiedInsights";
 
 // OnboardingRecommendations removed — unified engine handles onboarding-based recs
 import MobileTabNav from "@/components/dashboard/MobileTabNav";
@@ -834,6 +838,18 @@ const Dashboard = () => {
                       {/* C2 — Protocol nudges */}
                       <ProtocolNudges onNavigate={setActiveTab} />
 
+                      {/* C2.1 — Wearable-aware nudges */}
+                      <WearableNudges />
+
+                      {/* C2.2 — Bio-Age Score */}
+                      <BioAgeScore />
+
+                      {/* C2.3 — Unified health insights */}
+                      <UnifiedInsights />
+
+                      {/* C2.4 — Recommended blood tests */}
+                      <RecommendedTests />
+
                       {/* C2.5 — Research insights feed */}
                       <ResearchInsightsFeed />
 
@@ -896,6 +912,18 @@ const Dashboard = () => {
 
                   {/* C2 — Protocol nudges */}
                   <ProtocolNudges onNavigate={setActiveTab} />
+
+                  {/* C2.1 — Wearable-aware nudges */}
+                  <WearableNudges />
+
+                  {/* C2.2 — Bio-Age Score */}
+                  <BioAgeScore />
+
+                  {/* C2.3 — Unified health insights */}
+                  <UnifiedInsights />
+
+                  {/* C2.4 — Recommended blood tests */}
+                  <RecommendedTests />
 
                   {/* C2.5 — Research insights feed */}
                   <ResearchInsightsFeed />
