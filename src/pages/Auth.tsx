@@ -183,7 +183,7 @@ const Auth = () => {
             .select("id")
             .eq("status", "active")
             .limit(1);
-          navigate(activeProtocols && activeProtocols.length > 0 ? "/dashboard" : "/peptides", { replace: true });
+          navigate(redirectPath || (activeProtocols && activeProtocols.length > 0 ? "/dashboard" : "/peptides"), { replace: true });
         }
       }
     } catch {

@@ -299,7 +299,7 @@ const DNAUpload = () => {
 
     if (!user) {
       toast({ title: "Sign in required", description: "Please sign in to analyse your DNA data.", variant: "destructive" });
-      navigate("/auth");
+      navigate(`/auth?redirect=${encodeURIComponent(`/dna/upload?tier=${tier}`)}`);
       return;
     }
 

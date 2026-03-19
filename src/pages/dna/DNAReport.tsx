@@ -104,7 +104,7 @@ const DNAReport = () => {
               </p>
               <div className="flex gap-3 justify-center pt-2">
                 <button
-                  onClick={() => navigate("/dna/upload", { replace: true })}
+                  onClick={() => navigate(`/dna/upload?tier=${report.assessment_tier === "advanced" ? "advanced" : "standard"}`, { replace: true })}
                   className="px-6 py-2.5 bg-primary text-primary-foreground rounded-lg font-medium text-sm"
                 >
                   Re-run Analysis
