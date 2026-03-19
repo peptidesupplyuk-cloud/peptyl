@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { useNavigate, Navigate } from "react-router-dom";
+import { useState, useEffect } from "react";
+import { useNavigate, Navigate, useSearchParams } from "react-router-dom";
 import { motion } from "framer-motion";
 import { Mail, Lock, AlertCircle, ArrowRight, Loader2, Globe, Target, User } from "lucide-react";
 import { z } from "zod";
@@ -42,6 +42,8 @@ const Auth = () => {
   const [googleLoading, setGoogleLoading] = useState(false);
   const { signIn, signUp, user } = useAuth();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const refCode = searchParams.get("ref");
 
   const RESEARCH_GOALS = [
     { value: "weight_loss", label: t("authPage.goalWeightLoss") },
@@ -51,6 +53,11 @@ const Auth = () => {
     { value: "cognitive", label: t("authPage.goalCognitive") },
     { value: "general", label: t("authPage.goalGeneral") },
   ];
+
+  // Auto-switch to signup mode when arriving via referral
+  useEffect(() => {
+    if (refCode) setIsSignUp(true);
+  }, [refCode]);
 
   if (user) {
     return <Navigate to="/dashboard" replace />;
@@ -148,6 +155,16 @@ const Auth = () => {
             setError(error.message);
           }
         } else {
+          // Link referral if present
+          if (refCode) {
+            try {
+              await supabase
+                .from("referrals")
+                .update({ status: "signed_up" } as any)
+                .eq("referral_code", refCode)
+                .eq("status", "pending");
+            } catch {}
+          }
           // New signup → peptides for discovery
           navigate("/peptides", { replace: true });
         }

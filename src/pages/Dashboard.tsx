@@ -58,6 +58,8 @@ import OnboardingSummaryBanner from "@/components/dashboard/OnboardingSummaryBan
 import ResearchInsightsFeed from "@/components/dashboard/ResearchInsightsFeed";
 import QuickStackImport from "@/components/dashboard/QuickStackImport";
 import CollaborativeRecommendations from "@/components/dashboard/CollaborativeRecommendations";
+import PipMemoryCard from "@/components/dashboard/PipMemoryCard";
+import GpSummarySection from "@/components/dashboard/GpSummarySection";
 
 /* ─── Compact Journal for Overview ─── */
 const CompactJournal = ({ onExpandJournal }: { onExpandJournal: () => void }) => {
@@ -771,6 +773,9 @@ const Dashboard = () => {
               {/* Health Intelligence Score — top of Today */}
               <BioAgeScore />
 
+              {/* Pip AI Companion */}
+              <PipMemoryCard />
+
               {/* ═══ ZONE B — Today's doses (active) OR Next step (inactive) ═══ */}
               {hasActiveProtocol ? (
                 <TodaysPlan slim onActivate={() => setActiveTab("protocols")} selectedDate={selectedDate} />
@@ -837,6 +842,9 @@ const Dashboard = () => {
 
                       {/* C1 — Biomarker summary */}
                       {hasBloodwork && <BiomarkerSummary panels={panels} />}
+
+                      {/* GP Summary — clinical flags from Pip */}
+                      <GpSummarySection />
 
                       {/* C2 — Protocol nudges */}
                       <ProtocolNudges onNavigate={setActiveTab} />
@@ -910,6 +918,9 @@ const Dashboard = () => {
 
                   {/* C1 — Biomarker summary */}
                   {hasBloodwork && <BiomarkerSummary panels={panels} />}
+
+                  {/* GP Summary — clinical flags from Pip */}
+                  <GpSummarySection />
 
                   {/* C2 — Protocol nudges */}
                   <ProtocolNudges onNavigate={setActiveTab} />

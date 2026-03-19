@@ -85,6 +85,7 @@ const DNAUpload = lazy(() => import("./pages/dna/DNAUpload"));
 const DNAAnalysing = lazy(() => import("./pages/dna/DNAAnalysing"));
 const DNAReport = lazy(() => import("./pages/dna/DNAReport"));
 const DNADashboard = lazy(() => import("./pages/dna/DNADashboard"));
+const JoinReferral = lazy(() => import("./pages/JoinReferral"));
 
 const queryClient = new QueryClient();
 
@@ -162,6 +163,7 @@ const AppContent = () => {
           <Route path="/dna/analysing" element={<ProtectedRoute><DNAAnalysing /></ProtectedRoute>} />
           <Route path="/dna/report/:id" element={<ProtectedRoute><DNAReport /></ProtectedRoute>} />
           <Route path="/dna/dashboard" element={<ProtectedRoute><DNADashboard /></ProtectedRoute>} />
+          <Route path="/join/:code" element={<JoinReferral />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>
