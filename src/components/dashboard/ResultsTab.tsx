@@ -398,69 +398,88 @@ const MilestoneTrack = ({ weekSummaries }: { weekSummaries: WeekSummary[] }) => 
   ];
 
   return (
-    <div className="bg-card rounded-2xl border border-border p-4 sm:p-5">
-      <h3 className="text-xs font-medium text-muted-foreground uppercase tracking-wider mb-4">Milestones</h3>
-      
-      {/* Progress bar */}
-      <div className="relative h-2 bg-muted rounded-full mb-6">
-        <motion.div
-          className="absolute inset-y-0 left-0 rounded-full bg-gradient-to-r from-primary to-primary/60"
-          initial={{ width: 0 }}
-          animate={{ width: `${Math.min(100, (totalDays / 90) * 100)}%` }}
-          transition={{ duration: 1.2, ease: "easeOut" }}
-        />
-        {/* Milestone markers */}
-        {milestones.map((m) => {
-          const pct = (m.day / 90) * 100;
-          const reached = totalDays >= m.day;
-          return (
-            <div
-              key={m.day}
-              className="absolute top-1/2 -translate-y-1/2"
-              style={{ left: `${pct}%` }}
-            >
-              <div className={`h-4 w-4 rounded-full border-2 -ml-2 transition-all duration-500 ${
-                reached
-                  ? "bg-primary border-primary scale-110"
-                  : "bg-card border-border"
-              }`}>
-                {reached && (
-                  <CheckCircle2 className="h-4 w-4 text-primary-foreground" />
-                )}
-              </div>
-            </div>
-          );
-        })}
-      </div>
+    <motion.div
+      className="relative overflow-hidden rounded-2xl border border-border bg-card shadow-sm"
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.5, delay: 0.1 }}
+      style={{ willChange: "transform" }}
+    >
+      <div className="pointer-events-none absolute -top-12 -left-12 w-40 h-40 rounded-full opacity-10 blur-[60px]" style={{ background: "hsl(var(--primary))" }} />
 
-      {/* Milestone labels */}
-      <div className="grid grid-cols-3 gap-2">
-        {milestones.map((m) => {
-          const reached = totalDays >= m.day;
-          const Icon = m.icon;
-          return (
-            <motion.div
-              key={m.day}
-              className={`rounded-xl border p-3 text-center transition-all ${
-                reached ? m.bg : "bg-muted/30 border-border/50 opacity-50"
-              }`}
-              animate={reached ? { scale: [1, 1.05, 1] } : {}}
-              transition={{ duration: 0.5, delay: 0.3 }}
-            >
-              <Icon className={`h-5 w-5 mx-auto mb-1 ${reached ? m.color : "text-muted-foreground"}`} />
-              <p className={`text-xs font-semibold ${reached ? "text-foreground" : "text-muted-foreground"}`}>
-                {m.label}
-              </p>
-              {reached ? (
-                <p className="text-[10px] text-primary mt-0.5">Unlocked ✓</p>
-              ) : (
-                <p className="text-[10px] text-muted-foreground mt-0.5">{m.day - totalDays} days left</p>
-              )}
-            </motion.div>
-          );
-        })}
+      <div className="relative p-5 sm:p-6">
+        <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-widest mb-4">Milestones</h3>
+        
+        {/* Progress bar */}
+        <div className="relative h-2.5 bg-muted/30 rounded-full mb-6 overflow-hidden">
+          <motion.div
+            className="absolute inset-y-0 left-0 rounded-full"
+            style={{
+              background: "linear-gradient(90deg, hsl(var(--primary)), hsl(var(--teal-glow, var(--primary))))",
+              boxShadow: "0 0 12px hsl(var(--primary) / 0.35)",
+            }}
+            initial={{ width: 0 }}
+            animate={{ width: `${Math.min(100, (totalDays / 90) * 100)}%` }}
+            transition={{ duration: 1.4, ease: "easeOut", delay: 0.3 }}
+          />
+          {milestones.map((m) => {
+            const pct = (m.day / 90) * 100;
+            const reached = totalDays >= m.day;
+            return (
+              <div
+                key={m.day}
+                className="absolute top-1/2 -translate-y-1/2"
+                style={{ left: `${pct}%` }}
+              >
+                <div className={`h-4 w-4 rounded-full border-2 -ml-2 transition-all duration-500 ${
+                  reached
+                    ? "bg-primary border-primary scale-110"
+                    : "bg-card border-border"
+                }`}
+                  style={reached ? { boxShadow: "0 0 8px hsl(var(--primary) / 0.4)" } : {}}
+                >
+                  {reached && (
+                    <CheckCircle2 className="h-4 w-4 text-primary-foreground" />
+                  )}
+                </div>
+              </div>
+            );
+          })}
+        </div>
+
+        {/* Milestone labels */}
+        <div className="grid grid-cols-3 gap-2.5">
+          {milestones.map((m, idx) => {
+            const reached = totalDays >= m.day;
+            const Icon = m.icon;
+            return (
+              <motion.div
+                key={m.day}
+                className={`relative overflow-hidden rounded-xl border p-3.5 text-center transition-all ${
+                  reached ? m.bg : "bg-muted/10 border-border/50 opacity-50"
+                }`}
+                initial={{ opacity: 0, y: 8 }}
+                animate={reached ? { opacity: 1, y: 0, scale: [1, 1.04, 1] } : { opacity: 0.5, y: 0 }}
+                transition={{ duration: 0.5, delay: 0.2 + idx * 0.1 }}
+              >
+                {reached && (
+                  <div className="pointer-events-none absolute -bottom-4 -right-4 w-14 h-14 rounded-full opacity-25 blur-xl" style={{ background: m.color.replace("text-", "") }} />
+                )}
+                <Icon className={`h-5 w-5 mx-auto mb-1.5 ${reached ? m.color : "text-muted-foreground"}`} />
+                <p className={`text-xs font-semibold tracking-tight ${reached ? "text-foreground" : "text-muted-foreground"}`}>
+                  {m.label}
+                </p>
+                {reached ? (
+                  <p className="text-[10px] text-primary font-semibold mt-0.5">Unlocked ✓</p>
+                ) : (
+                  <p className="text-[10px] text-muted-foreground mt-0.5">{m.day - totalDays} days left</p>
+                )}
+              </motion.div>
+            );
+          })}
+        </div>
       </div>
-    </div>
+    </motion.div>
   );
 };
 
