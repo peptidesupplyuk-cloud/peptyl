@@ -334,36 +334,55 @@ const OverallStatsBanner = ({
   longestStreak: number;
   protocolName: string;
 }) => (
-  <div className="relative overflow-hidden bg-card rounded-2xl border border-border">
-    {/* Gradient glow */}
-    <div className="absolute -top-20 -right-20 w-40 h-40 bg-primary/10 rounded-full blur-3xl" />
-    <div className="absolute -bottom-16 -left-16 w-32 h-32 bg-primary/5 rounded-full blur-3xl" />
+  <motion.div
+    className="relative overflow-hidden bg-card rounded-2xl border border-border shadow-sm"
+    initial={{ opacity: 0, y: 20 }}
+    animate={{ opacity: 1, y: 0 }}
+    transition={{ duration: 0.5 }}
+    style={{ willChange: "transform" }}
+  >
+    {/* Ambient glow */}
+    <div className="pointer-events-none absolute -top-20 -right-20 w-56 h-56 bg-primary/10 rounded-full blur-[80px] opacity-15" />
+    <div className="pointer-events-none absolute -bottom-16 -left-16 w-40 h-40 bg-primary/5 rounded-full blur-[60px] opacity-15" />
     
     <div className="relative p-5 sm:p-6 space-y-4">
       <div className="flex items-center gap-3">
-        <div className="h-10 w-10 rounded-xl bg-primary/10 flex items-center justify-center">
+        <div
+          className="h-10 w-10 rounded-xl bg-primary/10 flex items-center justify-center"
+          style={{ boxShadow: "0 0 16px hsl(var(--primary) / 0.15)" }}
+        >
           <Trophy className="h-5 w-5 text-primary" />
         </div>
         <div>
-          <h2 className="font-heading font-bold text-foreground text-lg leading-tight">Your Journey</h2>
+          <h2 className="font-heading font-bold text-foreground text-lg leading-tight tracking-tight">Your Journey</h2>
           <p className="text-xs text-muted-foreground">{protocolName}</p>
         </div>
       </div>
 
-      <div className="grid grid-cols-2 gap-3">
+      <div className="grid grid-cols-2 gap-2.5">
         <StatPill icon={<Calendar className="h-3.5 w-3.5" />} label="Weeks" value={String(weeks)} />
         <StatPill icon={<Target className="h-3.5 w-3.5" />} label="Adherence" value={`${adherence}%`} highlight={adherence >= 80} />
       </div>
     </div>
-  </div>
+  </motion.div>
 );
 
 const StatPill = ({ icon, label, value, highlight }: { icon: React.ReactNode; label: string; value: string; highlight?: boolean }) => (
-  <div className={`rounded-xl p-3 text-center space-y-1 ${highlight ? "bg-primary/10 border border-primary/20" : "bg-muted/50"}`}>
-    <div className="flex justify-center text-muted-foreground">{icon}</div>
-    <p className={`text-lg font-heading font-bold ${highlight ? "text-primary" : "text-foreground"}`}>{value}</p>
-    <p className="text-[10px] text-muted-foreground uppercase tracking-wider">{label}</p>
-  </div>
+  <motion.div
+    className={`relative overflow-hidden rounded-xl p-3.5 text-center space-y-1 border ${highlight ? "bg-primary/10 border-primary/20" : "bg-muted/10 border-border/50"}`}
+    initial={{ opacity: 0, y: 8 }}
+    animate={{ opacity: 1, y: 0 }}
+    transition={{ delay: 0.2, duration: 0.35 }}
+  >
+    {highlight && (
+      <div className="pointer-events-none absolute -bottom-4 -right-4 w-16 h-16 rounded-full opacity-25 blur-xl" style={{ background: "hsl(var(--primary) / 0.3)" }} />
+    )}
+    <div className="relative">
+      <div className="flex justify-center text-muted-foreground">{icon}</div>
+      <p className={`text-xl font-heading font-bold tracking-tight leading-none ${highlight ? "text-primary" : "text-foreground"}`}>{value}</p>
+      <p className="text-[10px] text-muted-foreground uppercase tracking-widest font-semibold mt-1">{label}</p>
+    </div>
+  </motion.div>
 );
 
 /* ═══════════════════════════════════════════════════════
