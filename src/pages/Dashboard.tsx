@@ -844,8 +844,6 @@ const Dashboard = () => {
                       {/* C2.1 — Wearable-aware nudges */}
                       <WearableNudges />
 
-                      {/* C2.2 — Bio-Age Score */}
-                      <BioAgeScore />
 
                       {/* C2.3 — Unified health insights */}
                       <UnifiedInsights />
