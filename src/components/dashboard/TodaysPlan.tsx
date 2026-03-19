@@ -865,34 +865,39 @@ const TodaysPlan = ({ onActivate, slim = false, selectedDate }: TodaysPlanProps)
           </div>
         )}
 
-        {/* J2: Day X of N progress strip — only in full mode */}
+        {/* Per-protocol progress strips — only in full mode */}
         {!slim && showProgressStrip && (
-          <button
-            onClick={() => dnaReportId && navigate(`/dna/report/${dnaReportId}`)}
-            className="w-full bg-muted/30 rounded-xl px-4 py-3 flex items-center gap-4 text-left hover:bg-muted/50 transition-colors"
-          >
-            <div className="flex-1 min-w-0">
-              <p className="font-heading font-semibold text-sm text-foreground">
-                Day {daysActive + 1} of {totalDays}
-              </p>
-              <div className="w-full h-1 bg-muted rounded-full mt-1.5">
+          <div className="space-y-2">
+            {protocolProgressList.map(({ protocol: p, dayNum, total, pct, daysLeft, typeLabel }) => {
+              const goalLabel = p.goal ? formatGoalLabel(p.goal) : p.name;
+              return (
                 <div
-                  className="h-1 bg-primary rounded-full transition-all duration-500"
-                  style={{ width: `${progressPct}%` }}
-                />
-              </div>
-            </div>
-            {milestoneLabel && (
-              <div className="max-w-[180px] shrink-0 text-right">
-                {milestonePrefix && (
-                  <p className="text-[10px] text-muted-foreground">{milestonePrefix}</p>
-                )}
-                <p className={`text-xs truncate ${milestoneAmber ? "text-amber-400 font-medium" : "text-muted-foreground"}`}>
-                  {milestoneLabel}
-                </p>
-              </div>
-            )}
-          </button>
+                  key={p.id}
+                  className="bg-muted/30 rounded-xl px-4 py-3 space-y-1.5"
+                >
+                  <div className="flex items-center justify-between">
+                    <p className="font-heading font-semibold text-sm text-foreground truncate">
+                      {goalLabel}
+                    </p>
+                    <span className="text-xs text-muted-foreground shrink-0 ml-2">
+                      {daysLeft != null ? `${daysLeft} days remaining` : `Day ${dayNum}`}
+                    </span>
+                  </div>
+                  {total && pct != null && (
+                    <div className="w-full h-1.5 bg-muted rounded-full">
+                      <div
+                        className="h-1.5 bg-primary rounded-full transition-all duration-500"
+                        style={{ width: `${pct}%` }}
+                      />
+                    </div>
+                  )}
+                  {typeLabel && (
+                    <p className="text-[10px] text-muted-foreground">{typeLabel}</p>
+                  )}
+                </div>
+              );
+            })}
+          </div>
         )}
 
         {/* Active goal summary + detected issues — only in full mode */}
