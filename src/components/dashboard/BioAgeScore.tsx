@@ -52,8 +52,8 @@ function computeBioAge(args: {
     }
     if (tracked > 0) {
       bioScore = Math.round((optimal / tracked) * 25);
+      if (panels.length > 1) bioScore += 5; // tracking over time bonus only if markers exist
     }
-    if (panels.length > 1) bioScore += 5; // tracking over time
   }
   bioScore = Math.min(30, bioScore);
   breakdown.push({
