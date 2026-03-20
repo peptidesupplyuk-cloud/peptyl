@@ -5,15 +5,24 @@ const PWAUpdatePrompt = () => {
   useRegisterSW({
     onRegisteredSW(_swUrl, registration) {
       if (registration) {
-        // Check for updates every 5 minutes
         setInterval(() => registration.update(), 5 * 60 * 1000);
       }
     },
-    // skipWaiting + clientsClaim in workbox config handle activation silently
-    // — no forced page reload needed
   });
 
   React.useEffect(() => {
+    // Reload once when a new service worker takes control mid-session
+    if ("serviceWorker" in navigator) {
+      navigator.serviceWorker.addEventListener("controllerchange", () => {
+        // Guard against infinite reload loops
+        const key = "pwa-reloaded-at";
+        const last = sessionStorage.getItem(key);
+        if (last && Date.now() - Number(last) < 5000) return;
+        sessionStorage.setItem(key, String(Date.now()));
+        window.location.reload();
+      });
+    }
+
     const onVisibilityChange = () => {
       if (document.visibilityState === "visible" && "serviceWorker" in navigator) {
         navigator.serviceWorker.getRegistration().then((reg) => {
