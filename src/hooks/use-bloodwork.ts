@@ -104,6 +104,26 @@ export function useSaveBloodwork() {
         if (mErr) throw mErr;
       }
 
+      // --- Sync relevant markers back to profile ---
+      try {
+        const profileUpdate: Record<string, unknown> = {};
+        for (const m of rows) {
+          if (m.marker_name === "height_cm") profileUpdate.height_cm = m.value;
+          else if (m.marker_name === "weight_kg") profileUpdate.weight_kg = m.value;
+          else if (m.marker_name === "age") profileUpdate.age = m.value;
+          else if (m.marker_name === "bp_systolic") profileUpdate.bp_systolic = m.value;
+          else if (m.marker_name === "bp_diastolic") profileUpdate.bp_diastolic = m.value;
+        }
+        if (Object.keys(profileUpdate).length > 0) {
+          await supabase
+            .from("profiles")
+            .update(profileUpdate)
+            .eq("user_id", user.id);
+        }
+      } catch (profileErr) {
+        console.error("Profile sync from bloodwork failed (non-blocking):", profileErr);
+      }
+
       // --- Outcome delta calculation for retest panels ---
       if (panelType.startsWith("retest") && protocolId) {
         try {
