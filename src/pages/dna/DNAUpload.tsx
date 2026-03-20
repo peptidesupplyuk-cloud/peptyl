@@ -12,7 +12,8 @@ import SEO from "@/components/SEO";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
-import { useBloodworkPanels, useSaveBloodwork } from "@/hooks/use-bloodwork";
+import { useBloodworkPanels } from "@/hooks/use-bloodwork";
+import BloodworkForm from "@/components/dashboard/BloodworkForm";
 import { BIOMARKERS } from "@/data/biomarker-ranges";
 
 const TARGET_RSIDS = new Set([
@@ -94,9 +95,7 @@ const DNAUpload = () => {
 
   // Bloodwork integration
   const { data: panels = [] } = useBloodworkPanels();
-  const saveBloodwork = useSaveBloodwork();
   const [showBloodworkEntry, setShowBloodworkEntry] = useState(false);
-  const [bloodworkValues, setBloodworkValues] = useState<Record<string, string>>({});
   const [bloodworkSaved, setBloodworkSaved] = useState(false);
   const [showBloodworkDetails, setShowBloodworkDetails] = useState(false);
 
@@ -265,33 +264,10 @@ const DNAUpload = () => {
     return Object.keys(ctx).length > 0 ? ctx : null;
   };
 
-  const handleSaveQuickBloodwork = async () => {
-    const markers = BIOMARKERS
-      .filter((m) => m.panel === "basic")
-      .filter((m) => bloodworkValues[m.key] && !isNaN(parseFloat(bloodworkValues[m.key])))
-      .map((m) => ({
-        marker_name: m.key,
-        value: parseFloat(bloodworkValues[m.key]),
-        unit: m.unit,
-      }));
-
-    if (markers.length === 0) {
-      setShowBloodworkEntry(false);
-      return;
-    }
-
-    try {
-      await saveBloodwork.mutateAsync({
-        testDate: new Date().toISOString().split("T")[0],
-        panelType: "basic",
-        markers,
-      });
-      setBloodworkSaved(true);
-      setShowBloodworkEntry(false);
-      toast({ title: "Bloodwork saved", description: "Your results will be included in the assessment." });
-    } catch {
-      toast({ title: "Could not save bloodwork", variant: "destructive" });
-    }
+  const handleBloodworkSaved = () => {
+    setBloodworkSaved(true);
+    setShowBloodworkEntry(false);
+    toast({ title: "Bloodwork saved", description: "Your results will be included in the assessment." });
   };
 
   const handleSubmit = async () => {
@@ -524,7 +500,7 @@ const DNAUpload = () => {
               <div className="flex items-center justify-between px-4 py-3 border-b border-border">
                 <div className="flex items-center gap-2">
                   <FlaskConical className="h-4 w-4 text-primary" />
-                  <p className="text-sm font-medium text-foreground">Enter key blood results</p>
+                  <p className="text-sm font-medium text-foreground">Add your blood results</p>
                 </div>
                 <button
                   onClick={() => setShowBloodworkEntry(false)}
@@ -535,42 +511,10 @@ const DNAUpload = () => {
               </div>
               <div className="p-4">
                 <p className="text-xs text-muted-foreground mb-4">
-                  Enter any values you have. Leave blank what you don't.
+                  Upload a PDF or enter values manually. All markers including hormones, thyroid, and metabolic panels are supported.
                   Results will be saved to your profile and included in this assessment.
                 </p>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                  {BIOMARKERS.filter((m) => m.panel === "basic" && m.category !== "Body Composition" && m.category !== "Cardiovascular").map((m) => (
-                    <div key={m.key}>
-                      <label className="text-xs text-muted-foreground mb-1 block">
-                        {m.name} <span className="text-muted-foreground/60">({m.unit})</span>
-                      </label>
-                      <Input
-                        type="number"
-                        step="any"
-                        placeholder={`e.g. ${m.optimalMin}`}
-                        value={bloodworkValues[m.key] ?? ""}
-                        onChange={(e) => setBloodworkValues((prev) => ({ ...prev, [m.key]: e.target.value }))}
-                      />
-                    </div>
-                  ))}
-                </div>
-                <div className="flex gap-2 mt-4">
-                  <Button
-                    onClick={handleSaveQuickBloodwork}
-                    disabled={saveBloodwork.isPending}
-                    className="flex-1"
-                    size="sm"
-                  >
-                    {saveBloodwork.isPending ? "Saving..." : "Save & Include"}
-                  </Button>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => setShowBloodworkEntry(false)}
-                  >
-                    Skip
-                  </Button>
-                </div>
+                <BloodworkForm onSaved={handleBloodworkSaved} />
               </div>
             </div>
           ) : (
