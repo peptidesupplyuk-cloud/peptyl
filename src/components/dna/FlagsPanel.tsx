@@ -1,16 +1,17 @@
-import { AlertTriangle, Stethoscope, Eye } from "lucide-react";
+import { AlertTriangle, Stethoscope, Eye, Shield } from "lucide-react";
 
 interface Props {
   flags?: {
     urgent?: string[];
     discuss_with_gp?: string[];
     monitor?: string[];
+    peptide_cautions?: string[];
   };
 }
 
 const FlagsPanel = ({ flags }: Props) => {
   if (!flags) return null;
-  const hasAny = (flags.urgent?.length || 0) + (flags.discuss_with_gp?.length || 0) + (flags.monitor?.length || 0) > 0;
+  const hasAny = (flags.urgent?.length || 0) + (flags.discuss_with_gp?.length || 0) + (flags.monitor?.length || 0) + (flags.peptide_cautions?.length || 0) > 0;
   if (!hasAny) return null;
 
   return (
@@ -47,6 +48,18 @@ const FlagsPanel = ({ flags }: Props) => {
           </div>
           <ul className="space-y-1">
             {flags.monitor.map((f, i) => <li key={i} className="text-sm text-foreground">{f}</li>)}
+          </ul>
+        </div>
+      ) : null}
+
+      {flags.peptide_cautions?.length ? (
+        <div className="bg-amber-500/5 border border-amber-500/20 rounded-xl p-4">
+          <div className="flex items-center gap-2 mb-2">
+            <Shield className="h-4 w-4 text-amber-500" />
+            <span className="text-sm font-heading font-semibold text-amber-500">Peptide Cautions</span>
+          </div>
+          <ul className="space-y-1">
+            {flags.peptide_cautions.map((f, i) => <li key={i} className="text-sm text-foreground">{f}</li>)}
           </ul>
         </div>
       ) : null}

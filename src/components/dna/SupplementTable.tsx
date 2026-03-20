@@ -2,11 +2,16 @@ import { useState } from "react";
 import { ChevronDown, ChevronUp } from "lucide-react";
 
 interface Supplement {
-  supplement: string;
-  dose: string;
+  // New field names
+  name?: string;
+  supplement?: string; // Legacy
+  dosage?: string;
+  dose?: string; // Legacy
   timing: string;
   evidence_grade: string;
-  driven_by: string[];
+  driven_by?: string[];
+  rationale?: string;
+  notes?: string;
   caution?: string;
   peptyl_product_tag?: string;
   is_priority?: boolean;
@@ -24,36 +29,49 @@ const gradeColor = (g: string) => {
   return "bg-muted text-muted-foreground";
 };
 
-const SupplementRow = ({ s }: { s: Supplement }) => (
-  <tr className="border-b border-border/50 hover:bg-muted/20 transition-colors">
-    <td className="py-3 px-3">
-      <p className="font-medium text-foreground text-sm">{s.supplement}</p>
-      <div className="flex flex-wrap gap-1 mt-1">
-        {s.driven_by?.map((d) => (
-          <span key={d} className="text-[10px] bg-muted text-muted-foreground px-1.5 py-0.5 rounded">
-            {d}
-          </span>
-        ))}
-      </div>
-    </td>
-    <td className="py-3 px-3 text-sm text-muted-foreground whitespace-nowrap">
-      <p>{s.dose}</p>
-      <p className="text-xs">{s.timing}</p>
-    </td>
-    <td className="py-3 px-3 text-center">
-      <span className={`text-xs font-bold px-2 py-1 rounded-md ${gradeColor(s.evidence_grade)}`}>
-        {s.evidence_grade}
-      </span>
-    </td>
-  </tr>
-);
+const SupplementRow = ({ s }: { s: Supplement }) => {
+  const label = s.name || s.supplement || "Unknown";
+  const doseText = s.dosage || s.dose || "";
+  const drivenBy = s.driven_by || [];
+
+  return (
+    <tr className="border-b border-border/50 hover:bg-muted/20 transition-colors">
+      <td className="py-3 px-3">
+        <p className="font-medium text-foreground text-sm">{label}</p>
+        {drivenBy.length > 0 && (
+          <div className="flex flex-wrap gap-1 mt-1">
+            {drivenBy.map((d) => (
+              <span key={d} className="text-[10px] bg-primary/10 text-primary px-1.5 py-0.5 rounded">
+                {d}
+              </span>
+            ))}
+          </div>
+        )}
+        {s.rationale && (
+          <p className="text-[10px] text-muted-foreground mt-1 line-clamp-2">{s.rationale}</p>
+        )}
+      </td>
+      <td className="py-3 px-3 text-sm text-muted-foreground whitespace-nowrap">
+        <p>{doseText}</p>
+        <p className="text-xs">{s.timing}</p>
+      </td>
+      <td className="py-3 px-3 text-center">
+        <span className={`text-xs font-bold px-2 py-1 rounded-md ${gradeColor(s.evidence_grade)}`}>
+          {s.evidence_grade}
+        </span>
+        {(s.evidence_grade === "C" || s.evidence_grade === "D") && (
+          <p className="text-[9px] text-muted-foreground mt-0.5">Preclinical</p>
+        )}
+      </td>
+    </tr>
+  );
+};
 
 const SupplementTable = ({ supplements }: Props) => {
   const [showSuggestions, setShowSuggestions] = useState(false);
 
   if (!supplements?.length) return null;
 
-  // If is_priority is not set (old reports), treat all as priority
   const hasPriorityFlag = supplements.some(s => s.is_priority !== undefined);
   const priority = hasPriorityFlag ? supplements.filter(s => s.is_priority) : supplements.slice(0, 5);
   const suggestions = hasPriorityFlag ? supplements.filter(s => !s.is_priority) : supplements.slice(5);
@@ -62,7 +80,6 @@ const SupplementTable = ({ supplements }: Props) => {
     <div className="space-y-3">
       <h2 className="text-xl font-heading font-bold text-foreground">Supplement Protocol</h2>
 
-      {/* Priority table */}
       <div className="overflow-x-auto rounded-xl border border-border">
         <table className="w-full text-sm">
           <thead>
@@ -78,7 +95,6 @@ const SupplementTable = ({ supplements }: Props) => {
         </table>
       </div>
 
-      {/* Suggestions — collapsible */}
       {suggestions.length > 0 && (
         <div className="border border-border/50 rounded-xl overflow-hidden">
           <button

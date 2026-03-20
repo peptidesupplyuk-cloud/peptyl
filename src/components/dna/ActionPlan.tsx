@@ -3,8 +3,10 @@ import { Zap, Clock, Calendar, Stethoscope, MessageSquare, CheckCircle2 } from "
 interface Props {
   plan?: {
     immediate?: string[];
-    "30_days"?: string[];
-    "90_days"?: string[];
+    thirty_days?: string[];
+    "30_days"?: string[]; // Legacy
+    ninety_days?: string[];
+    "90_days"?: string[]; // Legacy
     gp_conversations?: string[];
   };
 }
@@ -17,25 +19,24 @@ const columns = [
     icon: Zap,
     accent: "border-primary/30 bg-primary/5",
     iconColor: "text-primary",
-    dotColor: "text-primary",
   },
   {
-    key: "30_days",
+    key: "thirty_days",
+    legacyKey: "30_days",
     label: "30 Days",
     sublabel: "First month targets",
     icon: Clock,
     accent: "border-blue-500/30 bg-blue-500/5",
     iconColor: "text-blue-500",
-    dotColor: "text-blue-500",
   },
   {
-    key: "90_days",
+    key: "ninety_days",
+    legacyKey: "90_days",
     label: "90 Days",
     sublabel: "Quarterly milestones",
     icon: Calendar,
     accent: "border-purple-500/30 bg-purple-500/5",
     iconColor: "text-purple-500",
-    dotColor: "text-purple-500",
   },
   {
     key: "gp_conversations",
@@ -44,11 +45,19 @@ const columns = [
     icon: Stethoscope,
     accent: "border-amber-500/30 bg-amber-500/5",
     iconColor: "text-amber-500",
-    dotColor: "text-amber-500",
   },
 ] as const;
 
-// Strip verbose explanations — keep only the action (before " — ")
+const getItems = (plan: any, col: typeof columns[number]): string[] => {
+  const items = plan[col.key];
+  if (items?.length) return items;
+  if ('legacyKey' in col && col.legacyKey) {
+    const legacy = plan[col.legacyKey];
+    if (legacy?.length) return legacy;
+  }
+  return [];
+};
+
 const tightenItem = (s: string): string => {
   const dash = s.indexOf(" — ");
   if (dash > 10 && dash < 80) return s.slice(0, dash).trim();
@@ -59,11 +68,7 @@ const tightenItem = (s: string): string => {
 const ActionPlan = ({ plan }: Props) => {
   if (!plan) return null;
 
-  const activeColumns = columns.filter((col) => {
-    const items = (plan as any)[col.key];
-    return items && items.length > 0;
-  });
-
+  const activeColumns = columns.filter((col) => getItems(plan, col).length > 0);
   if (activeColumns.length === 0) return null;
 
   const gridCols =
@@ -75,7 +80,6 @@ const ActionPlan = ({ plan }: Props) => {
     <div>
       <h2 className="text-xl font-heading font-bold text-foreground mb-6">Action Plan</h2>
 
-      {/* Timeline connector — desktop only */}
       <div className="hidden md:flex items-center mb-4 px-8">
         {activeColumns.map((col, i) => (
           <div key={col.key} className="flex items-center flex-1">
@@ -89,13 +93,12 @@ const ActionPlan = ({ plan }: Props) => {
 
       <div className={`grid grid-cols-1 ${gridCols} gap-4`}>
         {activeColumns.map((col) => {
-          const items: string[] = (plan as any)[col.key] || [];
+          const items = getItems(plan, col);
           const Icon = col.icon;
           const isGP = col.key === "gp_conversations";
 
           return (
             <div key={col.key} className={`border rounded-2xl p-5 flex flex-col gap-4 ${col.accent}`}>
-              {/* Column header */}
               <div className="flex items-start gap-3">
                 <div className={`p-2 rounded-lg bg-background/60 ${col.iconColor}`}>
                   <Icon className="h-4 w-4" />
@@ -106,7 +109,6 @@ const ActionPlan = ({ plan }: Props) => {
                 </div>
               </div>
 
-              {/* Items — short, action-first */}
               <ul className="space-y-2.5 flex-1">
                 {items.map((item, i) => {
                   const short = isGP ? item : tightenItem(item);

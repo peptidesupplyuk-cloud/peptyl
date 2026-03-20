@@ -7,6 +7,8 @@ import SEO from "@/components/SEO";
 import { Loader2 } from "lucide-react";
 import ReportHeader from "@/components/dna/ReportHeader";
 import FlagsPanel from "@/components/dna/FlagsPanel";
+import TopFindings from "@/components/dna/TopFindings";
+import HealthPriorities from "@/components/dna/HealthPriorities";
 import GeneCards from "@/components/dna/GeneCards";
 import BiomarkerBars from "@/components/dna/BiomarkerBars";
 import DrugInteractionPanel from "@/components/dna/DrugInteractionPanel";
@@ -22,6 +24,7 @@ import LegalDisclaimer from "@/components/dna/LegalDisclaimer";
 import ReportReview from "@/components/dna/ReportReview";
 import CreateProtocolFromReport from "@/components/dna/CreateProtocolFromReport";
 import OutcomeInsights from "@/components/dna/OutcomeInsights";
+import ResearchCitations from "@/components/dna/ResearchCitations";
 import { useAuth } from "@/contexts/AuthContext";
 
 const DNAReport = () => {
@@ -46,7 +49,6 @@ const DNAReport = () => {
       }
       setReport(data);
 
-      // Fetch existing review
       if (user) {
         const { data: rev } = await supabase
           .from("dna_reviews" as any)
@@ -100,7 +102,7 @@ const DNAReport = () => {
               </div>
               <h1 className="text-xl font-heading font-bold text-foreground">Report Generation Issue</h1>
               <p className="text-sm text-muted-foreground max-w-md mx-auto">
-                The AI produced a malformed response and your report couldn't be fully processed. This occasionally happens with complex analyses. Please try running your assessment again — it's free to retry.
+                The AI produced a malformed response and your report couldn't be fully processed. This occasionally happens with complex analyses. Please try running your assessment again.
               </p>
               <div className="flex gap-3 justify-center pt-2">
                 <button
@@ -119,15 +121,17 @@ const DNAReport = () => {
             </div>
           ) : (
           <>
-          {/* Tier badge + PDF button */}
-          <div className="flex items-center justify-between">
-            <span className={`text-xs font-semibold px-3 py-1 rounded-full ${
-              isAdvanced
-                ? "bg-primary/10 text-primary"
-                : "bg-muted text-muted-foreground"
-            }`}>
-              {isAdvanced ? "Advanced ✦" : "Standard"}
-            </span>
+          {/* Tier badge + quality + PDF */}
+          <div className="flex items-center justify-between flex-wrap gap-2">
+            <div className="flex items-center gap-2">
+              <span className={`text-xs font-semibold px-3 py-1 rounded-full ${
+                isAdvanced
+                  ? "bg-primary/10 text-primary"
+                  : "bg-muted text-muted-foreground"
+              }`}>
+                {isAdvanced ? "Advanced ✦" : "Standard"}
+              </span>
+            </div>
             <button
               onClick={() => window.print()}
               className="flex items-center gap-2 text-xs font-medium text-muted-foreground hover:text-foreground border border-border rounded-lg px-3 py-2 hover:bg-muted/30 transition-colors"
@@ -141,10 +145,15 @@ const DNAReport = () => {
 
           <ReportHeader
             healthScore={r.health_score}
+            overallScore={report.overall_score}
             meta={r.meta}
             narrative={report.narrative}
+            personalisedSummary={r.personalised_summary}
+            qualityScore={report.pipeline_quality_score}
           />
           <FlagsPanel flags={r.flags} />
+          <TopFindings findings={r.top_findings} />
+          <HealthPriorities priorities={r.health_priorities} />
           <GeneCards genes={r.gene_results} />
           <BiomarkerBars biomarkers={r.biomarker_results} />
           <DrugInteractionPanel interactions={r.drug_interactions} />
@@ -163,6 +172,7 @@ const DNAReport = () => {
           )}
 
           <ActionPlan plan={r.action_plan} />
+          <ResearchCitations citations={r.research_citations} />
           <OutcomeInsights reportId={id!} genotypeKey={buildGenotypeKey(r.gene_results)} />
           {(r.supplement_protocol?.length > 0 || r.peptide_protocol?.length > 0) && (
             <CreateProtocolFromReport
