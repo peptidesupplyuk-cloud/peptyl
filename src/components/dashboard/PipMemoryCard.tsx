@@ -31,10 +31,11 @@ const PipMemoryCard = () => {
         <div className="h-8 w-8 rounded-lg bg-[#00d4aa]/10 flex items-center justify-center">
           <Sparkles className="h-4 w-4 text-[#00d4aa]" />
         </div>
-        <div>
+        <div className="flex-1">
           <h3 className="text-sm font-heading font-semibold text-foreground">Pip AI Companion</h3>
           <p className="text-xs text-muted-foreground">Your WhatsApp health assistant</p>
         </div>
+        <Badge variant="secondary" className="text-[10px] px-2 py-0.5">Coming Soon</Badge>
       </div>
 
       {/* Section 1: What Pip is watching */}
