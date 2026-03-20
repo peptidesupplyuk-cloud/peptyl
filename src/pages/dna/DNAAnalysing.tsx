@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { Dna } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
 import Header from "@/components/Header";
 import SEO from "@/components/SEO";
 
@@ -14,13 +15,12 @@ const STATUS_MESSAGES = [
 const DNAAnalysing = () => {
   const location = useLocation();
   const navigate = useNavigate();
-  const { inputText, imageBase64, method, userId, tier, lifestyleContext } = (location.state || {}) as any;
+  const { inputText, imageBase64, method, userId, tier, lifestyleContext, reportId } =
+    (location.state || {}) as any;
   const [statusIndex, setStatusIndex] = useState(0);
-  const [_streamText, setStreamText] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [elapsed, setElapsed] = useState(0);
   const startRef = useRef(Date.now());
-  const abortRef = useRef<AbortController | null>(null);
 
   // Cycle status messages
   useEffect(() => {
@@ -38,18 +38,18 @@ const DNAAnalysing = () => {
     return () => clearInterval(interval);
   }, []);
 
-  // Call the edge function
+  // Submit to edge function then poll for completion
   useEffect(() => {
     if (!inputText && !imageBase64) {
       navigate("/dna/upload", { replace: true });
       return;
     }
 
-    const controller = new AbortController();
-    abortRef.current = controller;
+    let cancelled = false;
 
-    const analyse = async () => {
+    const run = async () => {
       try {
+        // Call the edge function (now returns immediately with queued status)
         const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
         const resp = await fetch(`${supabaseUrl}/functions/v1/analyse-dna`, {
           method: "POST",
@@ -57,8 +57,15 @@ const DNAAnalysing = () => {
             "Content-Type": "application/json",
             Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
           },
-          body: JSON.stringify({ inputText, imageBase64, method, userId, tier: tier ?? "standard", lifestyleContext: lifestyleContext ?? null }),
-          signal: controller.signal,
+          body: JSON.stringify({
+            reportId,
+            userId,
+            inputText,
+            imageBase64,
+            method,
+            tier: tier ?? "standard",
+            lifestyleContext: lifestyleContext ?? null,
+          }),
         });
 
         if (!resp.ok) {
@@ -66,80 +73,51 @@ const DNAAnalysing = () => {
           throw new Error(err.error || `Analysis failed (${resp.status})`);
         }
 
-        const reader = resp.body!.getReader();
-        const decoder = new TextDecoder();
-        let fullText = "";
-        let buffer = "";
+        const result = await resp.json();
+        const trackingReportId = result.reportId || reportId;
 
-        const handleLine = async (line: string) => {
-          if (line === "data: [DONE]") {
-            const parts = fullText.split("---NARRATIVE---");
-            const jsonStr = parts[0].trim().replace(/^```json\s*/i, "").replace(/```\s*$/i, "").trim();
-            try {
-              JSON.parse(jsonStr);
-              const { createClient } = await import("@supabase/supabase-js");
-              const sb = createClient(supabaseUrl, import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY);
-              const { data } = await sb
-                .from("dna_reports")
-                .select("id")
-                .eq("user_id", userId)
-                .order("created_at", { ascending: false })
-                .limit(1)
-                .maybeSingle();
-              if (data?.id) {
-                navigate(`/dna/report/${data.id}`, { replace: true });
-              } else {
-                navigate("/dna/dashboard", { replace: true });
-              }
-            } catch {
-              navigate("/dna/dashboard", { replace: true });
-            }
-            return true;
-          }
+        if (!trackingReportId) {
+          throw new Error("No report ID returned");
+        }
 
-          if (!line.startsWith("data: ")) return false;
-          try {
-            const parsed = JSON.parse(line.slice(6));
-            if (parsed.text) {
-              fullText += parsed.text;
-              setStreamText(fullText.slice(-300));
+        // Poll dna_reports for pipeline completion
+        const poll = async () => {
+          while (!cancelled) {
+            await new Promise((r) => setTimeout(r, 3000));
+            if (cancelled) return;
+
+            const { data, error: fetchErr } = await supabase
+              .from("dna_reports")
+              .select("pipeline_status, pipeline_error")
+              .eq("id", trackingReportId)
+              .maybeSingle();
+
+            if (fetchErr || !data) continue;
+
+            if (data.pipeline_status === "complete") {
+              navigate(`/dna/report/${trackingReportId}`, { replace: true });
+              return;
             }
-          } catch {
-            // wait for the rest of the split line in the next chunk
+
+            if (data.pipeline_status === "failed") {
+              setError(data.pipeline_error || "Analysis failed. Please try again.");
+              return;
+            }
           }
-          return false;
         };
 
-        while (true) {
-          const { done, value } = await reader.read();
-          if (done) break;
-          buffer += decoder.decode(value, { stream: true });
-          const lines = buffer.split("\n");
-          buffer = lines.pop() ?? "";
-
-          for (const rawLine of lines) {
-            const shouldStop = await handleLine(rawLine.trim());
-            if (shouldStop) return;
-          }
-        }
-
-        buffer += decoder.decode();
-        if (buffer.trim()) {
-          const shouldStop = await handleLine(buffer.trim());
-          if (shouldStop) return;
-        }
-
-        // If stream ends without [DONE]
-        navigate("/dna/dashboard", { replace: true });
+        poll();
       } catch (err: any) {
-        if (err.name !== "AbortError") {
+        if (!cancelled) {
           setError(err.message);
         }
       }
     };
 
-    analyse();
-    return () => controller.abort();
+    run();
+    return () => {
+      cancelled = true;
+    };
   }, []);
 
   if (error) {
@@ -168,14 +146,12 @@ const DNAAnalysing = () => {
       <Header />
       <main className="min-h-screen pt-24 pb-16 bg-background flex items-center justify-center">
         <div className="text-center max-w-md px-6">
-          {/* Spinner */}
           <div className="relative h-24 w-24 mx-auto mb-8">
             <div className="absolute inset-0 rounded-full border-4 border-border" />
             <div className="absolute inset-0 rounded-full border-4 border-primary border-t-transparent animate-spin" />
             <Dna className="absolute inset-0 m-auto h-8 w-8 text-primary" />
           </div>
 
-          {/* Status */}
           <p className="text-foreground font-heading font-semibold text-lg mb-2">
             {STATUS_MESSAGES[statusIndex]}
           </p>
@@ -184,7 +160,6 @@ const DNAAnalysing = () => {
             {elapsed > 90 && " — Taking longer than expected, still working…"}
           </p>
 
-          {/* Reassurance message */}
           <div className="bg-card border border-border rounded-lg p-4 text-center">
             <p className="text-sm text-muted-foreground">
               Can't wait? Don't worry, we'll send you a push notification and email when your report is ready.
