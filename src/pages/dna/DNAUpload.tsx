@@ -264,33 +264,10 @@ const DNAUpload = () => {
     return Object.keys(ctx).length > 0 ? ctx : null;
   };
 
-  const handleSaveQuickBloodwork = async () => {
-    const markers = BIOMARKERS
-      .filter((m) => m.panel === "basic")
-      .filter((m) => bloodworkValues[m.key] && !isNaN(parseFloat(bloodworkValues[m.key])))
-      .map((m) => ({
-        marker_name: m.key,
-        value: parseFloat(bloodworkValues[m.key]),
-        unit: m.unit,
-      }));
-
-    if (markers.length === 0) {
-      setShowBloodworkEntry(false);
-      return;
-    }
-
-    try {
-      await saveBloodwork.mutateAsync({
-        testDate: new Date().toISOString().split("T")[0],
-        panelType: "basic",
-        markers,
-      });
-      setBloodworkSaved(true);
-      setShowBloodworkEntry(false);
-      toast({ title: "Bloodwork saved", description: "Your results will be included in the assessment." });
-    } catch {
-      toast({ title: "Could not save bloodwork", variant: "destructive" });
-    }
+  const handleBloodworkSaved = () => {
+    setBloodworkSaved(true);
+    setShowBloodworkEntry(false);
+    toast({ title: "Bloodwork saved", description: "Your results will be included in the assessment." });
   };
 
   const handleSubmit = async () => {
