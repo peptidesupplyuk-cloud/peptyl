@@ -268,6 +268,13 @@ export type Database = {
             foreignKeyName: "bloodwork_panels_dna_report_id_fkey"
             columns: ["dna_report_id"]
             isOneToOne: false
+            referencedRelation: "admin_pipeline_quality"
+            referencedColumns: ["report_id"]
+          },
+          {
+            foreignKeyName: "bloodwork_panels_dna_report_id_fkey"
+            columns: ["dna_report_id"]
+            isOneToOne: false
             referencedRelation: "dna_reports"
             referencedColumns: ["id"]
           },
@@ -443,6 +450,129 @@ export type Database = {
         }
         Relationships: []
       }
+      dna_report_failures: {
+        Row: {
+          attempt_number: number | null
+          created_at: string | null
+          description: string | null
+          failure_code: string
+          failure_type: string
+          id: string
+          report_id: string
+          resolved: boolean | null
+          resolved_by: string | null
+        }
+        Insert: {
+          attempt_number?: number | null
+          created_at?: string | null
+          description?: string | null
+          failure_code: string
+          failure_type: string
+          id?: string
+          report_id: string
+          resolved?: boolean | null
+          resolved_by?: string | null
+        }
+        Update: {
+          attempt_number?: number | null
+          created_at?: string | null
+          description?: string | null
+          failure_code?: string
+          failure_type?: string
+          id?: string
+          report_id?: string
+          resolved?: boolean | null
+          resolved_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "dna_report_failures_report_id_fkey"
+            columns: ["report_id"]
+            isOneToOne: false
+            referencedRelation: "admin_pipeline_quality"
+            referencedColumns: ["report_id"]
+          },
+          {
+            foreignKeyName: "dna_report_failures_report_id_fkey"
+            columns: ["report_id"]
+            isOneToOne: false
+            referencedRelation: "dna_reports"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      dna_report_quality: {
+        Row: {
+          completeness_score: number | null
+          created_at: string | null
+          cross_reference_score: number | null
+          hard_failure_count: number | null
+          id: string
+          injected_fields: string[] | null
+          issues: string[] | null
+          model_used: string | null
+          personalisation_score: number | null
+          quality_score: number
+          report_id: string
+          retry_count: number | null
+          soft_failure_count: number | null
+          specificity_score: number | null
+          synthesis_duration_ms: number | null
+          synthesis_tokens: number | null
+        }
+        Insert: {
+          completeness_score?: number | null
+          created_at?: string | null
+          cross_reference_score?: number | null
+          hard_failure_count?: number | null
+          id?: string
+          injected_fields?: string[] | null
+          issues?: string[] | null
+          model_used?: string | null
+          personalisation_score?: number | null
+          quality_score: number
+          report_id: string
+          retry_count?: number | null
+          soft_failure_count?: number | null
+          specificity_score?: number | null
+          synthesis_duration_ms?: number | null
+          synthesis_tokens?: number | null
+        }
+        Update: {
+          completeness_score?: number | null
+          created_at?: string | null
+          cross_reference_score?: number | null
+          hard_failure_count?: number | null
+          id?: string
+          injected_fields?: string[] | null
+          issues?: string[] | null
+          model_used?: string | null
+          personalisation_score?: number | null
+          quality_score?: number
+          report_id?: string
+          retry_count?: number | null
+          soft_failure_count?: number | null
+          specificity_score?: number | null
+          synthesis_duration_ms?: number | null
+          synthesis_tokens?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "dna_report_quality_report_id_fkey"
+            columns: ["report_id"]
+            isOneToOne: true
+            referencedRelation: "admin_pipeline_quality"
+            referencedColumns: ["report_id"]
+          },
+          {
+            foreignKeyName: "dna_report_quality_report_id_fkey"
+            columns: ["report_id"]
+            isOneToOne: true
+            referencedRelation: "dna_reports"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       dna_reports: {
         Row: {
           assessment_tier: string | null
@@ -453,6 +583,16 @@ export type Database = {
           lifestyle_context: Json | null
           narrative: string | null
           overall_score: number | null
+          pipeline_duration_ms: number | null
+          pipeline_error: string | null
+          pipeline_injected: string[] | null
+          pipeline_issues: string[] | null
+          pipeline_progress: number | null
+          pipeline_quality_score: number | null
+          pipeline_retry_count: number | null
+          pipeline_status: string | null
+          pipeline_timings: Json | null
+          pipeline_updated_at: string | null
           plan_start_date: string | null
           report_json: Json
           updated_at: string
@@ -467,6 +607,16 @@ export type Database = {
           lifestyle_context?: Json | null
           narrative?: string | null
           overall_score?: number | null
+          pipeline_duration_ms?: number | null
+          pipeline_error?: string | null
+          pipeline_injected?: string[] | null
+          pipeline_issues?: string[] | null
+          pipeline_progress?: number | null
+          pipeline_quality_score?: number | null
+          pipeline_retry_count?: number | null
+          pipeline_status?: string | null
+          pipeline_timings?: Json | null
+          pipeline_updated_at?: string | null
           plan_start_date?: string | null
           report_json: Json
           updated_at?: string
@@ -481,6 +631,16 @@ export type Database = {
           lifestyle_context?: Json | null
           narrative?: string | null
           overall_score?: number | null
+          pipeline_duration_ms?: number | null
+          pipeline_error?: string | null
+          pipeline_injected?: string[] | null
+          pipeline_issues?: string[] | null
+          pipeline_progress?: number | null
+          pipeline_quality_score?: number | null
+          pipeline_retry_count?: number | null
+          pipeline_status?: string | null
+          pipeline_timings?: Json | null
+          pipeline_updated_at?: string | null
           plan_start_date?: string | null
           report_json?: Json
           updated_at?: string
@@ -490,30 +650,46 @@ export type Database = {
       }
       dna_reviews: {
         Row: {
+          accuracy_rating: number | null
           created_at: string
+          feedback_text: string | null
           id: string
           note: string | null
           rating: number
           report_id: string
+          section_feedback: Json | null
           user_id: string
         }
         Insert: {
+          accuracy_rating?: number | null
           created_at?: string
+          feedback_text?: string | null
           id?: string
           note?: string | null
           rating: number
           report_id: string
+          section_feedback?: Json | null
           user_id: string
         }
         Update: {
+          accuracy_rating?: number | null
           created_at?: string
+          feedback_text?: string | null
           id?: string
           note?: string | null
           rating?: number
           report_id?: string
+          section_feedback?: Json | null
           user_id?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "dna_reviews_report_id_fkey"
+            columns: ["report_id"]
+            isOneToOne: false
+            referencedRelation: "admin_pipeline_quality"
+            referencedColumns: ["report_id"]
+          },
           {
             foreignKeyName: "dna_reviews_report_id_fkey"
             columns: ["report_id"]
@@ -1167,6 +1343,13 @@ export type Database = {
           weeks_on_protocol?: number | null
         }
         Relationships: [
+          {
+            foreignKeyName: "outcome_records_dna_report_id_fkey"
+            columns: ["dna_report_id"]
+            isOneToOne: false
+            referencedRelation: "admin_pipeline_quality"
+            referencedColumns: ["report_id"]
+          },
           {
             foreignKeyName: "outcome_records_dna_report_id_fkey"
             columns: ["dna_report_id"]
@@ -2791,6 +2974,28 @@ export type Database = {
       }
     }
     Views: {
+      admin_pipeline_quality: {
+        Row: {
+          completeness_score: number | null
+          created_at: string | null
+          cross_reference_score: number | null
+          hard_failure_count: number | null
+          injection_count: number | null
+          issue_count: number | null
+          overall_score: number | null
+          personalisation_score: number | null
+          pipeline_duration_ms: number | null
+          pipeline_quality_score: number | null
+          pipeline_retry_count: number | null
+          pipeline_status: string | null
+          report_id: string | null
+          soft_failure_count: number | null
+          specificity_score: number | null
+          synthesis_tokens: number | null
+          user_id: string | null
+        }
+        Relationships: []
+      }
       benefit_vote_counts: {
         Row: {
           benefit: string | null
