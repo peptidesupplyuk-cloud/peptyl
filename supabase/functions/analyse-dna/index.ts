@@ -47,6 +47,7 @@ Deno.serve(async (req) => {
       body: JSON.stringify({
         reportId, userId, inputText, method,
         tier: tier || "standard", lifestyleContext,
+        callbackUrl: `${Deno.env.get("SUPABASE_URL")}/functions/v1/pipeline-callback`,
       }),
     });
 
