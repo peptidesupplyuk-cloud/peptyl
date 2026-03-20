@@ -9,6 +9,14 @@ export interface BlogPost {
 
 export const blogPosts: BlogPost[] = [
   {
+    slug: "endotoxin-purity-peptides",
+    title: "Endotoxin Purity: Why It Is Non-Negotiable for Peptides and Supplements",
+    category: "Purity & Safety",
+    excerpt: "Endotoxin contamination in peptides can trigger inflammation, cytokine storms, and compromised results. Learn how LAL testing and supplier verification protect your protocols.",
+    readTime: "10 min read",
+    date: "March 2026",
+  },
+  {
     slug: "peptide-craze-biohacking",
     title: "Inside the Peptide Craze Sweeping the Biohacking World",
     category: "Deep Dive",
