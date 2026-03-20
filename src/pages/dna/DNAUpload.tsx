@@ -12,7 +12,8 @@ import SEO from "@/components/SEO";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
-import { useBloodworkPanels, useSaveBloodwork } from "@/hooks/use-bloodwork";
+import { useBloodworkPanels } from "@/hooks/use-bloodwork";
+import BloodworkForm from "@/components/dashboard/BloodworkForm";
 import { BIOMARKERS } from "@/data/biomarker-ranges";
 
 const TARGET_RSIDS = new Set([
