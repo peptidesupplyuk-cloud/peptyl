@@ -1,11 +1,16 @@
 interface BiomarkerResult {
-  marker: string;
+  // New field names
+  name?: string;
+  marker?: string; // Legacy
   value: number;
   unit: string;
   status: string;
-  optimal_range: string;
-  action: string;
+  range_normal?: string;
+  optimal_range?: string; // Legacy
+  interpretation?: string;
+  action?: string; // Legacy
   gene_interaction?: string;
+  trend?: string;
 }
 
 interface Props {
@@ -33,29 +38,41 @@ const BiomarkerBars = ({ biomarkers }: Props) => {
     <div>
       <h2 className="text-xl font-heading font-bold text-foreground mb-4">Biomarker Results</h2>
       <div className="space-y-3">
-        {biomarkers.map((b, i) => (
-          <div key={i} className={`rounded-xl p-4 border border-border ${statusBg(b.status)}`}>
-            <div className="flex items-center justify-between mb-2">
-              <div>
-                <span className="font-heading font-semibold text-foreground text-sm">{b.marker}</span>
-                <span className="text-xs text-muted-foreground ml-2">Optimal: {b.optimal_range}</span>
+        {biomarkers.map((b, i) => {
+          const label = b.name || b.marker || "Unknown";
+          const range = b.range_normal || b.optimal_range || "";
+          const detail = b.interpretation || b.action || "";
+
+          return (
+            <div key={i} className={`rounded-xl p-4 border border-border ${statusBg(b.status)}`}>
+              <div className="flex items-center justify-between mb-2">
+                <div>
+                  <span className="font-heading font-semibold text-foreground text-sm">{label}</span>
+                  {range && <span className="text-xs text-muted-foreground ml-2">Optimal: {range}</span>}
+                </div>
+                <div className="flex items-center gap-2">
+                  {b.trend && (
+                    <span className="text-[10px] text-muted-foreground">{b.trend}</span>
+                  )}
+                  <span className={`text-xs font-medium px-2.5 py-1 rounded-full ${statusColor(b.status)}`}>
+                    {b.status}
+                  </span>
+                </div>
               </div>
-              <span className={`text-xs font-medium px-2.5 py-1 rounded-full ${statusColor(b.status)}`}>
-                {b.status}
-              </span>
-            </div>
 
-            <div className="flex items-baseline gap-1 mb-2">
-              <span className="text-lg font-heading font-bold text-foreground">{b.value}</span>
-              <span className="text-xs text-muted-foreground">{b.unit}</span>
-            </div>
+              <div className="flex items-baseline gap-1 mb-2">
+                <span className="text-lg font-heading font-bold text-foreground tabular-nums">{b.value}</span>
+                <span className="text-xs text-muted-foreground">{b.unit}</span>
+              </div>
 
-            <p className="text-xs text-foreground mb-1">{b.action}</p>
-            {b.gene_interaction && (
-              <p className="text-xs text-primary font-medium">🧬 {b.gene_interaction}</p>
-            )}
-          </div>
-        ))}
+              {detail && <p className="text-xs text-foreground mb-1">{detail}</p>}
+
+              {b.gene_interaction && (
+                <p className="text-xs text-primary font-medium mt-1">🧬 {b.gene_interaction}</p>
+              )}
+            </div>
+          );
+        })}
       </div>
     </div>
   );

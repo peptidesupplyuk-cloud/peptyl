@@ -1,0 +1,56 @@
+import { Target } from "lucide-react";
+
+interface Priority {
+  priority: string;
+  timeline?: string;
+  why?: string;
+  actions?: string[];
+}
+
+interface Props {
+  priorities?: Priority[];
+}
+
+const HealthPriorities = ({ priorities }: Props) => {
+  if (!priorities?.length) return null;
+
+  return (
+    <div>
+      <h2 className="text-xl font-heading font-bold text-foreground mb-4">Health Priorities</h2>
+      <div className="space-y-4">
+        {priorities.map((p, i) => (
+          <div key={i} className="bg-card border border-border rounded-xl p-5">
+            <div className="flex items-start gap-3 mb-3">
+              <div className="w-7 h-7 rounded-lg bg-primary/10 flex items-center justify-center shrink-0 mt-0.5">
+                <span className="text-xs font-bold text-primary">{i + 1}</span>
+              </div>
+              <div className="flex-1">
+                <h3 className="font-heading font-semibold text-foreground text-sm">{p.priority}</h3>
+                {p.timeline && (
+                  <span className="text-[10px] text-muted-foreground bg-muted px-2 py-0.5 rounded mt-1 inline-block">
+                    {p.timeline}
+                  </span>
+                )}
+              </div>
+            </div>
+            {p.why && (
+              <p className="text-xs text-muted-foreground mb-3">{p.why}</p>
+            )}
+            {p.actions && p.actions.length > 0 && (
+              <ul className="space-y-1.5">
+                {p.actions.map((a, j) => (
+                  <li key={j} className="flex items-start gap-2 text-xs text-foreground">
+                    <span className="text-primary shrink-0 mt-1 text-[8px]">●</span>
+                    <span>{a}</span>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+};
+
+export default HealthPriorities;

@@ -1,12 +1,21 @@
+interface CategoryScore {
+  score: number;
+  status?: string;
+  trend?: string;
+}
+
 interface Props {
   healthScore?: {
     overall?: number;
+    categories?: Record<string, CategoryScore>;
+    // Legacy fields
     genetics_score?: number;
     biomarker_score?: number;
     lifestyle_score?: number;
     label?: string;
     summary?: string;
   };
+  overallScore?: number; // from dna_reports.overall_score
   meta?: {
     confidence?: string;
     variants_detected?: string[];
@@ -14,6 +23,8 @@ interface Props {
     data_quality_notes?: string;
   };
   narrative?: string;
+  personalisedSummary?: string;
+  qualityScore?: number;
 }
 
 const ScoreGauge = ({ score }: { score: number }) => {
@@ -43,6 +54,42 @@ const ScoreGauge = ({ score }: { score: number }) => {
   );
 };
 
+const categoryLabels: Record<string, string> = {
+  methylation: "Methylation",
+  detoxification: "Detoxification",
+  cardiovascular: "Cardiovascular",
+  metabolic: "Metabolic",
+  inflammation: "Inflammation",
+  tissue_repair: "Tissue Repair",
+  sleep_circadian: "Sleep & Circadian",
+  cognitive_mood: "Cognitive & Mood",
+  longevity: "Longevity",
+  pharmacogenomics: "Pharmacogenomics",
+  nutrient: "Nutrient Status",
+};
+
+const statusDot = (status?: string) => {
+  const s = status?.toLowerCase();
+  if (s === "optimal" || s === "good") return "bg-primary";
+  if (s === "suboptimal" || s === "moderate") return "bg-yellow-500";
+  return "bg-destructive";
+};
+
+const CategoryBar = ({ name, cat }: { name: string; cat: CategoryScore }) => (
+  <div>
+    <div className="flex justify-between text-sm mb-1">
+      <span className="text-muted-foreground flex items-center gap-1.5">
+        <span className={`h-1.5 w-1.5 rounded-full ${statusDot(cat.status)}`} />
+        {categoryLabels[name] || name}
+      </span>
+      <span className="text-foreground font-medium tabular-nums">{cat.score}</span>
+    </div>
+    <div className="h-2 bg-muted rounded-full overflow-hidden">
+      <div className="h-full bg-primary rounded-full transition-all duration-700" style={{ width: `${cat.score}%` }} />
+    </div>
+  </div>
+);
+
 const ProgressBar = ({ label, value }: { label: string; value: number }) => (
   <div>
     <div className="flex justify-between text-sm mb-1">
@@ -55,13 +102,26 @@ const ProgressBar = ({ label, value }: { label: string; value: number }) => (
   </div>
 );
 
-const ReportHeader = ({ healthScore, meta, narrative }: Props) => {
-  const score = healthScore?.overall ?? 0;
+const ReportHeader = ({ healthScore, overallScore, meta, narrative, personalisedSummary, qualityScore }: Props) => {
+  // Prefer DB-level overall_score, then health_score.overall
+  const score = overallScore ?? healthScore?.overall ?? 0;
+
+  // Use new categories if available, fall back to legacy
+  const categories = healthScore?.categories;
+  const hasCategories = categories && Object.keys(categories).length > 0;
+  const hasLegacy = !hasCategories && (healthScore?.genetics_score != null || healthScore?.biomarker_score != null || healthScore?.lifestyle_score != null);
 
   return (
     <div className="bg-card border border-border rounded-xl p-6 md:p-8">
       <div className="flex flex-col md:flex-row items-center gap-6">
-        <ScoreGauge score={score} />
+        <div className="relative">
+          <ScoreGauge score={score} />
+          {qualityScore != null && (
+            <span className="absolute -bottom-1 left-1/2 -translate-x-1/2 text-[10px] text-muted-foreground bg-muted px-2 py-0.5 rounded-full whitespace-nowrap">
+              Quality: {qualityScore}%
+            </span>
+          )}
+        </div>
         <div className="flex-1 space-y-4">
           <div>
             <h1 className="text-2xl font-heading font-bold text-foreground">Your Health Assessment</h1>
@@ -78,11 +138,24 @@ const ReportHeader = ({ healthScore, meta, narrative }: Props) => {
           {healthScore?.summary && (
             <p className="text-sm text-muted-foreground">{healthScore.summary}</p>
           )}
-          <div className="space-y-3 max-w-sm">
-            {healthScore?.genetics_score != null && <ProgressBar label="Genetics" value={healthScore.genetics_score} />}
-            {healthScore?.biomarker_score != null && <ProgressBar label="Biomarkers" value={healthScore.biomarker_score} />}
-            {healthScore?.lifestyle_score != null && <ProgressBar label="Lifestyle" value={healthScore.lifestyle_score} />}
-          </div>
+
+          {/* New category bars */}
+          {hasCategories && (
+            <div className="space-y-2.5 max-w-md">
+              {Object.entries(categories!).slice(0, 6).map(([key, cat]) => (
+                <CategoryBar key={key} name={key} cat={cat as CategoryScore} />
+              ))}
+            </div>
+          )}
+
+          {/* Legacy progress bars */}
+          {hasLegacy && (
+            <div className="space-y-3 max-w-sm">
+              {healthScore?.genetics_score != null && <ProgressBar label="Genetics" value={healthScore.genetics_score} />}
+              {healthScore?.biomarker_score != null && <ProgressBar label="Biomarkers" value={healthScore.biomarker_score} />}
+              {healthScore?.lifestyle_score != null && <ProgressBar label="Lifestyle" value={healthScore.lifestyle_score} />}
+            </div>
+          )}
         </div>
       </div>
 
@@ -94,6 +167,18 @@ const ReportHeader = ({ healthScore, meta, narrative }: Props) => {
             meta.confidence === "medium" ? "bg-yellow-500/10 text-yellow-600" :
             "bg-destructive/10 text-destructive"
           }`}>{meta.confidence}</span>
+        </div>
+      )}
+
+      {/* Personalised summary */}
+      {personalisedSummary && (
+        <div className="mt-6 pt-6 border-t border-border">
+          <h3 className="text-sm font-heading font-semibold text-foreground mb-3">Personalised Summary</h3>
+          <div className="text-sm text-foreground leading-relaxed space-y-3">
+            {personalisedSummary.split("\n\n").map((p, i) => (
+              <p key={i}>{p}</p>
+            ))}
+          </div>
         </div>
       )}
 

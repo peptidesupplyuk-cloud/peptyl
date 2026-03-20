@@ -1,11 +1,20 @@
+import { useState } from "react";
+import { Info } from "lucide-react";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+
 interface GeneResult {
   gene: string;
-  variant: string;
+  variant?: string;
+  genotype?: string;
   rsid: string;
   risk_level: string;
-  score: number;
+  score?: number;
+  category?: string;
   clinical_summary: string;
-  action: string;
+  personalisation?: string;
+  biomarker_impact?: string;
+  evidence_grade?: string;
+  action?: string;
   peptyl_relevant?: boolean;
 }
 
@@ -20,6 +29,13 @@ const riskColor = (level: string) => {
   return "bg-destructive/10 text-destructive";
 };
 
+const gradeColor = (g?: string) => {
+  if (g === "A") return "bg-primary/10 text-primary";
+  if (g === "B") return "bg-blue-500/10 text-blue-600";
+  if (g === "C") return "bg-amber-500/10 text-amber-600";
+  return "bg-muted text-muted-foreground";
+};
+
 const GeneCards = ({ genes }: Props) => {
   if (!genes?.length) return null;
 
@@ -31,8 +47,22 @@ const GeneCards = ({ genes }: Props) => {
           <div key={i} className="bg-card border border-border rounded-xl p-5">
             <div className="flex items-start justify-between mb-3">
               <div>
-                <h3 className="font-heading font-semibold text-foreground">{g.gene}</h3>
-                <p className="text-xs text-muted-foreground font-mono">{g.rsid} — {g.variant}</p>
+                <div className="flex items-center gap-2">
+                  <h3 className="font-heading font-semibold text-foreground">{g.gene}</h3>
+                  {g.evidence_grade && (
+                    <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded ${gradeColor(g.evidence_grade)}`}>
+                      {g.evidence_grade}
+                    </span>
+                  )}
+                </div>
+                <p className="text-xs text-muted-foreground font-mono">
+                  {g.rsid} {g.genotype ? `— ${g.genotype}` : g.variant ? `— ${g.variant}` : ""}
+                </p>
+                {g.category && (
+                  <span className="text-[10px] text-muted-foreground bg-muted px-1.5 py-0.5 rounded mt-1 inline-block">
+                    {g.category}
+                  </span>
+                )}
               </div>
               <span className={`text-xs font-medium px-2.5 py-1 rounded-full ${riskColor(g.risk_level)}`}>
                 {g.risk_level}
@@ -40,19 +70,50 @@ const GeneCards = ({ genes }: Props) => {
             </div>
 
             {/* Score bar */}
-            <div className="mb-3">
-              <div className="h-1.5 bg-muted rounded-full overflow-hidden">
-                <div className="h-full bg-primary rounded-full" style={{ width: `${g.score}%` }} />
+            {g.score != null && (
+              <div className="mb-3">
+                <div className="h-1.5 bg-muted rounded-full overflow-hidden">
+                  <div className="h-full bg-primary rounded-full" style={{ width: `${g.score}%` }} />
+                </div>
+                <p className="text-xs text-muted-foreground mt-1">Score: {g.score}/100</p>
               </div>
-              <p className="text-xs text-muted-foreground mt-1">Score: {g.score}/100</p>
-            </div>
+            )}
 
             <p className="text-sm text-foreground mb-3">{g.clinical_summary}</p>
 
-            <div className="bg-muted/50 rounded-lg px-3 py-2">
-              <p className="text-xs font-medium text-foreground mb-1">Recommended Action</p>
-              <p className="text-xs text-muted-foreground">{g.action}</p>
-            </div>
+            {/* Personalisation */}
+            {g.personalisation && (
+              <p className="text-xs text-primary mb-3">{g.personalisation}</p>
+            )}
+
+            {/* Biomarker impact tooltip */}
+            {g.biomarker_impact && (
+              <TooltipProvider>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <button className="flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground transition-colors mb-3">
+                      <Info className="h-3 w-3" />
+                      Biomarker impact
+                    </button>
+                  </TooltipTrigger>
+                  <TooltipContent side="bottom" className="max-w-xs">
+                    <p className="text-xs">{g.biomarker_impact}</p>
+                  </TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
+            )}
+
+            {/* Evidence grade note for C/D */}
+            {(g.evidence_grade === "C" || g.evidence_grade === "D") && (
+              <p className="text-[10px] text-muted-foreground italic mb-3">Preclinical evidence</p>
+            )}
+
+            {g.action && (
+              <div className="bg-muted/50 rounded-lg px-3 py-2">
+                <p className="text-xs font-medium text-foreground mb-1">Recommended Action</p>
+                <p className="text-xs text-muted-foreground">{g.action}</p>
+              </div>
+            )}
           </div>
         ))}
       </div>
