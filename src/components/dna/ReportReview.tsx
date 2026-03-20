@@ -12,14 +12,31 @@ interface ReportReviewProps {
   existingReview?: { rating: number; note: string | null } | null;
 }
 
+const SECTION_OPTIONS = [
+  "Action Plan",
+  "Supplements",
+  "Peptides",
+  "Genetics Detail",
+  "Diet",
+  "Training",
+  "Hormones",
+];
+
 const ReportReview = ({ reportId, existingReview }: ReportReviewProps) => {
   const { user } = useAuth();
   const { toast } = useToast();
   const [rating, setRating] = useState(existingReview?.rating ?? 0);
   const [hoveredStar, setHoveredStar] = useState(0);
   const [note, setNote] = useState(existingReview?.note ?? "");
+  const [selectedSections, setSelectedSections] = useState<string[]>([]);
   const [submitted, setSubmitted] = useState(!!existingReview);
   const [saving, setSaving] = useState(false);
+
+  const toggleSection = (s: string) => {
+    setSelectedSections((prev) =>
+      prev.includes(s) ? prev.filter((x) => x !== s) : [...prev, s]
+    );
+  };
 
   const handleSubmit = async () => {
     if (!user || rating === 0) return;
@@ -30,12 +47,17 @@ const ReportReview = ({ reportId, existingReview }: ReportReviewProps) => {
       user_id: user.id,
       rating,
       note: note.trim() || null,
+      section_feedback: selectedSections.length > 0 ? selectedSections : null,
     };
 
     const { error } = existingReview
       ? await supabase
           .from("dna_reviews" as any)
-          .update({ rating, note: note.trim() || null } as any)
+          .update({
+            rating,
+            note: note.trim() || null,
+            section_feedback: selectedSections.length > 0 ? selectedSections : null,
+          } as any)
           .eq("report_id", reportId)
           .eq("user_id", user.id)
       : await supabase.from("dna_reviews" as any).insert(payload as any);
@@ -99,7 +121,31 @@ const ReportReview = ({ reportId, existingReview }: ReportReviewProps) => {
             </div>
 
             {rating > 0 && (
-              <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: "auto" }} className="space-y-3">
+              <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: "auto" }} className="space-y-4">
+                {/* Section feedback */}
+                <div>
+                  <p className="text-sm text-foreground font-medium mb-2">Which sections were most useful?</p>
+                  <div className="flex flex-wrap justify-center gap-2">
+                    {SECTION_OPTIONS.map((section) => {
+                      const active = selectedSections.includes(section);
+                      return (
+                        <button
+                          key={section}
+                          type="button"
+                          onClick={() => toggleSection(section)}
+                          className={`text-xs px-3 py-1.5 rounded-full border transition-colors ${
+                            active
+                              ? "bg-primary/10 border-primary/30 text-primary font-medium"
+                              : "bg-muted/30 border-border text-muted-foreground hover:bg-muted/50"
+                          }`}
+                        >
+                          {section}
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+
                 <Textarea
                   placeholder="Quick thoughts? (optional)"
                   value={note}
