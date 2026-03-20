@@ -6,25 +6,27 @@ import Footer from "@/components/Footer";
 import SEO from "@/components/SEO";
 import { Loader2 } from "lucide-react";
 import ReportHeader from "@/components/dna/ReportHeader";
-import FlagsPanel from "@/components/dna/FlagsPanel";
 import TopFindings from "@/components/dna/TopFindings";
-import HealthPriorities from "@/components/dna/HealthPriorities";
+import FlagsPanel from "@/components/dna/FlagsPanel";
+import ActionPlan from "@/components/dna/ActionPlan";
+import CreateProtocolCTA from "@/components/dna/CreateProtocolCTA";
+import SectionDivider from "@/components/dna/SectionDivider";
+import SupplementTable from "@/components/dna/SupplementTable";
+import PeptideProtocolPanel from "@/components/dna/PeptideProtocolPanel";
+import HormonalAssessmentPanel from "@/components/dna/HormonalAssessmentPanel";
+import GLP1AssessmentPanel from "@/components/dna/GLP1AssessmentPanel";
+import PersonalisationCard from "@/components/dna/PersonalisationCard";
 import GeneCards from "@/components/dna/GeneCards";
 import BiomarkerBars from "@/components/dna/BiomarkerBars";
-import DrugInteractionPanel from "@/components/dna/DrugInteractionPanel";
-import SupplementTable from "@/components/dna/SupplementTable";
-import PersonalisationCard from "@/components/dna/PersonalisationCard";
-import PeptideProtocolPanel from "@/components/dna/PeptideProtocolPanel";
-import GLP1AssessmentPanel from "@/components/dna/GLP1AssessmentPanel";
-import HormonalAssessmentPanel from "@/components/dna/HormonalAssessmentPanel";
 import DietRecommendations from "@/components/dna/DietRecommendations";
 import TrainingRecommendations from "@/components/dna/TrainingRecommendations";
-import ActionPlan from "@/components/dna/ActionPlan";
+import DrugInteractionPanel from "@/components/dna/DrugInteractionPanel";
+import OutcomeInsights from "@/components/dna/OutcomeInsights";
+import CreateProtocolFromReport from "@/components/dna/CreateProtocolFromReport";
 import LegalDisclaimer from "@/components/dna/LegalDisclaimer";
 import ReportReview from "@/components/dna/ReportReview";
-import CreateProtocolFromReport from "@/components/dna/CreateProtocolFromReport";
-import OutcomeInsights from "@/components/dna/OutcomeInsights";
 import ResearchCitations from "@/components/dna/ResearchCitations";
+import HealthPriorities from "@/components/dna/HealthPriorities";
 import { useAuth } from "@/contexts/AuthContext";
 
 const DNAReport = () => {
@@ -121,17 +123,13 @@ const DNAReport = () => {
             </div>
           ) : (
           <>
-          {/* Tier badge + quality + PDF */}
+          {/* Tier badge + PDF */}
           <div className="flex items-center justify-between flex-wrap gap-2">
-            <div className="flex items-center gap-2">
-              <span className={`text-xs font-semibold px-3 py-1 rounded-full ${
-                isAdvanced
-                  ? "bg-primary/10 text-primary"
-                  : "bg-muted text-muted-foreground"
-              }`}>
-                {isAdvanced ? "Advanced ✦" : "Standard"}
-              </span>
-            </div>
+            <span className={`text-xs font-semibold px-3 py-1 rounded-full ${
+              isAdvanced ? "bg-primary/10 text-primary" : "bg-muted text-muted-foreground"
+            }`}>
+              {isAdvanced ? "Advanced ✦" : "Standard"}
+            </span>
             <button
               onClick={() => window.print()}
               className="flex items-center gap-2 text-xs font-medium text-muted-foreground hover:text-foreground border border-border rounded-lg px-3 py-2 hover:bg-muted/30 transition-colors"
@@ -143,6 +141,7 @@ const DNAReport = () => {
             </button>
           </div>
 
+          {/* ── Overview ── */}
           <ReportHeader
             healthScore={r.health_score}
             overallScore={report.overall_score}
@@ -151,36 +150,50 @@ const DNAReport = () => {
             personalisedSummary={r.personalised_summary}
             qualityScore={report.pipeline_quality_score}
           />
+          <TopFindings geneResults={r.gene_results} biomarkerResults={r.biomarker_results} flags={r.flags} />
           <FlagsPanel flags={r.flags} />
-          <TopFindings findings={r.top_findings} />
           <HealthPriorities priorities={r.health_priorities} />
+          <ActionPlan plan={r.action_plan} />
+          <CreateProtocolCTA supplements={r.supplement_protocol} peptides={r.peptide_protocol} reportId={id!} />
+
+          {/* ── Your Protocol ── */}
+          <SectionDivider title="Your Protocol" />
+          <SupplementTable supplements={r.supplement_protocol} />
+          {isAdvanced && <PeptideProtocolPanel peptides={r.peptide_protocol} />}
+          {isAdvanced && <HormonalAssessmentPanel hormonal={r.hormonal_assessment} />}
+          {isAdvanced && <GLP1AssessmentPanel glp1={r.glp1_assessment} />}
+
+          {/* ── Deep Dive: Genetics ── */}
+          <SectionDivider title="Deep Dive: Your Genetics" subtitle="Detailed analysis of each variant. Tap to expand." />
+          {isAdvanced && <PersonalisationCard data={r.personalisation} />}
           <GeneCards genes={r.gene_results} />
           <BiomarkerBars biomarkers={r.biomarker_results} />
-          <DrugInteractionPanel interactions={r.drug_interactions} />
-          <SupplementTable supplements={r.supplement_protocol} />
 
-          {/* Advanced-only sections */}
+          {/* ── Lifestyle Optimisation (advanced only) ── */}
           {isAdvanced && (
             <>
-              <PersonalisationCard data={r.personalisation} />
-              <PeptideProtocolPanel peptides={r.peptide_protocol} />
-              <HormonalAssessmentPanel hormonal={r.hormonal_assessment} />
-              <GLP1AssessmentPanel glp1={r.glp1_assessment} />
+              <SectionDivider title="Lifestyle Optimisation" />
               <DietRecommendations data={r.diet_recommendations} />
               <TrainingRecommendations data={r.training_recommendations} />
             </>
           )}
 
-          <ActionPlan plan={r.action_plan} />
+          {/* ── Reference & Safety ── */}
+          <SectionDivider title="Reference & Safety" />
+          <DrugInteractionPanel interactions={r.drug_interactions} />
           <ResearchCitations citations={r.research_citations} />
           <OutcomeInsights reportId={id!} genotypeKey={buildGenotypeKey(r.gene_results)} />
-          {(r.supplement_protocol?.length > 0 || r.peptide_protocol?.length > 0) && (
-            <CreateProtocolFromReport
-              supplements={r.supplement_protocol ?? []}
-              peptides={r.peptide_protocol ?? []}
-              reportId={id!}
-            />
-          )}
+
+          <div id="create-protocol-section">
+            {(r.supplement_protocol?.length > 0 || r.peptide_protocol?.length > 0) && (
+              <CreateProtocolFromReport
+                supplements={r.supplement_protocol ?? []}
+                peptides={r.peptide_protocol ?? []}
+                reportId={id!}
+              />
+            )}
+          </div>
+
           <LegalDisclaimer />
           {review !== undefined && (
             <ReportReview reportId={id!} existingReview={review} />
