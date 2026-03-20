@@ -312,6 +312,26 @@ const DNAUpload = () => {
 
     const lifestyleContext = buildLifestyleContext();
 
+    // Create the dna_reports row first so we have a reportId for the pipeline
+    const { data: newReport, error: insertErr } = await supabase
+      .from("dna_reports")
+      .insert({
+        user_id: user.id,
+        input_method: method,
+        report_json: {},
+        assessment_tier: tier,
+        lifestyle_context: lifestyleContext,
+        pipeline_status: "queued",
+        pipeline_progress: 0,
+      })
+      .select("id")
+      .single();
+
+    if (insertErr || !newReport) {
+      toast({ title: "Could not start analysis", description: insertErr?.message || "Please try again.", variant: "destructive" });
+      return;
+    }
+
     navigate("/dna/analysing", {
       state: {
         inputText: method === "image" ? "" : inputText,
@@ -320,6 +340,7 @@ const DNAUpload = () => {
         userId: user.id,
         tier,
         lifestyleContext,
+        reportId: newReport.id,
       },
     });
   };
