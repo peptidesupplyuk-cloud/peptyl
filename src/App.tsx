@@ -75,6 +75,7 @@ const MyostatinBlockers = lazy(() => import("./pages/articles/MyostatinBlockers"
 const Fgf21Longevity = lazy(() => import("./pages/articles/Fgf21Longevity"));
 const PeptideStackingGuide = lazy(() => import("./pages/articles/PeptideStackingGuide"));
 const SemaxSelankGuide = lazy(() => import("./pages/articles/SemaxSelankGuide"));
+const EndotoxinPurity = lazy(() => import("./pages/articles/EndotoxinPurity"));
 const Glossary = lazy(() => import("./pages/Glossary"));
 const SiteMapPage = lazy(() => import("./pages/SiteMap"));
 const CampaignPage = lazy(() => import("./pages/CampaignPage"));
@@ -153,6 +154,7 @@ const AppContent = () => {
           <Route path="/education/fgf21-metabolic-longevity" element={<Fgf21Longevity />} />
           <Route path="/education/peptide-stacking-guide" element={<PeptideStackingGuide />} />
           <Route path="/education/semax-selank-dosage-guide" element={<SemaxSelankGuide />} />
+          <Route path="/education/endotoxin-purity-peptides" element={<EndotoxinPurity />} />
           <Route path="/glossary" element={<Glossary />} />
           <Route path="/sitemap" element={<SiteMapPage />} />
           <Route path="/whoop-callback" element={<WhoopCallback />} />
