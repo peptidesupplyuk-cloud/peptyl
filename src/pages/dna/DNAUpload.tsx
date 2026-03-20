@@ -94,9 +94,7 @@ const DNAUpload = () => {
 
   // Bloodwork integration
   const { data: panels = [] } = useBloodworkPanels();
-  const saveBloodwork = useSaveBloodwork();
   const [showBloodworkEntry, setShowBloodworkEntry] = useState(false);
-  const [bloodworkValues, setBloodworkValues] = useState<Record<string, string>>({});
   const [bloodworkSaved, setBloodworkSaved] = useState(false);
   const [showBloodworkDetails, setShowBloodworkDetails] = useState(false);
 
