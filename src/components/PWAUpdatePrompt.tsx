@@ -5,16 +5,37 @@ const PWAUpdatePrompt = () => {
   useRegisterSW({
     onRegisteredSW(_swUrl, registration) {
       if (registration) {
-        setInterval(() => registration.update(), 5 * 60 * 1000);
+        // Check for updates every 60 seconds (was 5 min)
+        setInterval(() => registration.update(), 60 * 1000);
+        // Also force an immediate check
+        registration.update();
       }
     },
   });
 
   React.useEffect(() => {
+    // On mount, aggressively clear all caches and force SW update
+    const nukeCaches = async () => {
+      if ("caches" in window) {
+        const names = await caches.keys();
+        await Promise.all(names.map((n) => caches.delete(n)));
+      }
+      if ("serviceWorker" in navigator) {
+        const reg = await navigator.serviceWorker.getRegistration();
+        if (reg) {
+          await reg.update();
+          // If a waiting worker exists, tell it to activate now
+          if (reg.waiting) {
+            reg.waiting.postMessage({ type: "SKIP_WAITING" });
+          }
+        }
+      }
+    };
+    nukeCaches();
+
     // Reload once when a new service worker takes control mid-session
     if ("serviceWorker" in navigator) {
       navigator.serviceWorker.addEventListener("controllerchange", () => {
-        // Guard against infinite reload loops
         const key = "pwa-reloaded-at";
         const last = sessionStorage.getItem(key);
         if (last && Date.now() - Number(last) < 5000) return;
