@@ -18,7 +18,7 @@ export default defineConfig(({ mode }) => ({
     mode === "development" && componentTagger(),
     VitePWA({
       registerType: "autoUpdate",
-      includeAssets: ["favicon.png", "app-icon.png", "splash.png"],
+      includeAssets: ["favicon-v2.png", "app-icon-v2.png", "splash.png"],
       manifest: {
         name: "Peptyl",
         short_name: "Peptyl",
@@ -29,9 +29,9 @@ export default defineConfig(({ mode }) => ({
         orientation: "portrait",
         start_url: "/",
         icons: [
-          { src: "/icon-192.png", sizes: "192x192", type: "image/png", purpose: "any" },
-          { src: "/icon-512.png", sizes: "512x512", type: "image/png", purpose: "any" },
-          { src: "/icon-512.png", sizes: "512x512", type: "image/png", purpose: "maskable" },
+          { src: "/icon-192-v2.png", sizes: "192x192", type: "image/png", purpose: "any" },
+          { src: "/icon-512-v2.png", sizes: "512x512", type: "image/png", purpose: "any" },
+          { src: "/icon-512-v2.png", sizes: "512x512", type: "image/png", purpose: "maskable" },
         ],
       },
       workbox: {
@@ -39,6 +39,7 @@ export default defineConfig(({ mode }) => ({
         globPatterns: ["**/*.{js,css,html,ico,svg,woff2}"],
         maximumFileSizeToCacheInBytes: 3 * 1024 * 1024,
         navigateFallback: "index.html",
+        cleanupOutdatedCaches: true,
         skipWaiting: true,
         clientsClaim: true,
         runtimeCaching: [
