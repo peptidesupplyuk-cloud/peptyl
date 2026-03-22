@@ -1,9 +1,5 @@
 import React from "react";
-
-const PREVIEW_HOST_MARKER = "id-preview--";
-
-const isPreviewHost = () =>
-  typeof window !== "undefined" && window.location.hostname.includes(PREVIEW_HOST_MARKER);
+import { isEditorPreviewHost, isPublicAppHost } from "@/lib/runtime-host";
 
 const PWAUpdatePrompt = () => {
   React.useEffect(() => {
@@ -30,15 +26,16 @@ const PWAUpdatePrompt = () => {
       if ("serviceWorker" in navigator) {
         const registrations = await navigator.serviceWorker.getRegistrations();
         await Promise.all(registrations.map((registration) => registration.unregister()));
+      }
 
-        if (registrations.length > 0) {
-          const key = "preview-sw-disabled";
-          const currentUrl = new URL(window.location.href);
-          if (!sessionStorage.getItem(key)) {
-            sessionStorage.setItem(key, "true");
-            currentUrl.searchParams.set("preview-bust", Date.now().toString());
-            window.location.replace(currentUrl.toString());
-          }
+      if (isEditorPreviewHost()) {
+        const key = "preview-sw-disabled";
+        const currentUrl = new URL(window.location.href);
+
+        if (!sessionStorage.getItem(key)) {
+          sessionStorage.setItem(key, "true");
+          currentUrl.searchParams.set("preview-bust", Date.now().toString());
+          window.location.replace(currentUrl.toString());
         }
       }
     };
@@ -65,7 +62,7 @@ const PWAUpdatePrompt = () => {
       }
     };
 
-    if (isPreviewHost()) {
+    if (!isPublicAppHost()) {
       void disablePreviewServiceWorker();
       return;
     }

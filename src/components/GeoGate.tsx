@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import RegionBlocked from "@/pages/RegionBlocked";
+import { isEditorPreviewHost } from "@/lib/runtime-host";
 
 const BLOCKED_USER_AGENTS = [
   "httrack", "wget", "curl", "scrapy", "python-requests",
@@ -28,6 +29,11 @@ const GeoGate = ({ children }: { children: React.ReactNode }) => {
   const [status, setStatus] = useState<"checking" | "allowed" | "blocked">("checking");
 
   useEffect(() => {
+    if (isEditorPreviewHost()) {
+      setStatus("allowed");
+      return;
+    }
+
     const ua = navigator.userAgent.toLowerCase();
     if (BLOCKED_USER_AGENTS.some((bot) => ua.includes(bot))) {
       setStatus("blocked");

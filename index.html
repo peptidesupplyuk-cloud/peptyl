@@ -126,43 +126,46 @@
     </script>
     <script>
       // Defer OneSignal load until after page is interactive
-      window.OneSignalDeferred = window.OneSignalDeferred || [];
-      function loadOneSignal() {
-        if (document.querySelector('script[src*="OneSignalSDK"]')) return;
-        var s = document.createElement('script');
-        s.src = 'https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.page.js';
-        s.async = true;
-        document.head.appendChild(s);
-      }
-      if (document.readyState === 'complete') { setTimeout(loadOneSignal, 3000); }
-      else { window.addEventListener('load', function() { setTimeout(loadOneSignal, 3000); }); }
-      OneSignalDeferred.push(async function(OneSignal) {
-        await OneSignal.init({
-          appId: "7dd6be24-0dca-45af-b8b6-15cc95db293d",
-          notifyButton: {
-            enable: false,
-          },
-          promptOptions: {
-            slidedown: {
-              prompts: [
-                {
-                  type: "push",
-                  autoPrompt: true,
-                  text: {
-                    actionMessage: "Get peptide cycle reminders and protocol updates from Peptyl",
-                    acceptButton: "Allow",
-                    cancelButton: "Not now",
-                  },
-                  delay: {
-                    pageViews: 2,
-                    timeDelay: 5
+      var productionHosts = new Set(['peptyl.co.uk', 'www.peptyl.co.uk', 'peptyl.lovable.app']);
+      if (productionHosts.has(window.location.hostname)) {
+        window.OneSignalDeferred = window.OneSignalDeferred || [];
+        function loadOneSignal() {
+          if (document.querySelector('script[src*="OneSignalSDK"]')) return;
+          var s = document.createElement('script');
+          s.src = 'https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.page.js';
+          s.async = true;
+          document.head.appendChild(s);
+        }
+        if (document.readyState === 'complete') { setTimeout(loadOneSignal, 3000); }
+        else { window.addEventListener('load', function() { setTimeout(loadOneSignal, 3000); }); }
+        OneSignalDeferred.push(async function(OneSignal) {
+          await OneSignal.init({
+            appId: "7dd6be24-0dca-45af-b8b6-15cc95db293d",
+            notifyButton: {
+              enable: false,
+            },
+            promptOptions: {
+              slidedown: {
+                prompts: [
+                  {
+                    type: "push",
+                    autoPrompt: true,
+                    text: {
+                      actionMessage: "Get peptide cycle reminders and protocol updates from Peptyl",
+                      acceptButton: "Allow",
+                      cancelButton: "Not now",
+                    },
+                    delay: {
+                      pageViews: 2,
+                      timeDelay: 5
+                    }
                   }
-                }
-              ]
+                ]
+              }
             }
-          }
+          });
         });
-      });
+      }
     </script>
   </body>
 </html>
