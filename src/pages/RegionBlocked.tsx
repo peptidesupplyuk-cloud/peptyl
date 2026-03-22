@@ -6,11 +6,11 @@ const RegionBlocked = () => {
       <div className="max-w-md text-center space-y-6">
         <ShieldX className="h-16 w-16 text-destructive mx-auto" />
         <h1 className="text-3xl font-bold text-foreground tracking-tight">
-          Not Available in Your Region
+          Access Denied
         </h1>
         <p className="text-muted-foreground leading-relaxed">
-          Peptyl is not currently available in the United States. We are focused on serving
-          researchers and health optimisers in regions where peptide research is permitted.
+          Your request has been blocked because it appears to be automated.
+          If you believe this is an error, please visit us in a standard browser.
         </p>
         <p className="text-sm text-muted-foreground/70">
           If you believe this is an error, please contact us at support@peptyl.com
