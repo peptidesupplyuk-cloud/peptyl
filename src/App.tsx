@@ -7,7 +7,7 @@ import { lazy, Suspense } from "react";
 import { AuthProvider } from "@/contexts/AuthContext";
 import ProtectedRoute from "@/components/ProtectedRoute";
 const PeptideChat = lazy(() => import("@/components/PeptideChat"));
-const SignupBanner = lazy(() => import("@/components/SignupBanner"));
+
 const PWAUpdatePrompt = lazy(() => import("@/components/PWAUpdatePrompt"));
 import { useActivityTracker } from "@/hooks/use-activity-tracker";
 
