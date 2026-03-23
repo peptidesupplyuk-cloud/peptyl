@@ -348,6 +348,9 @@ const ProtocolGroupedDoses = ({
                         <Check className="h-3.5 w-3.5 text-primary" />
                         <span className="text-sm font-medium text-foreground line-through opacity-60">{supp.name}</span>
                         <span className="text-xs text-muted-foreground">{supp.dose}</span>
+                        <span className={`text-[9px] font-medium px-1.5 py-0.5 rounded-full ${supp.timing === "AM" ? "bg-amber-500/10 text-amber-600" : "bg-indigo-500/10 text-indigo-500"}`}>
+                          {supp.timing === "AM" ? "☀ AM" : "🌙 PM"}
+                        </span>
                         <span className={`text-[9px] font-medium px-1.5 py-0.5 rounded-full ${badge.color}`}>{badge.label}</span>
                       </div>
                       <span className="text-xs text-primary">✓</span>
