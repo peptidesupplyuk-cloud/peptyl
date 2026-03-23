@@ -293,86 +293,30 @@ const ProtocolGroupedDoses = ({
               </div>
             </button>
 
-            {/* Expanded detail */}
-            {isExpanded && (
-              <div className="px-3 pb-3 space-y-1.5">
-                {/* Scheduled peptide doses */}
-                {group.scheduled.map((inj) => {
-                  const freq = getPeptideFrequency(inj.peptide_name, protocols, inj.protocol_peptide_id);
-                  const badge = frequencyLabel(freq);
-                  return (
-                    <div key={inj.id} className="flex flex-wrap items-center justify-between gap-2 bg-muted/50 rounded-lg px-3 py-2.5">
-                      <div className="min-w-0 flex-1">
-                        <div className="flex items-center gap-2">
-                          <Clock className="h-3.5 w-3.5 text-primary shrink-0" />
-                          <span className="text-sm font-medium text-foreground truncate">{inj.peptide_name}</span>
-                          <span className="text-xs text-muted-foreground shrink-0">{inj.dose_mcg}mcg</span>
-                          <span className={`text-[9px] font-medium px-1.5 py-0.5 rounded-full ${resolveInjectionTiming(inj.scheduled_time) === "AM" ? "bg-amber-500/10 text-amber-600" : "bg-indigo-500/10 text-indigo-500"}`}>
-                            {resolveInjectionTiming(inj.scheduled_time) === "AM" ? "☀ AM" : "🌙 PM"}
-                          </span>
-                          <span className={`text-[9px] font-medium px-1.5 py-0.5 rounded-full ${badge.color}`}>{badge.label}</span>
-                        </div>
-                        <p className="text-[11px] text-muted-foreground ml-5.5 mt-0.5">
-                          {format(new Date(inj.scheduled_time), "h:mm a")}
-                        </p>
-                      </div>
-                      {isToday ? (
-                        <div className="flex gap-1.5 shrink-0">
-                          <Button size="icon" variant="outline" className="h-7 w-7" onClick={() => updateStatus.mutate({ id: inj.id, status: "skipped" })} title="Skip">
-                            <SkipForward className="h-3.5 w-3.5" />
-                          </Button>
-                          <Button size="icon" className="h-7 w-7 shadow-brand" onClick={() => updateStatus.mutate({ id: inj.id, status: "completed" })} title="Done">
-                            <Check className="h-3.5 w-3.5" />
-                          </Button>
-                        </div>
-                      ) : (
-                        <span className="text-xs text-muted-foreground">{isFutureDate ? "Planned" : "Missed"}</span>
-                      )}
-                    </div>
-                  );
-                })}
+            {/* Expanded detail — grouped AM first, then PM; peptides before supplements in each window */}
+            {isExpanded && (() => {
+              const amPeptides = group.scheduled.filter(inj => resolveInjectionTiming(inj.scheduled_time) === "AM");
+              const pmPeptides = group.scheduled.filter(inj => resolveInjectionTiming(inj.scheduled_time) === "PM");
+              const amSupps = group.pendingSupps.filter(s => s.timing === "AM");
+              const pmSupps = group.pendingSupps.filter(s => s.timing === "PM");
 
-                {/* Pending supplements */}
-                {group.pendingSupps.map((supp) => {
-                  const badge = frequencyLabel(supp.frequency);
-                  return (
-                    <div key={`supp-${supp.trackingKey}`} className="flex flex-wrap items-center justify-between gap-2 bg-muted/50 rounded-lg px-3 py-2.5">
-                      <div className="min-w-0 flex-1">
-                        <div className="flex items-center gap-2">
-                          <Pill className="h-3.5 w-3.5 text-accent-foreground/70 shrink-0" />
-                          <span className="text-sm font-medium text-foreground truncate">{supp.name}</span>
-                          <span className="text-xs text-muted-foreground shrink-0">{supp.dose}</span>
-                          <span className={`text-[9px] font-medium px-1.5 py-0.5 rounded-full ${supp.timing === "AM" ? "bg-amber-500/10 text-amber-600" : "bg-indigo-500/10 text-indigo-500"}`}>
-                            {supp.timing === "AM" ? "☀ AM" : "🌙 PM"}
-                          </span>
-                          <span className={`text-[9px] font-medium px-1.5 py-0.5 rounded-full ${badge.color}`}>{badge.label}</span>
-                        </div>
-                        {supp.drivenBy && supp.drivenBy.length > 0 && (
-                          <span className="text-[10px] text-primary/70 flex items-center gap-1 ml-5.5 mt-0.5">
-                            <Dna className="h-2.5 w-2.5" /> {supp.drivenBy[0]}
-                          </span>
-                        )}
-                      </div>
-                      {isToday ? (
-                        <div className="flex gap-1.5 shrink-0">
-                          <Button size="icon" variant="outline" className="h-7 w-7" onClick={() => toggleSupplement.mutate({ item: supp.trackingKey, completed: false })} title="Skip">
-                            <SkipForward className="h-3.5 w-3.5" />
-                          </Button>
-                          <Button size="icon" className="h-7 w-7 shadow-brand" onClick={() => toggleSupplement.mutate({ item: supp.trackingKey, completed: true })} title="Done">
-                            <Check className="h-3.5 w-3.5" />
-                          </Button>
-                        </div>
-                      ) : (
-                        <span className="text-xs text-muted-foreground">{isFutureDate ? "Planned" : "Missed"}</span>
-                      )}
-                    </div>
-                  );
-                })}
+              const amCompPeptides = group.completed.filter(inj => resolveInjectionTiming(inj.scheduled_time) === "AM");
+              const pmCompPeptides = group.completed.filter(inj => resolveInjectionTiming(inj.scheduled_time) === "PM");
+              const amCompSupps = group.doneSupps.filter(s => s.timing === "AM");
+              const pmCompSupps = group.doneSupps.filter(s => s.timing === "PM");
 
-                {/* Completed peptide doses */}
-                {group.completed.map((inj) => {
-                  const freq = getPeptideFrequency(inj.peptide_name, protocols, inj.protocol_peptide_id);
-                  const badge = frequencyLabel(freq);
+              const amSkipPeptides = group.skipped.filter(inj => resolveInjectionTiming(inj.scheduled_time) === "AM");
+              const pmSkipPeptides = group.skipped.filter(inj => resolveInjectionTiming(inj.scheduled_time) === "PM");
+              const amSkipSupps = group.skippedSupps.filter(s => s.timing === "AM");
+              const pmSkipSupps = group.skippedSupps.filter(s => s.timing === "PM");
+
+              const hasAM = amPeptides.length + amSupps.length + amCompPeptides.length + amCompSupps.length + amSkipPeptides.length + amSkipSupps.length > 0;
+              const hasPM = pmPeptides.length + pmSupps.length + pmCompPeptides.length + pmCompSupps.length + pmSkipPeptides.length + pmSkipSupps.length > 0;
+
+              const renderPeptide = (inj: InjectionLog, status: "pending" | "completed" | "skipped") => {
+                const freq = getPeptideFrequency(inj.peptide_name, protocols, inj.protocol_peptide_id);
+                const badge = frequencyLabel(freq);
+                if (status === "completed") {
                   return (
                     <div key={inj.id} className="flex items-center justify-between bg-primary/5 border border-primary/10 rounded-lg px-3 py-2">
                       <div className="flex items-center gap-2">
@@ -380,18 +324,58 @@ const ProtocolGroupedDoses = ({
                         <span className="text-sm font-medium text-foreground line-through opacity-60">{inj.peptide_name}</span>
                         <span className="text-xs text-muted-foreground">{inj.dose_mcg}mcg</span>
                         <span className={`text-[9px] font-medium px-1.5 py-0.5 rounded-full ${badge.color}`}>{badge.label}</span>
-                        {inj.notes?.includes("via WhatsApp") && (
-                          <span className="text-[10px] text-muted-foreground italic">via WhatsApp</span>
-                        )}
+                        {inj.notes?.includes("via WhatsApp") && <span className="text-[10px] text-muted-foreground italic">via WhatsApp</span>}
                       </div>
                       <span className="text-xs text-primary">✓</span>
                     </div>
                   );
-                })}
+                }
+                if (status === "skipped") {
+                  return (
+                    <div key={inj.id} className="flex items-center justify-between bg-muted/30 rounded-lg px-3 py-2 opacity-50">
+                      <div className="flex items-center gap-2">
+                        <SkipForward className="h-3.5 w-3.5 text-muted-foreground" />
+                        <span className="text-sm font-medium text-foreground line-through">{inj.peptide_name}</span>
+                      </div>
+                      <span className="text-xs text-muted-foreground">Skipped</span>
+                    </div>
+                  );
+                }
+                return (
+                  <div key={inj.id} className="flex flex-wrap items-center justify-between gap-2 bg-muted/50 rounded-lg px-3 py-2.5">
+                    <div className="min-w-0 flex-1">
+                      <div className="flex items-center gap-2">
+                        <Clock className="h-3.5 w-3.5 text-primary shrink-0" />
+                        <span className="text-sm font-medium text-foreground truncate">{inj.peptide_name}</span>
+                        <span className="text-xs text-muted-foreground shrink-0">{inj.dose_mcg}mcg</span>
+                        <span className={`text-[9px] font-medium px-1.5 py-0.5 rounded-full ${resolveInjectionTiming(inj.scheduled_time) === "AM" ? "bg-amber-500/10 text-amber-600" : "bg-indigo-500/10 text-indigo-500"}`}>
+                          {resolveInjectionTiming(inj.scheduled_time) === "AM" ? "☀ AM" : "🌙 PM"}
+                        </span>
+                        <span className={`text-[9px] font-medium px-1.5 py-0.5 rounded-full ${badge.color}`}>{badge.label}</span>
+                      </div>
+                      <p className="text-[11px] text-muted-foreground ml-5.5 mt-0.5">
+                        {format(new Date(inj.scheduled_time), "h:mm a")}
+                      </p>
+                    </div>
+                    {isToday ? (
+                      <div className="flex gap-1.5 shrink-0">
+                        <Button size="icon" variant="outline" className="h-7 w-7" onClick={() => updateStatus.mutate({ id: inj.id, status: "skipped" })} title="Skip">
+                          <SkipForward className="h-3.5 w-3.5" />
+                        </Button>
+                        <Button size="icon" className="h-7 w-7 shadow-brand" onClick={() => updateStatus.mutate({ id: inj.id, status: "completed" })} title="Done">
+                          <Check className="h-3.5 w-3.5" />
+                        </Button>
+                      </div>
+                    ) : (
+                      <span className="text-xs text-muted-foreground">{isFutureDate ? "Planned" : "Missed"}</span>
+                    )}
+                  </div>
+                );
+              };
 
-                {/* Completed supplements */}
-                {group.doneSupps.map((supp) => {
-                  const badge = frequencyLabel(supp.frequency);
+              const renderSupplement = (supp: SupplementItem, status: "pending" | "completed" | "skipped") => {
+                const badge = frequencyLabel(supp.frequency);
+                if (status === "completed") {
                   return (
                     <div key={`supp-done-${supp.trackingKey}`} className="flex items-center justify-between bg-primary/5 border border-primary/10 rounded-lg px-3 py-2">
                       <div className="flex items-center gap-2">
@@ -406,29 +390,78 @@ const ProtocolGroupedDoses = ({
                       <span className="text-xs text-primary">✓</span>
                     </div>
                   );
-                })}
+                }
+                if (status === "skipped") {
+                  return (
+                    <div key={`supp-skip-${supp.trackingKey}`} className="flex items-center justify-between bg-muted/30 rounded-lg px-3 py-2 opacity-50">
+                      <div className="flex items-center gap-2">
+                        <SkipForward className="h-3.5 w-3.5 text-muted-foreground" />
+                        <span className="text-sm font-medium text-foreground line-through">{supp.name}</span>
+                      </div>
+                      <span className="text-xs text-muted-foreground">Skipped</span>
+                    </div>
+                  );
+                }
+                return (
+                  <div key={`supp-${supp.trackingKey}`} className="flex flex-wrap items-center justify-between gap-2 bg-muted/50 rounded-lg px-3 py-2.5">
+                    <div className="min-w-0 flex-1">
+                      <div className="flex items-center gap-2">
+                        <Pill className="h-3.5 w-3.5 text-accent-foreground/70 shrink-0" />
+                        <span className="text-sm font-medium text-foreground truncate">{supp.name}</span>
+                        <span className="text-xs text-muted-foreground shrink-0">{supp.dose}</span>
+                        <span className={`text-[9px] font-medium px-1.5 py-0.5 rounded-full ${supp.timing === "AM" ? "bg-amber-500/10 text-amber-600" : "bg-indigo-500/10 text-indigo-500"}`}>
+                          {supp.timing === "AM" ? "☀ AM" : "🌙 PM"}
+                        </span>
+                        <span className={`text-[9px] font-medium px-1.5 py-0.5 rounded-full ${badge.color}`}>{badge.label}</span>
+                      </div>
+                      {supp.drivenBy && supp.drivenBy.length > 0 && (
+                        <span className="text-[10px] text-primary/70 flex items-center gap-1 ml-5.5 mt-0.5">
+                          <Dna className="h-2.5 w-2.5" /> {supp.drivenBy[0]}
+                        </span>
+                      )}
+                    </div>
+                    {isToday ? (
+                      <div className="flex gap-1.5 shrink-0">
+                        <Button size="icon" variant="outline" className="h-7 w-7" onClick={() => toggleSupplement.mutate({ item: supp.trackingKey, completed: false })} title="Skip">
+                          <SkipForward className="h-3.5 w-3.5" />
+                        </Button>
+                        <Button size="icon" className="h-7 w-7 shadow-brand" onClick={() => toggleSupplement.mutate({ item: supp.trackingKey, completed: true })} title="Done">
+                          <Check className="h-3.5 w-3.5" />
+                        </Button>
+                      </div>
+                    ) : (
+                      <span className="text-xs text-muted-foreground">{isFutureDate ? "Planned" : "Missed"}</span>
+                    )}
+                  </div>
+                );
+              };
 
-                {/* Skipped */}
-                {group.skipped.map((inj) => (
-                  <div key={inj.id} className="flex items-center justify-between bg-muted/30 rounded-lg px-3 py-2 opacity-50">
-                    <div className="flex items-center gap-2">
-                      <SkipForward className="h-3.5 w-3.5 text-muted-foreground" />
-                      <span className="text-sm font-medium text-foreground line-through">{inj.peptide_name}</span>
+              const renderWindow = (label: string, emoji: string, peptides: InjectionLog[], supps: SupplementItem[], compPeptides: InjectionLog[], compSupps: SupplementItem[], skipPeptides: InjectionLog[], skipSupps: SupplementItem[]) => {
+                const total = peptides.length + supps.length + compPeptides.length + compSupps.length + skipPeptides.length + skipSupps.length;
+                if (total === 0) return null;
+                return (
+                  <>
+                    <div className="flex items-center gap-2 pt-1">
+                      <span className="text-[10px] uppercase tracking-wider font-semibold text-muted-foreground">{emoji} {label}</span>
+                      <div className="flex-1 h-px bg-border" />
                     </div>
-                    <span className="text-xs text-muted-foreground">Skipped</span>
-                  </div>
-                ))}
-                {group.skippedSupps.map((supp) => (
-                  <div key={`supp-skip-${supp.trackingKey}`} className="flex items-center justify-between bg-muted/30 rounded-lg px-3 py-2 opacity-50">
-                    <div className="flex items-center gap-2">
-                      <SkipForward className="h-3.5 w-3.5 text-muted-foreground" />
-                      <span className="text-sm font-medium text-foreground line-through">{supp.name}</span>
-                    </div>
-                    <span className="text-xs text-muted-foreground">Skipped</span>
-                  </div>
-                ))}
-              </div>
-            )}
+                    {peptides.map(inj => renderPeptide(inj, "pending"))}
+                    {supps.map(s => renderSupplement(s, "pending"))}
+                    {compPeptides.map(inj => renderPeptide(inj, "completed"))}
+                    {compSupps.map(s => renderSupplement(s, "completed"))}
+                    {skipPeptides.map(inj => renderPeptide(inj, "skipped"))}
+                    {skipSupps.map(s => renderSupplement(s, "skipped"))}
+                  </>
+                );
+              };
+
+              return (
+                <div className="px-3 pb-3 space-y-1.5">
+                  {renderWindow("Morning", "☀", amPeptides, amSupps, amCompPeptides, amCompSupps, amSkipPeptides, amSkipSupps)}
+                  {renderWindow("Evening", "🌙", pmPeptides, pmSupps, pmCompPeptides, pmCompSupps, pmSkipPeptides, pmSkipSupps)}
+                </div>
+              );
+            })()}
           </div>
         );
       })}
