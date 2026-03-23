@@ -840,7 +840,42 @@ function checkFrequencyDue(frequency: string, todayStr: string): boolean {
   }
 }
 
-function formatWhatsAppNumber(raw: string): string | null {
+/** Normalise supplement names — mirrors src/lib/supplement-normalise.ts */
+const SUPP_ALIASES: Record<string, string> = {
+  "omega-3 fish oil": "Omega-3 (EPA/DHA)",
+  "omega 3 fish oil": "Omega-3 (EPA/DHA)",
+  "omega-3": "Omega-3 (EPA/DHA)",
+  "omega 3": "Omega-3 (EPA/DHA)",
+  "fish oil": "Omega-3 (EPA/DHA)",
+  "epa/dha": "Omega-3 (EPA/DHA)",
+  "epa dha": "Omega-3 (EPA/DHA)",
+  "coq10": "CoQ10",
+  "coq10 (ubiquinol)": "CoQ10 (Ubiquinol)",
+  "ubiquinol": "CoQ10 (Ubiquinol)",
+  "vitamin d": "Vitamin D3 + K2",
+  "vitamin d3": "Vitamin D3 + K2",
+  "vit d3": "Vitamin D3 + K2",
+  "mag glycinate": "Magnesium Glycinate",
+  "magnesium": "Magnesium Glycinate",
+};
+
+function normaliseSupplementName(name: string): string {
+  const trimmed = name.trim();
+  return SUPP_ALIASES[trimmed.toLowerCase()] ?? trimmed;
+}
+
+/** Resolve supplement timing — mirrors dashboard resolveSupplementTiming */
+function resolveSupplementTimingEdge(supp: { timing?: string; frequency?: string }): string {
+  if (supp.timing) return supp.timing.toUpperCase();
+  const freq = (supp.frequency || "").toLowerCase();
+  if (freq.includes("split") || freq.includes("am/pm") || freq.includes("twice") || freq.includes("2x")) return "AM+PM";
+  if (freq.includes("morning") || freq.includes("fasted")) return "AM";
+  if (freq.includes("bed") || freq.includes("evening") || freq.includes("night")) return "PM";
+  if (freq.includes("with meals")) return "AM+PM";
+  return "AM";
+}
+
+
   let n = raw.replace(/[\s\-\(\)\.]/g, "");
   if (n.startsWith("+")) n = n.slice(1);
   if (n.startsWith("07")) n = "44" + n.slice(1);
