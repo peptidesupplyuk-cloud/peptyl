@@ -172,7 +172,7 @@ const AppContent = () => {
       </Suspense>
       <GlobalMobileNav />
       <PeptideChat />
-      <SignupBanner />
+      
       
       <SitewideDisclaimer />
       <PWAUpdatePrompt />
