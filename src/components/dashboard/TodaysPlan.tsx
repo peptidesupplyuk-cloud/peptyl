@@ -366,7 +366,7 @@ const ProtocolGroupedDoses = ({
                   </div>
                 ))}
                 {group.skippedSupps.map((supp) => (
-                  <div key={`supp-skip-${supp.name}`} className="flex items-center justify-between bg-muted/30 rounded-lg px-3 py-2 opacity-50">
+                  <div key={`supp-skip-${supp.trackingKey}`} className="flex items-center justify-between bg-muted/30 rounded-lg px-3 py-2 opacity-50">
                     <div className="flex items-center gap-2">
                       <SkipForward className="h-3.5 w-3.5 text-muted-foreground" />
                       <span className="text-sm font-medium text-foreground line-through">{supp.name}</span>
