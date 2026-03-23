@@ -41,11 +41,13 @@ interface SupplementItem {
   name: string;
   dose: string;
   frequency: string;
-  timing: string; // "AM" | "PM" | "AM+PM"
+  timing: string; // "AM" | "PM"
   protocolName: string;
   protocolId: string;
   goal: string;
   drivenBy?: string[];
+  /** Unique key used for supplement_logs tracking — includes ::AM / ::PM suffix for split items */
+  trackingKey: string;
 }
 
 /** Derive timing window for a supplement from its explicit timing or frequency hint */
@@ -178,8 +180,8 @@ const ProtocolGroupedDoses = ({
     const name = supp.protocolName || "Other";
     const goal = supp.goal || "";
     const group = getOrCreate(key, name, goal);
-    if (completedSupplements.has(supp.name)) group.doneSupps.push(supp);
-    else if (skippedSupplements.has(supp.name)) group.skippedSupps.push(supp);
+    if (completedSupplements.has(supp.trackingKey)) group.doneSupps.push(supp);
+    else if (skippedSupplements.has(supp.trackingKey)) group.skippedSupps.push(supp);
     else group.pendingSupps.push(supp);
   }
 
@@ -284,14 +286,14 @@ const ProtocolGroupedDoses = ({
                 {group.pendingSupps.map((supp) => {
                   const badge = frequencyLabel(supp.frequency);
                   return (
-                    <div key={`supp-${supp.name}`} className="flex flex-wrap items-center justify-between gap-2 bg-muted/50 rounded-lg px-3 py-2.5">
+                    <div key={`supp-${supp.trackingKey}`} className="flex flex-wrap items-center justify-between gap-2 bg-muted/50 rounded-lg px-3 py-2.5">
                       <div className="min-w-0 flex-1">
                         <div className="flex items-center gap-2">
                           <Pill className="h-3.5 w-3.5 text-accent-foreground/70 shrink-0" />
                           <span className="text-sm font-medium text-foreground truncate">{supp.name}</span>
                           <span className="text-xs text-muted-foreground shrink-0">{supp.dose}</span>
-                          <span className={`text-[9px] font-medium px-1.5 py-0.5 rounded-full ${supp.timing.includes("AM") ? "bg-amber-500/10 text-amber-600" : "bg-indigo-500/10 text-indigo-500"}`}>
-                            {supp.timing === "AM+PM" ? "☀🌙 Both" : supp.timing === "AM" ? "☀ AM" : "🌙 PM"}
+                          <span className={`text-[9px] font-medium px-1.5 py-0.5 rounded-full ${supp.timing === "AM" ? "bg-amber-500/10 text-amber-600" : "bg-indigo-500/10 text-indigo-500"}`}>
+                            {supp.timing === "AM" ? "☀ AM" : "🌙 PM"}
                           </span>
                           <span className={`text-[9px] font-medium px-1.5 py-0.5 rounded-full ${badge.color}`}>{badge.label}</span>
                         </div>
@@ -303,10 +305,10 @@ const ProtocolGroupedDoses = ({
                       </div>
                       {isToday ? (
                         <div className="flex gap-1.5 shrink-0">
-                          <Button size="icon" variant="outline" className="h-7 w-7" onClick={() => toggleSupplement.mutate({ item: supp.name, completed: false })} title="Skip">
+                          <Button size="icon" variant="outline" className="h-7 w-7" onClick={() => toggleSupplement.mutate({ item: supp.trackingKey, completed: false })} title="Skip">
                             <SkipForward className="h-3.5 w-3.5" />
                           </Button>
-                          <Button size="icon" className="h-7 w-7 shadow-brand" onClick={() => toggleSupplement.mutate({ item: supp.name, completed: true })} title="Done">
+                          <Button size="icon" className="h-7 w-7 shadow-brand" onClick={() => toggleSupplement.mutate({ item: supp.trackingKey, completed: true })} title="Done">
                             <Check className="h-3.5 w-3.5" />
                           </Button>
                         </div>
@@ -341,11 +343,14 @@ const ProtocolGroupedDoses = ({
                 {group.doneSupps.map((supp) => {
                   const badge = frequencyLabel(supp.frequency);
                   return (
-                    <div key={`supp-done-${supp.name}`} className="flex items-center justify-between bg-primary/5 border border-primary/10 rounded-lg px-3 py-2">
+                    <div key={`supp-done-${supp.trackingKey}`} className="flex items-center justify-between bg-primary/5 border border-primary/10 rounded-lg px-3 py-2">
                       <div className="flex items-center gap-2">
                         <Check className="h-3.5 w-3.5 text-primary" />
                         <span className="text-sm font-medium text-foreground line-through opacity-60">{supp.name}</span>
                         <span className="text-xs text-muted-foreground">{supp.dose}</span>
+                        <span className={`text-[9px] font-medium px-1.5 py-0.5 rounded-full ${supp.timing === "AM" ? "bg-amber-500/10 text-amber-600" : "bg-indigo-500/10 text-indigo-500"}`}>
+                          {supp.timing === "AM" ? "☀ AM" : "🌙 PM"}
+                        </span>
                         <span className={`text-[9px] font-medium px-1.5 py-0.5 rounded-full ${badge.color}`}>{badge.label}</span>
                       </div>
                       <span className="text-xs text-primary">✓</span>
@@ -364,7 +369,7 @@ const ProtocolGroupedDoses = ({
                   </div>
                 ))}
                 {group.skippedSupps.map((supp) => (
-                  <div key={`supp-skip-${supp.name}`} className="flex items-center justify-between bg-muted/30 rounded-lg px-3 py-2 opacity-50">
+                  <div key={`supp-skip-${supp.trackingKey}`} className="flex items-center justify-between bg-muted/30 rounded-lg px-3 py-2 opacity-50">
                     <div className="flex items-center gap-2">
                       <SkipForward className="h-3.5 w-3.5 text-muted-foreground" />
                       <span className="text-sm font-medium text-foreground line-through">{supp.name}</span>
@@ -584,21 +589,39 @@ const TodaysPlan = ({ onActivate, slim = false, selectedDate }: TodaysPlanProps)
 
   // Collect supplements from active protocols
   const supplements: SupplementItem[] = [];
+  const seenSuppKeys = new Set<string>();
   for (const protocol of protocols.filter((p) => p.status === "active")) {
     if (protocol.supplements && protocol.supplements.length > 0) {
       for (const supp of protocol.supplements) {
-        if (!supplements.find((s) => s.name === supp.name)) {
-          const isDnaGoal = protocol.goal && /dna/i.test(protocol.goal);
-          supplements.push({
-            name: supp.name,
-            dose: supp.dose,
-            frequency: supp.frequency,
-            timing: resolveSupplementTiming(supp),
-            protocolName: protocol.name,
-            protocolId: protocol.id,
-            goal: protocol.goal && !isDnaGoal ? formatGoalLabel(protocol.goal) : "",
-            drivenBy: (supp as any).drivenBy || [],
-          });
+        const resolvedTiming = resolveSupplementTiming(supp);
+        const isDnaGoal = protocol.goal && /dna/i.test(protocol.goal);
+        const base = {
+          dose: supp.dose,
+          frequency: supp.frequency,
+          protocolName: protocol.name,
+          protocolId: protocol.id,
+          goal: protocol.goal && !isDnaGoal ? formatGoalLabel(protocol.goal) : "",
+          drivenBy: (supp as any).drivenBy || [],
+        };
+
+        if (resolvedTiming === "AM+PM") {
+          // Split into two independent rows
+          const amKey = `${supp.name}::AM`;
+          const pmKey = `${supp.name}::PM`;
+          if (!seenSuppKeys.has(amKey)) {
+            seenSuppKeys.add(amKey);
+            supplements.push({ ...base, name: supp.name, timing: "AM", trackingKey: amKey });
+          }
+          if (!seenSuppKeys.has(pmKey)) {
+            seenSuppKeys.add(pmKey);
+            supplements.push({ ...base, name: supp.name, timing: "PM", trackingKey: pmKey });
+          }
+        } else {
+          const key = supp.name;
+          if (!seenSuppKeys.has(key)) {
+            seenSuppKeys.add(key);
+            supplements.push({ ...base, name: supp.name, timing: resolvedTiming, trackingKey: key });
+          }
         }
       }
     }
@@ -612,10 +635,10 @@ const TodaysPlan = ({ onActivate, slim = false, selectedDate }: TodaysPlanProps)
   });
 
   const pendingSupplements = todaySupplements.filter(
-    (s) => !completedSupplements.has(s.name) && !skippedSupplements.has(s.name)
+    (s) => !completedSupplements.has(s.trackingKey) && !skippedSupplements.has(s.trackingKey)
   );
-  const doneSupplements = todaySupplements.filter((s) => completedSupplements.has(s.name));
-  const skippedSuppList = todaySupplements.filter((s) => skippedSupplements.has(s.name));
+  const doneSupplements = todaySupplements.filter((s) => completedSupplements.has(s.trackingKey));
+  const skippedSuppList = todaySupplements.filter((s) => skippedSupplements.has(s.trackingKey));
 
   const activeGoals = [...new Set(
     protocols
@@ -658,8 +681,8 @@ const TodaysPlan = ({ onActivate, slim = false, selectedDate }: TodaysPlanProps)
   // Split pending items by AM/PM window
   const amScheduled = scheduled.filter(inj => resolveInjectionTiming(inj.scheduled_time) === "AM");
   const pmScheduled = scheduled.filter(inj => resolveInjectionTiming(inj.scheduled_time) === "PM");
-  const amPendingSupps = pendingSupplements.filter(s => s.timing === "AM" || s.timing === "AM+PM");
-  const pmPendingSupps = pendingSupplements.filter(s => s.timing === "PM" || s.timing === "AM+PM");
+  const amPendingSupps = pendingSupplements.filter(s => s.timing === "AM");
+  const pmPendingSupps = pendingSupplements.filter(s => s.timing === "PM");
 
   const amRemaining = amScheduled.length + amPendingSupps.length;
   const pmRemaining = pmScheduled.length + pmPendingSupps.length;
@@ -672,7 +695,7 @@ const TodaysPlan = ({ onActivate, slim = false, selectedDate }: TodaysPlanProps)
     }
     const suppsToComplete = window === "ALL" ? pendingSupplements
       : window === "AM" ? amPendingSupps : pmPendingSupps;
-    const pendingItems = suppsToComplete.map((s) => ({ item: s.name, protocolId: s.protocolId }));
+    const pendingItems = suppsToComplete.map((s) => ({ item: s.trackingKey, protocolId: s.protocolId }));
     if (pendingItems.length > 0) {
       batchComplete.mutate(pendingItems);
     }
