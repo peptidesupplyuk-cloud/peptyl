@@ -1517,6 +1517,7 @@ const KnowledgeBaseTab = () => {
 
 const UsersTab = () => {
   const { user } = useAuth();
+  const { openUser } = useContext(UserDetailContext);
 
   const { data: stats, isLoading } = useQuery({
     queryKey: ["admin-stats"],
