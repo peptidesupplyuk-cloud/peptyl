@@ -224,7 +224,18 @@ const ProtocolGroupedDoses = ({
     else group.pendingSupps.push(supp);
   }
 
-  const groups = Array.from(groupMap.entries());
+  const groups = Array.from(groupMap.entries()).map(([key, group]) => ({
+    key,
+    group: {
+      ...group,
+      scheduled: [...group.scheduled].sort((a, b) => compareDoseWindow(resolveInjectionTiming(a.scheduled_time), resolveInjectionTiming(b.scheduled_time)) || new Date(a.scheduled_time).getTime() - new Date(b.scheduled_time).getTime()),
+      completed: [...group.completed].sort((a, b) => compareDoseWindow(resolveInjectionTiming(a.scheduled_time), resolveInjectionTiming(b.scheduled_time)) || new Date(a.scheduled_time).getTime() - new Date(b.scheduled_time).getTime()),
+      skipped: [...group.skipped].sort((a, b) => compareDoseWindow(resolveInjectionTiming(a.scheduled_time), resolveInjectionTiming(b.scheduled_time)) || new Date(a.scheduled_time).getTime() - new Date(b.scheduled_time).getTime()),
+      pendingSupps: [...group.pendingSupps].sort((a, b) => compareDoseWindow(a.timing as "AM" | "PM", b.timing as "AM" | "PM") || a.name.localeCompare(b.name)),
+      doneSupps: [...group.doneSupps].sort((a, b) => compareDoseWindow(a.timing as "AM" | "PM", b.timing as "AM" | "PM") || a.name.localeCompare(b.name)),
+      skippedSupps: [...group.skippedSupps].sort((a, b) => compareDoseWindow(a.timing as "AM" | "PM", b.timing as "AM" | "PM") || a.name.localeCompare(b.name)),
+    },
+  }));
   // Default: collapse completed groups, expand groups with pending items
   const [expandedGroups, setExpandedGroups] = useState<Set<string>>(() => {
     const initial = new Set<string>();
