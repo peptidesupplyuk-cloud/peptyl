@@ -1688,8 +1688,9 @@ const UsersTab = () => {
               </tr>
             </thead>
             <tbody>
-              {(eng.most_active_users as { email: string; pageViews: number; sessions: number; isPwa: boolean }[]).map((u, i) => (
-                <tr key={i} className="border-b border-border/30 last:border-0">
+              {(eng.most_active_users as { userId: string; email: string; pageViews: number; sessions: number; isPwa: boolean }[]).map((u, i) => (
+                <tr key={i} className="border-b border-border/30 last:border-0 cursor-pointer hover:bg-muted/30 transition-colors"
+                  onClick={() => openUser(u.userId, u.email)}>
                   <td className="py-1.5 pr-2 text-foreground font-medium">{u.email}</td>
                   <td className="py-1.5 pr-2 text-right text-muted-foreground">{u.pageViews}</td>
                   <td className="py-1.5 pr-2 text-right text-muted-foreground">{u.sessions}</td>
