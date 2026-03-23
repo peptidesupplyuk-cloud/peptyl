@@ -8,7 +8,7 @@ const WhatIsPeptyl = () => (
     readTime="5 min read"
     date="February 2026"
     slug="what-is-peptyl"
-    description="Peptyl is the world's free peptide research platform — combining AI tools, biomarker tracking, dosing calculators, and community-driven data for researchers worldwide."
+    description="Peptyl is a free health optimisation platform combining AI tools, biomarker tracking, supplement and peptide protocols, dosing calculators, and community-driven data."
   >
     <p>
       If you've ever searched for reliable peptide information online, you know the struggle. Scattered Reddit threads, dubious forums, paywalled studies, and zero practical tools. That's exactly why we built <strong>Peptyl</strong>.
