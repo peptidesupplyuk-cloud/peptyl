@@ -28,8 +28,8 @@ function isDueToday(frequency: string, protocolStartDate: string): boolean {
 
 export function useDateInjections(date: Date) {
   const { user } = useAuth();
-  const dateStr = date.toISOString().split("T")[0];
-  const isToday = dateStr === new Date().toISOString().split("T")[0];
+  const dateStr = format(date, "yyyy-MM-dd");
+  const isToday = dateStr === format(new Date(), "yyyy-MM-dd");
 
   return useQuery({
     queryKey: ["injections_date", user?.id, dateStr],
