@@ -52,27 +52,65 @@ interface SupplementItem {
 }
 
 /** Derive timing window for a supplement from its explicit timing or frequency hint */
-function resolveSupplementTiming(supp: { timing?: string; frequency?: string }): string {
-  if (supp.timing) return supp.timing.toUpperCase();
-  // Infer from frequency keywords
+function resolveSupplementTiming(supp: { timing?: string; frequency?: string }): "AM" | "PM" | "AM+PM" {
+  const rawTiming = (supp.timing || "").trim().toLowerCase();
+  if (rawTiming) {
+    if ((rawTiming.includes("am") && rawTiming.includes("pm")) || rawTiming.includes("both") || rawTiming.includes("split")) {
+      return "AM+PM";
+    }
+    if (rawTiming.includes("pm") || rawTiming.includes("bed") || rawTiming.includes("evening") || rawTiming.includes("night")) {
+      return "PM";
+    }
+    return "AM";
+  }
+
   const freq = (supp.frequency || "").toLowerCase();
-  if (freq.includes("split") || freq.includes("am/pm") || freq.includes("twice") || freq.includes("2x")) return "AM+PM";
+  if (freq.includes("split") || freq.includes("am/pm") || freq.includes("twice") || freq.includes("2x/day") || freq.includes("twice daily")) return "AM+PM";
   if (freq.includes("morning") || freq.includes("fasted")) return "AM";
   if (freq.includes("bed") || freq.includes("evening") || freq.includes("night")) return "PM";
   if (freq.includes("with meals")) return "AM+PM";
-  return "AM"; // sensible default
+  return "AM";
 }
 
-/** Derive timing window for a peptide injection */
 function resolveInjectionTiming(scheduledTime: string): "AM" | "PM" {
   const hour = new Date(scheduledTime).getUTCHours();
   return hour < 14 ? "AM" : "PM";
 }
 
+function isFrequencyDueOnDate(frequency: string, protocolStartDate: string, date: Date): boolean {
+  const start = new Date(`${protocolStartDate}T12:00:00`);
+  const target = new Date(date.getFullYear(), date.getMonth(), date.getDate(), 12);
+  const daysSinceStart = differenceInCalendarDays(target, start);
+  const dayOfWeek = target.getDay();
+
+  if (daysSinceStart < 0) return false;
+
+  const f = frequency.toLowerCase();
+  if (f === "daily" || f.includes("daily") || f === "morning" || f === "evening" || f.includes("with meals") || f.includes("fasted") || f.includes("with fat")) return true;
+  if (f === "twice daily" || f.includes("2x/day") || f.includes("twice daily")) return true;
+  if (f === "weekly" || f.includes("1x")) return daysSinceStart % 7 === 0;
+  if (f.includes("2x")) return dayOfWeek === 1 || dayOfWeek === 4;
+  if (f.includes("3x")) return dayOfWeek === 1 || dayOfWeek === 3 || dayOfWeek === 5;
+  if (f === "5on/2off") return dayOfWeek >= 1 && dayOfWeek <= 5;
+  if (f === "eod" || f.includes("every other")) return daysSinceStart % 2 === 0;
+  return true;
+}
+
+function isActiveOnDate(startDate: string, endDate: string | null, date: Date): boolean {
+  const target = format(date, "yyyy-MM-dd");
+  if (startDate > target) return false;
+  if (endDate && endDate < target) return false;
+  return true;
+}
+
+function compareDoseWindow(a: "AM" | "PM", b: "AM" | "PM") {
+  if (a === b) return 0;
+  return a === "AM" ? -1 : 1;
+}
+
 /** Frequency badge helper — handles both peptide and supplement frequency labels */
 function frequencyLabel(freq: string): { label: string; color: string } {
   const f = freq.toLowerCase();
-  // Daily patterns (including supplement-specific daily frequencies)
   if (f === "daily" || f.includes("daily") || f === "morning" || f === "evening"
     || f.includes("with meals") || f.includes("before bed") || f.includes("fasted")
     || f.includes("before exercise") || f.includes("with fat") || f.includes("split")) {
