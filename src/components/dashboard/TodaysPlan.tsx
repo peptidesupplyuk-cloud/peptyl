@@ -15,6 +15,7 @@ import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { cn } from "@/lib/utils";
 import { useToast } from "@/hooks/use-toast";
+import { normaliseSupplementName } from "@/lib/supplement-normalise";
 import DoseCalendar from "./InjectionCalendar";
 
 interface TodaysPlanProps {
