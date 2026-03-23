@@ -303,11 +303,11 @@ const ProtocolGroupedDoses = ({
                       </div>
                       {isToday ? (
                         <div className="flex gap-1.5 shrink-0">
-                          <Button size="sm" variant="outline" className="h-7 text-xs px-2" onClick={() => toggleSupplement.mutate({ item: supp.name, completed: false })}>
-                            <SkipForward className="h-3 w-3 mr-1" /> Skip
+                          <Button size="icon" variant="outline" className="h-7 w-7" onClick={() => toggleSupplement.mutate({ item: supp.name, completed: false })} title="Skip">
+                            <SkipForward className="h-3.5 w-3.5" />
                           </Button>
-                          <Button size="sm" className="h-7 text-xs px-2 shadow-brand" onClick={() => toggleSupplement.mutate({ item: supp.name, completed: true })}>
-                            <Check className="h-3 w-3 mr-1" /> Done
+                          <Button size="icon" className="h-7 w-7 shadow-brand" onClick={() => toggleSupplement.mutate({ item: supp.name, completed: true })} title="Done">
+                            <Check className="h-3.5 w-3.5" />
                           </Button>
                         </div>
                       ) : (
