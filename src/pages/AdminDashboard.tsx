@@ -1751,67 +1751,79 @@ const AdminDashboard = () => {
             <p className="text-muted-foreground text-sm mt-1">Analytics, content management, and platform activity — all in one place.</p>
           </div>
 
-          <Tabs defaultValue="analytics" className="space-y-6">
-            <TabsList className="w-auto overflow-x-auto no-scrollbar">
-              <TabsTrigger value="analytics" className="gap-1.5">
-                <BarChart3 className="h-4 w-4" /> Analytics
-              </TabsTrigger>
-              <TabsTrigger value="users" className="gap-1.5">
-                <Users className="h-4 w-4" /> Users
-              </TabsTrigger>
-              <TabsTrigger value="payments" className="gap-1.5">
-                <CreditCard className="h-4 w-4" /> Payments
-              </TabsTrigger>
-              <TabsTrigger value="content" className="gap-1.5">
-                <FileText className="h-4 w-4" /> Content
-              </TabsTrigger>
-              <TabsTrigger value="campaigns" className="gap-1.5">
-                <Megaphone className="h-4 w-4" /> Campaigns
-              </TabsTrigger>
-              <TabsTrigger value="feedback" className="gap-1.5">
-                <MessageSquare className="h-4 w-4" /> Feedback
-              </TabsTrigger>
-              <TabsTrigger value="knowledge" className="gap-1.5">
-                <Sparkles className="h-4 w-4" /> Knowledge Base
-              </TabsTrigger>
-              <TabsTrigger value="research" className="gap-1.5">
-                <FlaskConical className="h-4 w-4" /> Research
-              </TabsTrigger>
-              <TabsTrigger value="marker-requests" className="gap-1.5">
-                <Droplets className="h-4 w-4" /> Marker Requests
-              </TabsTrigger>
-            </TabsList>
+          <UserDetailContext.Provider value={{ openUser }}>
+            {selectedUser && (
+              <div className="mb-6">
+                <UserDetailPanel
+                  userId={selectedUser.userId}
+                  userName={selectedUser.name}
+                  onClose={() => setSelectedUser(null)}
+                />
+              </div>
+            )}
 
-            <TabsContent value="analytics">
-              <AnalyticsTab />
-            </TabsContent>
-            <TabsContent value="users">
-              <UsersTab />
-            </TabsContent>
-            <TabsContent value="payments">
-              <PaymentsTab />
-            </TabsContent>
-            <TabsContent value="content">
-              <ContentTab />
-            </TabsContent>
-            <TabsContent value="campaigns">
-              <CampaignsTab />
-            </TabsContent>
-            <TabsContent value="feedback">
-              <FeedbackTab />
-            </TabsContent>
-            <TabsContent value="knowledge">
-              <KnowledgeBaseTab />
-            </TabsContent>
-            <TabsContent value="research">
-              <Suspense fallback={<div className="flex justify-center py-12"><Loader2 className="h-6 w-6 animate-spin" /></div>}>
-                <LazyResearchQueue embedded />
-              </Suspense>
-            </TabsContent>
-            <TabsContent value="marker-requests">
-              <MarkerRequestsTab />
-            </TabsContent>
-          </Tabs>
+            <Tabs defaultValue="analytics" className="space-y-6">
+              <TabsList className="w-auto overflow-x-auto no-scrollbar">
+                <TabsTrigger value="analytics" className="gap-1.5">
+                  <BarChart3 className="h-4 w-4" /> Analytics
+                </TabsTrigger>
+                <TabsTrigger value="users" className="gap-1.5">
+                  <Users className="h-4 w-4" /> Users
+                </TabsTrigger>
+                <TabsTrigger value="payments" className="gap-1.5">
+                  <CreditCard className="h-4 w-4" /> Payments
+                </TabsTrigger>
+                <TabsTrigger value="content" className="gap-1.5">
+                  <FileText className="h-4 w-4" /> Content
+                </TabsTrigger>
+                <TabsTrigger value="campaigns" className="gap-1.5">
+                  <Megaphone className="h-4 w-4" /> Campaigns
+                </TabsTrigger>
+                <TabsTrigger value="feedback" className="gap-1.5">
+                  <MessageSquare className="h-4 w-4" /> Feedback
+                </TabsTrigger>
+                <TabsTrigger value="knowledge" className="gap-1.5">
+                  <Sparkles className="h-4 w-4" /> Knowledge Base
+                </TabsTrigger>
+                <TabsTrigger value="research" className="gap-1.5">
+                  <FlaskConical className="h-4 w-4" /> Research
+                </TabsTrigger>
+                <TabsTrigger value="marker-requests" className="gap-1.5">
+                  <Droplets className="h-4 w-4" /> Marker Requests
+                </TabsTrigger>
+              </TabsList>
+
+              <TabsContent value="analytics">
+                <AnalyticsTab />
+              </TabsContent>
+              <TabsContent value="users">
+                <UsersTab />
+              </TabsContent>
+              <TabsContent value="payments">
+                <PaymentsTab />
+              </TabsContent>
+              <TabsContent value="content">
+                <ContentTab />
+              </TabsContent>
+              <TabsContent value="campaigns">
+                <CampaignsTab />
+              </TabsContent>
+              <TabsContent value="feedback">
+                <FeedbackTab />
+              </TabsContent>
+              <TabsContent value="knowledge">
+                <KnowledgeBaseTab />
+              </TabsContent>
+              <TabsContent value="research">
+                <Suspense fallback={<div className="flex justify-center py-12"><Loader2 className="h-6 w-6 animate-spin" /></div>}>
+                  <LazyResearchQueue embedded />
+                </Suspense>
+              </TabsContent>
+              <TabsContent value="marker-requests">
+                <MarkerRequestsTab />
+              </TabsContent>
+            </Tabs>
+          </UserDetailContext.Provider>
         </div>
       </main>
       <Footer />
