@@ -218,7 +218,7 @@ async function backfillMissingDays(userId: string) {
     if (!protocols || protocols.length === 0) return;
 
     const today = new Date();
-    const todayStr = today.toISOString().split("T")[0];
+    const todayStr = format(today, "yyyy-MM-dd");
 
     for (const protocol of protocols) {
       const { data: peptides } = await supabase
