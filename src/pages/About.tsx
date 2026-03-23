@@ -42,8 +42,8 @@ const About = () => {
   return (
     <div className="min-h-screen bg-background">
       <SEO
-        title="About Peptyl — Open Peptide Research Platform"
-        description="Built by biohackers and AI engineers. Peptyl is the free, independent research platform for peptide protocols, DNA analysis, and bloodwork tracking."
+        title="About Peptyl - Health Optimisation Platform"
+        description="Built by biohackers and AI engineers. Peptyl is the free, independent platform for health tracking, supplement protocols, peptide research, and bloodwork analysis."
         path="/about"
       />
       <Header />

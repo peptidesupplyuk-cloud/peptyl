@@ -40,7 +40,7 @@ const Suppliers = () => {
   return (
     <div className="min-h-screen bg-background">
       <SEO
-        title="Compare Medication & Bloodwork Prices — Verified Suppliers"
+        title="Compare Medication & Bloodwork Prices - Verified Suppliers"
         description="Compare prices for weight-loss medications and blood tests from verified pharmacies and labs. Find the best deal across 38+ approved providers."
         path="/suppliers"
       />

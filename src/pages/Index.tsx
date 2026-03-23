@@ -22,8 +22,8 @@ const Index = () => {
   return (
     <div className="min-h-screen bg-background">
       <SEO
-        title="Peptyl — Free Peptide Research Platform, Protocol Tracker & DNA Analysis"
-        description="Track peptide protocols, analyse bloodwork, calculate reconstitution doses, and get personalised DNA-based health reports. Free tools for peptide researchers worldwide."
+        title="Peptyl - Health Tracking, Supplements, Peptides & Bloodwork"
+        description="Track supplements, peptides, and protocols. Analyse bloodwork, get dose reminders, calculate reconstitution, and receive personalised health insights. Free tools for health optimisers."
         path="/"
         jsonLd={{
           "@context": "https://schema.org",

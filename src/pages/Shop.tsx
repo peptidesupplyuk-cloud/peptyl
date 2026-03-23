@@ -63,8 +63,8 @@ const Shop = () => {
   return (
     <div className="min-h-screen bg-background">
       <SEO
-        title="Support Layer — Recommended Supplements"
-        description="Curated supplements to support your peptide protocols. Independently reviewed and community-rated."
+        title="Support Layer - Recommended Supplements"
+        description="Curated supplements to support your health protocols. Independently reviewed and community-rated."
         path="/shop"
       />
       <Header />
