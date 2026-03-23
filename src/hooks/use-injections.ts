@@ -53,7 +53,7 @@ export function useDateInjections(date: Date) {
 
 export function useTodayInjections() {
   const { user } = useAuth();
-  const today = new Date().toISOString().split("T")[0];
+  const today = format(new Date(), "yyyy-MM-dd");
 
   return useQuery({
     queryKey: ["injections_today", user?.id, today],
