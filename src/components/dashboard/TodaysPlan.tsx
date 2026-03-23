@@ -256,7 +256,7 @@ const ProtocolGroupedDoses = ({
 
   return (
     <div className="space-y-2">
-      {groups.map(([key, group]) => {
+      {groups.map(({ key, group }) => {
         const totalInGroup = group.scheduled.length + group.completed.length + group.skipped.length + group.pendingSupps.length + group.doneSupps.length + group.skippedSupps.length;
         const completedInGroup = group.completed.length + group.doneSupps.length;
         const pendingInGroup = group.scheduled.length + group.pendingSupps.length;
