@@ -286,14 +286,14 @@ const ProtocolGroupedDoses = ({
                 {group.pendingSupps.map((supp) => {
                   const badge = frequencyLabel(supp.frequency);
                   return (
-                    <div key={`supp-${supp.name}`} className="flex flex-wrap items-center justify-between gap-2 bg-muted/50 rounded-lg px-3 py-2.5">
+                    <div key={`supp-${supp.trackingKey}`} className="flex flex-wrap items-center justify-between gap-2 bg-muted/50 rounded-lg px-3 py-2.5">
                       <div className="min-w-0 flex-1">
                         <div className="flex items-center gap-2">
                           <Pill className="h-3.5 w-3.5 text-accent-foreground/70 shrink-0" />
                           <span className="text-sm font-medium text-foreground truncate">{supp.name}</span>
                           <span className="text-xs text-muted-foreground shrink-0">{supp.dose}</span>
-                          <span className={`text-[9px] font-medium px-1.5 py-0.5 rounded-full ${supp.timing.includes("AM") ? "bg-amber-500/10 text-amber-600" : "bg-indigo-500/10 text-indigo-500"}`}>
-                            {supp.timing === "AM+PM" ? "☀🌙 Both" : supp.timing === "AM" ? "☀ AM" : "🌙 PM"}
+                          <span className={`text-[9px] font-medium px-1.5 py-0.5 rounded-full ${supp.timing === "AM" ? "bg-amber-500/10 text-amber-600" : "bg-indigo-500/10 text-indigo-500"}`}>
+                            {supp.timing === "AM" ? "☀ AM" : "🌙 PM"}
                           </span>
                           <span className={`text-[9px] font-medium px-1.5 py-0.5 rounded-full ${badge.color}`}>{badge.label}</span>
                         </div>
@@ -305,10 +305,10 @@ const ProtocolGroupedDoses = ({
                       </div>
                       {isToday ? (
                         <div className="flex gap-1.5 shrink-0">
-                          <Button size="icon" variant="outline" className="h-7 w-7" onClick={() => toggleSupplement.mutate({ item: supp.name, completed: false })} title="Skip">
+                          <Button size="icon" variant="outline" className="h-7 w-7" onClick={() => toggleSupplement.mutate({ item: supp.trackingKey, completed: false })} title="Skip">
                             <SkipForward className="h-3.5 w-3.5" />
                           </Button>
-                          <Button size="icon" className="h-7 w-7 shadow-brand" onClick={() => toggleSupplement.mutate({ item: supp.name, completed: true })} title="Done">
+                          <Button size="icon" className="h-7 w-7 shadow-brand" onClick={() => toggleSupplement.mutate({ item: supp.trackingKey, completed: true })} title="Done">
                             <Check className="h-3.5 w-3.5" />
                           </Button>
                         </div>
