@@ -91,6 +91,9 @@ const GlobalMobileNav = () => {
                 }`}>
                   {label}
                 </span>
+                {href === "/dashboard" && (
+                  <span className="absolute -top-0.5 -right-0.5 z-20 text-[6px] font-bold uppercase tracking-wider px-1 py-px rounded bg-primary/10 text-primary leading-none">Beta</span>
+                )}
               </Link>
             );
           })}

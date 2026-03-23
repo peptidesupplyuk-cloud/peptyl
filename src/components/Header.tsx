@@ -97,6 +97,9 @@ const Header = () => {
             >
               <Icon className="h-3.5 w-3.5" />
               {t(item.labelKey)}
+              {item.labelKey === "nav.myHealth" && (
+                <span className="text-[8px] font-bold uppercase tracking-wider px-1 py-px rounded bg-primary/10 text-primary leading-none">Beta</span>
+              )}
             </Link>
           );
         })}
