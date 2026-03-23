@@ -41,11 +41,13 @@ interface SupplementItem {
   name: string;
   dose: string;
   frequency: string;
-  timing: string; // "AM" | "PM" | "AM+PM"
+  timing: string; // "AM" | "PM"
   protocolName: string;
   protocolId: string;
   goal: string;
   drivenBy?: string[];
+  /** Unique key used for supplement_logs tracking — includes ::AM / ::PM suffix for split items */
+  trackingKey: string;
 }
 
 /** Derive timing window for a supplement from its explicit timing or frequency hint */
