@@ -536,6 +536,7 @@ const Dashboard = () => {
             <div className="flex items-center justify-between gap-3">
               <h1 className="text-2xl sm:text-3xl font-heading font-bold text-foreground leading-tight tracking-tight">
                 My <span className="text-gradient-teal">Health</span>
+                <span className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground/60 ml-2 align-middle">Beta</span>
               </h1>
               <VideoHelpButton />
             </div>
