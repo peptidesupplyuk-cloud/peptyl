@@ -172,9 +172,12 @@ export function useTodayInjections() {
 
 /** Check if a peptide is due on a specific date based on its frequency */
 function isDueOnDate(frequency: string, protocolStartDate: string, targetDate: Date): boolean {
-  const start = new Date(protocolStartDate);
-  const daysSinceStart = Math.floor((targetDate.getTime() - start.getTime()) / (1000 * 60 * 60 * 24));
-  const dayOfWeek = targetDate.getDay();
+  const start = new Date(`${protocolStartDate}T12:00:00`);
+  const target = new Date(targetDate.getFullYear(), targetDate.getMonth(), targetDate.getDate(), 12);
+  const daysSinceStart = Math.floor((target.getTime() - start.getTime()) / (1000 * 60 * 60 * 24));
+  const dayOfWeek = target.getDay();
+
+  if (daysSinceStart < 0) return false;
 
   switch (frequency.toLowerCase()) {
     case "daily":
