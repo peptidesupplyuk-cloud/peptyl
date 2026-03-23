@@ -632,6 +632,9 @@ const TodaysPlan = ({ onActivate, slim = false, selectedDate }: TodaysPlanProps)
   for (const protocol of protocols.filter((p) => p.status === "active")) {
     if (protocol.supplements && protocol.supplements.length > 0) {
       for (const supp of protocol.supplements) {
+        if (!isActiveOnDate(protocol.start_date, protocol.end_date, effectiveDate)) continue;
+        if (!isFrequencyDueOnDate(supp.frequency, protocol.start_date, effectiveDate)) continue;
+
         const normName = normaliseSupplementName(supp.name);
         const resolvedTiming = resolveSupplementTiming(supp);
         const isDnaGoal = protocol.goal && /dna/i.test(protocol.goal);
@@ -667,15 +670,9 @@ const TodaysPlan = ({ onActivate, slim = false, selectedDate }: TodaysPlanProps)
     }
   }
 
-  // Sort: AM items first, then PM
-  supplements.sort((a, b) => (a.timing === b.timing ? 0 : a.timing === "AM" ? -1 : 1));
+  supplements.sort((a, b) => compareDoseWindow(a.timing as "AM" | "PM", b.timing as "AM" | "PM") || a.name.localeCompare(b.name));
 
-  const todaySupplements = supplements.filter((s) => {
-    const freq = s.frequency.toLowerCase();
-    if (freq.includes("daily") || freq.includes("day")) return true;
-    if (freq.includes("2x") || freq.includes("twice")) return true;
-    return true;
-  });
+  const todaySupplements = supplements;
 
   const pendingSupplements = todaySupplements.filter(
     (s) => !completedSupplements.has(s.trackingKey) && !skippedSupplements.has(s.trackingKey)
