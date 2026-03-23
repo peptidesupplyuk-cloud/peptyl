@@ -678,8 +678,8 @@ const TodaysPlan = ({ onActivate, slim = false, selectedDate }: TodaysPlanProps)
   // Split pending items by AM/PM window
   const amScheduled = scheduled.filter(inj => resolveInjectionTiming(inj.scheduled_time) === "AM");
   const pmScheduled = scheduled.filter(inj => resolveInjectionTiming(inj.scheduled_time) === "PM");
-  const amPendingSupps = pendingSupplements.filter(s => s.timing === "AM" || s.timing === "AM+PM");
-  const pmPendingSupps = pendingSupplements.filter(s => s.timing === "PM" || s.timing === "AM+PM");
+  const amPendingSupps = pendingSupplements.filter(s => s.timing === "AM");
+  const pmPendingSupps = pendingSupplements.filter(s => s.timing === "PM");
 
   const amRemaining = amScheduled.length + amPendingSupps.length;
   const pmRemaining = pmScheduled.length + pmPendingSupps.length;
