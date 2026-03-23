@@ -94,6 +94,7 @@ const StatCard = ({ icon: Icon, label, value, delta }: { icon: any; label: strin
 
 const AnalyticsTab = () => {
   const { user } = useAuth();
+  const { openUser } = useContext(UserDetailContext);
 
   const { data: stats, isLoading, error } = useQuery({
     queryKey: ["admin-stats"],
