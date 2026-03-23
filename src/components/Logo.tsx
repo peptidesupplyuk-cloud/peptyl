@@ -27,6 +27,7 @@ const Logo = ({ className, size = "md", variant = "full", inverted = false, hide
             "text-foreground"
           )}>
             Pept<span className="text-gradient-teal">yl</span>
+            <span className="text-[0.35em] font-medium uppercase tracking-widest text-muted-foreground/50 ml-1.5 align-middle">Beta</span>
           </span>
           {!hideTagline && (
             <span className={cn(
