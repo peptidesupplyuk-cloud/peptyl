@@ -140,10 +140,10 @@ Deno.serve(async (req) => {
         const userEmail = authUser?.user?.email;
         if (!userEmail && profile.notify_email) continue;
 
-        // Build reminder items
+        // Build reminder items — mirror dashboard logic exactly
         const reminders: PeptideReminder[] = [];
         const supplementReminders: SupplementReminder[] = [];
-        const seenSupplements = new Set<string>();
+        const seenSupplements = new Set<string>(); // global dedup by normalised name (matches dashboard)
 
         for (const prot of userProts) {
           const { data: peptides } = await supabase
@@ -174,32 +174,32 @@ Deno.serve(async (req) => {
 
           if (Array.isArray(prot.supplements)) {
             for (const supp of prot.supplements as Array<{ name: string; dose: string; frequency: string; timing?: string }>) {
-              // Use explicit timing if set, otherwise infer from frequency
-              const suppTiming = (supp.timing || "").toUpperCase();
-              const freq = (supp.frequency || "").toLowerCase();
+              if (!supp.name) continue;
+
+              // Normalise name to match dashboard (same aliases)
+              const normName = normaliseSupplementName(supp.name);
+
+              // Global dedup by normalised name — matches dashboard line 590
+              if (seenSupplements.has(normName.toLowerCase())) continue;
+              seenSupplements.add(normName.toLowerCase());
+
+              // Resolve timing — same logic as dashboard resolveSupplementTiming
+              const suppTiming = resolveSupplementTimingEdge(supp);
               let matchesWindow = false;
 
               if (suppTiming === "AM+PM") {
-                matchesWindow = true; // Show in both windows
+                matchesWindow = true;
               } else if (suppTiming === "AM") {
                 matchesWindow = window === "AM";
               } else if (suppTiming === "PM") {
                 matchesWindow = window === "PM";
               } else {
-                // Legacy: no timing set — infer from frequency
-                if (freq.includes("morning") || freq.includes("fasted")) {
-                  matchesWindow = window === "AM";
-                } else if (freq.includes("bed") || freq.includes("evening")) {
-                  matchesWindow = window === "PM";
-                } else {
-                  matchesWindow = window === "AM"; // default AM
-                }
+                matchesWindow = window === "AM"; // default AM
               }
 
-              if (matchesWindow && supp.name && !seenSupplements.has(`${window}::${supp.name}`)) {
-                seenSupplements.add(`${window}::${supp.name}`);
+              if (matchesWindow) {
                 supplementReminders.push({
-                  name: supp.name,
+                  name: normName,
                   dose: supp.dose || "",
                   frequency: supp.frequency || "daily",
                   protocol_name: prot.name,
@@ -838,6 +838,41 @@ function checkFrequencyDue(frequency: string, todayStr: string): boolean {
     case "5on/2off": return dayOfWeek >= 1 && dayOfWeek <= 5;
     default: return true;
   }
+}
+
+/** Normalise supplement names — mirrors src/lib/supplement-normalise.ts */
+const SUPP_ALIASES: Record<string, string> = {
+  "omega-3 fish oil": "Omega-3 (EPA/DHA)",
+  "omega 3 fish oil": "Omega-3 (EPA/DHA)",
+  "omega-3": "Omega-3 (EPA/DHA)",
+  "omega 3": "Omega-3 (EPA/DHA)",
+  "fish oil": "Omega-3 (EPA/DHA)",
+  "epa/dha": "Omega-3 (EPA/DHA)",
+  "epa dha": "Omega-3 (EPA/DHA)",
+  "coq10": "CoQ10",
+  "coq10 (ubiquinol)": "CoQ10 (Ubiquinol)",
+  "ubiquinol": "CoQ10 (Ubiquinol)",
+  "vitamin d": "Vitamin D3 + K2",
+  "vitamin d3": "Vitamin D3 + K2",
+  "vit d3": "Vitamin D3 + K2",
+  "mag glycinate": "Magnesium Glycinate",
+  "magnesium": "Magnesium Glycinate",
+};
+
+function normaliseSupplementName(name: string): string {
+  const trimmed = name.trim();
+  return SUPP_ALIASES[trimmed.toLowerCase()] ?? trimmed;
+}
+
+/** Resolve supplement timing — mirrors dashboard resolveSupplementTiming */
+function resolveSupplementTimingEdge(supp: { timing?: string; frequency?: string }): string {
+  if (supp.timing) return supp.timing.toUpperCase();
+  const freq = (supp.frequency || "").toLowerCase();
+  if (freq.includes("split") || freq.includes("am/pm") || freq.includes("twice") || freq.includes("2x")) return "AM+PM";
+  if (freq.includes("morning") || freq.includes("fasted")) return "AM";
+  if (freq.includes("bed") || freq.includes("evening") || freq.includes("night")) return "PM";
+  if (freq.includes("with meals")) return "AM+PM";
+  return "AM";
 }
 
 function formatWhatsAppNumber(raw: string): string | null {
