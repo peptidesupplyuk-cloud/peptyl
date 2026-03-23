@@ -21,8 +21,12 @@ import { campaigns } from "@/data/campaigns";
 
 const LazyResearchQueue = lazy(() => import("@/pages/ResearchQueue"));
 import IngestChat from "@/components/admin/IngestChat";
+import UserDetailPanel from "@/components/admin/UserDetailPanel";
 
 const ADMIN_EMAIL = "peptidesupplyuk@gmail.com";
+
+// Context to allow child tabs to open user detail
+const UserDetailContext = createContext<{ openUser: (userId: string, name: string) => void }>({ openUser: () => {} });
 
 /* ========== ANALYTICS TAB ========== */
 
