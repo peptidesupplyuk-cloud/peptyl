@@ -692,7 +692,7 @@ const TodaysPlan = ({ onActivate, slim = false, selectedDate }: TodaysPlanProps)
     }
     const suppsToComplete = window === "ALL" ? pendingSupplements
       : window === "AM" ? amPendingSupps : pmPendingSupps;
-    const pendingItems = suppsToComplete.map((s) => ({ item: s.name, protocolId: s.protocolId }));
+    const pendingItems = suppsToComplete.map((s) => ({ item: s.trackingKey, protocolId: s.protocolId }));
     if (pendingItems.length > 0) {
       batchComplete.mutate(pendingItems);
     }
