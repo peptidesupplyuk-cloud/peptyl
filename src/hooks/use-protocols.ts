@@ -50,7 +50,7 @@ export function useProtocols() {
         .order("created_at", { ascending: false });
       if (error) throw error;
 
-      const today = new Date().toISOString().split("T")[0];
+      const today = format(new Date(), "yyyy-MM-dd");
       const results: Protocol[] = [];
 
       for (const p of protocols ?? []) {

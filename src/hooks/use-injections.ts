@@ -245,7 +245,7 @@ async function backfillMissingDays(userId: string) {
 
       // Iterate from protocol start to the effective end (today is handled by useTodayInjections)
       for (let d = new Date(protocolStart); d <= backfillEnd; d.setDate(d.getDate() + 1)) {
-        const dateStr = d.toISOString().split("T")[0];
+        const dateStr = format(d, "yyyy-MM-dd");
         if (dateStr === todayStr) continue; // Skip today
 
         for (const pep of peptides) {
