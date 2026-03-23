@@ -594,6 +594,7 @@ const TodaysPlan = ({ onActivate, slim = false, selectedDate }: TodaysPlanProps)
   for (const protocol of protocols.filter((p) => p.status === "active")) {
     if (protocol.supplements && protocol.supplements.length > 0) {
       for (const supp of protocol.supplements) {
+        const normName = normaliseSupplementName(supp.name);
         const resolvedTiming = resolveSupplementTiming(supp);
         const isDnaGoal = protocol.goal && /dna/i.test(protocol.goal);
         const base = {
@@ -606,27 +607,30 @@ const TodaysPlan = ({ onActivate, slim = false, selectedDate }: TodaysPlanProps)
         };
 
         if (resolvedTiming === "AM+PM") {
-          // Split into two independent rows
-          const amKey = `${supp.name}::AM`;
-          const pmKey = `${supp.name}::PM`;
+          const amKey = `${normName}::AM`;
+          const pmKey = `${normName}::PM`;
           if (!seenSuppKeys.has(amKey)) {
             seenSuppKeys.add(amKey);
-            supplements.push({ ...base, name: supp.name, timing: "AM", trackingKey: amKey });
+            supplements.push({ ...base, name: normName, timing: "AM", trackingKey: amKey });
           }
           if (!seenSuppKeys.has(pmKey)) {
             seenSuppKeys.add(pmKey);
-            supplements.push({ ...base, name: supp.name, timing: "PM", trackingKey: pmKey });
+            supplements.push({ ...base, name: normName, timing: "PM", trackingKey: pmKey });
           }
         } else {
-          const key = supp.name;
+          const timing = resolvedTiming === "PM" ? "PM" : "AM";
+          const key = `${normName}::${timing}`;
           if (!seenSuppKeys.has(key)) {
             seenSuppKeys.add(key);
-            supplements.push({ ...base, name: supp.name, timing: resolvedTiming, trackingKey: key });
+            supplements.push({ ...base, name: normName, timing, trackingKey: key });
           }
         }
       }
     }
   }
+
+  // Sort: AM items first, then PM
+  supplements.sort((a, b) => (a.timing === b.timing ? 0 : a.timing === "AM" ? -1 : 1));
 
   const todaySupplements = supplements.filter((s) => {
     const freq = s.frequency.toLowerCase();
