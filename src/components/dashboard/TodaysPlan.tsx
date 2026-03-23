@@ -632,10 +632,10 @@ const TodaysPlan = ({ onActivate, slim = false, selectedDate }: TodaysPlanProps)
   });
 
   const pendingSupplements = todaySupplements.filter(
-    (s) => !completedSupplements.has(s.name) && !skippedSupplements.has(s.name)
+    (s) => !completedSupplements.has(s.trackingKey) && !skippedSupplements.has(s.trackingKey)
   );
-  const doneSupplements = todaySupplements.filter((s) => completedSupplements.has(s.name));
-  const skippedSuppList = todaySupplements.filter((s) => skippedSupplements.has(s.name));
+  const doneSupplements = todaySupplements.filter((s) => completedSupplements.has(s.trackingKey));
+  const skippedSuppList = todaySupplements.filter((s) => skippedSupplements.has(s.trackingKey));
 
   const activeGoals = [...new Set(
     protocols
