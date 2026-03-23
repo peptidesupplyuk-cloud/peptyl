@@ -140,10 +140,10 @@ Deno.serve(async (req) => {
         const userEmail = authUser?.user?.email;
         if (!userEmail && profile.notify_email) continue;
 
-        // Build reminder items
+        // Build reminder items — mirror dashboard logic exactly
         const reminders: PeptideReminder[] = [];
         const supplementReminders: SupplementReminder[] = [];
-        const seenSupplements = new Set<string>();
+        const seenSupplements = new Set<string>(); // global dedup by normalised name (matches dashboard)
 
         for (const prot of userProts) {
           const { data: peptides } = await supabase
@@ -174,32 +174,32 @@ Deno.serve(async (req) => {
 
           if (Array.isArray(prot.supplements)) {
             for (const supp of prot.supplements as Array<{ name: string; dose: string; frequency: string; timing?: string }>) {
-              // Use explicit timing if set, otherwise infer from frequency
-              const suppTiming = (supp.timing || "").toUpperCase();
-              const freq = (supp.frequency || "").toLowerCase();
+              if (!supp.name) continue;
+
+              // Normalise name to match dashboard (same aliases)
+              const normName = normaliseSupplementName(supp.name);
+
+              // Global dedup by normalised name — matches dashboard line 590
+              if (seenSupplements.has(normName.toLowerCase())) continue;
+              seenSupplements.add(normName.toLowerCase());
+
+              // Resolve timing — same logic as dashboard resolveSupplementTiming
+              const suppTiming = resolveSupplementTimingEdge(supp);
               let matchesWindow = false;
 
               if (suppTiming === "AM+PM") {
-                matchesWindow = true; // Show in both windows
+                matchesWindow = true;
               } else if (suppTiming === "AM") {
                 matchesWindow = window === "AM";
               } else if (suppTiming === "PM") {
                 matchesWindow = window === "PM";
               } else {
-                // Legacy: no timing set — infer from frequency
-                if (freq.includes("morning") || freq.includes("fasted")) {
-                  matchesWindow = window === "AM";
-                } else if (freq.includes("bed") || freq.includes("evening")) {
-                  matchesWindow = window === "PM";
-                } else {
-                  matchesWindow = window === "AM"; // default AM
-                }
+                matchesWindow = window === "AM"; // default AM
               }
 
-              if (matchesWindow && supp.name && !seenSupplements.has(`${window}::${supp.name}`)) {
-                seenSupplements.add(`${window}::${supp.name}`);
+              if (matchesWindow) {
                 supplementReminders.push({
-                  name: supp.name,
+                  name: normName,
                   dose: supp.dose || "",
                   frequency: supp.frequency || "daily",
                   protocol_name: prot.name,
