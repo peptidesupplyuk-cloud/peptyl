@@ -1,4 +1,5 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { format } from "date-fns";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 
@@ -22,34 +23,13 @@ let generatingForDate: string | null = null;
 
 /** Check if a peptide is due today based on its frequency */
 function isDueToday(frequency: string, protocolStartDate: string): boolean {
-  const today = new Date();
-  const start = new Date(protocolStartDate);
-  const daysSinceStart = Math.floor((today.getTime() - start.getTime()) / (1000 * 60 * 60 * 24));
-  const dayOfWeek = today.getDay(); // 0=Sun
-
-  switch (frequency.toLowerCase()) {
-    case "daily":
-      return true;
-    case "weekly":
-      return daysSinceStart % 7 === 0;
-    case "2x/week":
-      return dayOfWeek === 1 || dayOfWeek === 4; // Mon, Thu
-    case "3x/week":
-      return dayOfWeek === 1 || dayOfWeek === 3 || dayOfWeek === 5; // Mon, Wed, Fri
-    case "5on/2off":
-      return dayOfWeek >= 1 && dayOfWeek <= 5; // Weekdays
-    case "eod":
-    case "every other day":
-      return daysSinceStart % 2 === 0;
-    default:
-      return true;
-  }
+  return isDueOnDate(frequency, protocolStartDate, new Date());
 }
 
 export function useDateInjections(date: Date) {
   const { user } = useAuth();
-  const dateStr = date.toISOString().split("T")[0];
-  const isToday = dateStr === new Date().toISOString().split("T")[0];
+  const dateStr = format(date, "yyyy-MM-dd");
+  const isToday = dateStr === format(new Date(), "yyyy-MM-dd");
 
   return useQuery({
     queryKey: ["injections_date", user?.id, dateStr],
@@ -73,7 +53,7 @@ export function useDateInjections(date: Date) {
 
 export function useTodayInjections() {
   const { user } = useAuth();
-  const today = new Date().toISOString().split("T")[0];
+  const today = format(new Date(), "yyyy-MM-dd");
 
   return useQuery({
     queryKey: ["injections_today", user?.id, today],
@@ -192,9 +172,12 @@ export function useTodayInjections() {
 
 /** Check if a peptide is due on a specific date based on its frequency */
 function isDueOnDate(frequency: string, protocolStartDate: string, targetDate: Date): boolean {
-  const start = new Date(protocolStartDate);
-  const daysSinceStart = Math.floor((targetDate.getTime() - start.getTime()) / (1000 * 60 * 60 * 24));
-  const dayOfWeek = targetDate.getDay();
+  const start = new Date(`${protocolStartDate}T12:00:00`);
+  const target = new Date(targetDate.getFullYear(), targetDate.getMonth(), targetDate.getDate(), 12);
+  const daysSinceStart = Math.floor((target.getTime() - start.getTime()) / (1000 * 60 * 60 * 24));
+  const dayOfWeek = target.getDay();
+
+  if (daysSinceStart < 0) return false;
 
   switch (frequency.toLowerCase()) {
     case "daily":
@@ -235,7 +218,7 @@ async function backfillMissingDays(userId: string) {
     if (!protocols || protocols.length === 0) return;
 
     const today = new Date();
-    const todayStr = today.toISOString().split("T")[0];
+    const todayStr = format(today, "yyyy-MM-dd");
 
     for (const protocol of protocols) {
       const { data: peptides } = await supabase
@@ -262,7 +245,7 @@ async function backfillMissingDays(userId: string) {
 
       // Iterate from protocol start to the effective end (today is handled by useTodayInjections)
       for (let d = new Date(protocolStart); d <= backfillEnd; d.setDate(d.getDate() + 1)) {
-        const dateStr = d.toISOString().split("T")[0];
+        const dateStr = format(d, "yyyy-MM-dd");
         if (dateStr === todayStr) continue; // Skip today
 
         for (const pep of peptides) {

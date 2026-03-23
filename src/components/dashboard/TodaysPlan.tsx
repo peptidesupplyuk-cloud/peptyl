@@ -52,27 +52,65 @@ interface SupplementItem {
 }
 
 /** Derive timing window for a supplement from its explicit timing or frequency hint */
-function resolveSupplementTiming(supp: { timing?: string; frequency?: string }): string {
-  if (supp.timing) return supp.timing.toUpperCase();
-  // Infer from frequency keywords
+function resolveSupplementTiming(supp: { timing?: string; frequency?: string }): "AM" | "PM" | "AM+PM" {
+  const rawTiming = (supp.timing || "").trim().toLowerCase();
+  if (rawTiming) {
+    if ((rawTiming.includes("am") && rawTiming.includes("pm")) || rawTiming.includes("both") || rawTiming.includes("split")) {
+      return "AM+PM";
+    }
+    if (rawTiming.includes("pm") || rawTiming.includes("bed") || rawTiming.includes("evening") || rawTiming.includes("night")) {
+      return "PM";
+    }
+    return "AM";
+  }
+
   const freq = (supp.frequency || "").toLowerCase();
-  if (freq.includes("split") || freq.includes("am/pm") || freq.includes("twice") || freq.includes("2x")) return "AM+PM";
+  if (freq.includes("split") || freq.includes("am/pm") || freq.includes("twice") || freq.includes("2x/day") || freq.includes("twice daily")) return "AM+PM";
   if (freq.includes("morning") || freq.includes("fasted")) return "AM";
   if (freq.includes("bed") || freq.includes("evening") || freq.includes("night")) return "PM";
   if (freq.includes("with meals")) return "AM+PM";
-  return "AM"; // sensible default
+  return "AM";
 }
 
-/** Derive timing window for a peptide injection */
 function resolveInjectionTiming(scheduledTime: string): "AM" | "PM" {
   const hour = new Date(scheduledTime).getUTCHours();
   return hour < 14 ? "AM" : "PM";
 }
 
+function isFrequencyDueOnDate(frequency: string, protocolStartDate: string, date: Date): boolean {
+  const start = new Date(`${protocolStartDate}T12:00:00`);
+  const target = new Date(date.getFullYear(), date.getMonth(), date.getDate(), 12);
+  const daysSinceStart = differenceInCalendarDays(target, start);
+  const dayOfWeek = target.getDay();
+
+  if (daysSinceStart < 0) return false;
+
+  const f = frequency.toLowerCase();
+  if (f === "daily" || f.includes("daily") || f === "morning" || f === "evening" || f.includes("with meals") || f.includes("fasted") || f.includes("with fat")) return true;
+  if (f === "twice daily" || f.includes("2x/day") || f.includes("twice daily")) return true;
+  if (f === "weekly" || f.includes("1x")) return daysSinceStart % 7 === 0;
+  if (f.includes("2x")) return dayOfWeek === 1 || dayOfWeek === 4;
+  if (f.includes("3x")) return dayOfWeek === 1 || dayOfWeek === 3 || dayOfWeek === 5;
+  if (f === "5on/2off") return dayOfWeek >= 1 && dayOfWeek <= 5;
+  if (f === "eod" || f.includes("every other")) return daysSinceStart % 2 === 0;
+  return true;
+}
+
+function isActiveOnDate(startDate: string, endDate: string | null, date: Date): boolean {
+  const target = format(date, "yyyy-MM-dd");
+  if (startDate > target) return false;
+  if (endDate && endDate < target) return false;
+  return true;
+}
+
+function compareDoseWindow(a: "AM" | "PM", b: "AM" | "PM") {
+  if (a === b) return 0;
+  return a === "AM" ? -1 : 1;
+}
+
 /** Frequency badge helper — handles both peptide and supplement frequency labels */
 function frequencyLabel(freq: string): { label: string; color: string } {
   const f = freq.toLowerCase();
-  // Daily patterns (including supplement-specific daily frequencies)
   if (f === "daily" || f.includes("daily") || f === "morning" || f === "evening"
     || f.includes("with meals") || f.includes("before bed") || f.includes("fasted")
     || f.includes("before exercise") || f.includes("with fat") || f.includes("split")) {
@@ -186,11 +224,22 @@ const ProtocolGroupedDoses = ({
     else group.pendingSupps.push(supp);
   }
 
-  const groups = Array.from(groupMap.entries());
+  const groups = Array.from(groupMap.entries()).map(([key, group]) => ({
+    key,
+    group: {
+      ...group,
+      scheduled: [...group.scheduled].sort((a, b) => compareDoseWindow(resolveInjectionTiming(a.scheduled_time), resolveInjectionTiming(b.scheduled_time)) || new Date(a.scheduled_time).getTime() - new Date(b.scheduled_time).getTime()),
+      completed: [...group.completed].sort((a, b) => compareDoseWindow(resolveInjectionTiming(a.scheduled_time), resolveInjectionTiming(b.scheduled_time)) || new Date(a.scheduled_time).getTime() - new Date(b.scheduled_time).getTime()),
+      skipped: [...group.skipped].sort((a, b) => compareDoseWindow(resolveInjectionTiming(a.scheduled_time), resolveInjectionTiming(b.scheduled_time)) || new Date(a.scheduled_time).getTime() - new Date(b.scheduled_time).getTime()),
+      pendingSupps: [...group.pendingSupps].sort((a, b) => compareDoseWindow(a.timing as "AM" | "PM", b.timing as "AM" | "PM") || a.name.localeCompare(b.name)),
+      doneSupps: [...group.doneSupps].sort((a, b) => compareDoseWindow(a.timing as "AM" | "PM", b.timing as "AM" | "PM") || a.name.localeCompare(b.name)),
+      skippedSupps: [...group.skippedSupps].sort((a, b) => compareDoseWindow(a.timing as "AM" | "PM", b.timing as "AM" | "PM") || a.name.localeCompare(b.name)),
+    },
+  }));
   // Default: collapse completed groups, expand groups with pending items
   const [expandedGroups, setExpandedGroups] = useState<Set<string>>(() => {
     const initial = new Set<string>();
-    for (const [key, g] of groups) {
+    for (const { key, group: g } of groups) {
       if (g.scheduled.length > 0 || g.pendingSupps.length > 0) initial.add(key);
     }
     return initial;
@@ -207,7 +256,7 @@ const ProtocolGroupedDoses = ({
 
   return (
     <div className="space-y-2">
-      {groups.map(([key, group]) => {
+      {groups.map(({ key, group }) => {
         const totalInGroup = group.scheduled.length + group.completed.length + group.skipped.length + group.pendingSupps.length + group.doneSupps.length + group.skippedSupps.length;
         const completedInGroup = group.completed.length + group.doneSupps.length;
         const pendingInGroup = group.scheduled.length + group.pendingSupps.length;
@@ -594,6 +643,9 @@ const TodaysPlan = ({ onActivate, slim = false, selectedDate }: TodaysPlanProps)
   for (const protocol of protocols.filter((p) => p.status === "active")) {
     if (protocol.supplements && protocol.supplements.length > 0) {
       for (const supp of protocol.supplements) {
+        if (!isActiveOnDate(protocol.start_date, protocol.end_date, effectiveDate)) continue;
+        if (!isFrequencyDueOnDate(supp.frequency, protocol.start_date, effectiveDate)) continue;
+
         const normName = normaliseSupplementName(supp.name);
         const resolvedTiming = resolveSupplementTiming(supp);
         const isDnaGoal = protocol.goal && /dna/i.test(protocol.goal);
@@ -629,15 +681,9 @@ const TodaysPlan = ({ onActivate, slim = false, selectedDate }: TodaysPlanProps)
     }
   }
 
-  // Sort: AM items first, then PM
-  supplements.sort((a, b) => (a.timing === b.timing ? 0 : a.timing === "AM" ? -1 : 1));
+  supplements.sort((a, b) => compareDoseWindow(a.timing as "AM" | "PM", b.timing as "AM" | "PM") || a.name.localeCompare(b.name));
 
-  const todaySupplements = supplements.filter((s) => {
-    const freq = s.frequency.toLowerCase();
-    if (freq.includes("daily") || freq.includes("day")) return true;
-    if (freq.includes("2x") || freq.includes("twice")) return true;
-    return true;
-  });
+  const todaySupplements = supplements;
 
   const pendingSupplements = todaySupplements.filter(
     (s) => !completedSupplements.has(s.trackingKey) && !skippedSupplements.has(s.trackingKey)

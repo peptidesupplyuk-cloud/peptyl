@@ -1,4 +1,5 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { format } from "date-fns";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 
@@ -49,7 +50,7 @@ export function useProtocols() {
         .order("created_at", { ascending: false });
       if (error) throw error;
 
-      const today = new Date().toISOString().split("T")[0];
+      const today = format(new Date(), "yyyy-MM-dd");
       const results: Protocol[] = [];
 
       for (const p of protocols ?? []) {
