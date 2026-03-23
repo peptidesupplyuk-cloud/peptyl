@@ -1,4 +1,4 @@
-import { useState, lazy, Suspense } from "react";
+import { useState, lazy, Suspense, createContext, useContext } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
@@ -21,8 +21,12 @@ import { campaigns } from "@/data/campaigns";
 
 const LazyResearchQueue = lazy(() => import("@/pages/ResearchQueue"));
 import IngestChat from "@/components/admin/IngestChat";
+import UserDetailPanel from "@/components/admin/UserDetailPanel";
 
 const ADMIN_EMAIL = "peptidesupplyuk@gmail.com";
+
+// Context to allow child tabs to open user detail
+const UserDetailContext = createContext<{ openUser: (userId: string, name: string) => void }>({ openUser: () => {} });
 
 /* ========== ANALYTICS TAB ========== */
 
@@ -90,6 +94,7 @@ const StatCard = ({ icon: Icon, label, value, delta }: { icon: any; label: strin
 
 const AnalyticsTab = () => {
   const { user } = useAuth();
+  const { openUser } = useContext(UserDetailContext);
 
   const { data: stats, isLoading, error } = useQuery({
     queryKey: ["admin-stats"],
@@ -203,7 +208,8 @@ const AnalyticsTab = () => {
                   const name = [u.first_name, u.last_name].filter(Boolean).join(" ") || u.username || "—";
                   const missingFields = [!u.first_name && "name", !u.country && "country", !u.research_goal && "goal"].filter(Boolean);
                   return (
-                    <tr key={i} className={`border-b border-border/30 last:border-0 ${missingFields.length >= 2 ? "bg-destructive/5" : ""}`}>
+                     <tr key={i} className={`border-b border-border/30 last:border-0 cursor-pointer hover:bg-muted/30 transition-colors ${missingFields.length >= 2 ? "bg-destructive/5" : ""}`}
+                       onClick={() => openUser(u.user_id, name)}>
                       <td className="py-1.5 pr-2 text-foreground font-medium whitespace-nowrap">{name}</td>
                       <td className="py-1.5 pr-2 text-muted-foreground">{u.email || "—"}</td>
                       <td className="py-1.5 pr-2 text-muted-foreground">{u.country || <span className="text-destructive/70">—</span>}</td>
@@ -1511,6 +1517,7 @@ const KnowledgeBaseTab = () => {
 
 const UsersTab = () => {
   const { user } = useAuth();
+  const { openUser } = useContext(UserDetailContext);
 
   const { data: stats, isLoading } = useQuery({
     queryKey: ["admin-stats"],
@@ -1681,8 +1688,9 @@ const UsersTab = () => {
               </tr>
             </thead>
             <tbody>
-              {(eng.most_active_users as { email: string; pageViews: number; sessions: number; isPwa: boolean }[]).map((u, i) => (
-                <tr key={i} className="border-b border-border/30 last:border-0">
+              {(eng.most_active_users as { userId: string; email: string; pageViews: number; sessions: number; isPwa: boolean }[]).map((u, i) => (
+                <tr key={i} className="border-b border-border/30 last:border-0 cursor-pointer hover:bg-muted/30 transition-colors"
+                  onClick={() => openUser(u.userId, u.email)}>
                   <td className="py-1.5 pr-2 text-foreground font-medium">{u.email}</td>
                   <td className="py-1.5 pr-2 text-right text-muted-foreground">{u.pageViews}</td>
                   <td className="py-1.5 pr-2 text-right text-muted-foreground">{u.sessions}</td>
@@ -1710,6 +1718,9 @@ const UsersTab = () => {
 
 const AdminDashboard = () => {
   const { user } = useAuth();
+  const [selectedUser, setSelectedUser] = useState<{ userId: string; name: string } | null>(null);
+
+  const openUser = (userId: string, name: string) => setSelectedUser({ userId, name });
 
   if (user?.email !== ADMIN_EMAIL) {
     return (
@@ -1740,67 +1751,79 @@ const AdminDashboard = () => {
             <p className="text-muted-foreground text-sm mt-1">Analytics, content management, and platform activity — all in one place.</p>
           </div>
 
-          <Tabs defaultValue="analytics" className="space-y-6">
-            <TabsList className="w-auto overflow-x-auto no-scrollbar">
-              <TabsTrigger value="analytics" className="gap-1.5">
-                <BarChart3 className="h-4 w-4" /> Analytics
-              </TabsTrigger>
-              <TabsTrigger value="users" className="gap-1.5">
-                <Users className="h-4 w-4" /> Users
-              </TabsTrigger>
-              <TabsTrigger value="payments" className="gap-1.5">
-                <CreditCard className="h-4 w-4" /> Payments
-              </TabsTrigger>
-              <TabsTrigger value="content" className="gap-1.5">
-                <FileText className="h-4 w-4" /> Content
-              </TabsTrigger>
-              <TabsTrigger value="campaigns" className="gap-1.5">
-                <Megaphone className="h-4 w-4" /> Campaigns
-              </TabsTrigger>
-              <TabsTrigger value="feedback" className="gap-1.5">
-                <MessageSquare className="h-4 w-4" /> Feedback
-              </TabsTrigger>
-              <TabsTrigger value="knowledge" className="gap-1.5">
-                <Sparkles className="h-4 w-4" /> Knowledge Base
-              </TabsTrigger>
-              <TabsTrigger value="research" className="gap-1.5">
-                <FlaskConical className="h-4 w-4" /> Research
-              </TabsTrigger>
-              <TabsTrigger value="marker-requests" className="gap-1.5">
-                <Droplets className="h-4 w-4" /> Marker Requests
-              </TabsTrigger>
-            </TabsList>
+          <UserDetailContext.Provider value={{ openUser }}>
+            {selectedUser && (
+              <div className="mb-6">
+                <UserDetailPanel
+                  userId={selectedUser.userId}
+                  userName={selectedUser.name}
+                  onClose={() => setSelectedUser(null)}
+                />
+              </div>
+            )}
 
-            <TabsContent value="analytics">
-              <AnalyticsTab />
-            </TabsContent>
-            <TabsContent value="users">
-              <UsersTab />
-            </TabsContent>
-            <TabsContent value="payments">
-              <PaymentsTab />
-            </TabsContent>
-            <TabsContent value="content">
-              <ContentTab />
-            </TabsContent>
-            <TabsContent value="campaigns">
-              <CampaignsTab />
-            </TabsContent>
-            <TabsContent value="feedback">
-              <FeedbackTab />
-            </TabsContent>
-            <TabsContent value="knowledge">
-              <KnowledgeBaseTab />
-            </TabsContent>
-            <TabsContent value="research">
-              <Suspense fallback={<div className="flex justify-center py-12"><Loader2 className="h-6 w-6 animate-spin" /></div>}>
-                <LazyResearchQueue embedded />
-              </Suspense>
-            </TabsContent>
-            <TabsContent value="marker-requests">
-              <MarkerRequestsTab />
-            </TabsContent>
-          </Tabs>
+            <Tabs defaultValue="analytics" className="space-y-6">
+              <TabsList className="w-auto overflow-x-auto no-scrollbar">
+                <TabsTrigger value="analytics" className="gap-1.5">
+                  <BarChart3 className="h-4 w-4" /> Analytics
+                </TabsTrigger>
+                <TabsTrigger value="users" className="gap-1.5">
+                  <Users className="h-4 w-4" /> Users
+                </TabsTrigger>
+                <TabsTrigger value="payments" className="gap-1.5">
+                  <CreditCard className="h-4 w-4" /> Payments
+                </TabsTrigger>
+                <TabsTrigger value="content" className="gap-1.5">
+                  <FileText className="h-4 w-4" /> Content
+                </TabsTrigger>
+                <TabsTrigger value="campaigns" className="gap-1.5">
+                  <Megaphone className="h-4 w-4" /> Campaigns
+                </TabsTrigger>
+                <TabsTrigger value="feedback" className="gap-1.5">
+                  <MessageSquare className="h-4 w-4" /> Feedback
+                </TabsTrigger>
+                <TabsTrigger value="knowledge" className="gap-1.5">
+                  <Sparkles className="h-4 w-4" /> Knowledge Base
+                </TabsTrigger>
+                <TabsTrigger value="research" className="gap-1.5">
+                  <FlaskConical className="h-4 w-4" /> Research
+                </TabsTrigger>
+                <TabsTrigger value="marker-requests" className="gap-1.5">
+                  <Droplets className="h-4 w-4" /> Marker Requests
+                </TabsTrigger>
+              </TabsList>
+
+              <TabsContent value="analytics">
+                <AnalyticsTab />
+              </TabsContent>
+              <TabsContent value="users">
+                <UsersTab />
+              </TabsContent>
+              <TabsContent value="payments">
+                <PaymentsTab />
+              </TabsContent>
+              <TabsContent value="content">
+                <ContentTab />
+              </TabsContent>
+              <TabsContent value="campaigns">
+                <CampaignsTab />
+              </TabsContent>
+              <TabsContent value="feedback">
+                <FeedbackTab />
+              </TabsContent>
+              <TabsContent value="knowledge">
+                <KnowledgeBaseTab />
+              </TabsContent>
+              <TabsContent value="research">
+                <Suspense fallback={<div className="flex justify-center py-12"><Loader2 className="h-6 w-6 animate-spin" /></div>}>
+                  <LazyResearchQueue embedded />
+                </Suspense>
+              </TabsContent>
+              <TabsContent value="marker-requests">
+                <MarkerRequestsTab />
+              </TabsContent>
+            </Tabs>
+          </UserDetailContext.Provider>
         </div>
       </main>
       <Footer />
