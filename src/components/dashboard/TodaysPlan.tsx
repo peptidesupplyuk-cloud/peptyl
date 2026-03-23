@@ -343,7 +343,7 @@ const ProtocolGroupedDoses = ({
                 {group.doneSupps.map((supp) => {
                   const badge = frequencyLabel(supp.frequency);
                   return (
-                    <div key={`supp-done-${supp.name}`} className="flex items-center justify-between bg-primary/5 border border-primary/10 rounded-lg px-3 py-2">
+                    <div key={`supp-done-${supp.trackingKey}`} className="flex items-center justify-between bg-primary/5 border border-primary/10 rounded-lg px-3 py-2">
                       <div className="flex items-center gap-2">
                         <Check className="h-3.5 w-3.5 text-primary" />
                         <span className="text-sm font-medium text-foreground line-through opacity-60">{supp.name}</span>
