@@ -875,7 +875,7 @@ function resolveSupplementTimingEdge(supp: { timing?: string; frequency?: string
   return "AM";
 }
 
-
+function formatWhatsAppNumber(raw: string): string | null {
   let n = raw.replace(/[\s\-\(\)\.]/g, "");
   if (n.startsWith("+")) n = n.slice(1);
   if (n.startsWith("07")) n = "44" + n.slice(1);
