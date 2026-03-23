@@ -234,6 +234,35 @@ const Auth = () => {
     }
   };
 
+  const handleAppleSignIn = async () => {
+    setError("");
+    if (isSignUp) {
+      if (!firstName.trim()) { setError("Please enter your first name before continuing with Apple."); return; }
+      if (!lastName.trim()) { setError("Please enter your last name before continuing with Apple."); return; }
+      if (!country) { setError("Please select your country before continuing with Apple."); return; }
+    }
+    setAppleLoading(true);
+    const onboardingRaw = sessionStorage.getItem("onboarding_answers");
+    const existing = onboardingRaw ? JSON.parse(onboardingRaw) : {};
+    const merged = {
+      ...existing,
+      ...(firstName.trim() ? { first_name: firstName.trim() } : {}),
+      ...(lastName.trim() ? { last_name: lastName.trim() } : {}),
+      ...(country ? { country } : {}),
+      ...(researchGoal ? { goal: researchGoal } : {}),
+    };
+    if (Object.keys(merged).length > 0) {
+      sessionStorage.setItem("onboarding_answers", JSON.stringify(merged));
+    }
+    const { error } = await lovable.auth.signInWithOAuth("apple", {
+      redirect_uri: window.location.origin,
+    });
+    if (error) {
+      setError(error.message || "Apple sign-in failed. Please try again.");
+      setAppleLoading(false);
+    }
+  };
+
   const selectClass = "w-full pl-10 pr-4 py-2.5 rounded-xl bg-background border border-border text-sm text-foreground focus:outline-none focus:border-primary/40 transition-colors appearance-none";
 
   return (
