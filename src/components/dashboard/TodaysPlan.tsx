@@ -180,8 +180,8 @@ const ProtocolGroupedDoses = ({
     const name = supp.protocolName || "Other";
     const goal = supp.goal || "";
     const group = getOrCreate(key, name, goal);
-    if (completedSupplements.has(supp.name)) group.doneSupps.push(supp);
-    else if (skippedSupplements.has(supp.name)) group.skippedSupps.push(supp);
+    if (completedSupplements.has(supp.trackingKey)) group.doneSupps.push(supp);
+    else if (skippedSupplements.has(supp.trackingKey)) group.skippedSupps.push(supp);
     else group.pendingSupps.push(supp);
   }
 
