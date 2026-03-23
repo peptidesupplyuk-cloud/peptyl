@@ -23,28 +23,7 @@ let generatingForDate: string | null = null;
 
 /** Check if a peptide is due today based on its frequency */
 function isDueToday(frequency: string, protocolStartDate: string): boolean {
-  const today = new Date();
-  const start = new Date(protocolStartDate);
-  const daysSinceStart = Math.floor((today.getTime() - start.getTime()) / (1000 * 60 * 60 * 24));
-  const dayOfWeek = today.getDay(); // 0=Sun
-
-  switch (frequency.toLowerCase()) {
-    case "daily":
-      return true;
-    case "weekly":
-      return daysSinceStart % 7 === 0;
-    case "2x/week":
-      return dayOfWeek === 1 || dayOfWeek === 4; // Mon, Thu
-    case "3x/week":
-      return dayOfWeek === 1 || dayOfWeek === 3 || dayOfWeek === 5; // Mon, Wed, Fri
-    case "5on/2off":
-      return dayOfWeek >= 1 && dayOfWeek <= 5; // Weekdays
-    case "eod":
-    case "every other day":
-      return daysSinceStart % 2 === 0;
-    default:
-      return true;
-  }
+  return isDueOnDate(frequency, protocolStartDate, new Date());
 }
 
 export function useDateInjections(date: Date) {
