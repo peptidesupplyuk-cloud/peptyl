@@ -1718,6 +1718,9 @@ const UsersTab = () => {
 
 const AdminDashboard = () => {
   const { user } = useAuth();
+  const [selectedUser, setSelectedUser] = useState<{ userId: string; name: string } | null>(null);
+
+  const openUser = (userId: string, name: string) => setSelectedUser({ userId, name });
 
   if (user?.email !== ADMIN_EMAIL) {
     return (
