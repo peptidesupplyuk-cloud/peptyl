@@ -586,21 +586,39 @@ const TodaysPlan = ({ onActivate, slim = false, selectedDate }: TodaysPlanProps)
 
   // Collect supplements from active protocols
   const supplements: SupplementItem[] = [];
+  const seenSuppKeys = new Set<string>();
   for (const protocol of protocols.filter((p) => p.status === "active")) {
     if (protocol.supplements && protocol.supplements.length > 0) {
       for (const supp of protocol.supplements) {
-        if (!supplements.find((s) => s.name === supp.name)) {
-          const isDnaGoal = protocol.goal && /dna/i.test(protocol.goal);
-          supplements.push({
-            name: supp.name,
-            dose: supp.dose,
-            frequency: supp.frequency,
-            timing: resolveSupplementTiming(supp),
-            protocolName: protocol.name,
-            protocolId: protocol.id,
-            goal: protocol.goal && !isDnaGoal ? formatGoalLabel(protocol.goal) : "",
-            drivenBy: (supp as any).drivenBy || [],
-          });
+        const resolvedTiming = resolveSupplementTiming(supp);
+        const isDnaGoal = protocol.goal && /dna/i.test(protocol.goal);
+        const base = {
+          dose: supp.dose,
+          frequency: supp.frequency,
+          protocolName: protocol.name,
+          protocolId: protocol.id,
+          goal: protocol.goal && !isDnaGoal ? formatGoalLabel(protocol.goal) : "",
+          drivenBy: (supp as any).drivenBy || [],
+        };
+
+        if (resolvedTiming === "AM+PM") {
+          // Split into two independent rows
+          const amKey = `${supp.name}::AM`;
+          const pmKey = `${supp.name}::PM`;
+          if (!seenSuppKeys.has(amKey)) {
+            seenSuppKeys.add(amKey);
+            supplements.push({ ...base, name: supp.name, timing: "AM", trackingKey: amKey });
+          }
+          if (!seenSuppKeys.has(pmKey)) {
+            seenSuppKeys.add(pmKey);
+            supplements.push({ ...base, name: supp.name, timing: "PM", trackingKey: pmKey });
+          }
+        } else {
+          const key = supp.name;
+          if (!seenSuppKeys.has(key)) {
+            seenSuppKeys.add(key);
+            supplements.push({ ...base, name: supp.name, timing: resolvedTiming, trackingKey: key });
+          }
         }
       }
     }
