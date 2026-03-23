@@ -207,7 +207,8 @@ const AnalyticsTab = () => {
                   const name = [u.first_name, u.last_name].filter(Boolean).join(" ") || u.username || "—";
                   const missingFields = [!u.first_name && "name", !u.country && "country", !u.research_goal && "goal"].filter(Boolean);
                   return (
-                    <tr key={i} className={`border-b border-border/30 last:border-0 ${missingFields.length >= 2 ? "bg-destructive/5" : ""}`}>
+                     <tr key={i} className={`border-b border-border/30 last:border-0 cursor-pointer hover:bg-muted/30 transition-colors ${missingFields.length >= 2 ? "bg-destructive/5" : ""}`}
+                       onClick={() => { const ctx = useContext(UserDetailContext); ctx.openUser(u.user_id, name); }}>
                       <td className="py-1.5 pr-2 text-foreground font-medium whitespace-nowrap">{name}</td>
                       <td className="py-1.5 pr-2 text-muted-foreground">{u.email || "—"}</td>
                       <td className="py-1.5 pr-2 text-muted-foreground">{u.country || <span className="text-destructive/70">—</span>}</td>
