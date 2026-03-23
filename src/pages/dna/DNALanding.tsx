@@ -61,7 +61,7 @@ const DNALanding = () => {
   return (
     <>
       <SEO
-        title="Peptide DNA Analysis — Personalised Health Protocols"
+        title="DNA Health Analysis - Personalised Protocols"
         description="Upload DNA and bloodwork for AI-powered personalised peptide, supplement, and lifestyle protocols built from your genetics. Standard and Advanced tiers available."
         path="/dna"
       />

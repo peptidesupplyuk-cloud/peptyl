@@ -77,7 +77,7 @@ const PeptidesPage = () => {
   return (
     <div className="min-h-screen bg-background">
       <SEO
-        title="Peptide Database — 54+ Compounds, Dosing & Protocols Free"
+        title="Peptide Database - 54+ Compounds, Dosing & Protocols"
         description="Search 54+ peptides with evidence-based dosing protocols, side effects, and community feedback. BPC-157, Semaglutide, Tirzepatide, GHK-Cu and more."
         path="/peptides"
       />
