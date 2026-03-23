@@ -239,7 +239,7 @@ const ProtocolGroupedDoses = ({
   // Default: collapse completed groups, expand groups with pending items
   const [expandedGroups, setExpandedGroups] = useState<Set<string>>(() => {
     const initial = new Set<string>();
-    for (const [key, g] of groups) {
+    for (const { key, group: g } of groups) {
       if (g.scheduled.length > 0 || g.pendingSupps.length > 0) initial.add(key);
     }
     return initial;
