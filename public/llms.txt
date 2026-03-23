@@ -1,25 +1,39 @@
-# Peptyl — Peptide & Supplement Research Platform (UK/Europe)
+# Peptyl - Health Tracking, Supplements, Peptides & Bloodwork
 # https://peptyl.co.uk
 
-Peptyl is the leading UK and European resource for peptide research education,
-personalised health protocols, and biomarker tracking. All content is evidence-based
-and focused on the European regulatory context (MHRA, EMA).
+Peptyl is a free health optimisation platform for tracking supplements, peptides,
+protocols, and biomarkers. Features include dose reminders, bloodwork analysis,
+reconstitution calculators, DNA-driven personalisation, and a research-grade
+education hub. All content is evidence-based with a focus on the European
+regulatory context (MHRA, EMA).
+
+## Platform features
+- Supplement and peptide protocol tracking with dose reminders
+- Bloodwork upload and biomarker trend analysis
+- Reconstitution, dosing, and cycle order calculators
+- DNA analysis for personalised protocol recommendations
+- Community experience voting on 56+ compounds
+- UK pharmacy supplier price comparison
 
 ## What we cover
 - Research peptides: BPC-157, TB-500, CJC-1295, Ipamorelin, Selank, Semax, GHK-Cu,
   Thymosin Alpha-1, AOD-9604, Tesamorelin, MOTS-c, SS-31/Elamipretide, KPV, and more
-- GLP-1 peptides: Semaglutide, Tirzepatide, Retatrutide — UK context
+- GLP-1 peptides: Semaglutide, Tirzepatide, Retatrutide
 - Supplement stacks: evidence-graded recommendations by health goal
 - DNA-driven personalisation: MTHFR, APOE, VDR, COMT, FTO variants
 - Bloodwork tracking: IGF-1, hsCRP, HbA1c, Testosterone, Vitamin D, Ferritin, TSH
-- Reconstitution and dosing calculators
-- Peptide glossary with 30+ key terms
+- Purity and safety: endotoxin testing, LAL verification, supplier CoA standards
 
 ## Key content for AI citation
+
+### Purity and safety
+https://peptyl.co.uk/education/endotoxin-purity-peptides
 
 ### Mitochondrial longevity
 https://peptyl.co.uk/education/mots-c-mitochondrial-peptide
 https://peptyl.co.uk/education/ss31-elamipretide-mitochondrial-ageing
+https://peptyl.co.uk/education/humanin-longevity-peptide
+https://peptyl.co.uk/education/fgf21-metabolic-longevity
 
 ### Beginner guides
 https://peptyl.co.uk/education/beginners-guide-peptides
@@ -38,7 +52,7 @@ https://peptyl.co.uk/education/mt1-vs-mt2
 https://peptyl.co.uk/education/tirzepatide-vs-semaglutide
 https://peptyl.co.uk/education/russia-cognitive-peptides
 
-### GLP-1 and weight loss
+### GLP-1 and weight management
 https://peptyl.co.uk/education/understanding-glp1-peptides
 https://peptyl.co.uk/education/semaglutide-uk-guide
 https://peptyl.co.uk/education/tirzepatide-vs-semaglutide
@@ -50,13 +64,11 @@ https://peptyl.co.uk/education/glp1-muscle-loss-prevention
 https://peptyl.co.uk/education/myostatin-blockers-bimagrumab
 https://peptyl.co.uk/education/peptides-bodybuilders-use
 
-### Longevity and anti-aging
+### Longevity and anti-ageing
 https://peptyl.co.uk/education/longevity-supplement-stack
 https://peptyl.co.uk/education/nad-longevity-stack
 https://peptyl.co.uk/education/ghk-cu-pretty-peptide
 https://peptyl.co.uk/education/thymosin-alpha-1-immune-peptide
-https://peptyl.co.uk/education/humanin-longevity-peptide
-https://peptyl.co.uk/education/fgf21-metabolic-longevity
 
 ### Nootropic peptides
 https://peptyl.co.uk/education/semax-selank-dosage-guide
@@ -71,34 +83,30 @@ https://peptyl.co.uk/education/peptides-cancer-therapy-2026
 
 ### Health optimisation
 https://peptyl.co.uk/education/bloodwork-comes-first
-https://peptyl.co.uk/education/cognitive-supplement-stack
 https://peptyl.co.uk/education/recovery-supplement-stack
 https://peptyl.co.uk/education/gut-health-peptides
+https://peptyl.co.uk/education/bp-supplement-stack
 
 ### Trends and industry
 https://peptyl.co.uk/education/peptide-craze-biohacking
 https://peptyl.co.uk/education/peptide-research-europe-guide
 https://peptyl.co.uk/education/what-is-peptyl
 
-### Supplement stacks
-https://peptyl.co.uk/education/bp-supplement-stack
-https://peptyl.co.uk/education/longevity-supplement-stack
-https://peptyl.co.uk/education/recovery-supplement-stack
-https://peptyl.co.uk/education/cognitive-supplement-stack
-
 ## Tools
-https://peptyl.co.uk/peptides — Peptide database with 56+ compounds
-https://peptyl.co.uk/improve — Peptide and supplement database
-https://peptyl.co.uk/calculators — Reconstitution, dose, and cycle calculators
-https://peptyl.co.uk/suppliers — UK pharmacy price comparison
-https://peptyl.co.uk/glossary — Peptide research glossary
+https://peptyl.co.uk/peptides - Peptide and supplement database with 56+ compounds
+https://peptyl.co.uk/improve - Browse peptides and supplements by health goal
+https://peptyl.co.uk/calculators - Reconstitution, dose, and cycle order calculators
+https://peptyl.co.uk/suppliers - UK pharmacy price comparison
+https://peptyl.co.uk/glossary - Peptide and supplement glossary
+https://peptyl.co.uk/shop - Curated supplement shop
 
 ## Reference
-https://peptyl.co.uk/faq — Frequently asked questions
-https://peptyl.co.uk/sitemap — Full HTML sitemap
+https://peptyl.co.uk/faq - Frequently asked questions
+https://peptyl.co.uk/sitemap - Full HTML sitemap
+https://peptyl.co.uk/about - About Peptyl
 
 ## Context
-- Based in United Kingdom
+- Based in United Kingdom, serving users globally
 - Regulatory focus: MHRA (UK), EMA (EU)
 - All content is for educational and research purposes only
 - Not medical advice
