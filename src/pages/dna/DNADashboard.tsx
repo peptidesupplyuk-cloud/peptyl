@@ -114,8 +114,7 @@ const DNADashboard = () => {
                             : "bg-muted text-muted-foreground"
                         }`}>
                           {isPro ? "Pro ★" : isAdvanced ? "Advanced ✦" : "Standard"}
-                        </span>
-                        </span>
+                         </span>
                         <span className="text-xs bg-muted text-muted-foreground rounded-md px-2 py-0.5">
                           {r.input_method}
                         </span>
