@@ -675,7 +675,23 @@ const Dashboard = () => {
               )}
 
               {/* ═══ ZONE A — Hero Status ═══ */}
-              {hasActiveProtocol ? (
+              {protocolsLoading || adherenceLoading ? (
+                <div className="space-y-3">
+                  {[1].map((i) => (
+                    <div key={i} className="rounded-2xl border border-border bg-card p-4 sm:p-5 animate-pulse space-y-3">
+                      <div className="h-1 bg-muted rounded-full" />
+                      <div className="flex items-center justify-between gap-3">
+                        <div className="space-y-2 flex-1">
+                          <div className="h-4 w-40 bg-muted rounded" />
+                          <div className="h-3 w-24 bg-muted/60 rounded" />
+                        </div>
+                        <div className="w-14 h-14 bg-muted rounded-xl" />
+                      </div>
+                      <div className="h-6 w-28 bg-muted/50 rounded-full" />
+                    </div>
+                  ))}
+                </div>
+              ) : hasActiveProtocol ? (
                 <div className="space-y-3">
                   {perProtocolStats.map(({ protocol, rate, dayNumber, totalDays, progressPct, daysLeft, hasPeptides, hasSupplements }, idx) => (
                     <PremiumCard key={protocol.id} glow delay={idx * 0.08}>
