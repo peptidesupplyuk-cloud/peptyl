@@ -224,7 +224,7 @@ const TierComparisonSection = () => {
               return (
                 <div
                   key={card.tier}
-                  className={`bg-card border rounded-2xl p-6 ${
+                  className={`bg-card border rounded-2xl p-6 flex flex-col ${
                     isAdvanced
                       ? "border-primary/30"
                       : isPro
@@ -239,7 +239,7 @@ const TierComparisonSection = () => {
                       <p className="text-xs text-muted-foreground">Perfect for...</p>
                     </div>
                   </div>
-                  <ul className="space-y-2.5">
+                  <ul className="space-y-2.5 flex-1">
                     {card.points.map((point) => (
                       <li key={point} className="flex items-start gap-2 text-sm text-foreground">
                         <Check className="h-3.5 w-3.5 text-primary mt-0.5 shrink-0" />
@@ -247,7 +247,7 @@ const TierComparisonSection = () => {
                       </li>
                     ))}
                   </ul>
-                  <Link to={`/dna/upload?tier=${card.tier.toLowerCase()}`} className="block mt-5">
+                  <Link to={`/dna/upload?tier=${card.tier.toLowerCase()}`} className="block mt-auto pt-5">
                     <Button
                       variant={isAdvanced || isPro ? "default" : "outline"}
                       className={`w-full ${isPro ? "bg-amber-500 hover:bg-amber-600 text-white" : ""}`}
@@ -265,7 +265,7 @@ const TierComparisonSection = () => {
         {/* Social Proof */}
         <div className="text-center space-y-3">
           <p className="text-sm text-muted-foreground">
-            Trusted by biohackers, athletes, and health optimisers across the UK
+            Trusted by biohackers, athletes, and health optimisers across Europe
           </p>
           <div className="flex items-center justify-center gap-6 text-xs text-muted-foreground">
             <span className="flex items-center gap-1">
