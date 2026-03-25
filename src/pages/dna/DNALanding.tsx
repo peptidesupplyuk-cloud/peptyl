@@ -168,24 +168,7 @@ const DNALanding = () => {
             <p className="text-sm text-primary-foreground/50 mb-8 max-w-md mx-auto">
               Best results come from combining genetic data (23andMe / AncestryDNA) with recent blood panels. You can start with either.
             </p>
-            <div className="flex justify-center gap-3 flex-wrap">
-              <Link to="/dna/upload?tier=standard">
-                <Button size="lg" variant="outline" className="border-primary-foreground/20 text-primary-foreground hover:bg-primary-foreground/10 px-6 py-6 text-base">
-                  Standard £14.99
-                </Button>
-              </Link>
-              <Link to="/dna/upload?tier=advanced">
-                <Button size="lg" className="shadow-brand px-6 py-6 text-base">
-                  Advanced £29.99 <ArrowRight className="ml-2 h-5 w-5" />
-                </Button>
-              </Link>
-              <Link to="/dna/upload?tier=pro">
-                <Button size="lg" className="bg-amber-500 hover:bg-amber-600 text-white px-6 py-6 text-base">
-                  <Crown className="mr-2 h-5 w-5" /> Pro £59.99
-                </Button>
-              </Link>
-            </div>
-            <p className="text-xs text-primary-foreground/50 mt-4">
+            <p className="text-xs text-primary-foreground/50 mt-2 mb-4">
               One-time payment per report. Your raw genetic data is never stored.
             </p>
 
@@ -197,6 +180,58 @@ const DNALanding = () => {
                 </Link>
               </div>
             )}
+          </div>
+        </section>
+
+        {/* Which tier is right for you? - right after hero */}
+        <section className="py-16 bg-background">
+          <div className="container mx-auto px-6">
+            <h2 className="text-2xl md:text-3xl font-heading font-bold text-foreground text-center mb-8">
+              Which tier is right for you?
+            </h2>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-5xl mx-auto">
+              {[
+                { tier: "Standard", icon: "🧬", points: ["First-time genetic testing", "Understanding your basic health risks", "Getting started with targeted supplements", "Quick 5-minute read"] },
+                { tier: "Advanced", icon: "📊", points: ["Health-conscious individuals wanting personalised protocols", "People with bloodwork results to cross-reference", "Anyone taking multiple supplements who wants to optimise", "Those wanting diet and training guidance based on genetics"] },
+                { tier: "Pro", icon: "🔬", points: ["Biohackers and longevity enthusiasts", "Research peptide users wanting genetic matching", "Athletes optimising performance genetics", "Anyone wanting predicted outcomes and retest tracking"] },
+              ].map((card) => {
+                const isAdvanced = card.tier === "Advanced";
+                const isPro = card.tier === "Pro";
+                return (
+                  <div
+                    key={card.tier}
+                    className={`bg-card border rounded-2xl p-6 flex flex-col ${
+                      isAdvanced ? "border-primary/30" : isPro ? "border-amber-500/30" : "border-border"
+                    }`}
+                  >
+                    <div className="flex items-center gap-3 mb-4">
+                      <span className="text-2xl">{card.icon}</span>
+                      <div>
+                        <h3 className="font-heading font-semibold text-foreground">{card.tier}</h3>
+                        <p className="text-xs text-muted-foreground">Perfect for...</p>
+                      </div>
+                    </div>
+                    <ul className="space-y-2.5 flex-1">
+                      {card.points.map((point) => (
+                        <li key={point} className="flex items-start gap-2 text-sm text-foreground">
+                          <Check className="h-3.5 w-3.5 text-primary mt-0.5 shrink-0" />
+                          <span className="leading-snug">{point}</span>
+                        </li>
+                      ))}
+                    </ul>
+                    <Link to={`/dna/upload?tier=${card.tier.toLowerCase()}`} className="block mt-auto pt-5">
+                      <Button
+                        variant={isAdvanced || isPro ? "default" : "outline"}
+                        className={`w-full ${isPro ? "bg-amber-500 hover:bg-amber-600 text-white" : ""}`}
+                        size="sm"
+                      >
+                        Get {card.tier} Report
+                      </Button>
+                    </Link>
+                  </div>
+                );
+              })}
+            </div>
           </div>
         </section>
 
