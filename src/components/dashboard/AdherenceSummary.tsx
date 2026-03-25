@@ -1,48 +1,24 @@
-import { useMemo } from "react";
 import { motion } from "framer-motion";
-import { useAllInjections } from "@/hooks/use-injections";
-import { useProtocols } from "@/hooks/use-protocols";
-import { startOfWeek } from "date-fns";
-import { CheckCircle2, XCircle, SkipForward, TrendingUp } from "lucide-react";
+import { CheckCircle2, XCircle, SkipForward, TrendingUp, FlaskConical, Pill } from "lucide-react";
+import { useAdherence } from "@/hooks/use-adherence";
 
 const AdherenceSummary = ({ onNavigate }: { onNavigate?: () => void }) => {
-  const { data: injections = [], isLoading } = useAllInjections();
-  const { data: protocols = [] } = useProtocols();
+  const { overall, totalPeptideRate, totalSupplementRate, perProtocol, isLoading } = useAdherence();
 
-  const protocolPeptideNames = useMemo(() => {
-    return new Set(
-      protocols.flatMap((protocol) => protocol.peptides?.map((pep) => pep.peptide_name) ?? [])
+  if (isLoading) {
+    return (
+      <div className="rounded-2xl border border-border bg-card shadow-sm px-5 py-4 animate-pulse">
+        <div className="h-4 bg-muted rounded w-1/3 mb-3" />
+        <div className="grid grid-cols-2 gap-2.5">
+          {[1, 2, 3, 4].map((i) => (
+            <div key={i} className="h-16 bg-muted/50 rounded-xl" />
+          ))}
+        </div>
+      </div>
     );
-  }, [protocols]);
+  }
 
-  const stats = useMemo(() => {
-    if (injections.length === 0) return null;
-
-    const protocolInj = injections.filter(
-      (i) => !!i.protocol_peptide_id || protocolPeptideNames.has(i.peptide_name)
-    );
-    if (protocolInj.length === 0) return null;
-
-    const now = new Date();
-    const completed = protocolInj.filter((i) => i.status === "completed").length;
-    const skipped = protocolInj.filter((i) => i.status === "skipped").length;
-    const missed = protocolInj.filter((i) => i.status === "scheduled" && new Date(i.scheduled_time) < now).length;
-    const total = completed + skipped + missed;
-    const rate = total > 0 ? Math.round((completed / total) * 100) : 0;
-
-    const weekStart = startOfWeek(now, { weekStartsOn: 1 });
-    const weekEligible = protocolInj.filter((i) => {
-      const scheduledAt = new Date(i.scheduled_time);
-      return scheduledAt >= weekStart && scheduledAt <= now;
-    });
-    const weekCompleted = weekEligible.filter((i) => i.status === "completed").length;
-
-    return { completed, skipped, missed, rate, weekCompleted, weekTotal: weekEligible.length };
-  }, [injections, protocolPeptideNames]);
-
-  if (isLoading) return null;
-
-  if (!stats) {
+  if (overall === null && totalPeptideRate === null && totalSupplementRate === null) {
     return (
       <motion.div
         className="relative overflow-hidden rounded-2xl border border-border bg-card shadow-sm px-5 py-4"
@@ -60,10 +36,10 @@ const AdherenceSummary = ({ onNavigate }: { onNavigate?: () => void }) => {
   }
 
   const tiles = [
-    { icon: <CheckCircle2 className="h-3.5 w-3.5 text-emerald-400" />, label: "Completed", value: stats.completed, glowColor: "rgba(52,211,153,0.15)" },
-    { icon: <XCircle className="h-3.5 w-3.5 text-destructive" />, label: "Missed", value: stats.missed, glowColor: "hsl(var(--destructive) / 0.15)" },
-    { icon: <SkipForward className="h-3.5 w-3.5 text-muted-foreground" />, label: "Skipped", value: stats.skipped, glowColor: "hsl(var(--muted) / 0.15)" },
-    { icon: <TrendingUp className="h-3.5 w-3.5 text-primary" />, label: "Adherence", value: `${stats.rate}%`, glowColor: "hsl(var(--primary) / 0.15)" },
+    { icon: <TrendingUp className="h-3.5 w-3.5 text-primary" />, label: "Overall", value: overall !== null ? `${overall}%` : "—", glowColor: "hsl(var(--primary) / 0.15)" },
+    { icon: <FlaskConical className="h-3.5 w-3.5 text-emerald-400" />, label: "Peptides", value: totalPeptideRate !== null ? `${totalPeptideRate}%` : "—", glowColor: "rgba(52,211,153,0.15)" },
+    { icon: <Pill className="h-3.5 w-3.5 text-blue-400" />, label: "Supplements", value: totalSupplementRate !== null ? `${totalSupplementRate}%` : "—", glowColor: "rgba(96,165,250,0.15)" },
+    { icon: <CheckCircle2 className="h-3.5 w-3.5 text-muted-foreground" />, label: "Protocols", value: `${perProtocol.length}`, glowColor: "hsl(var(--muted) / 0.15)" },
   ];
 
   return (
@@ -74,7 +50,6 @@ const AdherenceSummary = ({ onNavigate }: { onNavigate?: () => void }) => {
       transition={{ duration: 0.5 }}
       style={{ willChange: "transform" }}
     >
-      {/* Ambient glow */}
       <div
         className="pointer-events-none absolute -top-16 right-0 w-48 h-48 rounded-full opacity-10 blur-[80px]"
         style={{ background: "hsl(var(--primary))" }}
@@ -117,10 +92,18 @@ const AdherenceSummary = ({ onNavigate }: { onNavigate?: () => void }) => {
           ))}
         </div>
 
-        {stats.weekTotal > 0 && (
-          <p className="text-[11px] text-muted-foreground">
-            This week: <span className="text-foreground font-semibold">{stats.weekCompleted}/{stats.weekTotal}</span> doses completed
-          </p>
+        {/* Per-protocol breakdown */}
+        {perProtocol.length > 0 && (
+          <div className="space-y-1.5">
+            {perProtocol.map((p) => (
+              <div key={p.protocolId} className="flex items-center justify-between text-xs bg-muted/30 rounded-lg px-3 py-1.5">
+                <span className="text-foreground font-medium break-words line-clamp-1">{p.protocolName}</span>
+                <span className="text-muted-foreground shrink-0 ml-2">
+                  {p.combinedAdherence !== null ? `${p.combinedAdherence}%` : "—"}
+                </span>
+              </div>
+            ))}
+          </div>
         )}
       </div>
     </motion.div>
