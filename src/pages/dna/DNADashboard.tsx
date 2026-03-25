@@ -70,6 +70,11 @@ const DNADashboard = () => {
                   <Sparkles className="h-4 w-4 mr-1" /> Advanced
                 </Button>
               </Link>
+              <Link to="/dna/upload?tier=pro">
+                <Button size="sm" className="bg-amber-500 hover:bg-amber-600 text-white">
+                  <Sparkles className="h-4 w-4 mr-1" /> Pro
+                </Button>
+              </Link>
             </div>
           </div>
 
@@ -89,7 +94,8 @@ const DNADashboard = () => {
           ) : (
             <div className="space-y-3">
               {reports.map((r) => {
-                const isAdvanced = r.assessment_tier === "advanced";
+                const isPro = r.assessment_tier === "pro";
+                const isAdvanced = r.assessment_tier === "advanced" || isPro;
                 return (
                   <div key={r.id} className="bg-card border border-border rounded-xl p-4 flex items-center gap-4">
                     <div className="flex-1 min-w-0">
@@ -101,11 +107,14 @@ const DNADashboard = () => {
                           {r.overall_score ?? "\u2014"}
                         </span>
                         <span className={`text-xs font-semibold px-2 py-0.5 rounded-md ${
-                          isAdvanced
+                          isPro
+                            ? "bg-amber-500/10 text-amber-600"
+                            : isAdvanced
                             ? "bg-primary/10 text-primary"
                             : "bg-muted text-muted-foreground"
                         }`}>
-                          {isAdvanced ? "Advanced ✦" : "Standard"}
+                          {isPro ? "Pro ★" : isAdvanced ? "Advanced ✦" : "Standard"}
+                        </span>
                         </span>
                         <span className="text-xs bg-muted text-muted-foreground rounded-md px-2 py-0.5">
                           {r.input_method}
