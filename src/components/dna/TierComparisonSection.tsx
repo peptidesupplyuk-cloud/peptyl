@@ -212,23 +212,54 @@ const TierComparisonSection = () => {
           </div>
         </div>
 
-        {/* CTA Buttons */}
-        <div className="flex flex-col sm:flex-row justify-center items-center gap-3 mb-16">
-          <Link to="/dna/upload?tier=standard">
-            <Button variant="outline" size="lg" className="min-w-[180px]">
-              Standard £14.99
-            </Button>
-          </Link>
-          <Link to="/dna/upload?tier=advanced">
-            <Button size="lg" className="min-w-[200px] bg-primary hover:bg-primary/90 text-primary-foreground">
-              Advanced £29.99 →
-            </Button>
-          </Link>
-          <Link to="/dna/upload?tier=pro">
-            <Button size="lg" className="min-w-[180px] bg-amber-500 hover:bg-amber-600 text-white">
-              Pro £59.99
-            </Button>
-          </Link>
+        {/* Target Audience Cards */}
+        <div className="max-w-5xl mx-auto mb-16">
+          <h3 className="text-lg font-heading font-semibold text-foreground text-center mb-8">
+            Which tier is right for you?
+          </h3>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            {audienceCards.map((card) => {
+              const isAdvanced = card.tier === "Advanced";
+              const isPro = card.tier === "Pro";
+              return (
+                <div
+                  key={card.tier}
+                  className={`bg-card border rounded-2xl p-6 flex flex-col ${
+                    isAdvanced
+                      ? "border-primary/30"
+                      : isPro
+                      ? "border-amber-500/30"
+                      : "border-border"
+                  }`}
+                >
+                  <div className="flex items-center gap-3 mb-4">
+                    <span className="text-2xl">{card.icon}</span>
+                    <div>
+                      <h4 className="font-heading font-semibold text-foreground">{card.tier}</h4>
+                      <p className="text-xs text-muted-foreground">Perfect for...</p>
+                    </div>
+                  </div>
+                  <ul className="space-y-2.5 flex-1">
+                    {card.points.map((point) => (
+                      <li key={point} className="flex items-start gap-2 text-sm text-foreground">
+                        <Check className="h-3.5 w-3.5 text-primary mt-0.5 shrink-0" />
+                        <span className="leading-snug">{point}</span>
+                      </li>
+                    ))}
+                  </ul>
+                  <Link to={`/dna/upload?tier=${card.tier.toLowerCase()}`} className="block mt-auto pt-5">
+                    <Button
+                      variant={isAdvanced || isPro ? "default" : "outline"}
+                      className={`w-full ${isPro ? "bg-amber-500 hover:bg-amber-600 text-white" : ""}`}
+                      size="sm"
+                    >
+                      Get {card.tier} Report
+                    </Button>
+                  </Link>
+                </div>
+              );
+            })}
+          </div>
         </div>
 
         {/* Social Proof */}
