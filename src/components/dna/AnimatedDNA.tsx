@@ -1,185 +1,224 @@
+import { useEffect, useRef } from "react";
 import { motion } from "framer-motion";
 
 /**
- * Premium animated double-helix DNA graphic with 4D depth, glow effects,
- * and HiDPI-quality rendering using layered SVG filters and gradients.
+ * Premium 3D DNA double-helix rendered on Canvas for buttery-smooth
+ * 60fps animation with glow, depth-of-field, and HiDPI rendering.
  */
-const PAIRS = 18;
-const HEIGHT = 320;
-const WIDTH = 160;
-const CX = WIDTH / 2;
-const PAIR_GAP = HEIGHT / (PAIRS + 1);
-const RADIUS = 48;
-
 const AnimatedDNA = () => {
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+  const frameRef = useRef<number>(0);
+
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const ctx = canvas.getContext("2d");
+    if (!ctx) return;
+
+    const dpr = Math.min(window.devicePixelRatio || 1, 3);
+    const W = 200;
+    const H = 280;
+    canvas.width = W * dpr;
+    canvas.height = H * dpr;
+    canvas.style.width = `${W}px`;
+    canvas.style.height = `${H}px`;
+    ctx.scale(dpr, dpr);
+
+    const CX = W / 2;
+    const CY = H / 2;
+    const PAIRS = 14;
+    const SPACING = H / (PAIRS + 1);
+    const RADIUS = 42;
+    const ROTATION_SPEED = 0.008;
+
+    // Get CSS primary color
+    const style = getComputedStyle(document.documentElement);
+    const primaryRaw = style.getPropertyValue("--primary").trim();
+    const hslParts = primaryRaw.split(/\s+/);
+    const hue = parseFloat(hslParts[0]) || 175;
+    const sat = parseFloat(hslParts[1]) || 85;
+    const lig = parseFloat(hslParts[2]) || 40;
+
+    const hsl = (h: number, s: number, l: number, a = 1) =>
+      `hsla(${h}, ${s}%, ${l}%, ${a})`;
+
+    const primary = (a = 1) => hsl(hue, sat, lig, a);
+    const primaryBright = (a = 1) => hsl(hue, sat, Math.min(lig + 20, 70), a);
+
+    let t = 0;
+
+    const draw = () => {
+      t += ROTATION_SPEED;
+      ctx.clearRect(0, 0, W, H);
+
+      // Collect all renderable elements with z-depth for proper sorting
+      const elements: {
+        z: number;
+        type: "rung" | "node";
+        x1: number;
+        y1: number;
+        x2?: number;
+        y2?: number;
+        depth: number;
+        side?: "left" | "right";
+      }[] = [];
+
+      for (let i = 0; i < PAIRS; i++) {
+        const baseY = SPACING * (i + 1);
+        const phase = t + (i / PAIRS) * Math.PI * 2;
+        const sin = Math.sin(phase);
+        const cos = Math.cos(phase);
+
+        const x1 = CX + sin * RADIUS;
+        const x2 = CX - sin * RADIUS;
+        const depthL = (cos + 1) / 2;
+        const depthR = (1 - cos + 1) / 2;
+
+        // Rung
+        elements.push({
+          z: Math.min(depthL, depthR),
+          type: "rung",
+          x1, y1: baseY, x2, y2: baseY,
+          depth: (depthL + (1 - depthL)) / 2,
+        });
+
+        // Left node
+        elements.push({
+          z: depthL,
+          type: "node",
+          x1, y1: baseY,
+          depth: depthL,
+          side: "left",
+        });
+
+        // Right node
+        elements.push({
+          z: 1 - depthL,
+          type: "node",
+          x1: x2, y1: baseY,
+          depth: 1 - depthL,
+          side: "right",
+        });
+      }
+
+      // Sort back-to-front
+      elements.sort((a, b) => a.z - b.z);
+
+      // Vertical fade mask at top/bottom
+      const fadeH = 40;
+
+      for (const el of elements) {
+        // Vertical edge fade
+        let vertFade = 1;
+        if (el.y1 < fadeH) vertFade = el.y1 / fadeH;
+        else if (el.y1 > H - fadeH) vertFade = (H - el.y1) / fadeH;
+        vertFade = Math.max(0, Math.min(1, vertFade));
+
+        if (el.type === "rung" && el.x2 !== undefined && el.y2 !== undefined) {
+          const rungAlpha = (0.04 + el.depth * 0.12) * vertFade;
+          ctx.beginPath();
+          ctx.moveTo(el.x1, el.y1);
+          ctx.lineTo(el.x2, el.y2);
+          ctx.strokeStyle = primary(rungAlpha);
+          ctx.lineWidth = 1;
+          ctx.stroke();
+
+          // Rung midpoint dot for molecular feel
+          const mx = (el.x1 + el.x2) / 2;
+          const my = (el.y1 + el.y2!) / 2;
+          ctx.beginPath();
+          ctx.arc(mx, my, 1, 0, Math.PI * 2);
+          ctx.fillStyle = primary(rungAlpha * 0.6);
+          ctx.fill();
+        }
+
+        if (el.type === "node") {
+          const d = el.depth;
+          const nodeAlpha = (0.15 + d * 0.85) * vertFade;
+          const nodeRadius = 1.5 + d * 2.5;
+
+          // Outer glow (only for front-facing nodes)
+          if (d > 0.4) {
+            const glowRadius = nodeRadius * 4;
+            const grd = ctx.createRadialGradient(
+              el.x1, el.y1, 0,
+              el.x1, el.y1, glowRadius
+            );
+            grd.addColorStop(0, primaryBright(0.25 * nodeAlpha));
+            grd.addColorStop(0.5, primaryBright(0.08 * nodeAlpha));
+            grd.addColorStop(1, primaryBright(0));
+            ctx.beginPath();
+            ctx.arc(el.x1, el.y1, glowRadius, 0, Math.PI * 2);
+            ctx.fillStyle = grd;
+            ctx.fill();
+          }
+
+          // Core node
+          const coreGrd = ctx.createRadialGradient(
+            el.x1 - nodeRadius * 0.3,
+            el.y1 - nodeRadius * 0.3,
+            0,
+            el.x1, el.y1, nodeRadius
+          );
+          coreGrd.addColorStop(0, primaryBright(nodeAlpha));
+          coreGrd.addColorStop(0.7, primary(nodeAlpha * 0.9));
+          coreGrd.addColorStop(1, primary(nodeAlpha * 0.5));
+
+          ctx.beginPath();
+          ctx.arc(el.x1, el.y1, nodeRadius, 0, Math.PI * 2);
+          ctx.fillStyle = coreGrd;
+          ctx.fill();
+
+          // Specular highlight for 3D feel
+          if (d > 0.6) {
+            ctx.beginPath();
+            ctx.arc(
+              el.x1 - nodeRadius * 0.25,
+              el.y1 - nodeRadius * 0.25,
+              nodeRadius * 0.35,
+              0,
+              Math.PI * 2
+            );
+            ctx.fillStyle = `rgba(255,255,255,${0.3 * d * vertFade})`;
+            ctx.fill();
+          }
+        }
+      }
+
+      // Draw smooth helix backbone strands
+      for (const strand of [1, -1]) {
+        ctx.beginPath();
+        for (let i = -2; i <= PAIRS + 2; i++) {
+          const y = SPACING * (i + 1);
+          const phase = t + (i / PAIRS) * Math.PI * 2;
+          const sin = Math.sin(phase);
+          const x = CX + sin * RADIUS * strand;
+          if (i === -2) ctx.moveTo(x, y);
+          else ctx.lineTo(x, y);
+        }
+        ctx.strokeStyle = primary(0.12);
+        ctx.lineWidth = 1.5;
+        ctx.stroke();
+      }
+
+      frameRef.current = requestAnimationFrame(draw);
+    };
+
+    frameRef.current = requestAnimationFrame(draw);
+    return () => cancelAnimationFrame(frameRef.current);
+  }, []);
+
   return (
     <motion.div
-      initial={{ opacity: 0, scale: 0.85 }}
+      initial={{ opacity: 0, scale: 0.9 }}
       animate={{ opacity: 1, scale: 1 }}
-      transition={{ duration: 1, ease: "easeOut" }}
-      className="relative mx-auto w-[160px] h-[320px]"
+      transition={{ duration: 1.2, ease: "easeOut" }}
+      className="relative mx-auto w-[200px] h-[280px]"
     >
-      {/* Multi-layer ambient glow */}
-      <div className="absolute inset-0 blur-[60px] bg-primary/25 rounded-full scale-[2] pointer-events-none" />
-      <div className="absolute inset-0 blur-[30px] bg-primary/15 rounded-full scale-[1.5] pointer-events-none" />
-
-      <svg
-        viewBox={`0 0 ${WIDTH} ${HEIGHT}`}
-        className="relative z-10 w-full h-full"
-        fill="none"
-        style={{ filter: "drop-shadow(0 0 12px hsl(var(--primary) / 0.3))" }}
-      >
-        <defs>
-          {/* Radial glow for nodes */}
-          <radialGradient id="nodeGlow" cx="50%" cy="50%" r="50%">
-            <stop offset="0%" stopColor="hsl(var(--primary))" stopOpacity="1" />
-            <stop offset="60%" stopColor="hsl(var(--primary))" stopOpacity="0.6" />
-            <stop offset="100%" stopColor="hsl(var(--primary))" stopOpacity="0" />
-          </radialGradient>
-
-          {/* Strand gradient for depth */}
-          <linearGradient id="strandGradient" x1="0" y1="0" x2="0" y2="1">
-            <stop offset="0%" stopColor="hsl(var(--primary))" stopOpacity="0.15" />
-            <stop offset="50%" stopColor="hsl(var(--primary))" stopOpacity="0.7" />
-            <stop offset="100%" stopColor="hsl(var(--primary))" stopOpacity="0.15" />
-          </linearGradient>
-
-          {/* Soft glow filter */}
-          <filter id="softGlow" x="-50%" y="-50%" width="200%" height="200%">
-            <feGaussianBlur stdDeviation="2.5" result="glow" />
-            <feMerge>
-              <feMergeNode in="glow" />
-              <feMergeNode in="SourceGraphic" />
-            </feMerge>
-          </filter>
-
-          {/* Intense glow for front nodes */}
-          <filter id="nodeFilter" x="-100%" y="-100%" width="300%" height="300%">
-            <feGaussianBlur stdDeviation="1.5" result="blur" />
-            <feMerge>
-              <feMergeNode in="blur" />
-              <feMergeNode in="blur" />
-              <feMergeNode in="SourceGraphic" />
-            </feMerge>
-          </filter>
-        </defs>
-
-        {/* Base-pair rungs with depth */}
-        {Array.from({ length: PAIRS }).map((_, i) => {
-          const y = PAIR_GAP * (i + 1);
-          const phase = (i / PAIRS) * Math.PI * 2;
-          const sin = Math.sin(phase);
-          const cos = Math.cos(phase);
-          const x1 = CX + sin * RADIUS;
-          const x2 = CX - sin * RADIUS;
-          const depthFactor = (cos + 1) / 2; // 0=back, 1=front
-
-          return (
-            <motion.g
-              key={i}
-              animate={{ y: [0, -PAIR_GAP] }}
-              transition={{ duration: 3, repeat: Infinity, ease: "linear" }}
-            >
-              {/* Rung connection */}
-              <motion.line
-                x1={x1} y1={y} x2={x2} y2={y}
-                stroke="hsl(var(--primary))"
-                strokeWidth={0.8 + depthFactor * 0.6}
-                strokeOpacity={0.06 + depthFactor * 0.12}
-                strokeLinecap="round"
-              />
-
-              {/* Left strand node — outer glow */}
-              <motion.circle
-                cx={x1} cy={y}
-                r={5 + depthFactor * 2}
-                fill="url(#nodeGlow)"
-                opacity={0.15 + depthFactor * 0.25}
-              />
-              {/* Left strand node — core */}
-              <motion.circle
-                cx={x1} cy={y}
-                r={2.2 + depthFactor * 1.8}
-                fill="hsl(var(--primary))"
-                opacity={0.25 + depthFactor * 0.75}
-                filter={depthFactor > 0.5 ? "url(#nodeFilter)" : undefined}
-                animate={{
-                  cx: [
-                    CX + Math.sin(phase) * RADIUS,
-                    CX + Math.sin(phase + Math.PI * 2) * RADIUS,
-                  ],
-                }}
-                transition={{ duration: 3, repeat: Infinity, ease: "linear" }}
-              />
-
-              {/* Right strand node — outer glow */}
-              <motion.circle
-                cx={x2} cy={y}
-                r={5 + (1 - depthFactor) * 2}
-                fill="url(#nodeGlow)"
-                opacity={0.15 + (1 - depthFactor) * 0.25}
-              />
-              {/* Right strand node — core */}
-              <motion.circle
-                cx={x2} cy={y}
-                r={2.2 + (1 - depthFactor) * 1.8}
-                fill="hsl(var(--primary))"
-                opacity={0.25 + (1 - depthFactor) * 0.75}
-                filter={(1 - depthFactor) > 0.5 ? "url(#nodeFilter)" : undefined}
-                animate={{
-                  cx: [
-                    CX - Math.sin(phase) * RADIUS,
-                    CX - Math.sin(phase + Math.PI * 2) * RADIUS,
-                  ],
-                }}
-                transition={{ duration: 3, repeat: Infinity, ease: "linear" }}
-              />
-            </motion.g>
-          );
-        })}
-
-        {/* Left strand path with gradient */}
-        <motion.path
-          d={Array.from({ length: PAIRS + 4 })
-            .map((_, i) => {
-              const idx = i - 2;
-              const y = PAIR_GAP * (idx + 1);
-              const phase = (idx / PAIRS) * Math.PI * 2;
-              const x = CX + Math.sin(phase) * RADIUS;
-              return `${i === 0 ? "M" : "L"} ${x} ${y}`;
-            })
-            .join(" ")}
-          stroke="url(#strandGradient)"
-          strokeWidth={2.5}
-          strokeLinecap="round"
-          strokeLinejoin="round"
-          fill="none"
-          filter="url(#softGlow)"
-          animate={{ pathLength: [0, 1] }}
-          transition={{ duration: 1.8, ease: "easeOut" }}
-        />
-
-        {/* Right strand path with gradient */}
-        <motion.path
-          d={Array.from({ length: PAIRS + 4 })
-            .map((_, i) => {
-              const idx = i - 2;
-              const y = PAIR_GAP * (idx + 1);
-              const phase = (idx / PAIRS) * Math.PI * 2;
-              const x = CX - Math.sin(phase) * RADIUS;
-              return `${i === 0 ? "M" : "L"} ${x} ${y}`;
-            })
-            .join(" ")}
-          stroke="url(#strandGradient)"
-          strokeWidth={2.5}
-          strokeLinecap="round"
-          strokeLinejoin="round"
-          fill="none"
-          filter="url(#softGlow)"
-          animate={{ pathLength: [0, 1] }}
-          transition={{ duration: 1.8, ease: "easeOut", delay: 0.15 }}
-        />
-      </svg>
+      {/* Ambient glow layers */}
+      <div className="absolute inset-0 blur-[80px] bg-primary/20 rounded-full scale-[2.5] pointer-events-none" />
+      <div className="absolute inset-0 blur-[40px] bg-primary/10 rounded-full scale-[1.8] pointer-events-none" />
+      <canvas ref={canvasRef} className="relative z-10 w-full h-full" />
     </motion.div>
   );
 };
