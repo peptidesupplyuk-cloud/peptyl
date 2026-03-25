@@ -298,6 +298,9 @@ const DNALanding = () => {
           </div>
         </section>
 
+        {/* What's in each report? */}
+        <TierComparisonSection />
+
         {/* How It Works */}
         <section className="py-16 bg-muted/30">
           <div className="container mx-auto px-6">
