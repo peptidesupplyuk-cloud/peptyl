@@ -306,6 +306,30 @@ const BioAgeScore = () => {
     ? "Growing — add more data streams"
     : "Getting started — every step counts";
 
+  const isLoading = panelsLoading || protocolsLoading || adherenceLoading || dnaLoading;
+
+  if (isLoading) {
+    return (
+      <div className="rounded-2xl border border-border bg-card shadow-sm p-5 sm:p-6 animate-pulse">
+        <div className="flex items-center gap-2.5 mb-5">
+          <div className="h-4 w-4 bg-muted rounded" />
+          <div className="h-4 w-40 bg-muted rounded" />
+        </div>
+        <div className="flex items-start gap-7">
+          <div className="w-[128px] h-[128px] bg-muted rounded-full shrink-0" />
+          <div className="flex-1 space-y-4">
+            {[1, 2, 3, 4, 5].map((i) => (
+              <div key={i} className="space-y-1.5">
+                <div className="h-3 w-24 bg-muted rounded" />
+                <div className="h-2 bg-muted/30 rounded-full" />
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <motion.div
       className="relative overflow-hidden rounded-2xl border border-border bg-card shadow-sm"
