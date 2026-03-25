@@ -9,7 +9,7 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAdherence } from "@/hooks/use-adherence";
 import { BIOMARKERS, getMarkerStatus } from "@/data/biomarker-ranges";
-import { differenceInCalendarDays, startOfDay, subDays, isSameDay } from "date-fns";
+
 
 /* ── Score calculation engine ── */
 
