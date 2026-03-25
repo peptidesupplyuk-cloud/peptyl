@@ -321,7 +321,7 @@ const ProtocolGroupedDoses = ({
                     <div key={inj.id} className="flex items-center justify-between bg-primary/5 border border-primary/10 rounded-lg px-3 py-2">
                       <div className="flex items-center gap-2">
                         <Check className="h-3.5 w-3.5 text-primary" />
-                        <span className="text-sm font-medium text-foreground line-through opacity-60">{inj.peptide_name}</span>
+                        <span className="text-sm font-medium text-foreground line-through opacity-60 break-words">{inj.peptide_name}</span>
                         <span className="text-xs text-muted-foreground">{inj.dose_mcg}mcg</span>
                         <span className={`text-[9px] font-medium px-1.5 py-0.5 rounded-full ${badge.color}`}>{badge.label}</span>
                         {inj.notes?.includes("via WhatsApp") && <span className="text-[10px] text-muted-foreground italic">via WhatsApp</span>}
@@ -346,7 +346,7 @@ const ProtocolGroupedDoses = ({
                     <div className="min-w-0 flex-1">
                       <div className="flex items-center gap-2">
                         <Clock className="h-3.5 w-3.5 text-primary shrink-0" />
-                        <span className="text-sm font-medium text-foreground truncate">{inj.peptide_name}</span>
+                        <span className="text-sm font-medium text-foreground break-words line-clamp-2">{inj.peptide_name}</span>
                         <span className="text-xs text-muted-foreground shrink-0">{inj.dose_mcg}mcg</span>
                         <span className={`text-[9px] font-medium px-1.5 py-0.5 rounded-full ${resolveInjectionTiming(inj.scheduled_time) === "AM" ? "bg-amber-500/10 text-amber-600" : "bg-indigo-500/10 text-indigo-500"}`}>
                           {resolveInjectionTiming(inj.scheduled_time) === "AM" ? "☀ AM" : "🌙 PM"}
@@ -380,7 +380,7 @@ const ProtocolGroupedDoses = ({
                     <div key={`supp-done-${supp.trackingKey}`} className="flex items-center justify-between bg-primary/5 border border-primary/10 rounded-lg px-3 py-2">
                       <div className="flex items-center gap-2">
                         <Check className="h-3.5 w-3.5 text-primary" />
-                        <span className="text-sm font-medium text-foreground line-through opacity-60">{supp.name}</span>
+                        <span className="text-sm font-medium text-foreground line-through opacity-60 break-words">{supp.name}</span>
                         <span className="text-xs text-muted-foreground">{supp.dose}</span>
                         <span className={`text-[9px] font-medium px-1.5 py-0.5 rounded-full ${supp.timing === "AM" ? "bg-amber-500/10 text-amber-600" : "bg-indigo-500/10 text-indigo-500"}`}>
                           {supp.timing === "AM" ? "☀ AM" : "🌙 PM"}
@@ -407,7 +407,7 @@ const ProtocolGroupedDoses = ({
                     <div className="min-w-0 flex-1">
                       <div className="flex items-center gap-2">
                         <Pill className="h-3.5 w-3.5 text-accent-foreground/70 shrink-0" />
-                        <span className="text-sm font-medium text-foreground truncate">{supp.name}</span>
+                        <span className="text-sm font-medium text-foreground break-words line-clamp-2">{supp.name}</span>
                         <span className="text-xs text-muted-foreground shrink-0">{supp.dose}</span>
                         <span className={`text-[9px] font-medium px-1.5 py-0.5 rounded-full ${supp.timing === "AM" ? "bg-amber-500/10 text-amber-600" : "bg-indigo-500/10 text-indigo-500"}`}>
                           {supp.timing === "AM" ? "☀ AM" : "🌙 PM"}

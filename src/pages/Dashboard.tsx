@@ -60,6 +60,7 @@ import QuickStackImport from "@/components/dashboard/QuickStackImport";
 import CollaborativeRecommendations from "@/components/dashboard/CollaborativeRecommendations";
 import PipMemoryCard from "@/components/dashboard/PipMemoryCard";
 import GpSummarySection from "@/components/dashboard/GpSummarySection";
+import { useAdherence } from "@/hooks/use-adherence";
 
 /* ─── Compact Journal for Overview ─── */
 const CompactJournal = ({ onExpandJournal }: { onExpandJournal: () => void }) => {
@@ -170,7 +171,7 @@ const VideoHelpButton = () => {
 const Dashboard = () => {
   const { data: panels = [], refetch: refetchPanels } = useBloodworkPanels();
   const createProtocol = useCreateProtocol();
-  const { data: protocols = [] } = useProtocols();
+  const { data: protocols = [], isLoading: protocolsLoading } = useProtocols();
   const logInjection = useLogInjection();
   const updateInjectionStatus = useUpdateInjectionStatus();
   const { toast } = useToast();
@@ -228,28 +229,20 @@ const Dashboard = () => {
   const activeProtocols = protocols.filter((p) => p.status === "active");
   const hasActiveProtocol = activeProtocols.length > 0;
 
+  // Unified adherence
+  const { perProtocol: adherencePerProtocol, isLoading: adherenceLoading } = useAdherence();
+
   // Per-protocol stats for hero zone
   const perProtocolStats = useMemo(() => {
     return activeProtocols.map((protocol) => {
-      const pepIds = new Set(protocol.peptides.map((pp) => pp.id));
       const protocolStart = startOfDay(new Date(protocol.start_date));
       const now = new Date();
       const hasPeptides = protocol.peptides.length > 0;
+      const hasSupplements = (protocol.supplements || []).length > 0;
 
-      let rate: number | null = null;
-
-      if (hasPeptides) {
-        const protocolInjections = allInjections.filter(
-          (i) => i.protocol_peptide_id && pepIds.has(i.protocol_peptide_id)
-        );
-        const completed = protocolInjections.filter((i) => i.status === "completed").length;
-        const skipped = protocolInjections.filter((i) => i.status === "skipped").length;
-        const missed = protocolInjections.filter((i) =>
-          i.status === "scheduled" && new Date(i.scheduled_time) < now
-        ).length;
-        const total = completed + skipped + missed;
-        rate = total > 0 ? Math.round((completed / total) * 100) : null;
-      }
+      // Use unified adherence (peptides + supplements)
+      const adherenceEntry = adherencePerProtocol.find((a) => a.protocolId === protocol.id);
+      const rate = adherenceEntry?.combinedAdherence ?? null;
 
       const daysElapsed = Math.max(0, differenceInCalendarDays(now, protocolStart));
       const endDate = protocol.end_date ? new Date(protocol.end_date) : null;
@@ -258,9 +251,9 @@ const Dashboard = () => {
       const progressPct = Math.min(100, Math.round((dayNumber / totalDays) * 100));
       const daysLeft = Math.max(0, totalDays - dayNumber);
 
-      return { protocol, rate, dayNumber, totalDays, progressPct, daysLeft, hasPeptides };
+      return { protocol, rate, dayNumber, totalDays, progressPct, daysLeft, hasPeptides, hasSupplements };
     });
-  }, [activeProtocols, allInjections]);
+  }, [activeProtocols, adherencePerProtocol]);
 
   // Auto-generate milestone scorecards at 30/60/90 days
   const { data: existingScorecards = [] } = useProtocolScorecards();
@@ -682,9 +675,25 @@ const Dashboard = () => {
               )}
 
               {/* ═══ ZONE A — Hero Status ═══ */}
-              {hasActiveProtocol ? (
+              {protocolsLoading || adherenceLoading ? (
                 <div className="space-y-3">
-                  {perProtocolStats.map(({ protocol, rate, dayNumber, totalDays, progressPct, daysLeft, hasPeptides }, idx) => (
+                  {[1].map((i) => (
+                    <div key={i} className="rounded-2xl border border-border bg-card p-4 sm:p-5 animate-pulse space-y-3">
+                      <div className="h-1 bg-muted rounded-full" />
+                      <div className="flex items-center justify-between gap-3">
+                        <div className="space-y-2 flex-1">
+                          <div className="h-4 w-40 bg-muted rounded" />
+                          <div className="h-3 w-24 bg-muted/60 rounded" />
+                        </div>
+                        <div className="w-14 h-14 bg-muted rounded-xl" />
+                      </div>
+                      <div className="h-6 w-28 bg-muted/50 rounded-full" />
+                    </div>
+                  ))}
+                </div>
+              ) : hasActiveProtocol ? (
+                <div className="space-y-3">
+                  {perProtocolStats.map(({ protocol, rate, dayNumber, totalDays, progressPct, daysLeft, hasPeptides, hasSupplements }, idx) => (
                     <PremiumCard key={protocol.id} glow delay={idx * 0.08}>
                       {/* Progress bar across top */}
                       <div className="h-1 bg-muted">
@@ -718,7 +727,7 @@ const Dashboard = () => {
                         {/* Stat pills row */}
                         <div className="flex items-center gap-2 flex-wrap">
                           <span className="inline-flex items-center gap-1.5 text-xs font-medium bg-muted/60 rounded-full px-2.5 py-1 text-foreground">
-                            {rate !== null ? `${rate}% adherence` : hasPeptides ? "No doses yet" : "Supplements only"}
+                            {rate !== null ? `${rate}% adherence` : (hasPeptides || hasSupplements) ? "No doses yet" : "No items"}
                           </span>
                         </div>
                       </div>

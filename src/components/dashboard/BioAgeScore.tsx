@@ -7,9 +7,9 @@ import { useProtocols } from "@/hooks/use-protocols";
 import { useAuth } from "@/contexts/AuthContext";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { useAllInjections } from "@/hooks/use-injections";
+import { useAdherence } from "@/hooks/use-adherence";
 import { BIOMARKERS, getMarkerStatus } from "@/data/biomarker-ranges";
-import { differenceInCalendarDays, startOfDay, subDays, isSameDay } from "date-fns";
+
 
 /* ── Score calculation engine ── */
 
@@ -25,13 +25,13 @@ interface ScoreBreakdown {
 function computeBioAge(args: {
   panels: any[];
   protocols: any[];
-  allInjections: any[];
+  adherenceOverall: number | null;
   hasDna: boolean;
   dnaScore: number | null;
   whoopDays: number;
   fitbitDays: number;
 }): { total: number; breakdown: ScoreBreakdown[] } {
-  const { panels, protocols, allInjections, hasDna, dnaScore, whoopDays, fitbitDays } = args;
+  const { panels, protocols, adherenceOverall, hasDna, dnaScore, whoopDays, fitbitDays } = args;
   const breakdown: ScoreBreakdown[] = [];
 
   // 1. Biomarker Health (0-30)
@@ -65,34 +65,15 @@ function computeBioAge(args: {
     detail: latest ? `${panels[0]?.markers?.length || 0} markers tracked` : "No bloodwork yet",
   });
 
-  // 2. Protocol Adherence (0-25)
+  // 2. Protocol Adherence (0-25) — now uses unified adherence (peptides + supplements)
   let adherenceScore = 0;
   const activeProtocols = protocols.filter((p: any) => p.status === "active");
   if (activeProtocols.length > 0) {
     adherenceScore += 5;
-    const now = new Date();
-    const today = startOfDay(now);
-    const protocolInjections = allInjections.filter((i: any) => !!i.protocol_peptide_id);
-    const completed = protocolInjections.filter((i: any) => i.status === "completed").length;
-    const total = protocolInjections.filter(
-      (i: any) => i.status === "completed" || i.status === "skipped" || (i.status === "scheduled" && new Date(i.scheduled_time) < now)
-    ).length;
-    const rate = total > 0 ? completed / total : 0;
-    adherenceScore += Math.round(rate * 15);
-
-    // Streak bonus
-    let streak = 0;
-    for (let d = 0; d < 365; d++) {
-      const day = subDays(today, d);
-      const dayInj = protocolInjections.filter(
-        (i: any) => isSameDay(new Date(i.scheduled_time), day) && new Date(i.scheduled_time) <= now
-      );
-      if (dayInj.length === 0) continue;
-      if (dayInj.every((i: any) => i.status === "completed")) streak++;
-      else break;
+    if (adherenceOverall !== null) {
+      adherenceScore += Math.round((adherenceOverall / 100) * 15);
+      if (adherenceOverall >= 90) adherenceScore += 5; // high adherence bonus
     }
-    if (streak >= 7) adherenceScore += 3;
-    if (streak >= 30) adherenceScore += 2;
   }
   adherenceScore = Math.min(25, adherenceScore);
   breakdown.push({
@@ -101,7 +82,11 @@ function computeBioAge(args: {
     maxScore: 25,
     icon: <Zap className="h-3.5 w-3.5" />,
     color: "text-emerald-400",
-    detail: activeProtocols.length > 0 ? `${activeProtocols.length} active protocol${activeProtocols.length > 1 ? "s" : ""}` : "No active protocol",
+    detail: activeProtocols.length > 0
+      ? adherenceOverall !== null
+        ? `${adherenceOverall}% across ${activeProtocols.length} protocol${activeProtocols.length > 1 ? "s" : ""}`
+        : `${activeProtocols.length} active protocol${activeProtocols.length > 1 ? "s" : ""}`
+      : "No active protocol",
   });
 
   // 3. Genetic Insights (0-20)
@@ -260,11 +245,11 @@ const BreakdownBar = ({ item, delay }: { item: ScoreBreakdown; delay: number }) 
 
 const BioAgeScore = () => {
   const { user } = useAuth();
-  const { data: panels = [] } = useBloodworkPanels();
-  const { data: protocols = [] } = useProtocols();
-  const { data: allInjections = [] } = useAllInjections();
+  const { data: panels = [], isLoading: panelsLoading } = useBloodworkPanels();
+  const { data: protocols = [], isLoading: protocolsLoading } = useProtocols();
+  const { overall: adherenceOverall, isLoading: adherenceLoading } = useAdherence();
 
-  const { data: dnaReports = [] } = useQuery({
+  const { data: dnaReports = [], isLoading: dnaLoading } = useQuery({
     queryKey: ["bio-age-dna", user?.id],
     enabled: !!user,
     staleTime: 1000 * 60 * 10,
@@ -309,8 +294,8 @@ const BioAgeScore = () => {
   const dnaScore = dnaReports[0]?.overall_score ?? null;
 
   const { total, breakdown } = useMemo(
-    () => computeBioAge({ panels, protocols, allInjections, hasDna, dnaScore, whoopDays: whoopCount, fitbitDays: fitbitCount }),
-    [panels, protocols, allInjections, hasDna, dnaScore, whoopCount, fitbitCount]
+    () => computeBioAge({ panels, protocols, adherenceOverall: adherenceOverall ?? 0, hasDna, dnaScore, whoopDays: whoopCount, fitbitDays: fitbitCount }),
+    [panels, protocols, adherenceOverall, hasDna, dnaScore, whoopCount, fitbitCount]
   );
 
   const statusText = total >= 80
@@ -320,6 +305,30 @@ const BioAgeScore = () => {
     : total >= 35
     ? "Growing — add more data streams"
     : "Getting started — every step counts";
+
+  const isLoading = panelsLoading || protocolsLoading || adherenceLoading || dnaLoading;
+
+  if (isLoading) {
+    return (
+      <div className="rounded-2xl border border-border bg-card shadow-sm p-5 sm:p-6 animate-pulse">
+        <div className="flex items-center gap-2.5 mb-5">
+          <div className="h-4 w-4 bg-muted rounded" />
+          <div className="h-4 w-40 bg-muted rounded" />
+        </div>
+        <div className="flex items-start gap-7">
+          <div className="w-[128px] h-[128px] bg-muted rounded-full shrink-0" />
+          <div className="flex-1 space-y-4">
+            {[1, 2, 3, 4, 5].map((i) => (
+              <div key={i} className="space-y-1.5">
+                <div className="h-3 w-24 bg-muted rounded" />
+                <div className="h-2 bg-muted/30 rounded-full" />
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <motion.div

@@ -6,11 +6,9 @@ const PWAUpdatePrompt = () => {
     let updateInterval: number | undefined;
 
     const handleControllerChange = () => {
-      const key = "pwa-reloaded-at";
-      const last = sessionStorage.getItem(key);
-      if (last && Date.now() - Number(last) < 5000) return;
-      sessionStorage.setItem(key, String(Date.now()));
-      window.location.reload();
+      // Do NOT auto-reload — this was causing random full-page refreshes.
+      // The new service worker is already active via skipWaiting+clientsClaim.
+      console.info("[PWA] New service worker activated — changes will apply on next navigation.");
     };
 
     const clearCaches = async () => {
@@ -54,12 +52,7 @@ const PWAUpdatePrompt = () => {
         },
       });
       
-      if ("serviceWorker" in navigator) {
-        const reg = await navigator.serviceWorker.getRegistration();
-        if (reg?.waiting) {
-          reg.waiting.postMessage({ type: "SKIP_WAITING" });
-        }
-      }
+      // skipWaiting is handled by workbox config — no manual postMessage needed
     };
 
     if (!isPublicAppHost()) {
