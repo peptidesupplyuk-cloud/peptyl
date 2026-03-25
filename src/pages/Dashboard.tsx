@@ -171,7 +171,7 @@ const VideoHelpButton = () => {
 const Dashboard = () => {
   const { data: panels = [], refetch: refetchPanels } = useBloodworkPanels();
   const createProtocol = useCreateProtocol();
-  const { data: protocols = [] } = useProtocols();
+  const { data: protocols = [], isLoading: protocolsLoading } = useProtocols();
   const logInjection = useLogInjection();
   const updateInjectionStatus = useUpdateInjectionStatus();
   const { toast } = useToast();
