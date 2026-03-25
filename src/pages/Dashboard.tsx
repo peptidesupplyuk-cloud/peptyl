@@ -713,7 +713,6 @@ const Dashboard = () => {
                           <span className="inline-flex items-center gap-1.5 text-xs font-medium bg-muted/60 rounded-full px-2.5 py-1 text-foreground">
                             {rate !== null ? `${rate}% adherence` : (hasPeptides || hasSupplements) ? "No doses yet" : "No items"}
                           </span>
-                          </span>
                         </div>
                       </div>
                     </PremiumCard>
