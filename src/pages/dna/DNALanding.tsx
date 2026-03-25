@@ -154,10 +154,10 @@ const DNALanding = () => {
       <Header />
       <main className="min-h-screen pt-16">
         {/* Hero */}
-        <section className="bg-hero dark-section py-24 md:py-32">
+        <section className="bg-hero dark-section py-14 md:py-20">
           <div className="container mx-auto px-6 text-center max-w-3xl">
             <AnimatedDNA />
-            <div className="mt-8" />
+            <div className="mt-4" />
             <h1 className="text-4xl md:text-5xl lg:text-6xl font-heading font-bold text-primary-foreground mb-6 tracking-tight">
               Stop Guessing.<br />
               <span className="text-gradient-teal">Start Knowing.</span>
@@ -184,7 +184,7 @@ const DNALanding = () => {
         </section>
 
         {/* Which tier is right for you? - right after hero */}
-        <section className="py-16 bg-background">
+        <section className="py-10 bg-background">
           <div className="container mx-auto px-6">
             <h2 className="text-2xl md:text-3xl font-heading font-bold text-foreground text-center mb-8">
               Which tier is right for you?
