@@ -212,56 +212,6 @@ const TierComparisonSection = () => {
           </div>
         </div>
 
-        {/* Target Audience Cards */}
-        <div className="max-w-5xl mx-auto mb-16">
-          <h3 className="text-lg font-heading font-semibold text-foreground text-center mb-8">
-            Which tier is right for you?
-          </h3>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            {audienceCards.map((card) => {
-              const isAdvanced = card.tier === "Advanced";
-              const isPro = card.tier === "Pro";
-              return (
-                <div
-                  key={card.tier}
-                  className={`bg-card border rounded-2xl p-6 flex flex-col ${
-                    isAdvanced
-                      ? "border-primary/30"
-                      : isPro
-                      ? "border-amber-500/30"
-                      : "border-border"
-                  }`}
-                >
-                  <div className="flex items-center gap-3 mb-4">
-                    <span className="text-2xl">{card.icon}</span>
-                    <div>
-                      <h4 className="font-heading font-semibold text-foreground">{card.tier}</h4>
-                      <p className="text-xs text-muted-foreground">Perfect for...</p>
-                    </div>
-                  </div>
-                  <ul className="space-y-2.5 flex-1">
-                    {card.points.map((point) => (
-                      <li key={point} className="flex items-start gap-2 text-sm text-foreground">
-                        <Check className="h-3.5 w-3.5 text-primary mt-0.5 shrink-0" />
-                        <span className="leading-snug">{point}</span>
-                      </li>
-                    ))}
-                  </ul>
-                  <Link to={`/dna/upload?tier=${card.tier.toLowerCase()}`} className="block mt-auto pt-5">
-                    <Button
-                      variant={isAdvanced || isPro ? "default" : "outline"}
-                      className={`w-full ${isPro ? "bg-amber-500 hover:bg-amber-600 text-white" : ""}`}
-                      size="sm"
-                    >
-                      Get {card.tier} Report
-                    </Button>
-                  </Link>
-                </div>
-              );
-            })}
-          </div>
-        </div>
-
         {/* Social Proof */}
         <div className="text-center space-y-3">
           <p className="text-sm text-muted-foreground">
