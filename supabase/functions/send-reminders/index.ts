@@ -209,6 +209,85 @@ Deno.serve(async (req) => {
           }
         }
 
+        // ── PM CATCH-UP: if PM window has no native items, include incomplete AM items ──
+        if (window === "PM" && reminders.length === 0 && supplementReminders.length === 0) {
+          console.log(`PM window empty for ${userId}, checking for incomplete AM items as catch-up`);
+
+          // Check incomplete AM peptides
+          const { data: todayInjections } = await supabase
+            .from("injection_logs")
+            .select("peptide_name, status")
+            .eq("user_id", userId)
+            .gte("scheduled_time", `${today}T00:00:00`)
+            .lte("scheduled_time", `${today}T23:59:59`);
+
+          const completedPeptides = new Set(
+            (todayInjections || []).filter((l: any) => l.status === "completed").map((l: any) => l.peptide_name)
+          );
+
+          // Re-scan for AM peptides that are incomplete
+          for (const prot of userProts) {
+            const { data: peptides } = await supabase
+              .from("protocol_peptides")
+              .select("peptide_name, dose_mcg, timing, frequency")
+              .eq("protocol_id", prot.id);
+
+            if (peptides) {
+              for (const pep of peptides) {
+                const timing = (pep.timing || "AM").toUpperCase();
+                if (timing.includes("AM") && !completedPeptides.has(pep.peptide_name)) {
+                  const isDue = checkFrequencyDue(pep.frequency, today);
+                  if (isDue) {
+                    reminders.push({
+                      peptide_name: pep.peptide_name,
+                      dose_mcg: pep.dose_mcg,
+                      timing: "AM (catch-up)",
+                      protocol_name: prot.name,
+                    });
+                  }
+                }
+              }
+            }
+          }
+
+          // Check incomplete AM supplements
+          const { data: todaySuppLogs } = await supabase
+            .from("supplement_logs")
+            .select("supplement_name")
+            .eq("user_id", userId)
+            .eq("date", today)
+            .eq("completed", true);
+
+          const completedSupps = new Set(
+            (todaySuppLogs || []).map((l: any) => (l.supplement_name || "").toLowerCase())
+          );
+
+          const catchupSeenSupps = new Set<string>();
+          for (const prot of userProts) {
+            if (!Array.isArray(prot.supplements)) continue;
+            for (const supp of prot.supplements as Array<{ name: string; dose: string; frequency: string; timing?: string }>) {
+              if (!supp.name) continue;
+              const normName = normaliseSupplementName(supp.name);
+              const key = normName.toLowerCase();
+              if (catchupSeenSupps.has(key) || seenSupplements.has(key)) continue;
+              catchupSeenSupps.add(key);
+
+              if (!completedSupps.has(key)) {
+                supplementReminders.push({
+                  name: normName,
+                  dose: supp.dose || "",
+                  frequency: supp.frequency || "daily",
+                  protocol_name: prot.name,
+                });
+              }
+            }
+          }
+
+          if (reminders.length > 0 || supplementReminders.length > 0) {
+            console.log(`PM catch-up for ${userId}: ${reminders.length} peptides, ${supplementReminders.length} supplements incomplete from today`);
+          }
+        }
+
         if (reminders.length === 0 && supplementReminders.length === 0) continue;
 
         // ── FOLLOW-UP PHASE: only send if doses are still incomplete ──
