@@ -245,11 +245,11 @@ const BreakdownBar = ({ item, delay }: { item: ScoreBreakdown; delay: number }) 
 
 const BioAgeScore = () => {
   const { user } = useAuth();
-  const { data: panels = [] } = useBloodworkPanels();
-  const { data: protocols = [] } = useProtocols();
-  const { overall: adherenceOverall } = useAdherence();
+  const { data: panels = [], isLoading: panelsLoading } = useBloodworkPanels();
+  const { data: protocols = [], isLoading: protocolsLoading } = useProtocols();
+  const { overall: adherenceOverall, isLoading: adherenceLoading } = useAdherence();
 
-  const { data: dnaReports = [] } = useQuery({
+  const { data: dnaReports = [], isLoading: dnaLoading } = useQuery({
     queryKey: ["bio-age-dna", user?.id],
     enabled: !!user,
     staleTime: 1000 * 60 * 10,
