@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { Dna, Activity, FlaskConical, AlertTriangle, Shield, ArrowRight, Loader2, History, Check, Sparkles, Upload, FileText, Zap, ChevronDown, X, Heart, BarChart3, Microscope, Crown } from "lucide-react";
+import TierComparisonSection from "@/components/dna/TierComparisonSection";
 import { Button } from "@/components/ui/button";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import Header from "@/components/Header";
