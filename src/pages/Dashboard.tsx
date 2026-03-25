@@ -677,7 +677,7 @@ const Dashboard = () => {
               {/* ═══ ZONE A — Hero Status ═══ */}
               {hasActiveProtocol ? (
                 <div className="space-y-3">
-                  {perProtocolStats.map(({ protocol, rate, dayNumber, totalDays, progressPct, daysLeft, hasPeptides }, idx) => (
+                  {perProtocolStats.map(({ protocol, rate, dayNumber, totalDays, progressPct, daysLeft, hasPeptides, hasSupplements }, idx) => (
                     <PremiumCard key={protocol.id} glow delay={idx * 0.08}>
                       {/* Progress bar across top */}
                       <div className="h-1 bg-muted">
