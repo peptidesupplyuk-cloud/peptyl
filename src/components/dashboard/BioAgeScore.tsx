@@ -247,7 +247,7 @@ const BioAgeScore = () => {
   const { user } = useAuth();
   const { data: panels = [] } = useBloodworkPanels();
   const { data: protocols = [] } = useProtocols();
-  const { data: allInjections = [] } = useAllInjections();
+  const { overall: adherenceOverall } = useAdherence();
 
   const { data: dnaReports = [] } = useQuery({
     queryKey: ["bio-age-dna", user?.id],
@@ -294,8 +294,8 @@ const BioAgeScore = () => {
   const dnaScore = dnaReports[0]?.overall_score ?? null;
 
   const { total, breakdown } = useMemo(
-    () => computeBioAge({ panels, protocols, allInjections, hasDna, dnaScore, whoopDays: whoopCount, fitbitDays: fitbitCount }),
-    [panels, protocols, allInjections, hasDna, dnaScore, whoopCount, fitbitCount]
+    () => computeBioAge({ panels, protocols, adherenceOverall: adherenceOverall ?? 0, hasDna, dnaScore, whoopDays: whoopCount, fitbitDays: fitbitCount }),
+    [panels, protocols, adherenceOverall, hasDna, dnaScore, whoopCount, fitbitCount]
   );
 
   const statusText = total >= 80
