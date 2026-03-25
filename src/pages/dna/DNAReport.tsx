@@ -78,7 +78,8 @@ const DNAReport = () => {
   }
 
   const r = report.report_json || {};
-  const isAdvanced = report.assessment_tier === "advanced";
+  const isPro = report.assessment_tier === "pro";
+  const isAdvanced = report.assessment_tier === "advanced" || isPro;
   const parseFailed = !!r.parse_failed || !!r.raw_text;
 
   const buildGenotypeKey = (geneResults: any[]) => {
@@ -108,7 +109,7 @@ const DNAReport = () => {
               </p>
               <div className="flex gap-3 justify-center pt-2">
                 <button
-                  onClick={() => navigate(`/dna/upload?tier=${report.assessment_tier === "advanced" ? "advanced" : "standard"}`, { replace: true })}
+                  onClick={() => navigate(`/dna/upload?tier=${report.assessment_tier || "standard"}`, { replace: true })}
                   className="px-6 py-2.5 bg-primary text-primary-foreground rounded-lg font-medium text-sm"
                 >
                   Re-run Analysis
@@ -126,9 +127,9 @@ const DNAReport = () => {
           {/* Tier badge + PDF */}
           <div className="flex items-center justify-between flex-wrap gap-2">
             <span className={`text-xs font-semibold px-3 py-1 rounded-full ${
-              isAdvanced ? "bg-primary/10 text-primary" : "bg-muted text-muted-foreground"
+              isPro ? "bg-amber-500/10 text-amber-600" : isAdvanced ? "bg-primary/10 text-primary" : "bg-muted text-muted-foreground"
             }`}>
-              {isAdvanced ? "Advanced ✦" : "Standard"}
+              {isPro ? "Pro ★" : isAdvanced ? "Advanced ✦" : "Standard"}
             </span>
             <button
               onClick={() => window.print()}

@@ -8,8 +8,9 @@ const corsHeaders = {
 
 const productConfig: Record<string, { amount: number; description: string; redirectPath: string }> = {
   dna_assessment: { amount: 2999, description: "Peptyl DNA Assessment", redirectPath: "/dna" },
-  dna_standard: { amount: 999, description: "Peptyl DNA Standard Assessment", redirectPath: "/dna/upload?tier=standard" },
+  dna_standard: { amount: 1499, description: "Peptyl DNA Standard Assessment", redirectPath: "/dna/upload?tier=standard" },
   dna_advanced: { amount: 2999, description: "Peptyl DNA Advanced Assessment", redirectPath: "/dna/upload?tier=advanced" },
+  dna_pro: { amount: 5999, description: "Peptyl DNA Pro Assessment", redirectPath: "/dna/upload?tier=pro" },
   subscription_individual: { amount: 499, description: "Peptyl Individual Plan", redirectPath: "/dashboard" },
   subscription_coach: { amount: 4999, description: "Peptyl Coach Plan", redirectPath: "/dashboard" },
 };

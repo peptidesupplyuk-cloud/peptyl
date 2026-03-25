@@ -67,7 +67,7 @@ const DNAUpload = () => {
   const { user } = useAuth();
   const { toast } = useToast();
   const [searchParams] = useSearchParams();
-  const tier = (searchParams.get("tier") ?? "standard") as "standard" | "advanced";
+  const tier = (searchParams.get("tier") ?? "standard") as "standard" | "advanced" | "pro";
 
   const [method, setMethod] = useState<Method>("pdf");
   const [inputText, setInputText] = useState("");
@@ -122,8 +122,8 @@ const DNAUpload = () => {
 
       const p = profile as any;
       const hasPermanentUnlock = !!p?.dna_assessment_unlocked;
-      // TEMPORARY: bypass paywall for advanced tier during testing
-      const unlocked = tier === "advanced"
+      // TEMPORARY: bypass paywall for advanced and pro tiers during testing
+      const unlocked = tier === "advanced" || tier === "pro"
         ? true
         : (hasPermanentUnlock || !!p?.dna_standard_unlocked);
       setIsUnlocked(unlocked);
@@ -151,7 +151,7 @@ const DNAUpload = () => {
     }
     setPurchasing(true);
     try {
-      const product = tier === "advanced" ? "dna_advanced" : "dna_standard";
+      const product = tier === "pro" ? "dna_pro" : tier === "advanced" ? "dna_advanced" : "dna_standard";
       const { data, error } = await supabase.functions.invoke("create-gocardless-payment", {
         body: { product },
       });
@@ -327,8 +327,8 @@ const DNAUpload = () => {
     setImageBase64(null);
   };
 
-  const tierLabel = tier === "advanced" ? "Advanced" : "Standard";
-  const tierPrice = tier === "advanced" ? "£29.99" : "£9.99";
+  const tierLabel = tier === "pro" ? "Pro" : tier === "advanced" ? "Advanced" : "Standard";
+  const tierPrice = tier === "pro" ? "£59.99" : tier === "advanced" ? "£29.99" : "£14.99";
 
   // Show loading while checking
   if (checkingUnlock) {
@@ -429,11 +429,13 @@ const DNAUpload = () => {
           {/* Tier badge */}
           <div className="flex items-center gap-3 mb-6">
             <span className={`inline-flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-full ${
-              tier === "advanced"
+              tier === "pro"
+                ? "bg-amber-500/10 text-amber-600"
+                : tier === "advanced"
                 ? "bg-primary/10 text-primary"
                 : "bg-muted text-muted-foreground"
             }`}>
-              {tier === "advanced" ? `Advanced Assessment — ${tierPrice} ✦` : `Standard Assessment — ${tierPrice}`}
+              {tier === "pro" ? `Pro Assessment — ${tierPrice} ★` : tier === "advanced" ? `Advanced Assessment — ${tierPrice} ✦` : `Standard Assessment — ${tierPrice}`}
             </span>
             <Link to="/dna" className="text-xs text-muted-foreground underline underline-offset-2 hover:text-foreground">
               Change tier
