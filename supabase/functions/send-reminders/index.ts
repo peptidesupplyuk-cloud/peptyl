@@ -11,6 +11,7 @@ interface PeptideReminder {
   dose_mcg: number;
   timing: string;
   protocol_name: string;
+  doseWindow: "AM" | "PM";
 }
 
 interface SupplementReminder {
@@ -18,6 +19,7 @@ interface SupplementReminder {
   dose: string;
   frequency: string;
   protocol_name: string;
+  doseWindow: "AM" | "PM";
 }
 
 Deno.serve(async (req) => {
@@ -140,12 +142,17 @@ Deno.serve(async (req) => {
         const userEmail = authUser?.user?.email;
         if (!userEmail && profile.notify_email) continue;
 
-        // Build reminder items — mirror dashboard logic exactly
-        const reminders: PeptideReminder[] = [];
-        const supplementReminders: SupplementReminder[] = [];
-        const seenSupplements = new Set<string>(); // global dedup by normalised name (matches dashboard)
+        // Build ALL items for the day — mirrors dashboard TodaysPlan exactly
+        // AM reminder shows full daily plan; PM reminder shows PM items + incomplete AM catch-up
+        const allPeptideReminders: PeptideReminder[] = [];
+        const allSupplementReminders: SupplementReminder[] = [];
+        const seenSupplements = new Set<string>();
 
         for (const prot of userProts) {
+          // Check protocol is active on this date — mirrors dashboard isActiveOnDate
+          if (prot.start_date && prot.start_date > today) continue;
+          if (prot.end_date && prot.end_date < today) continue;
+
           const { data: peptides } = await supabase
             .from("protocol_peptides")
             .select("peptide_name, dose_mcg, timing, frequency")
@@ -153,22 +160,24 @@ Deno.serve(async (req) => {
 
           if (peptides) {
             for (const pep of peptides) {
-              const timing = (pep.timing || "AM").toUpperCase();
-              const matchesWindow =
-                (window === "AM" && timing.includes("AM")) ||
-                (window === "PM" && (timing.includes("PM") || timing.includes("BED")));
+              const isDue = checkFrequencyDue(pep.frequency, today, prot.start_date);
+              if (!isDue) continue;
 
-              if (matchesWindow) {
-                const isDue = checkFrequencyDue(pep.frequency, today);
-                if (isDue) {
-                  reminders.push({
-                    peptide_name: pep.peptide_name,
-                    dose_mcg: pep.dose_mcg,
-                    timing: pep.timing || "AM",
-                    protocol_name: prot.name,
-                  });
-                }
-              }
+              const timing = (pep.timing || "AM").toUpperCase();
+              const addPeptide = (w: "AM" | "PM") => {
+                allPeptideReminders.push({
+                  peptide_name: pep.peptide_name,
+                  dose_mcg: pep.dose_mcg,
+                  timing: pep.timing || "AM",
+                  protocol_name: prot.name,
+                  doseWindow: w,
+                });
+              };
+
+              let matched = false;
+              if (timing.includes("AM") || timing === "BOTH") { addPeptide("AM"); matched = true; }
+              if (timing.includes("PM") || timing.includes("BED") || timing === "BOTH") { addPeptide("PM"); matched = true; }
+              if (!matched) addPeptide("AM"); // default
             }
           }
 
@@ -176,44 +185,50 @@ Deno.serve(async (req) => {
             for (const supp of prot.supplements as Array<{ name: string; dose: string; frequency: string; timing?: string }>) {
               if (!supp.name) continue;
 
-              // Normalise name to match dashboard (same aliases)
               const normName = normaliseSupplementName(supp.name);
-
-              // Global dedup by normalised name — matches dashboard line 590
-              if (seenSupplements.has(normName.toLowerCase())) continue;
-              seenSupplements.add(normName.toLowerCase());
-
-              // Resolve timing — same logic as dashboard resolveSupplementTiming
               const suppTiming = resolveSupplementTimingEdge(supp);
-              let matchesWindow = false;
 
-              if (suppTiming === "AM+PM") {
-                matchesWindow = true;
-              } else if (suppTiming === "AM") {
-                matchesWindow = window === "AM";
-              } else if (suppTiming === "PM") {
-                matchesWindow = window === "PM";
+              // Check frequency — mirrors dashboard isFrequencyDueOnDate
+              const isDue = checkSupplementFrequencyDue(supp.frequency, today, prot.start_date);
+              if (!isDue) continue;
+
+              if (suppTiming === "AM+PM" || suppTiming === "AM/PM" || suppTiming === "BOTH") {
+                const amKey = `${normName.toLowerCase()}::AM`;
+                const pmKey = `${normName.toLowerCase()}::PM`;
+                if (!seenSupplements.has(amKey)) {
+                  seenSupplements.add(amKey);
+                  allSupplementReminders.push({ name: normName, dose: supp.dose || "", frequency: supp.frequency || "daily", protocol_name: prot.name, doseWindow: "AM" });
+                }
+                if (!seenSupplements.has(pmKey)) {
+                  seenSupplements.add(pmKey);
+                  allSupplementReminders.push({ name: normName, dose: supp.dose || "", frequency: supp.frequency || "daily", protocol_name: prot.name, doseWindow: "PM" });
+                }
               } else {
-                matchesWindow = window === "AM"; // default AM
-              }
-
-              if (matchesWindow) {
-                supplementReminders.push({
-                  name: normName,
-                  dose: supp.dose || "",
-                  frequency: supp.frequency || "daily",
-                  protocol_name: prot.name,
-                });
+                const w: "AM" | "PM" = suppTiming === "PM" ? "PM" : "AM";
+                const key = `${normName.toLowerCase()}::${w}`;
+                if (!seenSupplements.has(key)) {
+                  seenSupplements.add(key);
+                  allSupplementReminders.push({ name: normName, dose: supp.dose || "", frequency: supp.frequency || "daily", protocol_name: prot.name, doseWindow: w });
+                }
               }
             }
           }
         }
 
-        // ── PM CATCH-UP: if PM window has no native items, include incomplete AM items ──
-        if (window === "PM" && reminders.length === 0 && supplementReminders.length === 0) {
-          console.log(`PM window empty for ${userId}, checking for incomplete AM items as catch-up`);
+        // Determine which items to include based on window
+        let reminders: PeptideReminder[];
+        let supplementReminders: SupplementReminder[];
 
-          // Check incomplete AM peptides
+        if (window === "AM") {
+          // AM: show ALL items for the day (matches dashboard total)
+          reminders = allPeptideReminders;
+          supplementReminders = allSupplementReminders;
+        } else {
+          // PM: show PM items + catch-up for any incomplete AM items
+          reminders = allPeptideReminders.filter(r => r.doseWindow === "PM");
+          supplementReminders = allSupplementReminders.filter(s => s.doseWindow === "PM");
+
+          // Check for incomplete AM items as catch-up
           const { data: todayInjections } = await supabase
             .from("injection_logs")
             .select("peptide_name, status")
@@ -225,66 +240,34 @@ Deno.serve(async (req) => {
             (todayInjections || []).filter((l: any) => l.status === "completed").map((l: any) => l.peptide_name)
           );
 
-          // Re-scan for AM peptides that are incomplete
-          for (const prot of userProts) {
-            const { data: peptides } = await supabase
-              .from("protocol_peptides")
-              .select("peptide_name, dose_mcg, timing, frequency")
-              .eq("protocol_id", prot.id);
-
-            if (peptides) {
-              for (const pep of peptides) {
-                const timing = (pep.timing || "AM").toUpperCase();
-                if (timing.includes("AM") && !completedPeptides.has(pep.peptide_name)) {
-                  const isDue = checkFrequencyDue(pep.frequency, today);
-                  if (isDue) {
-                    reminders.push({
-                      peptide_name: pep.peptide_name,
-                      dose_mcg: pep.dose_mcg,
-                      timing: "AM (catch-up)",
-                      protocol_name: prot.name,
-                    });
-                  }
-                }
-              }
+          // Add incomplete AM peptides
+          for (const pep of allPeptideReminders.filter(r => r.doseWindow === "AM")) {
+            if (!completedPeptides.has(pep.peptide_name)) {
+              reminders.push({ ...pep, doseWindow: "AM" });
             }
           }
 
           // Check incomplete AM supplements
           const { data: todaySuppLogs } = await supabase
             .from("supplement_logs")
-            .select("supplement_name")
+            .select("item")
             .eq("user_id", userId)
             .eq("date", today)
             .eq("completed", true);
 
           const completedSupps = new Set(
-            (todaySuppLogs || []).map((l: any) => (l.supplement_name || "").toLowerCase())
+            (todaySuppLogs || []).map((l: any) => (l.item || "").toLowerCase())
           );
 
-          const catchupSeenSupps = new Set<string>();
-          for (const prot of userProts) {
-            if (!Array.isArray(prot.supplements)) continue;
-            for (const supp of prot.supplements as Array<{ name: string; dose: string; frequency: string; timing?: string }>) {
-              if (!supp.name) continue;
-              const normName = normaliseSupplementName(supp.name);
-              const key = normName.toLowerCase();
-              if (catchupSeenSupps.has(key) || seenSupplements.has(key)) continue;
-              catchupSeenSupps.add(key);
-
-              if (!completedSupps.has(key)) {
-                supplementReminders.push({
-                  name: normName,
-                  dose: supp.dose || "",
-                  frequency: supp.frequency || "daily",
-                  protocol_name: prot.name,
-                });
-              }
+          for (const supp of allSupplementReminders.filter(s => s.doseWindow === "AM")) {
+            const key = `${supp.name.toLowerCase()}::AM`;
+            if (!completedSupps.has(key)) {
+              supplementReminders.push({ ...supp, doseWindow: "AM" });
             }
           }
 
-          if (reminders.length > 0 || supplementReminders.length > 0) {
-            console.log(`PM catch-up for ${userId}: ${reminders.length} peptides, ${supplementReminders.length} supplements incomplete from today`);
+          if (reminders.length === 0 && supplementReminders.length === 0) {
+            console.log(`PM window for ${userId}: all AM items done, no PM items`);
           }
         }
 
@@ -906,17 +889,30 @@ function extractTopResult(markers: Record<string, any> | null): string | null {
   return `${name} ${direction} ${Math.round(topPct)}%`;
 }
 
-function checkFrequencyDue(frequency: string, todayStr: string): boolean {
-  const today = new Date(todayStr);
+/** Mirrors dashboard isFrequencyDueOnDate — uses protocol start_date for EOD/weekly alignment */
+function checkFrequencyDue(frequency: string, todayStr: string, startDate?: string): boolean {
+  const today = new Date(`${todayStr}T12:00:00`);
   const dayOfWeek = today.getDay();
-  switch (frequency.toLowerCase()) {
-    case "daily": return true;
-    case "weekly": return dayOfWeek === 1;
-    case "2x/week": return dayOfWeek === 1 || dayOfWeek === 4;
-    case "3x/week": return dayOfWeek === 1 || dayOfWeek === 3 || dayOfWeek === 5;
-    case "5on/2off": return dayOfWeek >= 1 && dayOfWeek <= 5;
-    default: return true;
-  }
+  const start = startDate ? new Date(`${startDate}T12:00:00`) : today;
+  const daysSinceStart = Math.floor((today.getTime() - start.getTime()) / (1000 * 60 * 60 * 24));
+  if (daysSinceStart < 0) return false;
+
+  const f = frequency.toLowerCase();
+  if (f === "daily" || f.includes("daily") || f === "morning" || f === "evening"
+    || f.includes("with meals") || f.includes("fasted") || f.includes("with fat")
+    || f.includes("before bed") || f.includes("before exercise") || f.includes("split")) return true;
+  if (f === "twice daily" || f.includes("twice") || f.includes("2x/day")) return true;
+  if (f === "weekly" || f.includes("1x")) return daysSinceStart % 7 === 0;
+  if (f.includes("2x")) return dayOfWeek === 1 || dayOfWeek === 4;
+  if (f.includes("3x")) return dayOfWeek === 1 || dayOfWeek === 3 || dayOfWeek === 5;
+  if (f === "5on/2off") return dayOfWeek >= 1 && dayOfWeek <= 5;
+  if (f === "eod" || f.includes("every other")) return daysSinceStart % 2 === 0;
+  return true;
+}
+
+/** Supplement frequency check — mirrors dashboard logic */
+function checkSupplementFrequencyDue(frequency: string, todayStr: string, startDate?: string): boolean {
+  return checkFrequencyDue(frequency || "daily", todayStr, startDate);
 }
 
 /** Normalise supplement names — mirrors src/lib/supplement-normalise.ts */
