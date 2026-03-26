@@ -21,7 +21,7 @@ const stepIndex = (status: string) => PIPELINE_STEPS.findIndex((s) => s.key === 
 const DNAAnalysing = () => {
   const location = useLocation();
   const navigate = useNavigate();
-  const { inputText, imageBase64, method, userId, tier, lifestyleContext, reportId } =
+  const { inputText, imageBase64, method, userId, tier, lifestyleContext, reportId, questionnaireAnswers } =
     (location.state || {}) as any;
 
   const [status, setStatus] = useState<string>("queued");
@@ -67,6 +67,7 @@ const DNAAnalysing = () => {
               reportId, userId, inputText, imageBase64, method,
               tier: tier ?? "standard",
               lifestyleContext: lifestyleContext ?? null,
+              questionnaireAnswers: questionnaireAnswers ?? null,
             }),
           });
 

@@ -17,7 +17,7 @@ Deno.serve(async (req) => {
     );
 
     const body = await req.json();
-    const { reportId, userId, inputText, method, tier, lifestyleContext } = body;
+    const { reportId, userId, inputText, method, tier, lifestyleContext, questionnaireAnswers } = body;
 
     if (!reportId || !userId || !inputText) {
       return new Response(
@@ -47,6 +47,7 @@ Deno.serve(async (req) => {
       body: JSON.stringify({
         reportId, userId, inputText, method,
         tier: tier || "standard", lifestyleContext,
+        questionnaireAnswers: questionnaireAnswers || null,
         callbackUrl: `${Deno.env.get("SUPABASE_URL")}/functions/v1/pipeline-callback`,
       }),
     });

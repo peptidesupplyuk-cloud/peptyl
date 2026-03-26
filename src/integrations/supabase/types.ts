@@ -594,6 +594,7 @@ export type Database = {
           pipeline_timings: Json | null
           pipeline_updated_at: string | null
           plan_start_date: string | null
+          questionnaire_answers: Json | null
           report_json: Json
           updated_at: string
           user_id: string
@@ -618,6 +619,7 @@ export type Database = {
           pipeline_timings?: Json | null
           pipeline_updated_at?: string | null
           plan_start_date?: string | null
+          questionnaire_answers?: Json | null
           report_json: Json
           updated_at?: string
           user_id: string
@@ -642,6 +644,7 @@ export type Database = {
           pipeline_timings?: Json | null
           pipeline_updated_at?: string | null
           plan_start_date?: string | null
+          questionnaire_answers?: Json | null
           report_json?: Json
           updated_at?: string
           user_id?: string

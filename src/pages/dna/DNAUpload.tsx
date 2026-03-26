@@ -308,7 +308,7 @@ const DNAUpload = () => {
       return;
     }
 
-    navigate("/dna/analysing", {
+    navigate("/dna/questionnaire", {
       state: {
         inputText: method === "image" ? "" : inputText,
         imageBase64: method === "image" ? imageBase64 : null,
