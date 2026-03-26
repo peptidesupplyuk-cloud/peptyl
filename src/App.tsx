@@ -163,6 +163,7 @@ const AppContent = () => {
           <Route path="/start/:slug" element={<CampaignPage />} />
           <Route path="/dna" element={<DNALanding />} />
           <Route path="/dna/upload" element={<ProtectedRoute><DNAUpload /></ProtectedRoute>} />
+          <Route path="/dna/questionnaire" element={<ProtectedRoute><DNAQuestionnaire /></ProtectedRoute>} />
           <Route path="/dna/analysing" element={<ProtectedRoute><DNAAnalysing /></ProtectedRoute>} />
           <Route path="/dna/report/:id" element={<ProtectedRoute><DNAReport /></ProtectedRoute>} />
           <Route path="/dna/dashboard" element={<ProtectedRoute><DNADashboard /></ProtectedRoute>} />
