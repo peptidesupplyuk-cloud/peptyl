@@ -83,6 +83,7 @@ const WhoopCallback = lazy(() => import("./pages/WhoopCallback"));
 const FitbitCallback = lazy(() => import("./pages/FitbitCallback"));
 const DNALanding = lazy(() => import("./pages/dna/DNALanding"));
 const DNAUpload = lazy(() => import("./pages/dna/DNAUpload"));
+const DNAQuestionnaire = lazy(() => import("./pages/dna/DNAQuestionnaire"));
 const DNAAnalysing = lazy(() => import("./pages/dna/DNAAnalysing"));
 const DNAReport = lazy(() => import("./pages/dna/DNAReport"));
 const DNADashboard = lazy(() => import("./pages/dna/DNADashboard"));
