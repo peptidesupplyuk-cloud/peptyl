@@ -296,8 +296,11 @@ const DNAQuestionnaire = () => {
   const handleMultiSelect = (value: string) => {
     setAnswers((prev) => {
       const current = (prev[currentQuestion.id] as string[]) || [];
-      // "none" clears everything else; selecting anything else clears "none"
-      if (value === "none") return { ...prev, [currentQuestion.id]: ["none"] };
+      if (value === "none") {
+        // Toggle "none" off if already selected, otherwise set it and clear others
+        if (current.includes("none")) return { ...prev, [currentQuestion.id]: [] };
+        return { ...prev, [currentQuestion.id]: ["none"] };
+      }
       const withoutNone = current.filter((v) => v !== "none");
       if (withoutNone.includes(value)) {
         return { ...prev, [currentQuestion.id]: withoutNone.filter((v) => v !== value) };
