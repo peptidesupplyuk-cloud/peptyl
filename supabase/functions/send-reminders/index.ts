@@ -982,45 +982,77 @@ function buildReminderEmail(
 ): string {
   const totalCount = reminders.length + supplements.length;
 
-  const peptideRows = reminders
-    .map(r => `<tr>
-      <td style="padding:12px 16px;border-bottom:1px solid #e5e7eb"><span style="font-size:18px">💉</span><strong style="color:#111827;margin-left:6px">${r.peptide_name}</strong></td>
-      <td style="padding:12px 16px;border-bottom:1px solid #e5e7eb;color:#374151;font-weight:500">${r.dose_mcg} mcg</td>
-      <td style="padding:12px 16px;border-bottom:1px solid #e5e7eb;color:#6b7280">${r.protocol_name}</td>
-    </tr>`).join("");
+  // Group by protocol — mirrors dashboard layout
+  const protocolGroups = new Map<string, { peptides: PeptideReminder[]; supps: SupplementReminder[] }>();
+  for (const r of reminders) {
+    if (!protocolGroups.has(r.protocol_name)) protocolGroups.set(r.protocol_name, { peptides: [], supps: [] });
+    protocolGroups.get(r.protocol_name)!.peptides.push(r);
+  }
+  for (const s of supplements) {
+    if (!protocolGroups.has(s.protocol_name)) protocolGroups.set(s.protocol_name, { peptides: [], supps: [] });
+    protocolGroups.get(s.protocol_name)!.supps.push(s);
+  }
 
-  const supplementRows = supplements
-    .map(s => `<tr>
-      <td style="padding:12px 16px;border-bottom:1px solid #e5e7eb"><span style="font-size:18px">💊</span><strong style="color:#111827;margin-left:6px">${s.name}</strong></td>
-      <td style="padding:12px 16px;border-bottom:1px solid #e5e7eb;color:#374151;font-weight:500">${s.dose}</td>
-      <td style="padding:12px 16px;border-bottom:1px solid #e5e7eb;color:#6b7280">${s.protocol_name}</td>
-    </tr>`).join("");
+  const renderItem = (icon: string, name: string, dose: string, w: string) =>
+    `<tr>
+      <td style="padding:10px 14px;border-bottom:1px solid #f3f4f6;vertical-align:middle">
+        <span style="display:inline-block;width:22px;text-align:center;font-size:15px">${icon}</span>
+        <strong style="color:#111827;font-size:13px;margin-left:4px">${name}</strong>
+      </td>
+      <td style="padding:10px 14px;border-bottom:1px solid #f3f4f6;color:#374151;font-size:13px;font-weight:500">${dose}</td>
+      <td style="padding:10px 14px;border-bottom:1px solid #f3f4f6">
+        <span style="display:inline-block;background:${w === "AM" ? "#dbeafe" : "#ede9fe"};color:${w === "AM" ? "#1d4ed8" : "#7c3aed"};font-size:10px;font-weight:600;padding:2px 8px;border-radius:10px">${w}</span>
+      </td>
+    </tr>`;
+
+  let protocolSections = "";
+  for (const [protName, items] of protocolGroups) {
+    const count = items.peptides.length + items.supps.length;
+    const rows = [
+      ...items.peptides.sort((a, b) => a.doseWindow === b.doseWindow ? 0 : a.doseWindow === "AM" ? -1 : 1)
+        .map(r => renderItem("💉", r.peptide_name, `${r.dose_mcg}mcg`, r.doseWindow)),
+      ...items.supps.sort((a, b) => a.doseWindow === b.doseWindow ? 0 : a.doseWindow === "AM" ? -1 : 1)
+        .map(s => renderItem("💊", s.name, s.dose, s.doseWindow)),
+    ].join("");
+
+    protocolSections += `
+      <div style="margin-bottom:16px">
+        <div style="margin-bottom:8px">
+          <span style="font-size:13px;font-weight:700;color:#111827">🧬 ${protName}</span>
+          <span style="font-size:11px;color:#6b7280;font-weight:400;margin-left:8px">${count} item${count > 1 ? "s" : ""}</span>
+        </div>
+        <table style="width:100%;border-collapse:collapse;font-size:13px;border:1px solid #e5e7eb;border-radius:8px;overflow:hidden">
+          <thead><tr style="background:#f9fafb">
+            <th style="padding:8px 14px;text-align:left;font-weight:600;color:#6b7280;font-size:11px;text-transform:uppercase;letter-spacing:0.5px">Item</th>
+            <th style="padding:8px 14px;text-align:left;font-weight:600;color:#6b7280;font-size:11px;text-transform:uppercase;letter-spacing:0.5px">Dose</th>
+            <th style="padding:8px 14px;text-align:left;font-weight:600;color:#6b7280;font-size:11px;text-transform:uppercase;letter-spacing:0.5px">Window</th>
+          </tr></thead>
+          <tbody>${rows}</tbody>
+        </table>
+      </div>`;
+  }
+
+  const amCount = reminders.filter(r => r.doseWindow === "AM").length + supplements.filter(s => s.doseWindow === "AM").length;
+  const pmCount = reminders.filter(r => r.doseWindow === "PM").length + supplements.filter(s => s.doseWindow === "PM").length;
+  const windowSummary = [amCount > 0 ? `${amCount} AM` : "", pmCount > 0 ? `${pmCount} PM` : ""].filter(Boolean).join(" · ");
 
   return `
     <div style="font-family:system-ui,-apple-system,sans-serif;max-width:520px;margin:0 auto;padding:0;background:#ffffff">
-      <div style="background:linear-gradient(135deg,#0d9488,#0f766e);padding:28px 24px;text-align:center;border-radius:12px 12px 0 0">
-        <h1 style="color:#ffffff;font-size:22px;margin:0;font-weight:700">⏰ Action Required</h1>
-        <p style="color:#d1fae5;font-size:14px;margin:8px 0 0;font-weight:400">
-          You have <strong style="color:#ffffff">${totalCount} item${totalCount > 1 ? "s" : ""}</strong> to complete in your <strong style="color:#ffffff">${window}</strong> window
+      <div style="background:linear-gradient(135deg,#0d9488,#0f766e);padding:24px 24px 20px;text-align:center;border-radius:12px 12px 0 0">
+        <h1 style="color:#ffffff;font-size:20px;margin:0;font-weight:700">Today's Plan</h1>
+        <p style="color:#d1fae5;font-size:13px;margin:6px 0 0">
+          <strong style="color:#ffffff">${totalCount} item${totalCount > 1 ? "s" : ""}</strong> to complete · ${windowSummary}
         </p>
       </div>
-      <div style="padding:24px;border:1px solid #e5e7eb;border-top:none;border-radius:0 0 12px 12px">
-        <p style="margin:0 0 16px;font-size:15px;color:#374151;line-height:1.5">Hi there 👋 — here's what's due today. Please log in to your dashboard to mark each item as complete.</p>
-        <table style="width:100%;border-collapse:collapse;font-size:14px;margin-bottom:20px;border:1px solid #e5e7eb;border-radius:8px;overflow:hidden">
-          <thead><tr style="background:#f0fdfa">
-            <th style="padding:10px 16px;text-align:left;font-weight:600;color:#0d9488;font-size:12px;text-transform:uppercase;letter-spacing:0.5px">Item</th>
-            <th style="padding:10px 16px;text-align:left;font-weight:600;color:#0d9488;font-size:12px;text-transform:uppercase;letter-spacing:0.5px">Dose</th>
-            <th style="padding:10px 16px;text-align:left;font-weight:600;color:#0d9488;font-size:12px;text-transform:uppercase;letter-spacing:0.5px">Protocol</th>
-          </tr></thead>
-          <tbody>${peptideRows}${supplementRows}</tbody>
-        </table>
-        <div style="text-align:center;margin:24px 0 8px">
-          <a href="https://peptyl.co.uk/dashboard" style="display:inline-block;background:#0d9488;color:#ffffff;text-decoration:none;padding:14px 32px;border-radius:8px;font-weight:600;font-size:15px;letter-spacing:0.3px">✅ Go to Dashboard & Complete</a>
+      <div style="padding:20px 24px;border:1px solid #e5e7eb;border-top:none;border-radius:0 0 12px 12px">
+        ${protocolSections}
+        <div style="text-align:center;margin:20px 0 8px">
+          <a href="https://peptyl.co.uk/dashboard" style="display:inline-block;background:#0d9488;color:#ffffff;text-decoration:none;padding:12px 32px;border-radius:8px;font-weight:600;font-size:14px">✅ Log Doses Now</a>
         </div>
-        <p style="text-align:center;font-size:12px;color:#9ca3af;margin:8px 0 0">Log your doses to keep your streak going!</p>
+        <p style="text-align:center;font-size:11px;color:#9ca3af;margin:8px 0 0">Log your doses to keep your streak going</p>
       </div>
-      <div style="padding:20px 24px;text-align:center">
-        <p style="font-size:11px;color:#9ca3af;margin:0;line-height:1.6">This is an automated reminder from Peptyl. For educational and research purposes only.<br/>Manage notification preferences in your <a href="https://peptyl.co.uk/dashboard" style="color:#0d9488;text-decoration:underline">dashboard settings</a>.</p>
+      <div style="padding:16px 24px;text-align:center">
+        <p style="font-size:10px;color:#9ca3af;margin:0;line-height:1.5">Peptyl — for educational and research purposes only.<br/>Manage notifications in your <a href="https://peptyl.co.uk/dashboard" style="color:#0d9488;text-decoration:underline">dashboard</a>.</p>
       </div>
     </div>`;
 }
@@ -1034,29 +1066,49 @@ function buildFollowupEmail(
   const totalCount = reminders.length + supplements.length;
 
   const itemList = [
-    ...reminders.map(r => `<li style="padding:6px 0;color:#374151">💉 <strong>${r.peptide_name}</strong> — ${r.dose_mcg} mcg</li>`),
-    ...supplements.map(s => `<li style="padding:6px 0;color:#374151">💊 <strong>${s.name}</strong> — ${s.dose}</li>`),
+    ...reminders.map(r => `<tr>
+      <td style="padding:8px 14px;border-bottom:1px solid #fef3c7;vertical-align:middle">
+        <span style="font-size:15px">💉</span>
+        <strong style="color:#111827;font-size:13px;margin-left:4px">${r.peptide_name}</strong>
+      </td>
+      <td style="padding:8px 14px;border-bottom:1px solid #fef3c7;color:#374151;font-size:13px">${r.dose_mcg}mcg</td>
+      <td style="padding:8px 14px;border-bottom:1px solid #fef3c7">
+        <span style="display:inline-block;background:${r.doseWindow === "AM" ? "#dbeafe" : "#ede9fe"};color:${r.doseWindow === "AM" ? "#1d4ed8" : "#7c3aed"};font-size:10px;font-weight:600;padding:2px 8px;border-radius:10px">${r.doseWindow}</span>
+      </td>
+    </tr>`),
+    ...supplements.map(s => `<tr>
+      <td style="padding:8px 14px;border-bottom:1px solid #fef3c7;vertical-align:middle">
+        <span style="font-size:15px">💊</span>
+        <strong style="color:#111827;font-size:13px;margin-left:4px">${s.name}</strong>
+      </td>
+      <td style="padding:8px 14px;border-bottom:1px solid #fef3c7;color:#374151;font-size:13px">${s.dose}</td>
+      <td style="padding:8px 14px;border-bottom:1px solid #fef3c7">
+        <span style="display:inline-block;background:${s.doseWindow === "AM" ? "#dbeafe" : "#ede9fe"};color:${s.doseWindow === "AM" ? "#1d4ed8" : "#7c3aed"};font-size:10px;font-weight:600;padding:2px 8px;border-radius:10px">${s.doseWindow}</span>
+      </td>
+    </tr>`),
   ].join("");
 
   return `
     <div style="font-family:system-ui,-apple-system,sans-serif;max-width:520px;margin:0 auto;padding:0;background:#ffffff">
-      <div style="background:linear-gradient(135deg,#d97706,#b45309);padding:28px 24px;text-align:center;border-radius:12px 12px 0 0">
-        <h1 style="color:#ffffff;font-size:22px;margin:0;font-weight:700">⚠️ Doses Still Incomplete</h1>
-        <p style="color:#fef3c7;font-size:14px;margin:8px 0 0;font-weight:400">
-          ${totalCount} item${totalCount > 1 ? "s" : ""} from your ${window} window ${totalCount > 1 ? "haven't" : "hasn't"} been logged yet
-        </p>
+      <div style="background:linear-gradient(135deg,#d97706,#b45309);padding:24px 24px 20px;text-align:center;border-radius:12px 12px 0 0">
+        <h1 style="color:#ffffff;font-size:20px;margin:0;font-weight:700">⚠️ ${totalCount} Dose${totalCount > 1 ? "s" : ""} Still Incomplete</h1>
+        <p style="color:#fef3c7;font-size:13px;margin:6px 0 0">Don't break your streak — log now</p>
       </div>
-      <div style="padding:24px;border:1px solid #e5e7eb;border-top:none;border-radius:0 0 12px 12px">
-        <p style="margin:0 0 16px;font-size:15px;color:#374151;line-height:1.5">
-          Hey — it looks like you still have outstanding items today. Don't break your streak!
-        </p>
-        <ul style="margin:0 0 20px;padding:0 0 0 16px;font-size:14px">${itemList}</ul>
-        <div style="text-align:center;margin:24px 0 8px">
-          <a href="https://peptyl.co.uk/dashboard" style="display:inline-block;background:#d97706;color:#ffffff;text-decoration:none;padding:14px 32px;border-radius:8px;font-weight:600;font-size:15px;letter-spacing:0.3px">✅ Complete Now</a>
+      <div style="padding:20px 24px;border:1px solid #e5e7eb;border-top:none;border-radius:0 0 12px 12px">
+        <table style="width:100%;border-collapse:collapse;font-size:13px;border:1px solid #fde68a;border-radius:8px;overflow:hidden;margin-bottom:20px">
+          <thead><tr style="background:#fffbeb">
+            <th style="padding:8px 14px;text-align:left;font-weight:600;color:#92400e;font-size:11px;text-transform:uppercase">Item</th>
+            <th style="padding:8px 14px;text-align:left;font-weight:600;color:#92400e;font-size:11px;text-transform:uppercase">Dose</th>
+            <th style="padding:8px 14px;text-align:left;font-weight:600;color:#92400e;font-size:11px;text-transform:uppercase">Window</th>
+          </tr></thead>
+          <tbody>${itemList}</tbody>
+        </table>
+        <div style="text-align:center;margin:20px 0 8px">
+          <a href="https://peptyl.co.uk/dashboard" style="display:inline-block;background:#d97706;color:#ffffff;text-decoration:none;padding:12px 32px;border-radius:8px;font-weight:600;font-size:14px">✅ Complete Now</a>
         </div>
       </div>
-      <div style="padding:20px 24px;text-align:center">
-        <p style="font-size:11px;color:#9ca3af;margin:0;line-height:1.6">This is an automated reminder from Peptyl. For educational and research purposes only.<br/>Manage notification preferences in your <a href="https://peptyl.co.uk/dashboard" style="color:#0d9488;text-decoration:underline">dashboard settings</a>.</p>
+      <div style="padding:16px 24px;text-align:center">
+        <p style="font-size:10px;color:#9ca3af;margin:0;line-height:1.5">Peptyl — for educational and research purposes only.<br/>Manage notifications in your <a href="https://peptyl.co.uk/dashboard" style="color:#0d9488;text-decoration:underline">dashboard</a>.</p>
       </div>
     </div>`;
 }
