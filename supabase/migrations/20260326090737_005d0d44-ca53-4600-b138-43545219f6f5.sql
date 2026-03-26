@@ -1,0 +1,1 @@
+ALTER TABLE public.dna_reports ADD COLUMN questionnaire_answers jsonb DEFAULT NULL;
