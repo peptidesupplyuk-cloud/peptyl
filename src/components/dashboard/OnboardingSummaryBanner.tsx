@@ -29,7 +29,7 @@ const GOAL_LABELS: Record<string, string> = {
 
 const EXPERIENCE_MESSAGES: Record<string, Record<string, string>> = {
   none: {
-    fat_loss: "You're new to peptides and focused on fat loss. We've surfaced the safest, most evidence-backed options first — no injections required to start.",
+    fat_loss: "You're new to peptides and focused on fat loss. We've surfaced the safest, most evidence-backed options first.",
     healing: "You're new to peptides and want to support recovery. BPC-157 is where most beginners start — well studied, widely used, and beginner safe.",
     longevity: "You're new to peptides and thinking long term. We've filtered the most studied anti-ageing protocols for you — start simple, track your results.",
     cognitive: "You're new to peptides and want sharper cognition. We've highlighted the beginner-safe nootropic stacks with the strongest evidence.",
