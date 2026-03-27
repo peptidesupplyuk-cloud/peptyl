@@ -373,50 +373,43 @@ const ProtocolGroupedDoses = ({
 
               const renderSupplement = (supp: SupplementItem, status: "pending" | "completed" | "skipped") => {
                 const badge = frequencyLabel(supp.frequency);
+                const timingBadge = supp.timing === "AM" ? "bg-amber-500/10 text-amber-600" : "bg-indigo-500/10 text-indigo-500";
+                const timingLabel = supp.timing === "AM" ? "☀ AM" : "🌙 PM";
+
                 if (status === "completed") {
                   return (
                     <div key={`supp-done-${supp.trackingKey}`} className="flex items-center justify-between bg-primary/5 border border-primary/10 rounded-lg px-3 py-2">
-                      <div className="flex items-center gap-2">
-                        <Check className="h-3.5 w-3.5 text-primary" />
-                        <span className="text-sm font-medium text-foreground line-through opacity-60 break-words">{supp.name}</span>
-                        <span className="text-xs text-muted-foreground">{supp.dose}</span>
-                        <span className={`text-[9px] font-medium px-1.5 py-0.5 rounded-full ${supp.timing === "AM" ? "bg-amber-500/10 text-amber-600" : "bg-indigo-500/10 text-indigo-500"}`}>
-                          {supp.timing === "AM" ? "☀ AM" : "🌙 PM"}
-                        </span>
-                        <span className={`text-[9px] font-medium px-1.5 py-0.5 rounded-full ${badge.color}`}>{badge.label}</span>
+                      <div className="flex items-center gap-2 min-w-0">
+                        <Check className="h-3.5 w-3.5 text-primary shrink-0" />
+                        <span className="text-sm font-medium text-foreground line-through opacity-60 truncate">{supp.name}</span>
                       </div>
-                      <span className="text-xs text-primary">✓</span>
+                      <span className="text-xs text-primary shrink-0">✓</span>
                     </div>
                   );
                 }
                 if (status === "skipped") {
                   return (
                     <div key={`supp-skip-${supp.trackingKey}`} className="flex items-center justify-between bg-muted/30 rounded-lg px-3 py-2 opacity-50">
-                      <div className="flex items-center gap-2">
-                        <SkipForward className="h-3.5 w-3.5 text-muted-foreground" />
-                        <span className="text-sm font-medium text-foreground line-through">{supp.name}</span>
+                      <div className="flex items-center gap-2 min-w-0">
+                        <SkipForward className="h-3.5 w-3.5 text-muted-foreground shrink-0" />
+                        <span className="text-sm font-medium text-foreground line-through truncate">{supp.name}</span>
                       </div>
-                      <span className="text-xs text-muted-foreground">Skipped</span>
+                      <span className="text-xs text-muted-foreground shrink-0">Skipped</span>
                     </div>
                   );
                 }
                 return (
-                  <div key={`supp-${supp.trackingKey}`} className="flex flex-wrap items-center justify-between gap-2 bg-muted/50 rounded-lg px-3 py-2.5">
+                  <div key={`supp-${supp.trackingKey}`} className="flex items-center justify-between gap-2 bg-muted/50 rounded-lg px-3 py-2.5">
                     <div className="min-w-0 flex-1">
-                      <div className="flex items-center gap-2">
+                      <div className="flex items-center gap-1.5">
                         <Pill className="h-3.5 w-3.5 text-accent-foreground/70 shrink-0" />
-                        <span className="text-sm font-medium text-foreground break-words line-clamp-2">{supp.name}</span>
-                        <span className="text-xs text-muted-foreground shrink-0">{supp.dose}</span>
-                        <span className={`text-[9px] font-medium px-1.5 py-0.5 rounded-full ${supp.timing === "AM" ? "bg-amber-500/10 text-amber-600" : "bg-indigo-500/10 text-indigo-500"}`}>
-                          {supp.timing === "AM" ? "☀ AM" : "🌙 PM"}
-                        </span>
+                        <span className="text-sm font-medium text-foreground truncate">{supp.name}</span>
+                      </div>
+                      <div className="flex items-center gap-1.5 ml-5 mt-1">
+                        <span className="text-[11px] text-muted-foreground">{supp.dose}</span>
+                        <span className={`text-[9px] font-medium px-1.5 py-0.5 rounded-full ${timingBadge}`}>{timingLabel}</span>
                         <span className={`text-[9px] font-medium px-1.5 py-0.5 rounded-full ${badge.color}`}>{badge.label}</span>
                       </div>
-                      {supp.drivenBy && supp.drivenBy.length > 0 && (
-                        <span className="text-[10px] text-primary/70 flex items-center gap-1 ml-5.5 mt-0.5">
-                          <Dna className="h-2.5 w-2.5" /> {supp.drivenBy[0]}
-                        </span>
-                      )}
                     </div>
                     {isToday ? (
                       <div className="flex gap-1.5 shrink-0">
@@ -428,7 +421,7 @@ const ProtocolGroupedDoses = ({
                         </Button>
                       </div>
                     ) : (
-                      <span className="text-xs text-muted-foreground">{isFutureDate ? "Planned" : "Missed"}</span>
+                      <span className="text-xs text-muted-foreground shrink-0">{isFutureDate ? "Planned" : "Missed"}</span>
                     )}
                   </div>
                 );
