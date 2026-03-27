@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Check, SkipForward, Clock, FlaskConical, ArrowRight, Target, Pill, CheckCheck, Dna, X, CalendarIcon, CalendarClock, ChevronDown, ChevronUp } from "lucide-react";
+import CompoundLink from "@/components/compound/CompoundLink";
 import { Button } from "@/components/ui/button";
 import { useTodayInjections, useDateInjections, useUpdateInjectionStatus, type InjectionLog } from "@/hooks/use-injections";
 import { useProtocols, type ProtocolSupplement } from "@/hooks/use-protocols";
@@ -347,7 +348,7 @@ const ProtocolGroupedDoses = ({
                     <div className="min-w-0 flex-1">
                       <div className="flex items-center gap-1.5">
                         <Clock className="h-3.5 w-3.5 text-primary shrink-0" />
-                        <span className="text-sm font-medium text-foreground truncate">{inj.peptide_name}</span>
+                        <CompoundLink name={inj.peptide_name} className="text-sm font-medium truncate" />
                       </div>
                       <div className="flex items-center gap-1.5 ml-5 mt-1">
                         <span className="text-[11px] text-muted-foreground">{inj.dose_mcg}mcg</span>
@@ -403,7 +404,7 @@ const ProtocolGroupedDoses = ({
                     <div className="min-w-0 flex-1">
                       <div className="flex items-center gap-1.5">
                         <Pill className="h-3.5 w-3.5 text-accent-foreground/70 shrink-0" />
-                        <span className="text-sm font-medium text-foreground truncate">{supp.name}</span>
+                        <CompoundLink name={supp.name} className="text-sm font-medium truncate" />
                       </div>
                       <div className="flex items-center gap-1.5 ml-5 mt-1">
                         <span className="text-[11px] text-muted-foreground">{supp.dose}</span>
