@@ -1,5 +1,5 @@
 import { motion } from "framer-motion";
-import { Activity, Droplets, Dna, ArrowRight } from "lucide-react";
+import { Activity, Droplets, Dna, ArrowRight, Users } from "lucide-react";
 import { Link } from "react-router-dom";
 
 const ComingSoonCards = () => {
@@ -19,10 +19,10 @@ const ComingSoonCards = () => {
               Now Live
             </span>
             <h3 className="text-lg sm:text-xl font-heading font-bold text-primary-foreground mb-1.5">
-              Holistic Health Assessment
+              AI Health Assessment
             </h3>
             <p className="text-sm text-primary-foreground/50 leading-relaxed mb-4 max-w-sm">
-              Upload your 23andMe or lab results. Get a personalised health score and supplement protocol in minutes.
+              Upload your 23andMe, lab results, or answer a questionnaire. Get a personalised health score, protocol, and supplement plan.
             </p>
             <div className="flex items-center gap-2 text-primary text-sm font-medium group-hover:gap-3 transition-all">
               <Dna className="h-4 w-4" />
@@ -35,7 +35,7 @@ const ComingSoonCards = () => {
       </Link>
 
       {/* Coming Soon row */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         {/* WHOOP / OURA Integration */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -52,7 +52,7 @@ const ComingSoonCards = () => {
               Wearable Integration
             </h3>
             <p className="text-xs text-primary-foreground/50 leading-relaxed mb-4">
-              Auto-sync HRV, recovery, strain & sleep data directly into your protocol dashboard.
+              Auto-sync HRV, recovery, strain and sleep data directly into your protocol dashboard.
             </p>
             <div className="mt-auto flex items-center gap-4">
               <div className="flex items-center gap-1.5">
@@ -77,7 +77,7 @@ const ComingSoonCards = () => {
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6, delay: 0.55 }}
+          transition={{ duration: 0.6, delay: 0.5 }}
           className="group relative rounded-2xl border border-primary-foreground/10 bg-glass overflow-hidden"
         >
           <div className="absolute inset-0 bg-gradient-to-br from-[hsl(0_0%_100%/0.04)] to-transparent" />
@@ -89,7 +89,7 @@ const ComingSoonCards = () => {
               Bespoke Bloodwork Kits
             </h3>
             <p className="text-xs text-primary-foreground/50 leading-relaxed mb-4">
-              Peptide-optimised home blood panels. Track IGF-1, lipids, liver & kidney markers — results feed into your dashboard.
+              At-home blood panels tailored to your protocol. Track IGF-1, lipids, liver and kidney markers with results fed into your dashboard.
             </p>
             <div className="mt-auto flex items-center gap-2">
               <div className="h-7 w-7 rounded-md bg-[hsl(0_0%_100%/0.08)] flex items-center justify-center">
@@ -102,6 +102,37 @@ const ComingSoonCards = () => {
             </div>
           </div>
           <div className="absolute -bottom-12 -right-12 w-32 h-32 rounded-full bg-warm/10 blur-3xl opacity-50 group-hover:opacity-80 transition-opacity" />
+        </motion.div>
+
+        {/* PT / Coaches Dashboard */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6, delay: 0.6 }}
+          className="group relative rounded-2xl border border-primary-foreground/10 bg-glass overflow-hidden"
+        >
+          <div className="absolute inset-0 bg-gradient-to-br from-[hsl(0_0%_100%/0.04)] to-transparent" />
+          <div className="relative p-5 sm:p-6 flex flex-col h-full">
+            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-info/15 text-info text-[11px] font-semibold uppercase tracking-wider mb-3 self-start">
+              Coming Soon
+            </span>
+            <h3 className="text-lg font-heading font-bold text-primary-foreground mb-1.5">
+              For PTs and Coaches
+            </h3>
+            <p className="text-xs text-primary-foreground/50 leading-relaxed mb-4">
+              A dedicated dashboard to manage client protocols, track adherence, and centralise health data across your roster.
+            </p>
+            <div className="mt-auto flex items-center gap-2">
+              <div className="h-7 w-7 rounded-md bg-[hsl(0_0%_100%/0.08)] flex items-center justify-center">
+                <Users className="h-3.5 w-3.5 text-info" />
+              </div>
+              <div>
+                <span className="text-xs font-semibold text-primary-foreground/70 block leading-none">Client Management</span>
+                <span className="text-[10px] text-primary-foreground/40">Multi-client dashboard</span>
+              </div>
+            </div>
+          </div>
+          <div className="absolute -bottom-12 -right-12 w-32 h-32 rounded-full bg-info/10 blur-3xl opacity-50 group-hover:opacity-80 transition-opacity" />
         </motion.div>
       </div>
     </div>

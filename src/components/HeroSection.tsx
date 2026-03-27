@@ -10,9 +10,9 @@ import OnboardingModal from "@/components/OnboardingModal";
 import ComingSoonCards from "@/components/ComingSoonCards";
 
 const TEASER_PHRASES = [
-  "Stop guessing your peptides & supplements.",
-  "Never miss a dose again.",
-  "See what actually works.",
+  "Your bloodwork. Your DNA. Your wearables.",
+  "Peptides. Supplements. GLP-1s.",
+  "One platform. Zero guesswork.",
 ];
 
 const PHASE_DURATION = 2200; // ms per teaser phrase
@@ -133,10 +133,10 @@ const HeroSection = () => {
             <Download className="mr-2 h-4 w-4" />
             Download App
           </Button>
-          <Link to="/education">
+          <Link to="/improve">
             <Button size="lg" variant="outline" className="border-primary-foreground/20 text-primary-foreground hover:bg-primary-foreground/10 text-base px-8 bg-primary-foreground/5">
               <BookOpen className="mr-2 h-4 w-4" />
-              Learn More
+              {t("hero.browseDatabase")}
             </Button>
           </Link>
         </motion.div>

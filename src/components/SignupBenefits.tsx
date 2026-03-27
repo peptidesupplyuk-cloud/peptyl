@@ -1,5 +1,5 @@
 import { motion } from "framer-motion";
-import { Calculator, MessageSquare, Bookmark, Shield, Sparkles, CheckCircle2 } from "lucide-react";
+import { Dna, Droplets, SlidersHorizontal, Watch, Shield, CheckCircle2 } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { useAuth } from "@/contexts/AuthContext";
@@ -11,10 +11,10 @@ const SignupBenefits = () => {
   if (user) return null;
 
   const benefits = [
-    { icon: Calculator, title: t("signup.dosingCalc"), description: t("signup.dosingCalcDesc") },
-    { icon: MessageSquare, title: t("signup.communityFeedback"), description: t("signup.communityFeedbackDesc") },
-    { icon: Bookmark, title: t("signup.saveStacks"), description: t("signup.saveStacksDesc") },
-    { icon: Sparkles, title: t("signup.aiAssistant"), description: t("signup.aiAssistantDesc") },
+    { icon: Dna, title: t("signup.dosingCalc"), description: t("signup.dosingCalcDesc") },
+    { icon: Droplets, title: t("signup.communityFeedback"), description: t("signup.communityFeedbackDesc") },
+    { icon: SlidersHorizontal, title: t("signup.saveStacks"), description: t("signup.saveStacksDesc") },
+    { icon: Watch, title: t("signup.aiAssistant"), description: t("signup.aiAssistantDesc") },
   ];
 
   return (

@@ -7,6 +7,7 @@ import MissionSection from "@/components/MissionSection";
 import LatestArticlesSection from "@/components/LatestArticlesSection";
 import SignupBenefits from "@/components/SignupBenefits";
 import HowItWorksSection from "@/components/HowItWorksSection";
+import TrustBar from "@/components/TrustBar";
 import SEO from "@/components/SEO";
 import { useSaveOnboarding } from "@/hooks/use-save-onboarding";
 import { useAuth } from "@/contexts/AuthContext";
@@ -16,21 +17,21 @@ const Index = () => {
   const { t } = useTranslation();
   const { user } = useAuth();
 
-  // Signed-in users go straight to their dashboard — app-like behaviour
+  // Signed-in users go straight to their dashboard
   if (user) return <Navigate to="/dashboard" replace />;
 
   return (
     <div className="min-h-screen bg-background">
       <SEO
-        title="Peptyl - Health Tracking, Supplements, Peptides & Bloodwork"
-        description="Track supplements, peptides, and protocols. Analyse bloodwork, get dose reminders, calculate reconstitution, and receive personalised health insights. Free tools for health optimisers."
+        title="Peptyl - Health Intelligence Platform | Peptides, Supplements, Bloodwork & Wearables"
+        description="Track peptide, supplement, and GLP-1 protocols. Analyse bloodwork, sync wearables, and get AI-driven health insights. Free tools for health optimisers."
         path="/"
         jsonLd={{
           "@context": "https://schema.org",
           "@type": "WebSite",
           "name": "Peptyl",
           "url": "https://peptyl.co.uk",
-          "description": "Track your health, supplements, peptides, and biomarkers in one platform. Free precision calculators and personalised protocols.",
+          "description": "Health intelligence platform. Track protocols, analyse bloodwork, sync wearables, and optimise with AI-driven insights across 54+ peptides, GLP-1s, and supplements.",
           "potentialAction": {
             "@type": "SearchAction",
             "target": "https://peptyl.co.uk/peptides?q={search_term_string}",
@@ -41,11 +42,11 @@ const Index = () => {
       <Header />
 
       <HeroSection />
+      <TrustBar />
       <HowItWorksSection />
       <SignupBenefits />
       <MissionSection />
       <LatestArticlesSection />
-      
 
       {/* CTA Section */}
       <section className="dark-section py-24 bg-hero relative overflow-hidden">
@@ -58,20 +59,19 @@ const Index = () => {
             {t("cta.subtitle")}
           </p>
           <div className="flex justify-center gap-4 flex-wrap">
-            <a href="/peptides">
+            <Link to="/auth">
               <button className="px-8 py-3 rounded-xl bg-primary text-primary-foreground font-medium shadow-brand hover:opacity-90 transition-opacity">
                 {t("cta.startProtocol")}
               </button>
-            </a>
-            <a href="/peptides">
+            </Link>
+            <Link to="/improve">
               <button className="px-8 py-3 rounded-xl border border-primary-foreground/20 text-primary-foreground font-medium hover:bg-primary-foreground/10 transition-colors">
                 {t("cta.browseDatabase")}
               </button>
-            </a>
+            </Link>
           </div>
         </div>
       </section>
-
 
       <Footer />
     </div>
