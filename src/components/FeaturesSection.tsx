@@ -1,5 +1,5 @@
 import { motion } from "framer-motion";
-import { Calculator, Database, Users, BookOpen, ArrowRight } from "lucide-react";
+import { Calculator, Database, Dna, BookOpen, ArrowRight } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 
@@ -9,7 +9,7 @@ const FeaturesSection = () => {
   const features = [
     { icon: Database, title: t("features.peptideDb"), description: t("features.peptideDbDesc"), href: "/peptides", color: "text-primary", bg: "bg-accent" },
     { icon: Calculator, title: t("features.precisionCalc"), description: t("features.precisionCalcDesc"), href: "/calculators", color: "text-info", bg: "bg-info/10" },
-    { icon: Users, title: t("features.communityFeedback"), description: t("features.communityFeedbackDesc"), href: "/peptides", color: "text-success", bg: "bg-success/10" },
+    { icon: Dna, title: t("features.communityFeedback"), description: t("features.communityFeedbackDesc"), href: "/dna", color: "text-success", bg: "bg-success/10" },
     { icon: BookOpen, title: t("features.educationHub"), description: t("features.educationHubDesc"), href: "/education", color: "text-warm", bg: "bg-warm/10" },
   ];
 
