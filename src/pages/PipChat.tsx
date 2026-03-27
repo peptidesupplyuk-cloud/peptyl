@@ -106,7 +106,7 @@ const PipChat = () => {
 
   return (
     <div className="min-h-[100dvh] flex flex-col bg-background">
-      <SEO title="Pip – Your Health AI | Peptyl" description="Chat with Pip, your personal AI health companion." />
+      <SEO title="Pip – Your Health AI | Peptyl" description="Chat with Pip, your personal AI health companion." path="/pip" />
       <Header />
 
       {/* Chat Header */}

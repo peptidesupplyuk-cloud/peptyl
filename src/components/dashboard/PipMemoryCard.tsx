@@ -1,5 +1,6 @@
-import { Sparkles, MessageCircle, TrendingUp, Settings, Pause, Play } from "lucide-react";
+import { Sparkles, MessageCircle, TrendingUp, Settings, Pause, Play, ArrowRight } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
+import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -13,6 +14,7 @@ const directionColors: Record<string, string> = {
 };
 
 const PipMemoryCard = () => {
+  const navigate = useNavigate();
   const { data: conversations = [] } = usePipConversations();
   const { data: notes = [] } = usePipWellnessNotes();
   const { data: trajectory } = useTrajectoryScore();
@@ -35,7 +37,9 @@ const PipMemoryCard = () => {
           <h3 className="text-sm font-heading font-semibold text-foreground">Pip AI Companion</h3>
           <p className="text-xs text-muted-foreground">Your WhatsApp health assistant</p>
         </div>
-        <Badge variant="secondary" className="text-[10px] px-2 py-0.5">Coming Soon</Badge>
+        <Button variant="ghost" size="sm" className="h-7 text-xs gap-1 text-primary" onClick={() => navigate("/pip")}>
+          Chat <ArrowRight className="h-3 w-3" />
+        </Button>
       </div>
 
       {/* Section 1: What Pip is watching */}
