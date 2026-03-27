@@ -1,6 +1,5 @@
 import { useState } from "react";
-import { Pause, Play, CheckCircle2, Clock, FlaskConical, Trash2, Pill, CheckCircle, Info, Settings2 } from "lucide-react";
-import PeptideInfoTooltip from "./PeptideInfoTooltip";
+import { Pause, Play, CheckCircle2, Clock, FlaskConical, Trash2, Pill, CheckCircle, Info, Settings2, ChevronDown, ChevronUp } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { useProtocols, useUpdateProtocolStatus, useDeleteProtocol, type Protocol } from "@/hooks/use-protocols";
@@ -42,12 +41,12 @@ const ActiveProtocols = () => {
   const [consentChecked, setConsentChecked] = useState(false);
   const [completing, setCompleting] = useState(false);
   const [adjustTarget, setAdjustTarget] = useState<Protocol | null>(null);
+  const [expandedProtocol, setExpandedProtocol] = useState<string | null>(null);
   const active = protocols.filter((p) => p.status === "active");
   const paused = protocols.filter((p) => p.status === "paused");
   const completed = protocols.filter((p) => p.status === "completed");
 
   const handleLogRetestNow = async (p: Protocol) => {
-    // Mark complete, create outcome record, then navigate
     await handleFinalComplete(p, false);
     navigate(`/dashboard?tab=biomarkers&retest=true&protocolId=${p.id}`);
   };
@@ -61,7 +60,6 @@ const ActiveProtocols = () => {
         peptide_name: pp.peptide_name,
         dose_mcg: pp.dose_mcg,
         frequency: pp.frequency,
-        route: pp.route,
       }));
       if (p.supplements?.length) {
         protocolSnapshot.push(...(p.supplements as any));
@@ -224,90 +222,101 @@ const ActiveProtocols = () => {
     const endDate = p.end_date ? new Date(p.end_date) : null;
     const totalDays = endDate ? differenceInDays(endDate, new Date(p.start_date)) : null;
     const progress = totalDays ? Math.min(100, Math.round((daysActive / totalDays) * 100)) : null;
+    const isExpanded = expandedProtocol === p.id;
 
     return (
-      <div key={p.id} className="bg-muted/50 rounded-xl p-4 space-y-3 overflow-hidden">
-        <div className="flex items-start justify-between gap-2 min-w-0">
+      <div key={p.id} className="bg-muted/50 rounded-xl overflow-hidden">
+        {/* Minimised view: Name, Goal, % complete */}
+        <button
+          onClick={() => setExpandedProtocol(isExpanded ? null : p.id)}
+          className="w-full flex items-center justify-between gap-3 p-4 text-left hover:bg-muted/70 transition-colors"
+        >
           <div className="min-w-0 flex-1">
-            <h4 className="font-heading font-semibold text-foreground text-sm truncate">{p.name}</h4>
-            {p.goal && <p className="text-xs text-muted-foreground mt-0.5 line-clamp-2">{p.goal}</p>}
+            <div className="flex items-center gap-2">
+              <h4 className="font-heading font-semibold text-foreground text-sm truncate">{p.name}</h4>
+              <span className={`text-[10px] px-2 py-0.5 rounded-full font-medium shrink-0 ${
+                p.status === "active" ? "bg-green-500/10 text-green-500" :
+                p.status === "paused" ? "bg-yellow-500/10 text-yellow-500" :
+                "bg-muted text-muted-foreground"
+              }`}>
+                {p.status}
+              </span>
+            </div>
+            {p.goal && <p className="text-xs text-muted-foreground mt-0.5 truncate">{p.goal}</p>}
           </div>
-          <span className={`text-[10px] px-2 py-0.5 rounded-full font-medium ${
-            p.status === "active" ? "bg-green-500/10 text-green-500" :
-            p.status === "paused" ? "bg-yellow-500/10 text-yellow-500" :
-            "bg-muted text-muted-foreground"
-          }`}>
-            {p.status}
-          </span>
-        </div>
-
-        {p.peptides.length > 0 && (
-          <div className="space-y-1 overflow-hidden">
-            {p.peptides.map((pp) => (
-              <div key={pp.id} className="flex items-center justify-between text-xs gap-2 min-w-0">
-                <span className="text-foreground flex items-center gap-1.5 shrink-0">{pp.peptide_name} <PeptideInfoTooltip peptideName={pp.peptide_name} /></span>
-                <span className="text-muted-foreground truncate text-right min-w-0">{pp.dose_mcg}mcg · {pp.frequency} · {pp.timing}</span>
-              </div>
-            ))}
-          </div>
-        )}
-
-        {p.supplements && p.supplements.length > 0 && (
-          <div className="space-y-1 border-t border-border/50 pt-2 overflow-hidden">
-            <p className="text-[10px] font-medium text-muted-foreground uppercase tracking-wider flex items-center gap-1">
-              <Pill className="h-3 w-3" /> Suggested Supplements
-            </p>
-            {p.supplements.map((s, i) => (
-              <div key={i} className="flex items-center justify-between text-xs gap-2 min-w-0">
-                <span className="text-foreground shrink-0">{s.name}</span>
-                <span className="text-muted-foreground truncate text-right min-w-0">{s.dose} · {s.frequency}</span>
-              </div>
-            ))}
-          </div>
-        )}
-
-        {p.notes && (
-          <p className="text-[10px] text-muted-foreground italic border-t border-border/50 pt-2 truncate">{p.notes}</p>
-        )}
-
-        <div className="flex items-center justify-between gap-2 min-w-0">
-          <div className="flex items-center gap-3 text-xs text-muted-foreground min-w-0 shrink">
-            <span className="flex items-center gap-1 shrink-0"><Clock className="h-3 w-3" />Day {daysActive + 1}</span>
+          <div className="flex items-center gap-3 shrink-0">
             {progress !== null && (
-              <div className="flex items-center gap-2 min-w-0">
-                <div className="w-16 h-1.5 bg-muted rounded-full overflow-hidden shrink-0">
+              <div className="flex items-center gap-2">
+                <div className="w-12 h-1.5 bg-muted rounded-full overflow-hidden">
                   <div className="h-full bg-primary rounded-full transition-all" style={{ width: `${progress}%` }} />
                 </div>
-                <span className="shrink-0">{progress}%</span>
+                <span className="text-xs text-muted-foreground">{progress}%</span>
               </div>
             )}
+            {isExpanded ? <ChevronUp className="h-4 w-4 text-muted-foreground" /> : <ChevronDown className="h-4 w-4 text-muted-foreground" />}
           </div>
-          <div className="flex gap-1 shrink-0 flex-wrap justify-end">
-            {p.status === "active" && (
-              <>
-                <Button size="sm" variant="outline" className="h-7 text-xs gap-1" onClick={() => setAdjustTarget(p)}>
-                  <Settings2 className="h-3 w-3" />
-                  Adjust
-                </Button>
-                <Button size="sm" variant="outline" className="h-7 text-xs gap-1" onClick={() => { setCompleteTarget(p); setCompleteStep(1); }}>
-                  <CheckCircle2 className="h-3 w-3" />
-                  Complete
-                </Button>
-                <Button size="sm" variant="ghost" className="h-7 text-xs" onClick={() => updateStatus.mutate({ id: p.id, status: "paused" })}>
-                  <Pause className="h-3 w-3" />
-                </Button>
-              </>
+        </button>
+
+        {/* Expanded detail */}
+        {isExpanded && (
+          <div className="px-4 pb-4 space-y-3 border-t border-border/50 pt-3">
+            {p.peptides.length > 0 && (
+              <div className="space-y-1">
+                {p.peptides.map((pp) => (
+                  <div key={pp.id} className="flex items-center justify-between text-xs gap-2 min-w-0">
+                    <span className="text-foreground shrink-0">{pp.peptide_name}</span>
+                    <span className="text-muted-foreground truncate text-right min-w-0">{pp.dose_mcg}mcg · {pp.frequency} · {pp.timing}</span>
+                  </div>
+                ))}
+              </div>
             )}
-            {p.status === "paused" && (
-              <Button size="sm" variant="ghost" className="h-7 text-xs" onClick={() => updateStatus.mutate({ id: p.id, status: "active" })}>
-                <Play className="h-3 w-3" />
-              </Button>
+
+            {p.supplements && p.supplements.length > 0 && (
+              <div className="space-y-1">
+                <p className="text-[10px] font-medium text-muted-foreground uppercase tracking-wider flex items-center gap-1">
+                  <Pill className="h-3 w-3" /> Supplements
+                </p>
+                {p.supplements.map((s, i) => (
+                  <div key={i} className="flex items-center justify-between text-xs gap-2 min-w-0">
+                    <span className="text-foreground shrink-0">{s.name}</span>
+                    <span className="text-muted-foreground truncate text-right min-w-0">{s.dose} · {s.frequency}</span>
+                  </div>
+                ))}
+              </div>
             )}
-            <Button size="sm" variant="ghost" className="h-7 text-xs text-destructive hover:text-destructive" onClick={() => setDeleteTarget(p)}>
-              <Trash2 className="h-3 w-3" />
-            </Button>
+
+            <div className="flex items-center justify-between gap-2 min-w-0">
+              <div className="flex items-center gap-3 text-xs text-muted-foreground min-w-0 shrink">
+                <span className="flex items-center gap-1 shrink-0"><Clock className="h-3 w-3" />Day {daysActive + 1}</span>
+              </div>
+              <div className="flex gap-1 shrink-0 flex-wrap justify-end">
+                {p.status === "active" && (
+                  <>
+                    <Button size="sm" variant="outline" className="h-7 text-xs gap-1" onClick={() => setAdjustTarget(p)}>
+                      <Settings2 className="h-3 w-3" />
+                      Adjust
+                    </Button>
+                    <Button size="sm" variant="outline" className="h-7 text-xs gap-1" onClick={() => { setCompleteTarget(p); setCompleteStep(1); }}>
+                      <CheckCircle2 className="h-3 w-3" />
+                      Complete
+                    </Button>
+                    <Button size="sm" variant="ghost" className="h-7 text-xs" onClick={() => updateStatus.mutate({ id: p.id, status: "paused" })}>
+                      <Pause className="h-3 w-3" />
+                    </Button>
+                  </>
+                )}
+                {p.status === "paused" && (
+                  <Button size="sm" variant="ghost" className="h-7 text-xs" onClick={() => updateStatus.mutate({ id: p.id, status: "active" })}>
+                    <Play className="h-3 w-3" />
+                  </Button>
+                )}
+                <Button size="sm" variant="ghost" className="h-7 text-xs text-destructive hover:text-destructive" onClick={() => setDeleteTarget(p)}>
+                  <Trash2 className="h-3 w-3" />
+                </Button>
+              </div>
+            </div>
           </div>
-        </div>
+        )}
       </div>
     );
   };
@@ -321,10 +330,10 @@ const ActiveProtocols = () => {
 
       {active.length === 0 && paused.length === 0 && completed.length === 0 ? (
         <p className="text-sm text-muted-foreground py-4 text-center">
-          No protocols yet. Upload bloodwork to get personalised recommendations.
+          No protocols yet. Create a custom protocol above or upload bloodwork to get personalised recommendations.
         </p>
       ) : (
-        <div className="space-y-3">
+        <div className="space-y-2">
           {active.map(renderProtocol)}
           {paused.map(renderProtocol)}
           {completed.length > 0 && (
@@ -340,7 +349,7 @@ const ActiveProtocols = () => {
         </div>
       )}
 
-      {/* Delete Confirmation Dialog — now archives instead of hard-deleting */}
+      {/* Delete Confirmation Dialog */}
       <AlertDialog open={!!deleteTarget} onOpenChange={(open) => !open && setDeleteTarget(null)}>
         <AlertDialogContent>
           <AlertDialogHeader>

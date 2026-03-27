@@ -57,7 +57,6 @@ import { Button } from "@/components/ui/button";
 import { useQuery } from "@tanstack/react-query";
 import OnboardingSummaryBanner from "@/components/dashboard/OnboardingSummaryBanner";
 import ResearchInsightsFeed from "@/components/dashboard/ResearchInsightsFeed";
-import QuickStackImport from "@/components/dashboard/QuickStackImport";
 import CollaborativeRecommendations from "@/components/dashboard/CollaborativeRecommendations";
 import PipMemoryCard from "@/components/dashboard/PipMemoryCard";
 import GpSummarySection from "@/components/dashboard/GpSummarySection";
@@ -288,7 +287,7 @@ const Dashboard = () => {
     }
   }, [perProtocolStats, existingScorecards]);
 
-  // Global streak across ALL protocol-scheduled injections
+  // Global streak across ALL protocol-scheduled doses
   const globalStreak = useMemo(() => {
     if (!hasActiveProtocol || allInjections.length === 0) return 0;
     const protocolInjections = allInjections.filter((i) => !!i.protocol_peptide_id);
@@ -432,7 +431,7 @@ const Dashboard = () => {
           dose_mcg: p.dose_mcg,
           frequency: p.frequency,
           timing: p.timing,
-          route: p.route,
+          route: "",
         })),
         supplements: rec.supplements?.map((s) => ({
           name: s.name,
@@ -1005,13 +1004,7 @@ const Dashboard = () => {
 
             {/* PROTOCOLS TAB */}
             <TabsContent value="protocols" className="space-y-6">
-              {/* ACTIVE PLAN — always first */}
-              <ActiveProtocols />
-
-              {/* PREVIOUS PLANS — completed/archived */}
-              <PreviousPlans />
-
-              {/* Disclaimer */}
+              {/* Disclaimer — FIRST */}
               <div className="bg-yellow-500/5 border border-yellow-500/20 rounded-2xl p-5 space-y-3">
                 <div className="flex items-start gap-2">
                   <AlertTriangle className="h-5 w-5 text-yellow-500 mt-0.5 flex-shrink-0" />
@@ -1033,6 +1026,15 @@ const Dashboard = () => {
                   </label>
                 </div>
               </div>
+
+              {/* CREATE CUSTOM — Second */}
+              <CreateProtocolForm disclaimerAccepted={disclaimerAccepted} initialPeptide={initialPeptide} onInitialPeptideConsumed={() => setInitialPeptide(null)} />
+
+              {/* ACTIVE PLAN */}
+              <ActiveProtocols />
+
+              {/* PREVIOUS PLANS — completed/archived */}
+              <PreviousPlans />
 
               {/* PERSONALISED RECOMMENDATIONS (unified engine) */}
               {recommendations.length > 0 ? (
@@ -1091,12 +1093,6 @@ const Dashboard = () => {
 
               {/* COMMUNITY PICKS */}
               <CollaborativeRecommendations />
-
-              {/* QUICK STACK IMPORT */}
-              <QuickStackImport disclaimerAccepted={disclaimerAccepted} />
-
-              {/* CREATE CUSTOM */}
-              <CreateProtocolForm disclaimerAccepted={disclaimerAccepted} initialPeptide={initialPeptide} onInitialPeptideConsumed={() => setInitialPeptide(null)} />
             </TabsContent>
 
             {/* TRACKER TAB */}

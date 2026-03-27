@@ -4,47 +4,69 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { peptides as peptideDatabase } from "@/data/peptides";
+import { supplements as supplementDatabase } from "@/data/supplements";
 import { useCreateProtocol, useProtocols } from "@/hooks/use-protocols";
 import { useToast } from "@/hooks/use-toast";
 import { format, addWeeks } from "date-fns";
 import { checkDoseEscalation, type EscalationWarning } from "@/data/titration-rules";
 import DoseEscalationWarning from "./DoseEscalationWarning";
 import { normaliseSupplementName, isSameSupplement } from "@/lib/supplement-normalise";
+import { Calendar } from "@/components/ui/calendar";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { CalendarIcon } from "lucide-react";
+import { cn } from "@/lib/utils";
 
-interface PeptideRow {
-  peptide_name: string;
-  dose_mcg: number;
-  frequency: string;
-  timing: string;
-  route: string;
-}
-
-interface SupplementRow {
+interface CompoundRow {
+  id: string;
   name: string;
   dose: string;
   frequency: string;
   timing: string;
+  type: "peptide" | "supplement";
 }
 
-const emptyPeptide: PeptideRow = {
-  peptide_name: "",
-  dose_mcg: 0,
+const emptyRow = (): CompoundRow => ({
+  id: crypto.randomUUID(),
+  name: "",
+  dose: "",
   frequency: "daily",
-  timing: "PM",
-  route: "SubQ",
-};
+  timing: "AM",
+  type: "supplement",
+});
 
-const emptySupp: SupplementRow = { name: "", dose: "", frequency: "Daily", timing: "AM" };
+// ─── Unified searchable compound input ─────────────────────────────────────
+const allCompounds = [
+  ...supplementDatabase.map((s) => ({ name: s.name, type: "supplement" as const })),
+  ...peptideDatabase.map((p) => ({ name: p.name, type: "peptide" as const })),
+].sort((a, b) => a.name.localeCompare(b.name));
 
-// ─── Searchable peptide input ────────────────────────────────────────────────
+const PEPTIDE_KEYWORDS = [
+  "bpc", "tb-500", "tb500", "ipamorelin", "sermorelin", "semax", "epitalon",
+  "ta-1", "ta1", "thymosin", "mots-c", "cjc", "ghrp", "hexarelin", "tesamorelin",
+  "retatrutide", "semaglutide", "tirzepatide", "aod", "ghk", "ghk-cu",
+  "selank", "dsip", "kisspeptin", "pt-141", "pt141", "melanotan", "igf",
+  "frag", "bnp", "bremelanotide", "mod-grf", "ghrh", "kpv", "foxo4",
+  "humanin", "ss-31", "elamipretide", "fgf21",
+];
 
-const PeptideSearchInput = ({
-  value, onChange, peptideNames
-}: { value: string; onChange: (v: string) => void; peptideNames: string[] }) => {
+function detectType(name: string): "peptide" | "supplement" {
+  const lower = name.toLowerCase();
+  if (PEPTIDE_KEYWORDS.some((kw) => lower.includes(kw))) return "peptide";
+  const match = allCompounds.find((c) => c.name.toLowerCase() === lower);
+  return match?.type || "supplement";
+}
+
+const CompoundSearchInput = ({
+  value,
+  onChange,
+}: {
+  value: string;
+  onChange: (name: string, type: "peptide" | "supplement") => void;
+}) => {
   const [query, setQuery] = useState(value);
   const [open, setOpen] = useState(false);
   const filtered = query.length > 0
-    ? peptideNames.filter(n => n.toLowerCase().includes(query.toLowerCase())).slice(0, 8)
+    ? allCompounds.filter((c) => c.name.toLowerCase().includes(query.toLowerCase())).slice(0, 10)
     : [];
 
   useEffect(() => { setQuery(value); }, [value]);
@@ -56,19 +78,22 @@ const PeptideSearchInput = ({
         onChange={(e) => { setQuery(e.target.value); setOpen(true); }}
         onFocus={() => setOpen(true)}
         onBlur={() => setTimeout(() => setOpen(false), 150)}
-        placeholder="Search peptide..."
+        placeholder="Search compound..."
         className="text-xs h-9"
       />
       {open && filtered.length > 0 && (
         <div className="absolute z-50 top-full left-0 right-0 bg-card border border-border rounded-lg shadow-lg mt-1 max-h-48 overflow-y-auto">
-          {filtered.map(name => (
+          {filtered.map((c) => (
             <button
-              key={name}
+              key={c.name}
               type="button"
-              className="w-full text-left px-3 py-2 text-xs hover:bg-muted transition-colors"
-              onMouseDown={() => { onChange(name); setQuery(name); setOpen(false); }}
+              className="w-full text-left px-3 py-2 text-xs hover:bg-muted transition-colors flex items-center justify-between"
+              onMouseDown={() => { onChange(c.name, c.type); setQuery(c.name); setOpen(false); }}
             >
-              {name}
+              <span>{c.name}</span>
+              <span className={`text-[9px] px-1.5 py-0.5 rounded-full ${c.type === "peptide" ? "bg-primary/10 text-primary" : "bg-accent/30 text-accent-foreground"}`}>
+                {c.type === "peptide" ? "Peptide" : "Supplement"}
+              </span>
             </button>
           ))}
         </div>
@@ -80,9 +105,8 @@ const PeptideSearchInput = ({
 const CreateProtocolForm = ({ disclaimerAccepted, initialPeptide, onInitialPeptideConsumed }: { disclaimerAccepted: boolean; initialPeptide?: string | null; onInitialPeptideConsumed?: () => void }) => {
   const [name, setName] = useState("");
   const [goal, setGoal] = useState("");
-  const [durationWeeks, setDurationWeeks] = useState(8);
-  const [peptideRows, setPeptideRows] = useState<PeptideRow[]>([{ ...emptyPeptide }]);
-  const [supplementRows, setSupplementRows] = useState<SupplementRow[]>([]);
+  const [endDate, setEndDate] = useState<Date | undefined>(addWeeks(new Date(), 8));
+  const [rows, setRows] = useState<CompoundRow[]>([emptyRow()]);
   const [escalationWarnings, setEscalationWarnings] = useState<EscalationWarning[]>([]);
   const [showEscalationWarning, setShowEscalationWarning] = useState(false);
   const createProtocol = useCreateProtocol();
@@ -98,24 +122,33 @@ const CreateProtocolForm = ({ disclaimerAccepted, initialPeptide, onInitialPepti
         const stack = JSON.parse(pendingStack);
         setName(stack.name || "");
         setGoal(stack.goal || "");
-        if (stack.durationWeeks) setDurationWeeks(stack.durationWeeks);
+        if (stack.durationWeeks) setEndDate(addWeeks(new Date(), stack.durationWeeks));
+        const newRows: CompoundRow[] = [];
         if (stack.peptides?.length) {
-          setPeptideRows(stack.peptides.map((p: any) => ({
-            peptide_name: p.peptide_name || "",
-            dose_mcg: p.dose_mcg || 0,
-            frequency: p.frequency || "daily",
-            timing: p.timing || "PM",
-            route: p.route || "SubQ",
-          })));
+          for (const p of stack.peptides) {
+            newRows.push({
+              id: crypto.randomUUID(),
+              name: p.peptide_name || "",
+              dose: String(p.dose_mcg || ""),
+              frequency: p.frequency || "daily",
+              timing: p.timing || "AM",
+              type: "peptide",
+            });
+          }
         }
         if (stack.supplements?.length) {
-          setSupplementRows(stack.supplements.map((s: any) => ({
-            name: s.name || "",
-            dose: s.dose || "",
-            frequency: s.frequency || "Daily",
-            timing: s.timing || "AM",
-          })));
+          for (const s of stack.supplements) {
+            newRows.push({
+              id: crypto.randomUUID(),
+              name: s.name || "",
+              dose: s.dose || "",
+              frequency: s.frequency || "Daily",
+              timing: s.timing || "AM",
+              type: "supplement",
+            });
+          }
         }
+        if (newRows.length > 0) setRows(newRows);
         sessionStorage.removeItem("pending_stack");
         setTimeout(() => formRef.current?.scrollIntoView({ behavior: "smooth", block: "start" }), 100);
       } catch {}
@@ -124,7 +157,11 @@ const CreateProtocolForm = ({ disclaimerAccepted, initialPeptide, onInitialPepti
 
   useEffect(() => {
     if (initialPeptide) {
-      setPeptideRows([{ ...emptyPeptide, peptide_name: initialPeptide }]);
+      setRows([{
+        ...emptyRow(),
+        name: initialPeptide,
+        type: "peptide",
+      }]);
       setName(`${initialPeptide} Protocol`);
       onInitialPeptideConsumed?.();
       setTimeout(() => formRef.current?.scrollIntoView({ behavior: "smooth", block: "start" }), 100);
@@ -137,12 +174,17 @@ const CreateProtocolForm = ({ disclaimerAccepted, initialPeptide, onInitialPepti
       .flatMap((p) => p.peptides.map((pp) => pp.peptide_name))
   );
 
-  const updateRow = (index: number, field: keyof PeptideRow, value: string | number) => {
-    setPeptideRows((prev) => prev.map((r, i) => (i === index ? { ...r, [field]: value } : r)));
+  const updateRow = (id: string, field: keyof CompoundRow, value: string) => {
+    setRows((prev) => prev.map((r) => (r.id === id ? { ...r, [field]: value } : r)));
   };
 
-  const addRow = () => setPeptideRows((prev) => [...prev, { ...emptyPeptide }]);
-  const removeRow = (index: number) => setPeptideRows((prev) => prev.filter((_, i) => i !== index));
+  const handleCompoundChange = (id: string, name: string, type: "peptide" | "supplement") => {
+    setRows((prev) => prev.map((r) => (r.id === id ? { ...r, name, type } : r)));
+  };
+
+  const removeRow = (id: string) => {
+    setRows((prev) => prev.filter((r) => r.id !== id));
+  };
 
   const handleSubmit = async () => {
     if (!disclaimerAccepted) {
@@ -153,17 +195,34 @@ const CreateProtocolForm = ({ disclaimerAccepted, initialPeptide, onInitialPepti
       toast({ title: "Missing name", description: "Please enter a protocol name.", variant: "destructive" });
       return;
     }
-    const validPeptides = peptideRows.filter((p) => p.peptide_name && p.dose_mcg > 0);
-    const validSupplements = supplementRows
-      .filter(s => s.name.trim() && s.dose.trim())
-      .map(s => ({ ...s, name: normaliseSupplementName(s.name) }));
-
-    if (validPeptides.length === 0 && validSupplements.length === 0) {
-      toast({ title: "Add peptides or supplements", description: "Add at least one peptide or supplement.", variant: "destructive" });
+    if (!endDate) {
+      toast({ title: "Missing end date", description: "Please set an end date for your protocol.", variant: "destructive" });
       return;
     }
 
-    // Check for duplicate supplements within this protocol (after normalisation)
+    const validRows = rows.filter((r) => r.name.trim() && r.dose.trim());
+    if (validRows.length === 0) {
+      toast({ title: "Add compounds", description: "Add at least one peptide or supplement with a dose.", variant: "destructive" });
+      return;
+    }
+
+    // Auto-detect types for manually typed names
+    const typedRows = validRows.map((r) => ({
+      ...r,
+      type: r.type || detectType(r.name),
+    }));
+
+    const peptideRows = typedRows.filter((r) => r.type === "peptide");
+    const supplementRows = typedRows.filter((r) => r.type === "supplement");
+
+    const validSupplements = supplementRows.map((s) => ({
+      name: normaliseSupplementName(s.name),
+      dose: s.dose.trim(),
+      frequency: s.frequency,
+      timing: s.timing,
+    }));
+
+    // Check for duplicate supplements within this protocol
     const seen = new Set<string>();
     const dupeSupps: string[] = [];
     for (const s of validSupplements) {
@@ -182,14 +241,14 @@ const CreateProtocolForm = ({ disclaimerAccepted, initialPeptide, onInitialPepti
 
     // Check for supplements already in other active protocols
     const activeSupps = existingProtocols
-      .filter(p => p.status === "active" || p.status === "paused")
-      .flatMap(p => (p.supplements || []).map((s: any) => ({ name: normaliseSupplementName(s.name), protocolName: p.name })));
-    const crossDupes = validSupplements.filter(s =>
-      activeSupps.some(as => isSameSupplement(as.name, s.name))
+      .filter((p) => p.status === "active" || p.status === "paused")
+      .flatMap((p) => (p.supplements || []).map((s: any) => ({ name: normaliseSupplementName(s.name), protocolName: p.name })));
+    const crossDupes = validSupplements.filter((s) =>
+      activeSupps.some((as) => isSameSupplement(as.name, s.name))
     );
     if (crossDupes.length > 0) {
-      const details = crossDupes.map(d => {
-        const match = activeSupps.find(as => isSameSupplement(as.name, d.name));
+      const details = crossDupes.map((d) => {
+        const match = activeSupps.find((as) => isSameSupplement(as.name, d.name));
         return `${d.name} (already in "${match?.protocolName}")`;
       }).join(", ");
       toast({
@@ -201,6 +260,14 @@ const CreateProtocolForm = ({ disclaimerAccepted, initialPeptide, onInitialPepti
     }
 
     // Check for duplicate compounds already in active protocols
+    const validPeptides = peptideRows.map((p) => ({
+      peptide_name: p.name.trim(),
+      dose_mcg: parseInt(p.dose) || 0,
+      frequency: p.frequency,
+      timing: p.timing,
+      route: "",
+    }));
+
     const duplicates = validPeptides.filter((p) => activeCompounds.has(p.peptide_name));
     if (duplicates.length > 0) {
       const names = duplicates.map((d) => d.peptide_name).join(", ");
@@ -235,15 +302,15 @@ const CreateProtocolForm = ({ disclaimerAccepted, initialPeptide, onInitialPepti
     await executeCreate(validPeptides, validSupplements);
   };
 
-  const executeCreate = async (validPeptides: PeptideRow[], validSupplements?: SupplementRow[]) => {
+  const executeCreate = async (validPeptides: { peptide_name: string; dose_mcg: number; frequency: string; timing: string; route: string }[], validSupplements?: { name: string; dose: string; frequency: string; timing: string }[]) => {
     try {
       await createProtocol.mutateAsync({
         name: name.trim(),
         goal: goal.trim(),
         startDate: format(new Date(), "yyyy-MM-dd"),
-        endDate: format(addWeeks(new Date(), durationWeeks), "yyyy-MM-dd"),
+        endDate: endDate ? format(endDate, "yyyy-MM-dd") : format(addWeeks(new Date(), 8), "yyyy-MM-dd"),
         peptides: validPeptides,
-        supplements: (validSupplements || []).map(s => ({
+        supplements: (validSupplements || []).map((s) => ({
           name: s.name.trim(),
           dose: s.dose.trim(),
           frequency: s.frequency,
@@ -253,14 +320,15 @@ const CreateProtocolForm = ({ disclaimerAccepted, initialPeptide, onInitialPepti
       toast({ title: "Protocol created", description: `${name} is now active.` });
       setName("");
       setGoal("");
-      setPeptideRows([{ ...emptyPeptide }]);
-      setSupplementRows([]);
+      setEndDate(addWeeks(new Date(), 8));
+      setRows([emptyRow()]);
     } catch (err: any) {
       toast({ title: "Error", description: err?.message || "Failed to create protocol.", variant: "destructive" });
     }
   };
 
-  const peptideNames = peptideDatabase.map((p) => p.name).sort();
+  const FREQUENCIES = ["daily", "EOD", "2x/week", "3x/week", "5on/2off", "weekly"];
+  const TIMINGS = ["AM", "PM", "AM+PM", "Pre-bed"];
 
   return (
     <div ref={formRef} className="bg-card rounded-2xl border border-border p-5 space-y-5">
@@ -281,114 +349,77 @@ const CreateProtocolForm = ({ disclaimerAccepted, initialPeptide, onInitialPepti
       </div>
 
       <div className="space-y-1.5">
-        <label className="text-xs text-muted-foreground font-medium">Duration (weeks)</label>
-        <Input type="number" min={1} max={52} value={durationWeeks} onChange={(e) => setDurationWeeks(Number(e.target.value))} className="w-28" />
+        <label className="text-xs text-muted-foreground font-medium">End Date</label>
+        <Popover>
+          <PopoverTrigger asChild>
+            <Button
+              variant="outline"
+              className={cn(
+                "w-48 justify-start text-left font-normal text-xs h-9",
+                !endDate && "text-muted-foreground"
+              )}
+            >
+              <CalendarIcon className="mr-2 h-3.5 w-3.5" />
+              {endDate ? format(endDate, "d MMM yyyy") : "Pick end date"}
+            </Button>
+          </PopoverTrigger>
+          <PopoverContent className="w-auto p-0" align="start">
+            <Calendar
+              mode="single"
+              selected={endDate}
+              onSelect={setEndDate}
+              disabled={(date) => date < new Date()}
+              initialFocus
+            />
+          </PopoverContent>
+        </Popover>
       </div>
 
-      {/* ─── Peptides Section ──────────────────────────────────────────────── */}
+      {/* ─── Compounds Section (Supplements first, then Peptides) ─── */}
       <div className="space-y-3">
         <label className="text-xs text-muted-foreground font-medium flex items-center gap-1.5">
-          <FlaskConical className="h-3.5 w-3.5" /> Peptides
+          <Pill className="h-3.5 w-3.5" /> Compounds
+          <span className="text-[10px] text-muted-foreground/70">(peptides & supplements)</span>
         </label>
-        {peptideRows.map((row, i) => (
-          <div key={i} className="grid grid-cols-[1fr_80px_90px_70px_70px_32px] gap-2 items-end">
-            <PeptideSearchInput
-              value={row.peptide_name}
-              onChange={(v) => updateRow(i, "peptide_name", v)}
-              peptideNames={peptideNames}
+
+        {rows.map((row) => (
+          <div key={row.id} className="grid grid-cols-[1fr_90px_90px_70px_32px] gap-2 items-end">
+            <CompoundSearchInput
+              value={row.name}
+              onChange={(n, t) => handleCompoundChange(row.id, n, t)}
             />
-            <Input type="number" placeholder="mcg" value={row.dose_mcg || ""} onChange={(e) => updateRow(i, "dose_mcg", Number(e.target.value))} className="text-xs h-9" />
-            <Select value={row.frequency} onValueChange={(v) => updateRow(i, "frequency", v)}>
+            <Input
+              placeholder="Dose"
+              value={row.dose}
+              onChange={(e) => updateRow(row.id, "dose", e.target.value)}
+              className="text-xs h-9"
+            />
+            <Select value={row.frequency} onValueChange={(v) => updateRow(row.id, "frequency", v)}>
               <SelectTrigger className="text-xs h-9"><SelectValue /></SelectTrigger>
               <SelectContent>
-                {["daily", "EOD", "2x/week", "3x/week", "weekly"].map((f) => (
+                {FREQUENCIES.map((f) => (
                   <SelectItem key={f} value={f} className="text-xs">{f}</SelectItem>
                 ))}
               </SelectContent>
             </Select>
-            <Select value={row.timing} onValueChange={(v) => updateRow(i, "timing", v)}>
+            <Select value={row.timing} onValueChange={(v) => updateRow(row.id, "timing", v)}>
               <SelectTrigger className="text-xs h-9"><SelectValue /></SelectTrigger>
               <SelectContent>
-                {["AM", "PM", "AM+PM", "Pre-bed"].map((t) => (
+                {TIMINGS.map((t) => (
                   <SelectItem key={t} value={t} className="text-xs">{t}</SelectItem>
                 ))}
               </SelectContent>
             </Select>
-            <Select value={row.route} onValueChange={(v) => updateRow(i, "route", v)}>
-              <SelectTrigger className="text-xs h-9"><SelectValue /></SelectTrigger>
-              <SelectContent>
-                {["SubQ", "IM", "Oral", "Nasal"].map((r) => (
-                  <SelectItem key={r} value={r} className="text-xs">{r}</SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-            <Button variant="ghost" size="icon" className="h-9 w-9" onClick={() => removeRow(i)} disabled={peptideRows.length === 1}>
-              <Trash2 className="h-3.5 w-3.5 text-muted-foreground" />
-            </Button>
+            {rows.length > 1 && (
+              <Button variant="ghost" size="icon" className="h-9 w-9" onClick={() => removeRow(row.id)}>
+                <Trash2 className="h-3.5 w-3.5 text-muted-foreground" />
+              </Button>
+            )}
           </div>
         ))}
-        <Button variant="outline" size="sm" onClick={addRow} className="text-xs">
-          <Plus className="h-3 w-3 mr-1" /> Add Peptide
+        <Button variant="outline" size="sm" onClick={() => setRows((prev) => [...prev, emptyRow()])} className="text-xs">
+          <Plus className="h-3 w-3 mr-1" /> Add Compound
         </Button>
-      </div>
-
-      {/* ─── Supplements Section ───────────────────────────────────────────── */}
-      <div className="space-y-3">
-        <div className="flex items-center justify-between">
-          <label className="text-xs text-muted-foreground font-medium flex items-center gap-1.5">
-            <Pill className="h-3.5 w-3.5" /> Supplements
-            <span className="text-[10px] text-muted-foreground/70">(optional)</span>
-          </label>
-          <Button variant="outline" size="sm" onClick={() => setSupplementRows(p => [...p, { ...emptySupp }])} className="text-xs h-7">
-            <Plus className="h-3 w-3 mr-1" /> Add Supplement
-          </Button>
-        </div>
-
-        {supplementRows.length === 0 && (
-          <p className="text-xs text-muted-foreground/60 italic">No supplements added. Click above to add.</p>
-        )}
-
-        {supplementRows.map((row, i) => (
-          <div key={i} className="grid grid-cols-[1fr_100px_100px_80px_32px] gap-2 items-end">
-            <Input
-              placeholder="Supplement name"
-              value={row.name}
-              onChange={(e) => setSupplementRows(p => p.map((r, idx) => idx === i ? { ...r, name: e.target.value } : r))}
-              className="text-xs h-9"
-            />
-            <Input
-              placeholder="Dose (e.g. 400mg)"
-              value={row.dose}
-              onChange={(e) => setSupplementRows(p => p.map((r, idx) => idx === i ? { ...r, dose: e.target.value } : r))}
-              className="text-xs h-9"
-            />
-            <Select
-              value={row.frequency}
-              onValueChange={(v) => setSupplementRows(p => p.map((r, idx) => idx === i ? { ...r, frequency: v } : r))}
-            >
-              <SelectTrigger className="text-xs h-9"><SelectValue /></SelectTrigger>
-              <SelectContent>
-                {["Daily", "Twice daily", "With meals", "Before bed", "Morning", "Weekly"].map(f => (
-                  <SelectItem key={f} value={f} className="text-xs">{f}</SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-            <Select
-              value={row.timing}
-              onValueChange={(v) => setSupplementRows(p => p.map((r, idx) => idx === i ? { ...r, timing: v } : r))}
-            >
-              <SelectTrigger className="text-xs h-9"><SelectValue /></SelectTrigger>
-              <SelectContent>
-                <SelectItem value="AM" className="text-xs">AM</SelectItem>
-                <SelectItem value="PM" className="text-xs">PM</SelectItem>
-                <SelectItem value="AM+PM" className="text-xs">AM+PM</SelectItem>
-              </SelectContent>
-            </Select>
-            <Button variant="ghost" size="icon" className="h-9 w-9" onClick={() => setSupplementRows(p => p.filter((_, idx) => idx !== i))}>
-              <Trash2 className="h-3.5 w-3.5 text-muted-foreground" />
-            </Button>
-          </div>
-        ))}
       </div>
 
       <Button onClick={handleSubmit} disabled={createProtocol.isPending} className="shadow-brand">
@@ -401,8 +432,20 @@ const CreateProtocolForm = ({ disclaimerAccepted, initialPeptide, onInitialPepti
         onCancel={() => setShowEscalationWarning(false)}
         onConfirm={() => {
           setShowEscalationWarning(false);
-          const validPeptides = peptideRows.filter((p) => p.peptide_name && p.dose_mcg > 0);
-          const validSupplements = supplementRows.filter(s => s.name.trim() && s.dose.trim());
+          const typedRows = rows.filter((r) => r.name.trim() && r.dose.trim()).map((r) => ({ ...r, type: r.type || detectType(r.name) }));
+          const validPeptides = typedRows.filter((r) => r.type === "peptide").map((p) => ({
+            peptide_name: p.name.trim(),
+            dose_mcg: parseInt(p.dose) || 0,
+            frequency: p.frequency,
+            timing: p.timing,
+            route: "",
+          }));
+          const validSupplements = typedRows.filter((r) => r.type === "supplement").map((s) => ({
+            name: normaliseSupplementName(s.name),
+            dose: s.dose.trim(),
+            frequency: s.frequency,
+            timing: s.timing,
+          }));
           executeCreate(validPeptides, validSupplements);
         }}
       />
