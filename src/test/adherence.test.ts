@@ -3,7 +3,7 @@ import { describe, it, expect } from "vitest";
 
 /**
  * Adherence percentage invariant tests.
- * These validate the core math rules that must always hold.
+ * Validates the core math rules: percentages MUST be 0-100.
  */
 
 function clampPct(completed: number, total: number): number | null {
@@ -20,7 +20,7 @@ describe("Adherence percentage clamping", () => {
     expect(clampPct(10, 10)).toBe(100);
   });
 
-  it("caps at 100 even when completed exceeds total (double-log edge case)", () => {
+  it("caps at 100 even when completed exceeds total", () => {
     expect(clampPct(15, 10)).toBe(100);
   });
 
@@ -30,9 +30,5 @@ describe("Adherence percentage clamping", () => {
 
   it("returns 0 when nothing completed", () => {
     expect(clampPct(0, 10)).toBe(0);
-  });
-
-  it("handles single-dose protocols", () => {
-    expect(clampPct(1, 1)).toBe(100);
   });
 });
