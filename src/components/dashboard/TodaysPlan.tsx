@@ -1102,8 +1102,8 @@ const TodaysPlan = ({ onActivate, slim = false, selectedDate }: TodaysPlanProps)
                 className="flex-1 text-xs h-8 border-primary/20 text-primary hover:bg-primary/5"
                 onClick={() => handleCompleteWindow("AM")}
               >
-                <CheckCheck className="h-3.5 w-3.5 mr-1.5" />
-                Complete AM Doses ({amRemaining})
+                <CheckCheck className="h-3.5 w-3.5 mr-1" />
+                ☀ AM ({amRemaining})
               </Button>
             )}
             {pmRemaining > 0 && (
@@ -1113,8 +1113,8 @@ const TodaysPlan = ({ onActivate, slim = false, selectedDate }: TodaysPlanProps)
                 className="flex-1 text-xs h-8 border-primary/20 text-primary hover:bg-primary/5"
                 onClick={() => handleCompleteWindow("PM")}
               >
-                <CheckCheck className="h-3.5 w-3.5 mr-1.5" />
-                Complete PM Doses ({pmRemaining})
+                <CheckCheck className="h-3.5 w-3.5 mr-1" />
+                🌙 PM ({pmRemaining})
               </Button>
             )}
             {amRemaining > 0 && pmRemaining > 0 && (
