@@ -15,24 +15,49 @@ import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { CalendarIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/contexts/AuthContext";
 
 interface CompoundRow {
   id: string;
   name: string;
-  dose: string;
+  doseValue: string;
+  doseUnit: string;
   frequency: string;
   timing: string;
   type: "peptide" | "supplement";
+  isManual: boolean;
 }
 
 const emptyRow = (): CompoundRow => ({
   id: crypto.randomUUID(),
   name: "",
-  dose: "",
+  doseValue: "",
+  doseUnit: "mg",
   frequency: "daily",
   timing: "AM",
   type: "supplement",
+  isManual: false,
 });
+
+const GOALS = [
+  "Fat Loss",
+  "Muscle Growth",
+  "Body Recomposition",
+  "Recovery & Healing",
+  "Longevity & Anti-Ageing",
+  "Cognitive Enhancement",
+  "Sleep Optimisation",
+  "Immune Support",
+  "Gut Health",
+  "Skin & Hair",
+  "Hormonal Balance",
+  "General Wellness",
+];
+
+const FREQUENCIES = ["Daily", "2x/week", "3x/week", "5on/2off", "Weekly"];
+const TIMINGS = ["AM", "Noon", "PM"];
+const DOSE_UNITS = ["g", "mg", "mcg"];
 
 // ─── Unified searchable compound input ─────────────────────────────────────
 const allCompounds = [
@@ -61,7 +86,7 @@ const CompoundSearchInput = ({
   onChange,
 }: {
   value: string;
-  onChange: (name: string, type: "peptide" | "supplement") => void;
+  onChange: (name: string, type: "peptide" | "supplement", isManual: boolean) => void;
 }) => {
   const [query, setQuery] = useState(value);
   const [open, setOpen] = useState(false);
@@ -71,24 +96,32 @@ const CompoundSearchInput = ({
 
   useEffect(() => { setQuery(value); }, [value]);
 
+  const hasExactMatch = allCompounds.some((c) => c.name.toLowerCase() === query.toLowerCase());
+
   return (
     <div className="relative">
       <Input
         value={query}
         onChange={(e) => { setQuery(e.target.value); setOpen(true); }}
         onFocus={() => setOpen(true)}
-        onBlur={() => setTimeout(() => setOpen(false), 150)}
-        placeholder="Search compound..."
+        onBlur={() => setTimeout(() => {
+          setOpen(false);
+          // If user typed something not in DB, flag as manual
+          if (query.trim() && !hasExactMatch) {
+            onChange(query.trim(), detectType(query.trim()), true);
+          }
+        }, 150)}
+        placeholder="Search or type compound..."
         className="text-xs h-9"
       />
-      {open && filtered.length > 0 && (
+      {open && (filtered.length > 0 || (query.trim().length > 1 && !hasExactMatch)) && (
         <div className="absolute z-50 top-full left-0 right-0 bg-card border border-border rounded-lg shadow-lg mt-1 max-h-48 overflow-y-auto">
           {filtered.map((c) => (
             <button
               key={c.name}
               type="button"
               className="w-full text-left px-3 py-2 text-xs hover:bg-muted transition-colors flex items-center justify-between"
-              onMouseDown={() => { onChange(c.name, c.type); setQuery(c.name); setOpen(false); }}
+              onMouseDown={() => { onChange(c.name, c.type, false); setQuery(c.name); setOpen(false); }}
             >
               <span>{c.name}</span>
               <span className={`text-[9px] px-1.5 py-0.5 rounded-full ${c.type === "peptide" ? "bg-primary/10 text-primary" : "bg-accent/30 text-accent-foreground"}`}>
@@ -96,6 +129,19 @@ const CompoundSearchInput = ({
               </span>
             </button>
           ))}
+          {query.trim().length > 1 && !hasExactMatch && (
+            <button
+              type="button"
+              className="w-full text-left px-3 py-2 text-xs hover:bg-muted transition-colors flex items-center justify-between border-t border-border"
+              onMouseDown={() => { onChange(query.trim(), detectType(query.trim()), true); setOpen(false); }}
+            >
+              <span className="flex items-center gap-1.5">
+                <Plus className="h-3 w-3 text-primary" />
+                Add "<strong>{query.trim()}</strong>" as custom compound
+              </span>
+              <span className="text-[9px] px-1.5 py-0.5 rounded-full bg-muted text-muted-foreground">Manual</span>
+            </button>
+          )}
         </div>
       )}
     </div>
@@ -112,6 +158,7 @@ const CreateProtocolForm = ({ disclaimerAccepted, initialPeptide, onInitialPepti
   const createProtocol = useCreateProtocol();
   const { data: existingProtocols = [] } = useProtocols();
   const { toast } = useToast();
+  const { user } = useAuth();
   const formRef = useRef<HTMLDivElement>(null);
 
   // Load from stack import (sessionStorage)
@@ -129,22 +176,27 @@ const CreateProtocolForm = ({ disclaimerAccepted, initialPeptide, onInitialPepti
             newRows.push({
               id: crypto.randomUUID(),
               name: p.peptide_name || "",
-              dose: String(p.dose_mcg || ""),
-              frequency: p.frequency || "daily",
+              doseValue: String(p.dose_mcg || ""),
+              doseUnit: "mcg",
+              frequency: p.frequency || "Daily",
               timing: p.timing || "AM",
               type: "peptide",
+              isManual: false,
             });
           }
         }
         if (stack.supplements?.length) {
           for (const s of stack.supplements) {
+            const doseMatch = (s.dose || "").match(/^([\d.]+)\s*(g|mg|mcg)?$/i);
             newRows.push({
               id: crypto.randomUUID(),
               name: s.name || "",
-              dose: s.dose || "",
+              doseValue: doseMatch ? doseMatch[1] : s.dose || "",
+              doseUnit: doseMatch?.[2]?.toLowerCase() || "mg",
               frequency: s.frequency || "Daily",
               timing: s.timing || "AM",
               type: "supplement",
+              isManual: false,
             });
           }
         }
@@ -174,16 +226,28 @@ const CreateProtocolForm = ({ disclaimerAccepted, initialPeptide, onInitialPepti
       .flatMap((p) => p.peptides.map((pp) => pp.peptide_name))
   );
 
-  const updateRow = (id: string, field: keyof CompoundRow, value: string) => {
+  const updateRow = (id: string, field: keyof CompoundRow, value: string | boolean) => {
     setRows((prev) => prev.map((r) => (r.id === id ? { ...r, [field]: value } : r)));
   };
 
-  const handleCompoundChange = (id: string, name: string, type: "peptide" | "supplement") => {
-    setRows((prev) => prev.map((r) => (r.id === id ? { ...r, name, type } : r)));
+  const handleCompoundChange = (id: string, name: string, type: "peptide" | "supplement", isManual: boolean) => {
+    setRows((prev) => prev.map((r) => (r.id === id ? { ...r, name, type, isManual } : r)));
   };
 
   const removeRow = (id: string) => {
     setRows((prev) => prev.filter((r) => r.id !== id));
+  };
+
+  const flagManualCompounds = async (manualRows: CompoundRow[]) => {
+    if (!user || manualRows.length === 0) return;
+    for (const row of manualRows) {
+      await supabase.from("manual_compounds").insert({
+        user_id: user.id,
+        compound_name: row.name.trim(),
+        compound_type: row.type,
+        needs_review: true,
+      } as any);
+    }
   };
 
   const handleSubmit = async () => {
@@ -195,12 +259,16 @@ const CreateProtocolForm = ({ disclaimerAccepted, initialPeptide, onInitialPepti
       toast({ title: "Missing name", description: "Please enter a protocol name.", variant: "destructive" });
       return;
     }
+    if (!goal) {
+      toast({ title: "Missing goal", description: "Please select a goal for your protocol.", variant: "destructive" });
+      return;
+    }
     if (!endDate) {
       toast({ title: "Missing end date", description: "Please set an end date for your protocol.", variant: "destructive" });
       return;
     }
 
-    const validRows = rows.filter((r) => r.name.trim() && r.dose.trim());
+    const validRows = rows.filter((r) => r.name.trim() && r.doseValue.trim());
     if (validRows.length === 0) {
       toast({ title: "Add compounds", description: "Add at least one peptide or supplement with a dose.", variant: "destructive" });
       return;
@@ -217,7 +285,7 @@ const CreateProtocolForm = ({ disclaimerAccepted, initialPeptide, onInitialPepti
 
     const validSupplements = supplementRows.map((s) => ({
       name: normaliseSupplementName(s.name),
-      dose: s.dose.trim(),
+      dose: `${s.doseValue.trim()} ${s.doseUnit}`,
       frequency: s.frequency,
       timing: s.timing,
     }));
@@ -259,14 +327,19 @@ const CreateProtocolForm = ({ disclaimerAccepted, initialPeptide, onInitialPepti
       return;
     }
 
-    // Check for duplicate compounds already in active protocols
-    const validPeptides = peptideRows.map((p) => ({
-      peptide_name: p.name.trim(),
-      dose_mcg: parseInt(p.dose) || 0,
-      frequency: p.frequency,
-      timing: p.timing,
-      route: "",
-    }));
+    // Build peptides payload - convert dose to mcg for DB
+    const validPeptides = peptideRows.map((p) => {
+      let doseMcg = parseFloat(p.doseValue) || 0;
+      if (p.doseUnit === "mg") doseMcg *= 1000;
+      if (p.doseUnit === "g") doseMcg *= 1_000_000;
+      return {
+        peptide_name: p.name.trim(),
+        dose_mcg: Math.round(doseMcg),
+        frequency: p.frequency,
+        timing: p.timing,
+        route: "",
+      };
+    });
 
     const duplicates = validPeptides.filter((p) => activeCompounds.has(p.peptide_name));
     if (duplicates.length > 0) {
@@ -299,6 +372,8 @@ const CreateProtocolForm = ({ disclaimerAccepted, initialPeptide, onInitialPepti
       return;
     }
 
+    // Flag manual compounds before creating
+    await flagManualCompounds(typedRows.filter((r) => r.isManual));
     await executeCreate(validPeptides, validSupplements);
   };
 
@@ -327,9 +402,6 @@ const CreateProtocolForm = ({ disclaimerAccepted, initialPeptide, onInitialPepti
     }
   };
 
-  const FREQUENCIES = ["daily", "EOD", "2x/week", "3x/week", "5on/2off", "weekly"];
-  const TIMINGS = ["AM", "PM", "AM+PM", "Pre-bed"];
-
   return (
     <div ref={formRef} className="bg-card rounded-2xl border border-border p-5 space-y-5">
       <div className="flex items-center gap-2">
@@ -344,7 +416,16 @@ const CreateProtocolForm = ({ disclaimerAccepted, initialPeptide, onInitialPepti
         </div>
         <div className="space-y-1.5">
           <label className="text-xs text-muted-foreground font-medium">Goal</label>
-          <Input value={goal} onChange={(e) => setGoal(e.target.value)} placeholder="e.g. Body recomposition" />
+          <Select value={goal} onValueChange={setGoal}>
+            <SelectTrigger className="text-xs h-10">
+              <SelectValue placeholder="Select a goal..." />
+            </SelectTrigger>
+            <SelectContent>
+              {GOALS.map((g) => (
+                <SelectItem key={g} value={g} className="text-xs">{g}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
         </div>
       </div>
 
@@ -375,7 +456,7 @@ const CreateProtocolForm = ({ disclaimerAccepted, initialPeptide, onInitialPepti
         </Popover>
       </div>
 
-      {/* ─── Compounds Section (Supplements first, then Peptides) ─── */}
+      {/* ─── Compounds Section ─── */}
       <div className="space-y-3">
         <label className="text-xs text-muted-foreground font-medium flex items-center gap-1.5">
           <Pill className="h-3.5 w-3.5" /> Compounds
@@ -383,37 +464,53 @@ const CreateProtocolForm = ({ disclaimerAccepted, initialPeptide, onInitialPepti
         </label>
 
         {rows.map((row) => (
-          <div key={row.id} className="grid grid-cols-[1fr_90px_90px_70px_32px] gap-2 items-end">
-            <CompoundSearchInput
-              value={row.name}
-              onChange={(n, t) => handleCompoundChange(row.id, n, t)}
-            />
-            <Input
-              placeholder="Dose"
-              value={row.dose}
-              onChange={(e) => updateRow(row.id, "dose", e.target.value)}
-              className="text-xs h-9"
-            />
-            <Select value={row.frequency} onValueChange={(v) => updateRow(row.id, "frequency", v)}>
-              <SelectTrigger className="text-xs h-9"><SelectValue /></SelectTrigger>
-              <SelectContent>
-                {FREQUENCIES.map((f) => (
-                  <SelectItem key={f} value={f} className="text-xs">{f}</SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-            <Select value={row.timing} onValueChange={(v) => updateRow(row.id, "timing", v)}>
-              <SelectTrigger className="text-xs h-9"><SelectValue /></SelectTrigger>
-              <SelectContent>
-                {TIMINGS.map((t) => (
-                  <SelectItem key={t} value={t} className="text-xs">{t}</SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-            {rows.length > 1 && (
-              <Button variant="ghost" size="icon" className="h-9 w-9" onClick={() => removeRow(row.id)}>
-                <Trash2 className="h-3.5 w-3.5 text-muted-foreground" />
-              </Button>
+          <div key={row.id} className="space-y-2">
+            <div className="grid grid-cols-[1fr_80px_64px_90px_70px_32px] gap-2 items-end">
+              <CompoundSearchInput
+                value={row.name}
+                onChange={(n, t, manual) => handleCompoundChange(row.id, n, t, manual)}
+              />
+              <Input
+                placeholder="Dose"
+                value={row.doseValue}
+                onChange={(e) => updateRow(row.id, "doseValue", e.target.value)}
+                className="text-xs h-9"
+                type="number"
+                min="0"
+                step="any"
+              />
+              <Select value={row.doseUnit} onValueChange={(v) => updateRow(row.id, "doseUnit", v)}>
+                <SelectTrigger className="text-xs h-9 px-2"><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  {DOSE_UNITS.map((u) => (
+                    <SelectItem key={u} value={u} className="text-xs">{u}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <Select value={row.frequency} onValueChange={(v) => updateRow(row.id, "frequency", v)}>
+                <SelectTrigger className="text-xs h-9"><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  {FREQUENCIES.map((f) => (
+                    <SelectItem key={f} value={f} className="text-xs">{f}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <Select value={row.timing} onValueChange={(v) => updateRow(row.id, "timing", v)}>
+                <SelectTrigger className="text-xs h-9"><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  {TIMINGS.map((t) => (
+                    <SelectItem key={t} value={t} className="text-xs">{t}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              {rows.length > 1 && (
+                <Button variant="ghost" size="icon" className="h-9 w-9" onClick={() => removeRow(row.id)}>
+                  <Trash2 className="h-3.5 w-3.5 text-muted-foreground" />
+                </Button>
+              )}
+            </div>
+            {row.isManual && row.name.trim() && (
+              <p className="text-[10px] text-amber-500 pl-1">⚠ Custom compound — will be flagged for knowledge base review</p>
             )}
           </div>
         ))}
@@ -432,20 +529,26 @@ const CreateProtocolForm = ({ disclaimerAccepted, initialPeptide, onInitialPepti
         onCancel={() => setShowEscalationWarning(false)}
         onConfirm={() => {
           setShowEscalationWarning(false);
-          const typedRows = rows.filter((r) => r.name.trim() && r.dose.trim()).map((r) => ({ ...r, type: r.type || detectType(r.name) }));
-          const validPeptides = typedRows.filter((r) => r.type === "peptide").map((p) => ({
-            peptide_name: p.name.trim(),
-            dose_mcg: parseInt(p.dose) || 0,
-            frequency: p.frequency,
-            timing: p.timing,
-            route: "",
-          }));
+          const typedRows = rows.filter((r) => r.name.trim() && r.doseValue.trim()).map((r) => ({ ...r, type: r.type || detectType(r.name) }));
+          const validPeptides = typedRows.filter((r) => r.type === "peptide").map((p) => {
+            let doseMcg = parseFloat(p.doseValue) || 0;
+            if (p.doseUnit === "mg") doseMcg *= 1000;
+            if (p.doseUnit === "g") doseMcg *= 1_000_000;
+            return {
+              peptide_name: p.name.trim(),
+              dose_mcg: Math.round(doseMcg),
+              frequency: p.frequency,
+              timing: p.timing,
+              route: "",
+            };
+          });
           const validSupplements = typedRows.filter((r) => r.type === "supplement").map((s) => ({
             name: normaliseSupplementName(s.name),
-            dose: s.dose.trim(),
+            dose: `${s.doseValue.trim()} ${s.doseUnit}`,
             frequency: s.frequency,
             timing: s.timing,
           }));
+          flagManualCompounds(typedRows.filter((r) => r.isManual));
           executeCreate(validPeptides, validSupplements);
         }}
       />
