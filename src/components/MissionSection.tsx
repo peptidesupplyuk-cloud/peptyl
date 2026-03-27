@@ -1,15 +1,15 @@
 import { motion } from "framer-motion";
-import { Shield, Activity, GraduationCap, HeartHandshake } from "lucide-react";
+import { Layers, FlaskConical, ShieldCheck, Building2 } from "lucide-react";
 import { useTranslation } from "react-i18next";
 
 const MissionSection = () => {
   const { t } = useTranslation();
 
   const pillars = [
-    { icon: HeartHandshake, title: t("mission.communityFirst"), description: t("mission.communityFirstDesc") },
-    { icon: Activity, title: t("mission.biomarkerDriven"), description: t("mission.biomarkerDrivenDesc") },
-    { icon: Shield, title: t("mission.researchVerified"), description: t("mission.researchVerifiedDesc") },
-    { icon: GraduationCap, title: t("mission.educationTools"), description: t("mission.educationToolsDesc") },
+    { icon: Layers, title: t("mission.communityFirst"), description: t("mission.communityFirstDesc") },
+    { icon: FlaskConical, title: t("mission.biomarkerDriven"), description: t("mission.biomarkerDrivenDesc") },
+    { icon: ShieldCheck, title: t("mission.researchVerified"), description: t("mission.researchVerifiedDesc") },
+    { icon: Building2, title: t("mission.educationTools"), description: t("mission.educationToolsDesc") },
   ];
 
   return (
