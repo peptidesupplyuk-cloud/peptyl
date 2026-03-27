@@ -74,7 +74,7 @@ export function useHealthKit() {
           endDate,
         }).catch(() => null),
         Health.queryAggregated({
-          dataType: "calories",
+          dataType: "active-calories",
           bucket: "day",
           startDate,
           endDate,
