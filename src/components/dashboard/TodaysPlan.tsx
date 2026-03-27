@@ -316,46 +316,44 @@ const ProtocolGroupedDoses = ({
               const renderPeptide = (inj: InjectionLog, status: "pending" | "completed" | "skipped") => {
                 const freq = getPeptideFrequency(inj.peptide_name, protocols, inj.protocol_peptide_id);
                 const badge = frequencyLabel(freq);
+                const timingWindow = resolveInjectionTiming(inj.scheduled_time);
+                const timingBadge = timingWindow === "AM" ? "bg-amber-500/10 text-amber-600" : "bg-indigo-500/10 text-indigo-500";
+                const timingLabel = timingWindow === "AM" ? "☀ AM" : "🌙 PM";
+
                 if (status === "completed") {
                   return (
                     <div key={inj.id} className="flex items-center justify-between bg-primary/5 border border-primary/10 rounded-lg px-3 py-2">
-                      <div className="flex items-center gap-2">
-                        <Check className="h-3.5 w-3.5 text-primary" />
-                        <span className="text-sm font-medium text-foreground line-through opacity-60 break-words">{inj.peptide_name}</span>
-                        <span className="text-xs text-muted-foreground">{inj.dose_mcg}mcg</span>
-                        <span className={`text-[9px] font-medium px-1.5 py-0.5 rounded-full ${badge.color}`}>{badge.label}</span>
-                        {inj.notes?.includes("via WhatsApp") && <span className="text-[10px] text-muted-foreground italic">via WhatsApp</span>}
+                      <div className="flex items-center gap-2 min-w-0">
+                        <Check className="h-3.5 w-3.5 text-primary shrink-0" />
+                        <span className="text-sm font-medium text-foreground line-through opacity-60 truncate">{inj.peptide_name}</span>
                       </div>
-                      <span className="text-xs text-primary">✓</span>
+                      <span className="text-xs text-primary shrink-0">✓</span>
                     </div>
                   );
                 }
                 if (status === "skipped") {
                   return (
                     <div key={inj.id} className="flex items-center justify-between bg-muted/30 rounded-lg px-3 py-2 opacity-50">
-                      <div className="flex items-center gap-2">
-                        <SkipForward className="h-3.5 w-3.5 text-muted-foreground" />
-                        <span className="text-sm font-medium text-foreground line-through">{inj.peptide_name}</span>
+                      <div className="flex items-center gap-2 min-w-0">
+                        <SkipForward className="h-3.5 w-3.5 text-muted-foreground shrink-0" />
+                        <span className="text-sm font-medium text-foreground line-through truncate">{inj.peptide_name}</span>
                       </div>
-                      <span className="text-xs text-muted-foreground">Skipped</span>
+                      <span className="text-xs text-muted-foreground shrink-0">Skipped</span>
                     </div>
                   );
                 }
                 return (
-                  <div key={inj.id} className="flex flex-wrap items-center justify-between gap-2 bg-muted/50 rounded-lg px-3 py-2.5">
+                  <div key={inj.id} className="flex items-center justify-between gap-2 bg-muted/50 rounded-lg px-3 py-2.5">
                     <div className="min-w-0 flex-1">
-                      <div className="flex items-center gap-2">
+                      <div className="flex items-center gap-1.5">
                         <Clock className="h-3.5 w-3.5 text-primary shrink-0" />
-                        <span className="text-sm font-medium text-foreground break-words line-clamp-2">{inj.peptide_name}</span>
-                        <span className="text-xs text-muted-foreground shrink-0">{inj.dose_mcg}mcg</span>
-                        <span className={`text-[9px] font-medium px-1.5 py-0.5 rounded-full ${resolveInjectionTiming(inj.scheduled_time) === "AM" ? "bg-amber-500/10 text-amber-600" : "bg-indigo-500/10 text-indigo-500"}`}>
-                          {resolveInjectionTiming(inj.scheduled_time) === "AM" ? "☀ AM" : "🌙 PM"}
-                        </span>
+                        <span className="text-sm font-medium text-foreground truncate">{inj.peptide_name}</span>
+                      </div>
+                      <div className="flex items-center gap-1.5 ml-5 mt-1">
+                        <span className="text-[11px] text-muted-foreground">{inj.dose_mcg}mcg</span>
+                        <span className={`text-[9px] font-medium px-1.5 py-0.5 rounded-full ${timingBadge}`}>{timingLabel}</span>
                         <span className={`text-[9px] font-medium px-1.5 py-0.5 rounded-full ${badge.color}`}>{badge.label}</span>
                       </div>
-                      <p className="text-[11px] text-muted-foreground ml-5.5 mt-0.5">
-                        {format(new Date(inj.scheduled_time), "h:mm a")}
-                      </p>
                     </div>
                     {isToday ? (
                       <div className="flex gap-1.5 shrink-0">
@@ -367,7 +365,7 @@ const ProtocolGroupedDoses = ({
                         </Button>
                       </div>
                     ) : (
-                      <span className="text-xs text-muted-foreground">{isFutureDate ? "Planned" : "Missed"}</span>
+                      <span className="text-xs text-muted-foreground shrink-0">{isFutureDate ? "Planned" : "Missed"}</span>
                     )}
                   </div>
                 );
