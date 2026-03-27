@@ -5,16 +5,20 @@ const PWAUpdatePrompt = () => {
   React.useEffect(() => {
     let updateInterval: number | undefined;
 
+    // Build-time stamp so we can detect stale SW caches
+    const BUILD_VERSION = import.meta.env.VITE_BUILD_TIME ?? Date.now().toString();
+
     const handleControllerChange = () => {
-      // Do NOT auto-reload — this was causing random full-page refreshes.
-      // The new service worker is already active via skipWaiting+clientsClaim.
-      console.info("[PWA] New service worker activated — changes will apply on next navigation.");
+      // Reload once when a new SW takes over — this ensures the latest assets load
+      console.info("[PWA] New service worker activated — reloading for latest build.");
+      window.location.reload();
     };
 
     const clearCaches = async () => {
       if ("caches" in window) {
         const names = await caches.keys();
         await Promise.all(names.map((n) => caches.delete(n)));
+        console.info(`[PWA] Cleared ${names.length} cache(s)`);
       }
     };
 
@@ -39,20 +43,25 @@ const PWAUpdatePrompt = () => {
     };
 
     const setupProductionServiceWorker = async () => {
-      await clearCaches();
+      // If build version changed, nuke all caches first to prevent stale content
+      const lastBuild = localStorage.getItem("peptyl-build-version");
+      if (lastBuild !== BUILD_VERSION) {
+        console.info(`[PWA] Build changed (${lastBuild} → ${BUILD_VERSION}), clearing caches`);
+        await clearCaches();
+        localStorage.setItem("peptyl-build-version", BUILD_VERSION);
+      }
 
       const { registerSW } = await import("virtual:pwa-register");
       registerSW({
         immediate: true,
         onRegisteredSW(_swUrl, registration) {
           if (registration) {
-            updateInterval = window.setInterval(() => registration.update(), 60 * 1000);
+            // Check for updates every 30s (was 60s)
+            updateInterval = window.setInterval(() => registration.update(), 30 * 1000);
             registration.update();
           }
         },
       });
-      
-      // skipWaiting is handled by workbox config — no manual postMessage needed
     };
 
     if (!isPublicAppHost()) {
