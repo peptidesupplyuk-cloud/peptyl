@@ -5,6 +5,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { useProtocols, useUpdateProtocolStatus, useDeleteProtocol, type Protocol } from "@/hooks/use-protocols";
 import { useGenerateScorecard } from "@/hooks/use-protocol-history";
 import AdjustProtocolDialog from "./AdjustProtocolDialog";
+import CompoundLink from "@/components/compound/CompoundLink";
 import { differenceInDays, subDays, format } from "date-fns";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
@@ -264,7 +265,7 @@ const ActiveProtocols = () => {
               <div className="space-y-1">
                 {p.peptides.map((pp) => (
                   <div key={pp.id} className="flex items-center justify-between text-xs gap-2 min-w-0">
-                    <span className="text-foreground shrink-0">{pp.peptide_name}</span>
+                    <span className="text-foreground shrink-0"><CompoundLink name={pp.peptide_name} className="text-xs font-medium" /></span>
                     <span className="text-muted-foreground truncate text-right min-w-0">{pp.dose_mcg}mcg · {pp.frequency} · {pp.timing}</span>
                   </div>
                 ))}
@@ -278,7 +279,7 @@ const ActiveProtocols = () => {
                 </p>
                 {p.supplements.map((s, i) => (
                   <div key={i} className="flex items-center justify-between text-xs gap-2 min-w-0">
-                    <span className="text-foreground shrink-0">{s.name}</span>
+                    <span className="text-foreground shrink-0"><CompoundLink name={s.name} className="text-xs font-medium" /></span>
                     <span className="text-muted-foreground truncate text-right min-w-0">{s.dose} · {s.frequency}</span>
                   </div>
                 ))}
