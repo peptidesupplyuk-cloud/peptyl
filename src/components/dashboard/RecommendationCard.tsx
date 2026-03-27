@@ -8,6 +8,7 @@ import { checkDoseEscalation, type EscalationWarning } from "@/data/titration-ru
 import { useProtocols } from "@/hooks/use-protocols";
 import PeptideInfoTooltip from "./PeptideInfoTooltip";
 import DoseEscalationWarning from "./DoseEscalationWarning";
+import CompoundLink from "@/components/compound/CompoundLink";
 
 interface Props {
   recommendation: Recommendation;
@@ -100,7 +101,7 @@ const RecommendationCard = ({ recommendation: initialRec, onActivate, isActivati
           {rec.peptides.map((p, i) =>
             editing ? (
               <div key={i} className="space-y-1.5 bg-muted/30 rounded-lg p-2.5">
-                <span className="text-xs font-medium text-foreground flex items-center gap-1.5">{p.name} <PeptideInfoTooltip peptideName={p.name} /></span>
+                <span className="text-xs font-medium text-foreground flex items-center gap-1.5"><CompoundLink name={p.name} className="text-xs" /> <PeptideInfoTooltip peptideName={p.name} /></span>
                 <div className="grid grid-cols-3 gap-1.5">
                   <div>
                     <label className="text-[9px] text-muted-foreground uppercase">Dose (mcg)</label>
@@ -137,7 +138,7 @@ const RecommendationCard = ({ recommendation: initialRec, onActivate, isActivati
               </div>
             ) : (
               <div key={i} className="flex items-center justify-between text-sm bg-muted/50 rounded-lg px-3 py-2">
-                <span className="font-medium text-foreground flex items-center gap-1.5">{p.name} <PeptideInfoTooltip peptideName={p.name} /></span>
+                <span className="font-medium text-foreground flex items-center gap-1.5"><CompoundLink name={p.name} className="text-sm" /> <PeptideInfoTooltip peptideName={p.name} /></span>
                 <span className="text-muted-foreground text-xs">
                   {p.dose_mcg}mcg · {p.frequency} · {p.timing}
                 </span>
@@ -155,7 +156,7 @@ const RecommendationCard = ({ recommendation: initialRec, onActivate, isActivati
           {rec.supplements.map((s, i) => (
             <div key={i} className="flex items-center justify-between text-sm bg-accent/30 rounded-lg px-3 py-2 group">
               <div>
-                <span className="font-medium text-foreground">{s.name}</span>
+                <span className="font-medium text-foreground"><CompoundLink name={s.name} className="text-sm" /></span>
                 {(s as any).driven_by && (s as any).driven_by.length > 0 && (
                   <span className="text-[9px] text-primary/70 ml-1.5">
                     ({(s as any).driven_by[0]})
