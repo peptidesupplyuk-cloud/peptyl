@@ -464,12 +464,14 @@ const CreateProtocolForm = ({ disclaimerAccepted, initialPeptide, onInitialPepti
         </label>
 
         {rows.map((row) => (
-          <div key={row.id} className="space-y-2">
-            <div className="grid grid-cols-[1fr_80px_64px_90px_70px_32px] gap-2 items-end">
-              <CompoundSearchInput
-                value={row.name}
-                onChange={(n, t, manual) => handleCompoundChange(row.id, n, t, manual)}
-              />
+          <div key={row.id} className="space-y-2 bg-muted/30 rounded-xl p-3">
+            {/* Row 1: Compound name (full width) */}
+            <CompoundSearchInput
+              value={row.name}
+              onChange={(n, t, manual) => handleCompoundChange(row.id, n, t, manual)}
+            />
+            {/* Row 2: Dose + Unit + Frequency + Timing + Delete */}
+            <div className="grid grid-cols-[1fr_56px_1fr_56px_28px] gap-1.5 items-center">
               <Input
                 placeholder="Dose"
                 value={row.doseValue}
@@ -480,7 +482,7 @@ const CreateProtocolForm = ({ disclaimerAccepted, initialPeptide, onInitialPepti
                 step="any"
               />
               <Select value={row.doseUnit} onValueChange={(v) => updateRow(row.id, "doseUnit", v)}>
-                <SelectTrigger className="text-xs h-9 px-2"><SelectValue /></SelectTrigger>
+                <SelectTrigger className="text-xs h-9 px-1.5"><SelectValue /></SelectTrigger>
                 <SelectContent>
                   {DOSE_UNITS.map((u) => (
                     <SelectItem key={u} value={u} className="text-xs">{u}</SelectItem>
@@ -488,7 +490,7 @@ const CreateProtocolForm = ({ disclaimerAccepted, initialPeptide, onInitialPepti
                 </SelectContent>
               </Select>
               <Select value={row.frequency} onValueChange={(v) => updateRow(row.id, "frequency", v)}>
-                <SelectTrigger className="text-xs h-9"><SelectValue /></SelectTrigger>
+                <SelectTrigger className="text-xs h-9 px-1.5"><SelectValue /></SelectTrigger>
                 <SelectContent>
                   {FREQUENCIES.map((f) => (
                     <SelectItem key={f} value={f} className="text-xs">{f}</SelectItem>
@@ -496,21 +498,21 @@ const CreateProtocolForm = ({ disclaimerAccepted, initialPeptide, onInitialPepti
                 </SelectContent>
               </Select>
               <Select value={row.timing} onValueChange={(v) => updateRow(row.id, "timing", v)}>
-                <SelectTrigger className="text-xs h-9"><SelectValue /></SelectTrigger>
+                <SelectTrigger className="text-xs h-9 px-1.5"><SelectValue /></SelectTrigger>
                 <SelectContent>
                   {TIMINGS.map((t) => (
                     <SelectItem key={t} value={t} className="text-xs">{t}</SelectItem>
                   ))}
                 </SelectContent>
               </Select>
-              {rows.length > 1 && (
-                <Button variant="ghost" size="icon" className="h-9 w-9" onClick={() => removeRow(row.id)}>
+              {rows.length > 1 ? (
+                <Button variant="ghost" size="icon" className="h-9 w-9 p-0" onClick={() => removeRow(row.id)}>
                   <Trash2 className="h-3.5 w-3.5 text-muted-foreground" />
                 </Button>
-              )}
+              ) : <div />}
             </div>
             {row.isManual && row.name.trim() && (
-              <p className="text-[10px] text-amber-500 pl-1">⚠ Custom compound — will be flagged for knowledge base review</p>
+              <p className="text-[10px] text-amber-500">⚠ Custom compound — will be flagged for knowledge base review</p>
             )}
           </div>
         ))}
