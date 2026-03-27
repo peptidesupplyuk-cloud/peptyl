@@ -124,49 +124,6 @@ const CompactJournal = ({ onExpandJournal }: { onExpandJournal: () => void }) =>
   );
 };
 
-const VideoHelpButton = () => {
-  const [open, setOpen] = useState(false);
-  const tracked = useRef(false);
-
-  const trackView = () => {
-    if (tracked.current) return;
-    tracked.current = true;
-    (supabase as any).from("video_views").insert({ video_name: "meet-peptyl" });
-  };
-
-  return (
-    <>
-      <Button
-        variant="outline"
-        size="sm"
-        onClick={() => setOpen(true)}
-        className="gap-2 text-xs shrink-0"
-      >
-        <Play className="h-3.5 w-3.5" />
-        Need help? Watch demo
-      </Button>
-
-      {open && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-background/80 backdrop-blur-sm" onClick={() => setOpen(false)}>
-          <div className="relative w-full max-w-3xl mx-4 rounded-2xl overflow-hidden border border-border bg-card shadow-lg" onClick={(e) => e.stopPropagation()}>
-            <div className="flex items-center justify-between p-4 border-b border-border">
-              <div className="flex items-center gap-2">
-                <Play className="h-4 w-4 text-primary" />
-                <span className="text-sm font-heading font-semibold text-foreground">Meet Peptyl</span>
-              </div>
-              <button onClick={() => setOpen(false)} className="p-1.5 rounded-lg hover:bg-muted transition-colors">
-                <X className="h-4 w-4 text-muted-foreground" />
-              </button>
-            </div>
-            <video className="w-full aspect-video" controls autoPlay preload="metadata" onPlay={trackView}>
-              <source src="/videos/meet-peptyl.mp4" type="video/mp4" />
-            </video>
-          </div>
-        </div>
-      )}
-    </>
-  );
-};
 
 const Dashboard = () => {
   const { data: panels = [], refetch: refetchPanels } = useBloodworkPanels();
@@ -531,7 +488,7 @@ const Dashboard = () => {
                 My <span className="text-gradient-teal">Health</span>
                 <span className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground/60 ml-2 align-middle">Beta</span>
               </h1>
-              <VideoHelpButton />
+              
             </div>
             <p className="text-muted-foreground text-sm">
               Your daily actions, biomarkers, and active protocols.
