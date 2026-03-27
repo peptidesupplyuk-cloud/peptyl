@@ -89,7 +89,7 @@ export function useAdherence(): AdherenceResult {
       const peptideTotal = protocolInj.filter(
         (i) => i.status === "completed" || i.status === "skipped" || (i.status === "scheduled" && new Date(i.scheduled_time) < now)
       ).length;
-      const peptideAdherence = peptideTotal > 0 ? Math.round((peptideCompleted / peptideTotal) * 100) : null;
+      const peptideAdherence = peptideTotal > 0 ? Math.min(100, Math.round((peptideCompleted / peptideTotal) * 100)) : null;
 
       // ── Supplement adherence ──
       const supplements = (protocol.supplements || []) as ProtocolSupplement[];
@@ -110,8 +110,9 @@ export function useAdherence(): AdherenceResult {
           const completedLogs = allSupplementLogs.filter((log) => {
             if (!log.completed) return false;
             if (log.date < protocol.start_date || log.date > effectiveEnd) return false;
-            const logName = normaliseSupplementName(log.item.replace(/::(?:AM|PM)$/, ""));
-            return logName === canonicalName && (log.protocol_id === protocol.id || log.protocol_id === null);
+          const logName = normaliseSupplementName(log.item.replace(/::(?:AM|PM)$/, ""));
+            // Only count logs explicitly tied to this protocol to prevent cross-protocol inflation
+            return logName === canonicalName && log.protocol_id === protocol.id;
           });
           supplementCompleted += completedLogs.length;
         }
@@ -122,7 +123,7 @@ export function useAdherence(): AdherenceResult {
       // ── Combined adherence ──
       const totalAll = peptideTotal + supplementTotal;
       const completedAll = peptideCompleted + supplementCompleted;
-      const combinedAdherence = totalAll > 0 ? Math.round((completedAll / totalAll) * 100) : null;
+      const combinedAdherence = totalAll > 0 ? Math.min(100, Math.round((completedAll / totalAll) * 100)) : null;
 
       return {
         protocolId: protocol.id,
@@ -140,7 +141,7 @@ export function useAdherence(): AdherenceResult {
     // Overall = average of all protocol combined adherences
     const validAdherences = perProtocol.filter((p) => p.combinedAdherence !== null);
     const overall = validAdherences.length > 0
-      ? Math.round(validAdherences.reduce((sum, p) => sum + p.combinedAdherence!, 0) / validAdherences.length)
+      ? Math.min(100, Math.round(validAdherences.reduce((sum, p) => sum + p.combinedAdherence!, 0) / validAdherences.length))
       : null;
 
     // Global peptide/supplement rates
@@ -152,8 +153,8 @@ export function useAdherence(): AdherenceResult {
     return {
       perProtocol,
       overall,
-      totalPeptideRate: totalPepTotal > 0 ? Math.round((totalPepCompleted / totalPepTotal) * 100) : null,
-      totalSupplementRate: totalSuppTotal > 0 ? Math.round((totalSuppCompleted / totalSuppTotal) * 100) : null,
+      totalPeptideRate: totalPepTotal > 0 ? Math.min(100, Math.round((totalPepCompleted / totalPepTotal) * 100)) : null,
+      totalSupplementRate: totalSuppTotal > 0 ? Math.min(100, Math.round((totalSuppCompleted / totalSuppTotal) * 100)) : null,
     };
   }, [protocols, allInjections, allSupplementLogs]);
 
