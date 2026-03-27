@@ -80,7 +80,7 @@ const CompoundIntelligence = () => {
 
   return (
     <div className="min-h-screen bg-background">
-      <SEO title={`${compound.name} — Compound Intelligence | Peptyl`} description={compound.description?.slice(0, 155) || `Deep dive into ${compound.name}`} />
+      <SEO title={`${compound.name} — Compound Intelligence | Peptyl`} description={compound.description?.slice(0, 155) || `Deep dive into ${compound.name}`} path={`/compound/${compoundId}`} />
 
       {/* Sticky back button */}
       <div className="sticky top-0 z-40 bg-background/80 backdrop-blur-md border-b border-border/50">
