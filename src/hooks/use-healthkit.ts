@@ -31,8 +31,8 @@ export function useHealthKit() {
   const requestPermission = useCallback(async () => {
     if (!IS_NATIVE) return;
     try {
-      const { CapacitorHealth } = await import("capacitor-health");
-      const available = await CapacitorHealth.isHealthAvailable();
+      const { Health } = await import("capacitor-health");
+      const available = await Health.isHealthAvailable();
       if (!available.available) {
         setStatus("unavailable");
         return;
@@ -42,7 +42,7 @@ export function useHealthKit() {
         "READ_HEART_RATE",
         "READ_CALORIES",
       ] as const;
-      const result = await CapacitorHealth.requestHealthPermissions({
+      const result = await Health.requestHealthPermissions({
         permissions: [...permissions],
       });
       setStatus(result.granted ? "granted" : "denied");
@@ -56,7 +56,7 @@ export function useHealthKit() {
     if (!IS_NATIVE || status !== "granted") return;
     setLoading(true);
     try {
-      const { CapacitorHealth } = await import("capacitor-health");
+      const { Health } = await import("capacitor-health");
       const today = dateStr || new Date().toISOString().slice(0, 10);
       const startDate = `${today}T00:00:00.000Z`;
       const endDate = `${today}T23:59:59.999Z`;
