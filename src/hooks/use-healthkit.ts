@@ -21,6 +21,12 @@ const EMPTY_METRICS: HealthKitMetrics = {
   activeCalories: null,
 };
 
+const PERMISSIONS = [
+  "READ_STEPS",
+  "READ_ACTIVE_CALORIES",
+  "READ_HEART_RATE",
+] as const;
+
 export function useHealthKit() {
   const [status, setStatus] = useState<PermissionStatus>(
     IS_NATIVE ? "undetermined" : "unavailable"
@@ -37,15 +43,14 @@ export function useHealthKit() {
         setStatus("unavailable");
         return;
       }
-      const permissions = [
-        "READ_STEPS",
-        "READ_HEART_RATE",
-        "READ_CALORIES",
-      ] as const;
       const result = await Health.requestHealthPermissions({
-        permissions: [...permissions],
+        permissions: [...PERMISSIONS] as any,
       });
-      setStatus(result.granted ? "granted" : "denied");
+      // Check if at least steps permission was granted
+      const hasGrant = result.permissions?.some(
+        (p) => Object.values(p).some(Boolean)
+      );
+      setStatus(hasGrant ? "granted" : "denied");
     } catch (err) {
       console.error("[HealthKit] Permission request failed:", err);
       setStatus("denied");
@@ -61,15 +66,14 @@ export function useHealthKit() {
       const startDate = `${today}T00:00:00.000Z`;
       const endDate = `${today}T23:59:59.999Z`;
 
-      // Fetch aggregated steps & calories
       const [stepsResult, caloriesResult] = await Promise.all([
-        CapacitorHealth.queryAggregated({
+        Health.queryAggregated({
           dataType: "steps",
           bucket: "day",
           startDate,
           endDate,
         }).catch(() => null),
-        CapacitorHealth.queryAggregated({
+        Health.queryAggregated({
           dataType: "calories",
           bucket: "day",
           startDate,
@@ -82,7 +86,7 @@ export function useHealthKit() {
 
       setMetrics({
         steps,
-        restingHeartRate: null, // requires sample query — defer
+        restingHeartRate: null,
         hrv: null,
         sleepMinutes: null,
         activeCalories,
@@ -94,7 +98,6 @@ export function useHealthKit() {
     }
   }, [status]);
 
-  // Auto-fetch on grant
   useEffect(() => {
     if (status === "granted") {
       fetchMetrics();
