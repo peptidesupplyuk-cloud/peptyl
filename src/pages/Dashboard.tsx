@@ -19,6 +19,7 @@ import CreateProtocolForm from "@/components/dashboard/CreateProtocolForm";
 import ProfileBiometrics from "@/components/dashboard/ProfileBiometrics";
 import WhoopSection from "@/components/dashboard/WhoopSection";
 import FitbitSection from "@/components/dashboard/FitbitSection";
+import HealthKitSection from "@/components/dashboard/HealthKitSection";
 import WearableSummary from "@/components/dashboard/WearableSummary";
 import { useBloodworkPanels } from "@/hooks/use-bloodwork";
 import { useCreateProtocol, useProtocols } from "@/hooks/use-protocols";
@@ -590,6 +591,7 @@ const Dashboard = () => {
                   <ProfileBiometrics onUpdate={(bio) => setBioRecs(getBiometricRecommendations(bio))} />
                   <WhoopSection />
                   <FitbitSection />
+                  <HealthKitSection />
                 </TabsContent>
 
                 {/* BLOODWORK SUB-TAB */}
