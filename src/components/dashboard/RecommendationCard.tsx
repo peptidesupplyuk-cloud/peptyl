@@ -18,7 +18,6 @@ interface Props {
 
 const FREQUENCIES = ["daily", "EOD", "2x/week", "3x/week", "5on/2off", "weekly"];
 const TIMINGS = ["AM", "PM", "AM+PM", "Pre-bed"];
-const ROUTES = ["SubQ", "IM", "Oral", "Nasal"];
 
 const RecommendationCard = ({ recommendation: initialRec, onActivate, isActivating, badge }: Props) => {
   const [editing, setEditing] = useState(false);
@@ -102,7 +101,7 @@ const RecommendationCard = ({ recommendation: initialRec, onActivate, isActivati
             editing ? (
               <div key={i} className="space-y-1.5 bg-muted/30 rounded-lg p-2.5">
                 <span className="text-xs font-medium text-foreground flex items-center gap-1.5">{p.name} <PeptideInfoTooltip peptideName={p.name} /></span>
-                <div className="grid grid-cols-2 gap-1.5">
+                <div className="grid grid-cols-3 gap-1.5">
                   <div>
                     <label className="text-[9px] text-muted-foreground uppercase">Dose (mcg)</label>
                     <Input
@@ -134,24 +133,13 @@ const RecommendationCard = ({ recommendation: initialRec, onActivate, isActivati
                       </SelectContent>
                     </Select>
                   </div>
-                  <div>
-                    <label className="text-[9px] text-muted-foreground uppercase">Route</label>
-                    <Select value={p.route} onValueChange={(v) => updatePeptide(i, "route", v)}>
-                      <SelectTrigger className="text-[10px] h-7 px-2"><SelectValue /></SelectTrigger>
-                      <SelectContent>
-                        {ROUTES.map((r) => (
-                          <SelectItem key={r} value={r} className="text-xs">{r}</SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
                 </div>
               </div>
             ) : (
               <div key={i} className="flex items-center justify-between text-sm bg-muted/50 rounded-lg px-3 py-2">
                 <span className="font-medium text-foreground flex items-center gap-1.5">{p.name} <PeptideInfoTooltip peptideName={p.name} /></span>
                 <span className="text-muted-foreground text-xs">
-                  {p.dose_mcg}mcg · {p.frequency} · {p.timing} · {p.route}
+                  {p.dose_mcg}mcg · {p.frequency} · {p.timing}
                 </span>
               </div>
             )

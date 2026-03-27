@@ -86,7 +86,6 @@ const AdjustProtocolDialog = ({ protocol, open, onOpenChange }: Props) => {
   const [pepDose, setPepDose] = useState(0);
   const [pepFreq, setPepFreq] = useState("daily");
   const [pepTiming, setPepTiming] = useState("PM");
-  const [pepRoute, setPepRoute] = useState("SubQ");
 
   // Supplement form
   const [suppName, setSuppName] = useState("");
@@ -106,7 +105,7 @@ const AdjustProtocolDialog = ({ protocol, open, onOpenChange }: Props) => {
         dose_mcg: pepDose,
         frequency: pepFreq,
         timing: pepTiming,
-        route: pepRoute,
+        route: "",
         day_number: dayNumber,
       });
       toast({ title: "Peptide added", description: `${pepName} added to ${protocol.name} on Day ${dayNumber}.` });
@@ -200,31 +199,16 @@ const AdjustProtocolDialog = ({ protocol, open, onOpenChange }: Props) => {
                 </Select>
               </div>
             </div>
-            <div className="grid grid-cols-2 gap-3">
-              <div>
-                <label className="text-xs text-muted-foreground mb-1 block">Timing</label>
-                <Select value={pepTiming} onValueChange={setPepTiming}>
-                  <SelectTrigger className="text-sm h-9"><SelectValue /></SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="AM">AM</SelectItem>
-                    <SelectItem value="PM">PM</SelectItem>
-                    <SelectItem value="AM+PM">AM+PM</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-              <div>
-                <label className="text-xs text-muted-foreground mb-1 block">Route</label>
-                <Select value={pepRoute} onValueChange={setPepRoute}>
-                  <SelectTrigger className="text-sm h-9"><SelectValue /></SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="SubQ">SubQ</SelectItem>
-                    <SelectItem value="IM">IM</SelectItem>
-                    <SelectItem value="Oral">Oral</SelectItem>
-                    <SelectItem value="Nasal">Nasal</SelectItem>
-                    <SelectItem value="Topical">Topical</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
+            <div>
+              <label className="text-xs text-muted-foreground mb-1 block">Timing</label>
+              <Select value={pepTiming} onValueChange={setPepTiming}>
+                <SelectTrigger className="text-sm h-9"><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="AM">AM</SelectItem>
+                  <SelectItem value="PM">PM</SelectItem>
+                  <SelectItem value="AM+PM">AM+PM</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
             <Button
               className="w-full"

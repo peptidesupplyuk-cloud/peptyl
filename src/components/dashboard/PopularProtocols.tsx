@@ -87,7 +87,7 @@ const PopularProtocols = ({ onActivate, isActivating, disclaimerAccepted }: Prop
             </div>
           </div>
           <p className="text-xs text-muted-foreground mt-1">
-            Research peptide stacks with suggested supplements. Require injection equipment.
+            Research peptide stacks with suggested supplements.
           </p>
 
           {/* Category filter */}
@@ -140,7 +140,7 @@ const PopularProtocols = ({ onActivate, isActivating, disclaimerAccepted }: Prop
             <h2 className="font-heading font-semibold text-foreground">Supplement Protocols</h2>
           </div>
           <p className="text-xs text-muted-foreground">
-            No injections required. Supplement stacks to support your health goals.
+            Supplement stacks to support your health goals.
           </p>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {supplementOnly.map((protocol) => (
