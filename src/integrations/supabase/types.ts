@@ -1120,6 +1120,39 @@ export type Database = {
           },
         ]
       }
+      manual_compounds: {
+        Row: {
+          compound_name: string
+          compound_type: string
+          created_at: string
+          id: string
+          needs_review: boolean
+          reviewed_at: string | null
+          reviewed_by: string | null
+          user_id: string
+        }
+        Insert: {
+          compound_name: string
+          compound_type?: string
+          created_at?: string
+          id?: string
+          needs_review?: boolean
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          user_id: string
+        }
+        Update: {
+          compound_name?: string
+          compound_type?: string
+          created_at?: string
+          id?: string
+          needs_review?: boolean
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
       marker_requests: {
         Row: {
           created_at: string
