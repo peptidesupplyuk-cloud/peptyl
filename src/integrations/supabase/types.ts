@@ -1585,6 +1585,42 @@ export type Database = {
         }
         Relationships: []
       }
+      pip_conversations: {
+        Row: {
+          content: string
+          created_at: string
+          direction: string
+          id: string
+          is_proactive: boolean
+          message_type: string
+          session_id: string
+          structured_data: Json | null
+          user_id: string
+        }
+        Insert: {
+          content: string
+          created_at?: string
+          direction: string
+          id?: string
+          is_proactive?: boolean
+          message_type?: string
+          session_id?: string
+          structured_data?: Json | null
+          user_id: string
+        }
+        Update: {
+          content?: string
+          created_at?: string
+          direction?: string
+          id?: string
+          is_proactive?: boolean
+          message_type?: string
+          session_id?: string
+          structured_data?: Json | null
+          user_id?: string
+        }
+        Relationships: []
+      }
       pip_product_recommendations: {
         Row: {
           created_at: string | null

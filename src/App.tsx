@@ -89,6 +89,8 @@ const DNAReport = lazy(() => import("./pages/dna/DNAReport"));
 const DNADashboard = lazy(() => import("./pages/dna/DNADashboard"));
 const JoinReferral = lazy(() => import("./pages/JoinReferral"));
 const CompoundIntelligence = lazy(() => import("./pages/CompoundIntelligence"));
+const PipChatPage = lazy(() => import("./pages/PipChat"));
+const PipFloatingButton = lazy(() => import("./components/pip/PipFloatingButton"));
 
 const queryClient = new QueryClient();
 
@@ -169,6 +171,7 @@ const AppContent = () => {
           <Route path="/dna/report/:id" element={<ProtectedRoute><DNAReport /></ProtectedRoute>} />
           <Route path="/dna/dashboard" element={<ProtectedRoute><DNADashboard /></ProtectedRoute>} />
           <Route path="/compound/:compoundId" element={<ProtectedRoute><CompoundIntelligence /></ProtectedRoute>} />
+          <Route path="/pip" element={<ProtectedRoute><PipChatPage /></ProtectedRoute>} />
           <Route path="/join/:code" element={<JoinReferral />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
@@ -176,6 +179,7 @@ const AppContent = () => {
       </Suspense>
       <GlobalMobileNav />
       <PeptideChat />
+      <PipFloatingButton />
       
       
       <SitewideDisclaimer />
