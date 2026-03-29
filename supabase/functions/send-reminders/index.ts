@@ -503,13 +503,18 @@ Deno.serve(async (req) => {
           }
         }
 
-        // Log initial nudge to prevent re-send (with delivery status)
+        // Log initial nudge to prevent re-send (with delivery status + content for debugging)
+        const contentSummary = [
+          ...reminders.map(r => `💉 ${r.peptide_name} ${r.dose_mcg}mcg [${r.doseWindow}] (${r.protocol_name})`),
+          ...supplementReminders.map(s => `💊 ${s.name} ${s.dose} [${s.doseWindow}] (${s.protocol_name})`),
+        ].join(" | ");
         await supabase.from("nudge_log").insert({
           user_id: userId,
           nudge_type: nudgeType,
           email_sent: emailSent,
           push_sent: pushSent,
           error_message: errorMsg || null,
+          message_content: contentSummary.slice(0, 1000),
         } as any);
 
         results.push({
