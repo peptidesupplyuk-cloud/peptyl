@@ -215,6 +215,8 @@ Deno.serve(async (req) => {
           }
         }
 
+        console.log(`User ${userId}: ${allPeptideReminders.length} peptides, ${allSupplementReminders.length} supplements across ${userProts.length} protocols. Seen keys: ${Array.from(seenSupplements).join(', ')}`);
+
         // Determine which items to include based on window
         let reminders: PeptideReminder[];
         let supplementReminders: SupplementReminder[];
