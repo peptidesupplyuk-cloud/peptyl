@@ -215,6 +215,8 @@ Deno.serve(async (req) => {
           }
         }
 
+        console.log(`User ${userId}: ${allPeptideReminders.length} peptides, ${allSupplementReminders.length} supplements across ${userProts.length} protocols. Seen keys: ${Array.from(seenSupplements).join(', ')}`);
+
         // Determine which items to include based on window
         let reminders: PeptideReminder[];
         let supplementReminders: SupplementReminder[];
@@ -501,13 +503,18 @@ Deno.serve(async (req) => {
           }
         }
 
-        // Log initial nudge to prevent re-send (with delivery status)
+        // Log initial nudge to prevent re-send (with delivery status + content for debugging)
+        const contentSummary = [
+          ...reminders.map(r => `💉 ${r.peptide_name} ${r.dose_mcg}mcg [${r.doseWindow}] (${r.protocol_name})`),
+          ...supplementReminders.map(s => `💊 ${s.name} ${s.dose} [${s.doseWindow}] (${s.protocol_name})`),
+        ].join(" | ");
         await supabase.from("nudge_log").insert({
           user_id: userId,
           nudge_type: nudgeType,
           email_sent: emailSent,
           push_sent: pushSent,
           error_message: errorMsg || null,
+          message_content: contentSummary.slice(0, 1000),
         } as any);
 
         results.push({
@@ -915,23 +922,32 @@ function checkSupplementFrequencyDue(frequency: string, todayStr: string, startD
   return checkFrequencyDue(frequency || "daily", todayStr, startDate);
 }
 
-/** Normalise supplement names — mirrors src/lib/supplement-normalise.ts */
+/** Normalise supplement names — mirrors src/lib/supplement-normalise.ts EXACTLY */
 const SUPP_ALIASES: Record<string, string> = {
   "omega-3 fish oil": "Omega-3 (EPA/DHA)",
   "omega 3 fish oil": "Omega-3 (EPA/DHA)",
   "omega-3": "Omega-3 (EPA/DHA)",
   "omega 3": "Omega-3 (EPA/DHA)",
+  "omega-3 (epa/dha)": "Omega-3 (EPA/DHA)",
   "fish oil": "Omega-3 (EPA/DHA)",
   "epa/dha": "Omega-3 (EPA/DHA)",
   "epa dha": "Omega-3 (EPA/DHA)",
+  "omega-3 fish oil 3000mg epa/dha": "Omega-3 (EPA/DHA)",
   "coq10": "CoQ10",
   "coq10 (ubiquinol)": "CoQ10 (Ubiquinol)",
   "ubiquinol": "CoQ10 (Ubiquinol)",
   "vitamin d": "Vitamin D3 + K2",
   "vitamin d3": "Vitamin D3 + K2",
   "vit d3": "Vitamin D3 + K2",
+  "vitamin d3 + k2": "Vitamin D3 + K2",
   "mag glycinate": "Magnesium Glycinate",
   "magnesium": "Magnesium Glycinate",
+  "magnesium glycinate": "Magnesium Glycinate",
+  "vitamin c": "Vitamin C",
+  "vit c": "Vitamin C",
+  "berberine": "Berberine HCl",
+  "berberine hcl": "Berberine HCl",
+  "zinc": "Zinc",
 };
 
 function normaliseSupplementName(name: string): string {
@@ -939,11 +955,24 @@ function normaliseSupplementName(name: string): string {
   return SUPP_ALIASES[trimmed.toLowerCase()] ?? trimmed;
 }
 
-/** Resolve supplement timing — mirrors dashboard resolveSupplementTiming */
+/** Resolve supplement timing — mirrors dashboard resolveSupplementTiming EXACTLY */
 function resolveSupplementTimingEdge(supp: { timing?: string; frequency?: string }): string {
-  if (supp.timing) return supp.timing.toUpperCase();
+  const rawTiming = (supp.timing || "").trim().toLowerCase();
+  if (rawTiming) {
+    if ((rawTiming.includes("am") && rawTiming.includes("pm")) || rawTiming.includes("both") || rawTiming.includes("split")) {
+      return "AM+PM";
+    }
+    if (rawTiming.includes("pm") || rawTiming.includes("bed") || rawTiming.includes("evening") || rawTiming.includes("night")) {
+      return "PM";
+    }
+    if (rawTiming.includes("noon") || rawTiming.includes("midday") || rawTiming.includes("lunch")) {
+      return "AM"; // Noon items show in AM window on email
+    }
+    return "AM";
+  }
+
   const freq = (supp.frequency || "").toLowerCase();
-  if (freq.includes("split") || freq.includes("am/pm") || freq.includes("twice") || freq.includes("2x")) return "AM+PM";
+  if (freq.includes("split") || freq.includes("am/pm") || freq.includes("twice") || freq.includes("2x/day") || freq.includes("twice daily")) return "AM+PM";
   if (freq.includes("morning") || freq.includes("fasted")) return "AM";
   if (freq.includes("bed") || freq.includes("evening") || freq.includes("night")) return "PM";
   if (freq.includes("with meals")) return "AM+PM";
