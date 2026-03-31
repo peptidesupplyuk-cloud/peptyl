@@ -38,6 +38,9 @@ Deno.serve(async (req) => {
     const pipelineUrl = Deno.env.get("DNA_PIPELINE_URL");
     const pipelineSecret = Deno.env.get("DNA_PIPELINE_SECRET");
 
+    console.log("[analyse-dna] DEBUG pipeline URL:", pipelineUrl);
+    console.log("[analyse-dna] DEBUG secret length:", pipelineSecret?.length, "first4:", pipelineSecret?.slice(0, 4), "last4:", pipelineSecret?.slice(-4));
+
     const pipelineResponse = await fetch(`${pipelineUrl}/pipeline/run`, {
       method: "POST",
       headers: {
