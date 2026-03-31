@@ -35,8 +35,8 @@ Deno.serve(async (req) => {
     }).eq("id", reportId);
 
     // Delegate to pipeline service
-    const pipelineUrl = Deno.env.get("DNA_PIPELINE_URL");
-    const pipelineSecret = Deno.env.get("DNA_PIPELINE_SECRET");
+    const pipelineUrl = Deno.env.get("DNA_PIPELINE_URL")?.trim();
+    const pipelineSecret = Deno.env.get("DNA_PIPELINE_SECRET")?.trim();
 
     const pipelineResponse = await fetch(`${pipelineUrl}/pipeline/run`, {
       method: "POST",
