@@ -326,7 +326,7 @@ const DNAAnalysing = () => {
                 className="bg-card border border-border rounded-xl p-5 text-center"
               >
                 <p className="text-sm text-muted-foreground leading-relaxed">
-                  This can take up to 20 minutes depending on the depth of your assessment.
+                  This can take up to 30 minutes depending on the depth of your assessment.
                   Feel free to close this page — we'll email you when your report is ready.
                 </p>
                 <Button
@@ -337,7 +337,7 @@ const DNAAnalysing = () => {
                 >
                   View My Assessments
                 </Button>
-                {elapsed > 300 && (
+                {elapsed > 600 && (
                   <p className="text-xs text-muted-foreground/70 mt-2">
                     Still working on your report. You can safely leave and check back later.
                   </p>
