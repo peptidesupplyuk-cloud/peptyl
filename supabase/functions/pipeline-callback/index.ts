@@ -117,15 +117,36 @@ Deno.serve(async (req) => {
           .eq("id", reportId)
           .single();
 
-        await supabase.from("dna_reports").update({
-          ...reportData,
+        // Only spread known columns to prevent silent update failures
+        const safeUpdate: Record<string, any> = {
           pipeline_status: "complete",
           pipeline_progress: 100,
           pipeline_updated_at: new Date().toISOString(),
-        }).eq("id", reportId);
+        };
+        const knownColumns = [
+          "report_json", "overall_score", "confidence", "narrative",
+          "assessment_tier", "pipeline_quality_score", "pipeline_duration_ms",
+          "pipeline_injected", "pipeline_issues", "pipeline_retry_count",
+          "pipeline_timings", "plan_start_date",
+        ];
+        for (const col of knownColumns) {
+          if (reportData[col] !== undefined) {
+            safeUpdate[col] = reportData[col];
+          }
+        }
 
-        // Only send email if report has meaningful content (quality gate)
-        const savedScore = reportData.overall_score ?? 0;
+        const { error: updateErr } = await supabase
+          .from("dna_reports")
+          .update(safeUpdate)
+          .eq("id", reportId);
+
+        if (updateErr) {
+          console.error("save_report update failed:", updateErr);
+          throw new Error(`Failed to save report: ${updateErr.message}`);
+        }
+
+        // Only send email if update succeeded AND report has meaningful content
+        const savedScore = safeUpdate.overall_score ?? 0;
         if (reportRow?.user_id && savedScore > 0) {
           try {
             const { data: userData } = await supabase.auth.admin.getUserById(reportRow.user_id);
@@ -171,7 +192,6 @@ Deno.serve(async (req) => {
             }
           } catch (emailErr) {
             console.error("Failed to send report-ready email:", emailErr);
-            // Don't fail the callback just because email failed
           }
         }
 
