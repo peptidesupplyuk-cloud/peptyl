@@ -11,7 +11,7 @@ Deno.serve(async (req) => {
   }
 
   const authHeader = req.headers.get("Authorization");
-  const secret = Deno.env.get("DNA_PIPELINE_SECRET");
+  const secret = Deno.env.get("DNA_PIPELINE_SECRET")?.trim();
   if (secret && authHeader !== `Bearer ${secret}`) {
     return new Response(JSON.stringify({ error: "Unauthorized" }), {
       status: 401,
