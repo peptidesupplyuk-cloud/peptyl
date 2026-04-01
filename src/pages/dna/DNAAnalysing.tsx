@@ -337,7 +337,7 @@ const DNAAnalysing = () => {
                 >
                   View My Assessments
                 </Button>
-                {elapsed > 300 && (
+                {elapsed > 600 && (
                   <p className="text-xs text-muted-foreground/70 mt-2">
                     Still working on your report. You can safely leave and check back later.
                   </p>
