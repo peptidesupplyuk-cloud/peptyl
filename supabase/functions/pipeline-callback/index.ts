@@ -124,8 +124,9 @@ Deno.serve(async (req) => {
           pipeline_updated_at: new Date().toISOString(),
         }).eq("id", reportId);
 
-        // Send email notification to the user
-        if (reportRow?.user_id) {
+        // Only send email if report has meaningful content (quality gate)
+        const savedScore = reportData.overall_score ?? 0;
+        if (reportRow?.user_id && savedScore > 0) {
           try {
             const { data: userData } = await supabase.auth.admin.getUserById(reportRow.user_id);
             const userEmail = userData?.user?.email;
