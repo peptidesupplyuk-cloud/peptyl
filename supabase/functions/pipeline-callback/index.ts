@@ -109,12 +109,71 @@ Deno.serve(async (req) => {
       case "save_report": {
         const { reportId, ...reportData } = body;
         delete reportData.action;
+
+        // Get the user_id before updating
+        const { data: reportRow } = await supabase
+          .from("dna_reports")
+          .select("user_id")
+          .eq("id", reportId)
+          .single();
+
         await supabase.from("dna_reports").update({
           ...reportData,
           pipeline_status: "complete",
           pipeline_progress: 100,
           pipeline_updated_at: new Date().toISOString(),
         }).eq("id", reportId);
+
+        // Send email notification to the user
+        if (reportRow?.user_id) {
+          try {
+            const { data: userData } = await supabase.auth.admin.getUserById(reportRow.user_id);
+            const userEmail = userData?.user?.email;
+            if (userEmail) {
+              const resendKey = Deno.env.get("RESEND_API_KEY")?.trim();
+              const reportUrl = `https://peptyl.lovable.app/dna/report/${reportId}`;
+              if (resendKey) {
+                await fetch("https://api.resend.com/emails", {
+                  method: "POST",
+                  headers: {
+                    "Content-Type": "application/json",
+                    Authorization: `Bearer ${resendKey}`,
+                  },
+                  body: JSON.stringify({
+                    from: "Peptyl <noreply@resend.dev>",
+                    to: [userEmail],
+                    subject: "🎉 Your Holistic Health Report is Ready!",
+                    html: `
+                      <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 40px 20px;">
+                        <h1 style="color: #0d9488; font-size: 24px; margin-bottom: 16px;">Congratulations!</h1>
+                        <p style="color: #374151; font-size: 16px; line-height: 1.6; margin-bottom: 24px;">
+                          Your new Holistic Health Assessment report has been generated and is ready to view.
+                        </p>
+                        <p style="color: #374151; font-size: 16px; line-height: 1.6; margin-bottom: 32px;">
+                          Our AI has analysed your data and produced personalised recommendations just for you.
+                        </p>
+                        <a href="${reportUrl}" style="display: inline-block; background-color: #0d9488; color: #ffffff; padding: 14px 28px; border-radius: 8px; text-decoration: none; font-weight: 600; font-size: 16px;">
+                          Click here to view your report
+                        </a>
+                        <p style="color: #9ca3af; font-size: 13px; margin-top: 40px; line-height: 1.5;">
+                          You can also view all your reports in the <a href="https://peptyl.lovable.app/dna/dashboard" style="color: #0d9488;">My Assessments</a> section.
+                        </p>
+                        <p style="color: #9ca3af; font-size: 12px; margin-top: 24px;">
+                          — The Peptyl Team
+                        </p>
+                      </div>
+                    `,
+                  }),
+                });
+                console.log(`Report-ready email sent to ${userEmail} for report ${reportId}`);
+              }
+            }
+          } catch (emailErr) {
+            console.error("Failed to send report-ready email:", emailErr);
+            // Don't fail the callback just because email failed
+          }
+        }
+
         break;
       }
 
