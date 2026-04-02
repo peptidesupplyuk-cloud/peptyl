@@ -71,95 +71,96 @@ export function useTodayInjections() {
         .order("scheduled_time", { ascending: true });
       if (error) throw error;
 
-      if (existing && existing.length > 0) {
-        // Still backfill past days in the background (non-blocking)
-        backfillMissingDays(user!.id).catch(() => {});
-        return existing as InjectionLog[];
-      }
-
       // Mutex: prevent concurrent auto-generation
       if (generatingForDate === today) {
-        return [];
+        return (existing ?? []) as InjectionLog[];
       }
       generatingForDate = today;
 
-      // No logs yet — auto-generate from active protocols (exclude expired ones)
-      const { data: protocols } = await supabase
-        .from("protocols")
-        .select("*")
-        .eq("status", "active");
-
-      // Filter out protocols whose end_date has passed
-      const activeProtocols = (protocols || []).filter(p => {
-        if (!p.end_date) return true;
-        return p.end_date >= today;
-      });
-
-      if (activeProtocols.length === 0) return [];
-
-      // Gather all peptides from all active protocols
-      const logsToInsert: Array<{
-        user_id: string;
-        peptide_name: string;
-        dose_mcg: number;
-        scheduled_time: string;
-        protocol_peptide_id: string;
-        status: string;
-      }> = [];
-
-      for (const protocol of activeProtocols) {
-        const { data: peptides } = await supabase
-          .from("protocol_peptides")
+      try {
+        // Fetch active protocols (exclude expired ones)
+        const { data: protocols } = await supabase
+          .from("protocols")
           .select("*")
-          .eq("protocol_id", protocol.id);
+          .eq("status", "active");
 
-        if (!peptides) continue;
+        const activeProtocols = (protocols || []).filter(p => {
+          if (!p.end_date) return true;
+          return p.end_date >= today;
+        });
 
-        for (const pep of peptides) {
-          if (!isDueToday(pep.frequency, protocol.start_date)) continue;
+        if (activeProtocols.length === 0) {
+          return (existing ?? []) as InjectionLog[];
+        }
 
-          const timings: string[] = [];
-          const timing = (pep.timing || "AM").toUpperCase();
-          if (timing.includes("AM")) timings.push("09:00");
-          if (timing.includes("PM") || timing.includes("BED")) timings.push("21:00");
-          if (timings.length === 0) timings.push("09:00");
+        // Build set of protocol_peptide_ids already logged today
+        const existingPeptideKeys = new Set(
+          (existing ?? []).map((log) => `${log.protocol_peptide_id}||${log.scheduled_time}`)
+        );
 
-          for (const t of timings) {
-            logsToInsert.push({
-              user_id: user!.id,
-              peptide_name: pep.peptide_name,
-              dose_mcg: pep.dose_mcg,
-              scheduled_time: `${today}T${t}:00.000Z`,
-              protocol_peptide_id: pep.id,
-              status: "scheduled",
-            });
+        // Gather all peptides from all active protocols, inserting only missing ones
+        const logsToInsert: Array<{
+          user_id: string;
+          peptide_name: string;
+          dose_mcg: number;
+          scheduled_time: string;
+          protocol_peptide_id: string;
+          status: string;
+        }> = [];
+
+        for (const protocol of activeProtocols) {
+          const { data: peptides } = await supabase
+            .from("protocol_peptides")
+            .select("*")
+            .eq("protocol_id", protocol.id);
+
+          if (!peptides) continue;
+
+          for (const pep of peptides) {
+            if (!isDueToday(pep.frequency, protocol.start_date)) continue;
+
+            const timings: string[] = [];
+            const timing = (pep.timing || "AM").toUpperCase();
+            if (timing.includes("AM")) timings.push("09:00");
+            if (timing.includes("PM") || timing.includes("BED")) timings.push("21:00");
+            if (timings.length === 0) timings.push("09:00");
+
+            for (const t of timings) {
+              const scheduledTime = `${today}T${t}:00.000Z`;
+              const key = `${pep.id}||${scheduledTime}`;
+              if (!existingPeptideKeys.has(key)) {
+                logsToInsert.push({
+                  user_id: user!.id,
+                  peptide_name: pep.peptide_name,
+                  dose_mcg: pep.dose_mcg,
+                  scheduled_time: scheduledTime,
+                  protocol_peptide_id: pep.id,
+                  status: "scheduled",
+                });
+              }
+            }
           }
         }
-      }
 
-      if (logsToInsert.length === 0) {
-        generatingForDate = null;
-        return [];
-      }
+        if (logsToInsert.length > 0) {
+          const { error: insertErr } = await supabase
+            .from("injection_logs")
+            .insert(logsToInsert);
 
-      try {
-        const { error: insertErr } = await supabase
-          .from("injection_logs")
-          .insert(logsToInsert);
-
-        if (insertErr && !String(insertErr.message || "").toLowerCase().includes("duplicate")) {
-          throw insertErr;
+          if (insertErr && !String(insertErr.message || "").toLowerCase().includes("duplicate")) {
+            console.warn("[Injections] Failed to insert missing logs:", insertErr);
+          }
         }
 
-        // Backfill past days too
+        // Backfill past days in the background
         backfillMissingDays(user!.id).catch(() => {});
 
-        // Re-fetch to get updated data
+        // Re-fetch to get complete data
         const { data: final } = await supabase
           .from("injection_logs")
           .select("*")
-          .gte("scheduled_time", `${today}T00:00:00.000Z`)
-          .lte("scheduled_time", `${today}T23:59:59.999Z`)
+          .gte("scheduled_time", startOfDay)
+          .lte("scheduled_time", endOfDay)
           .order("scheduled_time", { ascending: true });
 
         return (final ?? []) as InjectionLog[];
