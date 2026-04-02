@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { useTodayInjections, useDateInjections, useUpdateInjectionStatus, type InjectionLog } from "@/hooks/use-injections";
 import { useProtocols, type ProtocolSupplement } from "@/hooks/use-protocols";
 import { useBloodworkPanels } from "@/hooks/use-bloodwork";
-import { useTodaySupplementLogs, useDateSupplementLogs, useToggleSupplement, useBatchCompleteSupplement } from "@/hooks/use-supplement-logs";
+import { useTodaySupplementLogs, useDateSupplementLogs, useToggleSupplement, useBatchCompleteSupplement, supplementLogKey } from "@/hooks/use-supplement-logs";
 import { BIOMARKERS, getMarkerStatus } from "@/data/biomarker-ranges";
 import { format, differenceInDays, differenceInCalendarDays } from "date-fns";
 import { useAuth } from "@/contexts/AuthContext";
@@ -48,7 +48,9 @@ interface SupplementItem {
   protocolId: string;
   goal: string;
   drivenBy?: string[];
-  /** Unique key used for supplement_logs tracking — includes ::AM / ::PM suffix for split items */
+  /** Item value stored in supplement_logs, e.g. Omega-3 (EPA/DHA)::AM */
+  logItem: string;
+  /** Protocol-scoped UI key used to avoid cross-protocol collisions */
   trackingKey: string;
 }
 
@@ -414,10 +416,10 @@ const ProtocolGroupedDoses = ({
                     </div>
                     {isToday ? (
                       <div className="flex gap-1.5 shrink-0">
-                        <Button size="icon" variant="outline" className="h-7 w-7" onClick={() => toggleSupplement.mutate({ item: supp.trackingKey, completed: false })} title="Skip">
+                        <Button size="icon" variant="outline" className="h-7 w-7" onClick={() => toggleSupplement.mutate({ item: supp.logItem, protocolId: supp.protocolId, completed: false })} title="Skip">
                           <SkipForward className="h-3.5 w-3.5" />
                         </Button>
-                        <Button size="icon" className="h-7 w-7 shadow-brand" onClick={() => toggleSupplement.mutate({ item: supp.trackingKey, completed: true })} title="Done">
+                        <Button size="icon" className="h-7 w-7 shadow-brand" onClick={() => toggleSupplement.mutate({ item: supp.logItem, protocolId: supp.protocolId, completed: true })} title="Done">
                           <Check className="h-3.5 w-3.5" />
                         </Button>
                       </div>
@@ -497,8 +499,12 @@ const TodaysPlan = ({ onActivate, slim = false, selectedDate }: TodaysPlanProps)
   const supplementLogs = selectedDate ? dateSupplementLogs : todaySupplementLogsDefault;
   const toggleSupplement = useToggleSupplement();
   const batchComplete = useBatchCompleteSupplement();
-  const completedSupplements = new Set(supplementLogs.filter((l) => l.completed).map((l) => l.item));
-  const skippedSupplements = new Set(supplementLogs.filter((l) => !l.completed).map((l) => l.item));
+  const completedSupplements = new Set(
+    supplementLogs.filter((l) => l.completed).map((l) => supplementLogKey(l.item, l.protocol_id))
+  );
+  const skippedSupplements = new Set(
+    supplementLogs.filter((l) => !l.completed).map((l) => supplementLogKey(l.item, l.protocol_id))
+  );
 
   // --- J2: Fetch active outcome record + DNA report for 90-day progress ---
   const { data: outcomeRecord } = useQuery({
@@ -684,22 +690,26 @@ const TodaysPlan = ({ onActivate, slim = false, selectedDate }: TodaysPlanProps)
         };
 
         if (resolvedTiming === "AM+PM") {
-          const amKey = `${normName}::AM`;
-          const pmKey = `${normName}::PM`;
-          if (!seenSuppKeys.has(amKey)) {
-            seenSuppKeys.add(amKey);
-            supplements.push({ ...base, name: normName, timing: "AM", trackingKey: amKey });
+          const amLogItem = `${normName}::AM`;
+          const pmLogItem = `${normName}::PM`;
+          const amTrackingKey = supplementLogKey(amLogItem, protocol.id);
+          const pmTrackingKey = supplementLogKey(pmLogItem, protocol.id);
+
+          if (!seenSuppKeys.has(amTrackingKey)) {
+            seenSuppKeys.add(amTrackingKey);
+            supplements.push({ ...base, name: normName, timing: "AM", logItem: amLogItem, trackingKey: amTrackingKey });
           }
-          if (!seenSuppKeys.has(pmKey)) {
-            seenSuppKeys.add(pmKey);
-            supplements.push({ ...base, name: normName, timing: "PM", trackingKey: pmKey });
+          if (!seenSuppKeys.has(pmTrackingKey)) {
+            seenSuppKeys.add(pmTrackingKey);
+            supplements.push({ ...base, name: normName, timing: "PM", logItem: pmLogItem, trackingKey: pmTrackingKey });
           }
         } else {
           const timing = resolvedTiming === "PM" ? "PM" : "AM";
-          const key = `${normName}::${timing}`;
-          if (!seenSuppKeys.has(key)) {
-            seenSuppKeys.add(key);
-            supplements.push({ ...base, name: normName, timing, trackingKey: key });
+          const logItem = `${normName}::${timing}`;
+          const trackingKey = supplementLogKey(logItem, protocol.id);
+          if (!seenSuppKeys.has(trackingKey)) {
+            seenSuppKeys.add(trackingKey);
+            supplements.push({ ...base, name: normName, timing, logItem, trackingKey });
           }
         }
       }
@@ -771,7 +781,7 @@ const TodaysPlan = ({ onActivate, slim = false, selectedDate }: TodaysPlanProps)
     }
     const suppsToComplete = window === "ALL" ? pendingSupplements
       : window === "AM" ? amPendingSupps : pmPendingSupps;
-    const pendingItems = suppsToComplete.map((s) => ({ item: s.trackingKey, protocolId: s.protocolId }));
+    const pendingItems = suppsToComplete.map((s) => ({ item: s.logItem, protocolId: s.protocolId }));
     if (pendingItems.length > 0) {
       batchComplete.mutate(pendingItems);
     }
