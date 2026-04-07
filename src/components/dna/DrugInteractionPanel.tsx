@@ -1,12 +1,10 @@
 import { AlertTriangle } from "lucide-react";
 
 interface DrugInteraction {
-  // New fields
   compound?: string;
   drug?: string;
   mechanism?: string;
   recommendation?: string;
-  // Legacy fields
   gene?: string;
   drug_class?: string;
   status?: string;
@@ -17,6 +15,11 @@ interface DrugInteraction {
 interface Props {
   interactions?: DrugInteraction[];
 }
+
+const humanizeStatus = (s?: string): string => {
+  if (!s) return "";
+  return s.replace(/_/g, " ").replace(/\b\w/g, c => c.toUpperCase());
+};
 
 const DrugInteractionPanel = ({ interactions }: Props) => {
   if (!Array.isArray(interactions) || interactions.length === 0) return null;
@@ -31,13 +34,14 @@ const DrugInteractionPanel = ({ interactions }: Props) => {
           const detail = d.mechanism || d.interaction || d.recommendation || "";
           const rec = d.recommendation && d.recommendation !== detail ? d.recommendation : "";
           const drugs = Array.isArray(d.affected_drugs) ? d.affected_drugs : (drugName ? [drugName] : []);
+          const statusText = humanizeStatus(d.status);
 
           return (
             <div key={i} className={i > 0 ? "pt-4 border-t border-yellow-500/10" : ""}>
               <div className="flex items-center gap-2 mb-2">
                 <AlertTriangle className="h-4 w-4 text-yellow-600" />
                 <span className="font-heading font-semibold text-foreground text-sm">
-                  {label}{d.status ? ` — ${d.status}` : ""}
+                  {label}{statusText ? ` · ${statusText}` : ""}
                 </span>
               </div>
               {drugs.length > 0 && (

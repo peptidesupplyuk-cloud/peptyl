@@ -45,7 +45,6 @@ const gradeColor = (g: string) => {
   return "bg-muted text-muted-foreground";
 };
 
-// Parse dose string to mcg number best-effort
 const parseDoseMcg = (dose: string): number => {
   const match = dose.match(/([\d.]+)\s*(mcg|mg|g)/i);
   if (!match) return 0;
@@ -63,12 +62,11 @@ const CreateProtocolFromReport = ({ supplements, peptides = [], reportId, isPaid
   const today = format(new Date(), "yyyy-MM-dd");
 
   const [open, setOpen] = useState(false);
-  const [name, setName] = useState(`DNA Health Protocol — ${format(new Date(), "MMM yyyy")}`);
+  const [name, setName] = useState(`DNA Health Protocol - ${format(new Date(), "MMM yyyy")}`);
   const [startDate, setStartDate] = useState(today);
   const [showSuppSuggestions, setShowSuppSuggestions] = useState(false);
   const [showPepSuggestions, setShowPepSuggestions] = useState(false);
 
-  // Identify priority vs suggestions
   const hasSuppFlag = supplements.some(s => s.is_priority !== undefined);
   const prioritySupps = hasSuppFlag ? supplements.filter(s => s.is_priority) : supplements.slice(0, 5);
   const suggestionSupps = hasSuppFlag ? supplements.filter(s => !s.is_priority) : supplements.slice(5);
@@ -77,7 +75,6 @@ const CreateProtocolFromReport = ({ supplements, peptides = [], reportId, isPaid
   const priorityPeps = hasPepFlag ? peptides.filter(p => p.is_priority) : peptides.slice(0, 3);
   const suggestionPeps = hasPepFlag ? peptides.filter(p => !p.is_priority) : peptides.slice(3);
 
-  // Selection state — priority pre-ticked, suggestions unticked
   const [suppSelected, setSuppSelected] = useState<boolean[]>(() => [
     ...prioritySupps.map(() => true),
     ...suggestionSupps.map(() => false),
@@ -235,7 +232,6 @@ const CreateProtocolFromReport = ({ supplements, peptides = [], reportId, isPaid
                   <span className="text-xs text-muted-foreground">{selectedSuppCount} selected</span>
                 </div>
 
-                {/* Priority */}
                 <div className="space-y-2">
                   {prioritySupps.map((s, i) => (
                     <SectionItem
@@ -249,7 +245,6 @@ const CreateProtocolFromReport = ({ supplements, peptides = [], reportId, isPaid
                   ))}
                 </div>
 
-                {/* Suggestions toggle */}
                 {suggestionSupps.length > 0 && (
                   <div className="border border-border/50 rounded-xl overflow-hidden">
                     <button
@@ -259,7 +254,7 @@ const CreateProtocolFromReport = ({ supplements, peptides = [], reportId, isPaid
                       <div className="flex items-center gap-2">
                         <Sparkles className="h-3.5 w-3.5 text-muted-foreground" />
                         <span className="text-xs font-medium text-foreground">
-                          {suggestionSupps.length} suggestions — after first 90 days
+                          {suggestionSupps.length} suggestions - after first 90 days
                         </span>
                       </div>
                       {showSuppSuggestions
@@ -295,7 +290,6 @@ const CreateProtocolFromReport = ({ supplements, peptides = [], reportId, isPaid
                   <span className="text-xs text-muted-foreground">{selectedPepCount} selected</span>
                 </div>
 
-                {/* Priority */}
                 <div className="space-y-2">
                   {priorityPeps.map((p, i) => (
                     <SectionItem
@@ -309,7 +303,6 @@ const CreateProtocolFromReport = ({ supplements, peptides = [], reportId, isPaid
                   ))}
                 </div>
 
-                {/* Peptide suggestions toggle */}
                 {suggestionPeps.length > 0 && (
                   <div className="border border-border/50 rounded-xl overflow-hidden">
                     <button
@@ -319,7 +312,7 @@ const CreateProtocolFromReport = ({ supplements, peptides = [], reportId, isPaid
                       <div className="flex items-center gap-2">
                         <Sparkles className="h-3.5 w-3.5 text-muted-foreground" />
                         <span className="text-xs font-medium text-foreground">
-                          {suggestionPeps.length} peptide suggestion{suggestionPeps.length > 1 ? "s" : ""} — after first cycle
+                          {suggestionPeps.length} peptide suggestion{suggestionPeps.length > 1 ? "s" : ""} - after first cycle
                         </span>
                       </div>
                       {showPepSuggestions
@@ -367,14 +360,14 @@ const CreateProtocolFromReport = ({ supplements, peptides = [], reportId, isPaid
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm">
           <div className="bg-[#070B14] max-w-md w-full mx-4 rounded-2xl border border-border p-6 space-y-5">
             <div className="flex flex-col items-center text-center space-y-3">
-              <div className="h-12 w-12 rounded-full bg-[#00D4AA]/10 flex items-center justify-center">
-                <CheckCircle2 className="h-6 w-6 text-[#00D4AA]" />
+              <div className="h-12 w-12 rounded-full bg-primary/10 flex items-center justify-center">
+                <CheckCircle2 className="h-6 w-6 text-primary" />
               </div>
               <h2 className="font-heading text-xl font-semibold text-foreground">Protocol created</h2>
               <p className="text-sm text-muted-foreground">{createdProtocolName} is now active</p>
             </div>
 
-            <div className="border-l-4 border-[#00D4AA] bg-[#00D4AA]/5 pl-4 py-3 rounded-r-xl">
+            <div className="border-l-4 border-primary bg-primary/5 pl-4 py-3 rounded-r-xl">
               <p className="text-sm text-foreground">
                 Log your baseline bloods before you start. Without a baseline, Peptyl can't calculate
                 what changed at the end of your protocol.
@@ -383,7 +376,7 @@ const CreateProtocolFromReport = ({ supplements, peptides = [], reportId, isPaid
 
             <div className="space-y-2">
               <Button
-                className="w-full bg-[#00D4AA] text-black hover:bg-[#00D4AA]/90 font-medium"
+                className="w-full bg-primary text-primary-foreground hover:bg-primary/90 font-medium"
                 onClick={() => {
                   setShowNudge(false);
                   navigate(`/dashboard?tab=bloodwork&protocolId=${createdProtocolId}`);

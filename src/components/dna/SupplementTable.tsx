@@ -2,11 +2,10 @@ import { useState } from "react";
 import { ChevronDown, ChevronUp } from "lucide-react";
 
 interface Supplement {
-  // New field names
   name?: string;
-  supplement?: string; // Legacy
+  supplement?: string;
   dosage?: string;
-  dose?: string; // Legacy
+  dose?: string;
   timing: string;
   evidence_grade: string;
   driven_by?: string[];
@@ -29,6 +28,9 @@ const gradeColor = (g: string) => {
   return "bg-muted text-muted-foreground";
 };
 
+const cleanText = (s: string): string =>
+  s.replace(/\s*[—–]\s*/g, " - ");
+
 const SupplementRow = ({ s }: { s: Supplement }) => {
   const label = s.name || s.supplement || "Unknown";
   const doseText = s.dosage || s.dose || "";
@@ -42,13 +44,13 @@ const SupplementRow = ({ s }: { s: Supplement }) => {
           <div className="flex flex-wrap gap-1 mt-1">
             {drivenBy.map((d) => (
               <span key={d} className="text-[10px] bg-primary/10 text-primary px-1.5 py-0.5 rounded">
-                {d}
+                {cleanText(d)}
               </span>
             ))}
           </div>
         )}
         {s.rationale && (
-          <p className="text-[10px] text-muted-foreground mt-1 line-clamp-2">{s.rationale}</p>
+          <p className="text-[10px] text-muted-foreground mt-1 line-clamp-2">{cleanText(s.rationale)}</p>
         )}
       </td>
       <td className="py-3 px-3 text-sm text-muted-foreground whitespace-nowrap">
@@ -103,7 +105,7 @@ const SupplementTable = ({ supplements }: Props) => {
           >
             <div>
               <span className="text-sm font-medium text-foreground">
-                After your first 90 days — {suggestions.length} additional supplement{suggestions.length > 1 ? "s" : ""}
+                After your first 90 days - {suggestions.length} additional supplement{suggestions.length > 1 ? "s" : ""}
               </span>
               <p className="text-xs text-muted-foreground mt-0.5">
                 Complete your priority stack first before adding these

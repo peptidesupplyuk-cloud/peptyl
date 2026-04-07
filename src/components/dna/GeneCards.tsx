@@ -22,6 +22,13 @@ interface Props {
   genes?: GeneResult[];
 }
 
+const riskLabel = (level: string) => {
+  const l = level?.toLowerCase();
+  if (l === "low" || l === "favourable" || l === "normal") return "Low Risk";
+  if (l === "moderate") return "Moderate";
+  return "Elevated";
+};
+
 const riskColor = (level: string) => {
   const l = level?.toLowerCase();
   if (l === "low" || l === "favourable" || l === "normal") return "bg-primary/10 text-primary";
@@ -56,7 +63,7 @@ const GeneCards = ({ genes }: Props) => {
                   )}
                 </div>
                 <p className="text-xs text-muted-foreground font-mono">
-                  {g.rsid} {g.genotype ? `— ${g.genotype}` : g.variant ? `— ${g.variant}` : ""}
+                  {g.rsid} {g.genotype ? `· ${g.genotype}` : g.variant ? `· ${g.variant}` : ""}
                 </p>
                 {g.category && (
                   <span className="text-[10px] text-muted-foreground bg-muted px-1.5 py-0.5 rounded mt-1 inline-block">
@@ -65,11 +72,10 @@ const GeneCards = ({ genes }: Props) => {
                 )}
               </div>
               <span className={`text-xs font-medium px-2.5 py-1 rounded-full ${riskColor(g.risk_level)}`}>
-                {g.risk_level}
+                {riskLabel(g.risk_level)}
               </span>
             </div>
 
-            {/* Score bar */}
             {g.score != null && (
               <div className="mb-3">
                 <div className="h-1.5 bg-muted rounded-full overflow-hidden">
@@ -81,12 +87,10 @@ const GeneCards = ({ genes }: Props) => {
 
             <p className="text-sm text-foreground mb-3">{g.clinical_summary}</p>
 
-            {/* Personalisation */}
             {g.personalisation && (
               <p className="text-xs text-primary mb-3">{g.personalisation}</p>
             )}
 
-            {/* Biomarker impact tooltip */}
             {g.biomarker_impact && (
               <TooltipProvider>
                 <Tooltip>
@@ -103,7 +107,6 @@ const GeneCards = ({ genes }: Props) => {
               </TooltipProvider>
             )}
 
-            {/* Evidence grade note for C/D */}
             {(g.evidence_grade === "C" || g.evidence_grade === "D") && (
               <p className="text-[10px] text-muted-foreground italic mb-3">Preclinical evidence</p>
             )}
