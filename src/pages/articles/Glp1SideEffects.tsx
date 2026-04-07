@@ -191,8 +191,8 @@ const Glp1SideEffects = () => (
 
     <h2>Evidence-Based Supplements for GI Side Effect Management</h2>
 
-    <div className="not-prose my-6 p-4 rounded-xl border border-yellow-500/30 bg-yellow-500/5">
-      <p className="text-xs font-semibold text-yellow-600 dark:text-yellow-400 uppercase tracking-wide mb-2">Important Context</p>
+    <div className="not-prose my-6 p-4 rounded-xl border border-accent/30 bg-accent/5">
+      <p className="text-xs font-semibold text-accent-foreground uppercase tracking-wide mb-2">Important Context</p>
       <p className="text-sm text-foreground leading-relaxed">The supplements listed below have general clinical evidence for GI symptom relief. None have been studied specifically in combination with GLP-1 receptor agonists. Always consult your prescriber before adding supplements to your protocol.</p>
     </div>
 
