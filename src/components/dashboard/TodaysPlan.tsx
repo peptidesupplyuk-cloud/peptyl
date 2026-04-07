@@ -787,7 +787,7 @@ const TodaysPlan = ({ onActivate, slim = false, selectedDate }: TodaysPlanProps)
     }
   };
 
-  if (isLoading) {
+  if (isLoading || protocolsLoading) {
     return (
       <div className="bg-card rounded-2xl border border-border p-5 animate-pulse">
         <div className="h-6 bg-muted rounded w-1/3 mb-4" />
