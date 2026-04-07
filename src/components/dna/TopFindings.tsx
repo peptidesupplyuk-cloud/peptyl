@@ -19,23 +19,36 @@ const severityBadge = (s: string) => {
   return "bg-primary/10 text-primary";
 };
 
+const severityLabel = (s: string) => {
+  if (s === "high") return "High Priority";
+  if (s === "moderate") return "Monitor";
+  return "Low";
+};
+
 const iconMap = {
   urgent: AlertTriangle,
   biomarker: Activity,
   gene: Dna,
 };
 
+const typeLabel = (t: string) => {
+  if (t === "urgent") return "Urgent Flag";
+  if (t === "biomarker") return "Biomarker";
+  return "Genetic Variant";
+};
+
+const cleanText = (s: string): string =>
+  s.replace(/\s*[—–]\s*/g, " - ").replace(/_/g, " ");
+
 const TopFindings = ({ geneResults, biomarkerResults, flags }: Props) => {
   const findings: Finding[] = [];
 
-  // 1. Urgent flags first
   if (flags?.urgent?.length) {
     for (const f of flags.urgent) {
-      findings.push({ type: "urgent", name: "Urgent Flag", summary: f, severity: "high" });
+      findings.push({ type: "urgent", name: "Urgent Flag", summary: cleanText(f), severity: "high" });
     }
   }
 
-  // 2. Biomarkers with action/deficient status
   if (biomarkerResults?.length) {
     for (const b of biomarkerResults) {
       const s = b.status?.toLowerCase();
@@ -43,14 +56,13 @@ const TopFindings = ({ geneResults, biomarkerResults, flags }: Props) => {
         findings.push({
           type: "biomarker",
           name: b.name || b.marker || "Biomarker",
-          summary: b.interpretation || b.action || b.clinical_summary || `${b.value} ${b.unit} — ${b.status}`,
+          summary: cleanText(b.interpretation || b.action || b.clinical_summary || `${b.value} ${b.unit}`),
           severity: "high",
         });
       }
     }
   }
 
-  // 3. High-risk genes
   if (geneResults?.length) {
     for (const g of geneResults) {
       const r = g.risk_level?.toLowerCase();
@@ -58,36 +70,34 @@ const TopFindings = ({ geneResults, biomarkerResults, flags }: Props) => {
         findings.push({
           type: "gene",
           name: g.gene || g.rsid || "Variant",
-          summary: g.clinical_summary || `${g.rsid} — ${g.risk_level}`,
+          summary: cleanText(g.clinical_summary || `${g.rsid} - ${g.risk_level}`),
           severity: "high",
         });
       }
     }
   }
 
-  // 4. Moderate biomarkers
   if (biomarkerResults?.length) {
     for (const b of biomarkerResults) {
       const s = b.status?.toLowerCase();
-      if (s === "suboptimal" || s === "borderline") {
+      if (s === "suboptimal" || s === "borderline" || s === "above_range" || s === "below_range") {
         findings.push({
           type: "biomarker",
           name: b.name || b.marker || "Biomarker",
-          summary: b.interpretation || b.action || `${b.value} ${b.unit} — ${b.status}`,
+          summary: cleanText(b.interpretation || b.action || `${b.value} ${b.unit}`),
           severity: "moderate",
         });
       }
     }
   }
 
-  // 5. Moderate genes
   if (geneResults?.length) {
     for (const g of geneResults) {
       if (g.risk_level?.toLowerCase() === "moderate") {
         findings.push({
           type: "gene",
           name: g.gene || g.rsid || "Variant",
-          summary: g.clinical_summary || `${g.rsid} — ${g.risk_level}`,
+          summary: cleanText(g.clinical_summary || `${g.rsid} - ${g.risk_level}`),
           severity: "moderate",
         });
       }
@@ -108,10 +118,10 @@ const TopFindings = ({ geneResults, biomarkerResults, flags }: Props) => {
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
                   <Icon className="h-4 w-4 text-muted-foreground" />
-                  <span className="text-xs font-medium text-muted-foreground uppercase tracking-wide">{f.type}</span>
+                  <span className="text-xs font-medium text-muted-foreground uppercase tracking-wide">{typeLabel(f.type)}</span>
                 </div>
                 <span className={`text-[10px] font-semibold px-2 py-0.5 rounded-full ${severityBadge(f.severity)}`}>
-                  {f.severity}
+                  {severityLabel(f.severity)}
                 </span>
               </div>
               <h3 className="font-heading font-semibold text-foreground text-sm">{f.name}</h3>

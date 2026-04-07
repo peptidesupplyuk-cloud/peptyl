@@ -1,5 +1,3 @@
-import { Target } from "lucide-react";
-
 interface Priority {
   priority: string;
   timeline?: string;
@@ -10,6 +8,21 @@ interface Priority {
 interface Props {
   priorities?: Priority[];
 }
+
+const timelineLabel = (t?: string): string => {
+  if (!t) return "";
+  return t.replace(/_/g, " ").replace(/\b\w/g, c => c.toUpperCase());
+};
+
+const timelineColor = (t?: string): string => {
+  const l = t?.toLowerCase();
+  if (l === "immediate" || l === "urgent") return "bg-destructive/10 text-destructive";
+  if (l === "ongoing") return "bg-primary/10 text-primary";
+  return "bg-muted text-muted-foreground";
+};
+
+const cleanText = (s: string): string =>
+  s.replace(/\s*[—–]\s*/g, " - ");
 
 const HealthPriorities = ({ priorities }: Props) => {
   if (!priorities?.length) return null;
@@ -27,21 +40,21 @@ const HealthPriorities = ({ priorities }: Props) => {
               <div className="flex-1">
                 <h3 className="font-heading font-semibold text-foreground text-sm">{p.priority}</h3>
                 {p.timeline && (
-                  <span className="text-[10px] text-muted-foreground bg-muted px-2 py-0.5 rounded mt-1 inline-block">
-                    {p.timeline}
+                  <span className={`text-[10px] px-2 py-0.5 rounded mt-1 inline-block font-medium ${timelineColor(p.timeline)}`}>
+                    {timelineLabel(p.timeline)}
                   </span>
                 )}
               </div>
             </div>
             {p.why && (
-              <p className="text-xs text-muted-foreground mb-3">{p.why}</p>
+              <p className="text-xs text-muted-foreground mb-3">{cleanText(p.why)}</p>
             )}
             {p.actions && p.actions.length > 0 && (
               <ul className="space-y-1.5">
                 {p.actions.map((a, j) => (
                   <li key={j} className="flex items-start gap-2 text-xs text-foreground">
                     <span className="text-primary shrink-0 mt-1 text-[8px]">●</span>
-                    <span>{a}</span>
+                    <span>{cleanText(a)}</span>
                   </li>
                 ))}
               </ul>

@@ -1,14 +1,13 @@
 interface BiomarkerResult {
-  // New field names
   name?: string;
-  marker?: string; // Legacy
+  marker?: string;
   value: number;
   unit: string;
   status: string;
-  range_normal?: string;
-  optimal_range?: string; // Legacy
+  range_normal?: string | { min?: number; max?: number };
+  optimal_range?: string | { min?: number; max?: number };
   interpretation?: string;
-  action?: string; // Legacy
+  action?: string;
   gene_interaction?: string;
   trend?: string;
 }
@@ -17,18 +16,48 @@ interface Props {
   biomarkers?: BiomarkerResult[];
 }
 
+const humanizeStatus = (s: string): string => {
+  if (!s) return "Unknown";
+  const map: Record<string, string> = {
+    optimal: "Optimal",
+    suboptimal: "Suboptimal",
+    above_range: "Above Range",
+    below_range: "Below Range",
+    out_of_range: "Out of Range",
+    action_required: "Needs Attention",
+    action: "Needs Attention",
+    critical: "Critical",
+    deficient: "Deficient",
+    borderline: "Borderline",
+    normal: "Normal",
+  };
+  return map[s.toLowerCase()] ?? s.replace(/_/g, " ").replace(/\b\w/g, c => c.toUpperCase());
+};
+
 const statusColor = (s: string) => {
   const l = s?.toLowerCase();
-  if (l === "optimal") return "bg-primary text-primary-foreground";
-  if (l === "suboptimal") return "bg-yellow-500 text-white";
+  if (l === "optimal" || l === "normal") return "bg-primary text-primary-foreground";
+  if (l === "suboptimal" || l === "borderline") return "bg-yellow-500 text-white";
   return "bg-destructive text-white";
 };
 
 const statusBg = (s: string) => {
   const l = s?.toLowerCase();
-  if (l === "optimal") return "bg-primary/10";
-  if (l === "suboptimal") return "bg-yellow-500/10";
+  if (l === "optimal" || l === "normal") return "bg-primary/10";
+  if (l === "suboptimal" || l === "borderline") return "bg-yellow-500/10";
   return "bg-destructive/10";
+};
+
+const formatRange = (raw: unknown): string => {
+  if (!raw) return "";
+  if (typeof raw === "string") return raw;
+  if (typeof raw === "object" && raw !== null) {
+    const obj = raw as Record<string, unknown>;
+    const min = obj.min ?? obj.low ?? "?";
+    const max = obj.max ?? obj.high ?? "?";
+    return `${min} - ${max}`;
+  }
+  return String(raw);
 };
 
 const BiomarkerBars = ({ biomarkers }: Props) => {
@@ -40,11 +69,9 @@ const BiomarkerBars = ({ biomarkers }: Props) => {
       <div className="space-y-3">
         {biomarkers.map((b, i) => {
           const label = b.name || b.marker || "Unknown";
-          const rawRange = b.range_normal || b.optimal_range || "";
-          const range = typeof rawRange === "object" && rawRange !== null
-            ? `${(rawRange as any).min ?? "?"} – ${(rawRange as any).max ?? "?"}`
-            : String(rawRange);
+          const range = formatRange(b.range_normal || b.optimal_range);
           const detail = b.interpretation || b.action || "";
+          const displayStatus = humanizeStatus(b.status);
 
           return (
             <div key={i} className={`rounded-xl p-4 border border-border ${statusBg(b.status)}`}>
@@ -53,14 +80,9 @@ const BiomarkerBars = ({ biomarkers }: Props) => {
                   <span className="font-heading font-semibold text-foreground text-sm">{label}</span>
                   {range && <span className="text-xs text-muted-foreground ml-2">Optimal: {range}</span>}
                 </div>
-                <div className="flex items-center gap-2">
-                  {b.trend && (
-                    <span className="text-[10px] text-muted-foreground">{b.trend}</span>
-                  )}
-                  <span className={`text-xs font-medium px-2.5 py-1 rounded-full ${statusColor(b.status)}`}>
-                    {b.status}
-                  </span>
-                </div>
+                <span className={`text-xs font-medium px-2.5 py-1 rounded-full ${statusColor(b.status)}`}>
+                  {displayStatus}
+                </span>
               </div>
 
               <div className="flex items-baseline gap-1 mb-2">

@@ -4,9 +4,9 @@ interface Props {
   plan?: {
     immediate?: string[];
     thirty_days?: string[];
-    "30_days"?: string[]; // Legacy
+    "30_days"?: string[];
     ninety_days?: string[];
-    "90_days"?: string[]; // Legacy
+    "90_days"?: string[];
     gp_conversations?: string[];
   };
 }
@@ -58,11 +58,11 @@ const getItems = (plan: any, col: typeof columns[number]): string[] => {
   return [];
 };
 
-const tightenItem = (s: string): string => {
-  const dash = s.indexOf(" — ");
-  if (dash > 10 && dash < 80) return s.slice(0, dash).trim();
-  if (s.length > 80) return s.slice(0, 80).trim() + "…";
-  return s;
+const cleanItem = (s: string): string => {
+  // Remove em dashes and content after them for brevity, but keep the core action
+  let cleaned = s.replace(/\s*[—–]\s*/g, " - ");
+  if (cleaned.length > 90) cleaned = cleaned.slice(0, 90).trim() + "...";
+  return cleaned;
 };
 
 const ActionPlan = ({ plan }: Props) => {
@@ -111,18 +111,18 @@ const ActionPlan = ({ plan }: Props) => {
 
               <ul className="space-y-2.5 flex-1">
                 {items.map((item, i) => {
-                  const short = isGP ? item : tightenItem(item);
+                  const text = cleanItem(item);
                   return (
                     <li key={i} className="flex items-start gap-2">
                       {isGP ? (
                         <>
                           <MessageSquare className={`h-3.5 w-3.5 mt-0.5 shrink-0 ${col.iconColor}`} />
-                          <span className="text-sm text-foreground italic leading-snug">{short}</span>
+                          <span className="text-sm text-foreground italic leading-snug">{text}</span>
                         </>
                       ) : (
                         <>
                           <CheckCircle2 className={`h-3.5 w-3.5 mt-0.5 shrink-0 ${col.iconColor}`} />
-                          <span className="text-sm text-foreground leading-snug">{short}</span>
+                          <span className="text-sm text-foreground leading-snug">{text}</span>
                         </>
                       )}
                     </li>

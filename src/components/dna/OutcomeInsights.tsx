@@ -81,7 +81,7 @@ const OutcomeInsights = ({ reportId, genotypeKey }: OutcomeInsightsProps) => {
         <div className="flex items-center gap-2">
           <Clock className="h-4 w-4 text-primary" />
           <span className="font-heading font-semibold text-foreground text-sm">
-            Protocol in progress — Week {weeksActive}
+            Protocol in progress · Week {weeksActive}
           </span>
         </div>
         <div className="w-full bg-muted rounded-full h-2">
@@ -93,7 +93,7 @@ const OutcomeInsights = ({ reportId, genotypeKey }: OutcomeInsightsProps) => {
         {record.avg_hrv_baseline != null && (
           <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
             <Activity className="h-3 w-3" />
-            Avg HRV: <span className="font-mono text-foreground">{Number(record.avg_hrv_baseline).toFixed(0)}</span>bpm
+            Avg HRV: <span className="font-mono text-foreground">{Number(record.avg_hrv_baseline).toFixed(0)}</span> bpm
           </div>
         )}
         <p className="text-xs text-muted-foreground">Your week 10 retest reminder is scheduled</p>
@@ -133,6 +133,9 @@ const OutcomeInsights = ({ reportId, genotypeKey }: OutcomeInsightsProps) => {
 
   const sampleSize = communityData?.sample_size ? Number(communityData.sample_size) : 0;
 
+  const humanizeMarker = (key: string) =>
+    key.replace(/_/g, " ").replace(/\b\w/g, c => c.toUpperCase());
+
   return (
     <div className="space-y-4">
       {/* Part A: Your Results */}
@@ -147,7 +150,7 @@ const OutcomeInsights = ({ reportId, genotypeKey }: OutcomeInsightsProps) => {
         <div className="space-y-1.5">
           {markerEntries.map(([key, m]) => (
             <div key={key} className="flex items-center justify-between text-sm py-1.5 border-b border-border/10 last:border-0">
-              <span className="text-muted-foreground capitalize">{key.replace(/_/g, " ")}</span>
+              <span className="text-muted-foreground">{humanizeMarker(key)}</span>
               <div className="flex items-center gap-2">
                 <span className="font-mono text-xs text-muted-foreground">{m.before}</span>
                 <span className="text-muted-foreground/50">→</span>

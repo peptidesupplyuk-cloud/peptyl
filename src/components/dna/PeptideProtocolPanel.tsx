@@ -161,7 +161,7 @@ const PeptideProtocolPanel = ({ peptides }: Props) => {
               <Sparkles className="h-4 w-4 text-muted-foreground mt-0.5 shrink-0" />
               <div>
                 <span className="text-sm font-medium text-foreground">
-                  After your first cycle — {suggestions.length} further compound{suggestions.length > 1 ? "s" : ""} to consider
+                  After your first cycle: {suggestions.length} further compound{suggestions.length > 1 ? "s" : ""} to consider
                 </span>
                 <p className="text-xs text-muted-foreground mt-0.5">
                   Run your priority stack for one full cycle before adding these
