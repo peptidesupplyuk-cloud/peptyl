@@ -304,4 +304,12 @@ export const blogPosts: BlogPost[] = [
     readTime: "8 min read",
     date: "March 2026",
   },
+  {
+    slug: "glp1-side-effects-supplements",
+    title: "GLP-1 Side Effects: What to Expect and Supplements That May Help",
+    category: "Side Effects & Safety",
+    excerpt: "Evidence-based guide to confirmed GLP-1 side effects including nausea, constipation, and muscle loss. Research-backed supplements like ginger, magnesium, and probiotics that may help manage symptoms.",
+    readTime: "14 min read",
+    date: "April 2026",
+  },
 ];

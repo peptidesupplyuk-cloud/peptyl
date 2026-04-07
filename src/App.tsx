@@ -160,6 +160,7 @@ const AppContent = () => {
           <Route path="/education/peptide-stacking-guide" element={<PeptideStackingGuide />} />
           <Route path="/education/semax-selank-dosage-guide" element={<SemaxSelankGuide />} />
           <Route path="/education/endotoxin-purity-peptides" element={<EndotoxinPurity />} />
+          <Route path="/education/glp1-side-effects-supplements" element={<Glp1SideEffects />} />
           <Route path="/glossary" element={<Glossary />} />
           <Route path="/sitemap" element={<SiteMapPage />} />
           <Route path="/whoop-callback" element={<WhoopCallback />} />
