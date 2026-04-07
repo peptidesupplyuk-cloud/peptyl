@@ -489,7 +489,7 @@ const TodaysPlan = ({ onActivate, slim = false, selectedDate }: TodaysPlanProps)
   const isLoading = selectedDate ? dateLoading : todayLoading;
   
   const updateStatus = useUpdateInjectionStatus();
-  const { data: protocols = [] } = useProtocols();
+  const { data: protocols = [], isLoading: protocolsLoading } = useProtocols();
   const { data: panels = [] } = useBloodworkPanels();
   const hasActiveProtocol = protocols.some((p) => p.status === "active");
 
@@ -787,7 +787,7 @@ const TodaysPlan = ({ onActivate, slim = false, selectedDate }: TodaysPlanProps)
     }
   };
 
-  if (isLoading) {
+  if (isLoading || protocolsLoading) {
     return (
       <div className="bg-card rounded-2xl border border-border p-5 animate-pulse">
         <div className="h-6 bg-muted rounded w-1/3 mb-4" />
