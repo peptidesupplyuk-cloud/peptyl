@@ -39,7 +39,40 @@ const DNAAnalysing = () => {
     return () => clearInterval(interval);
   }, []);
 
-  // Call the edge function once, then poll
+  // Realtime subscription as primary detection + polling as fallback
+  useEffect(() => {
+    if (!reportId) return;
+
+    const channel = supabase
+      .channel(`dna-report-${reportId}`)
+      .on(
+        "postgres_changes",
+        {
+          event: "UPDATE",
+          schema: "public",
+          table: "dna_reports",
+          filter: `id=eq.${reportId}`,
+        },
+        (payload) => {
+          const row = payload.new as any;
+          if (row.pipeline_status) setStatus(row.pipeline_status);
+          if (row.pipeline_progress != null) setProgress(row.pipeline_progress);
+          if (row.pipeline_status === "complete") {
+            navigate(`/dna/report/${reportId}`, { replace: true });
+          }
+          if (row.pipeline_status === "failed") {
+            setError(row.pipeline_error || "Analysis failed. Please try again.");
+          }
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [reportId, navigate]);
+
+  // Call the edge function once, then poll as fallback
   useEffect(() => {
     if (!inputText && !imageBase64) {
       navigate("/dna/upload", { replace: true });
@@ -81,9 +114,9 @@ const DNAAnalysing = () => {
         }
       }
 
-      // Poll for pipeline completion
+      // Poll as fallback (realtime is primary)
       while (!cancelled) {
-        await new Promise((r) => setTimeout(r, 3000));
+        await new Promise((r) => setTimeout(r, 5000));
         if (cancelled) return;
 
         const { data, error: fetchErr } = await supabase
