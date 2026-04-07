@@ -53,7 +53,7 @@ const GLP1AssessmentPanel = ({ glp1 }: Props) => {
       {/* Short contextual intro — not a warning */}
       <p className="text-sm text-muted-foreground leading-relaxed">
         Based on your metabolic signals, GLP-1 receptor agonists are worth raising with your GP.
-        These are prescription medications — this section gives you the context to have that conversation.
+        These are prescription medications. This section gives you the context to have that conversation.
       </p>
 
       {/* Trigger signals — compact chips, not a scary list */}
