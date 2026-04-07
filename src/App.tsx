@@ -76,6 +76,7 @@ const Fgf21Longevity = lazy(() => import("./pages/articles/Fgf21Longevity"));
 const PeptideStackingGuide = lazy(() => import("./pages/articles/PeptideStackingGuide"));
 const SemaxSelankGuide = lazy(() => import("./pages/articles/SemaxSelankGuide"));
 const EndotoxinPurity = lazy(() => import("./pages/articles/EndotoxinPurity"));
+const Glp1SideEffects = lazy(() => import("./pages/articles/Glp1SideEffects"));
 const Glossary = lazy(() => import("./pages/Glossary"));
 const SiteMapPage = lazy(() => import("./pages/SiteMap"));
 const CampaignPage = lazy(() => import("./pages/CampaignPage"));
