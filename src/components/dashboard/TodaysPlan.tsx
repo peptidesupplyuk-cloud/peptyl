@@ -489,7 +489,7 @@ const TodaysPlan = ({ onActivate, slim = false, selectedDate }: TodaysPlanProps)
   const isLoading = selectedDate ? dateLoading : todayLoading;
   
   const updateStatus = useUpdateInjectionStatus();
-  const { data: protocols = [] } = useProtocols();
+  const { data: protocols = [], isLoading: protocolsLoading } = useProtocols();
   const { data: panels = [] } = useBloodworkPanels();
   const hasActiveProtocol = protocols.some((p) => p.status === "active");
 
