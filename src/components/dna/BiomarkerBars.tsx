@@ -40,7 +40,10 @@ const BiomarkerBars = ({ biomarkers }: Props) => {
       <div className="space-y-3">
         {biomarkers.map((b, i) => {
           const label = b.name || b.marker || "Unknown";
-          const range = b.range_normal || b.optimal_range || "";
+          const rawRange = b.range_normal || b.optimal_range || "";
+          const range = typeof rawRange === "object" && rawRange !== null
+            ? `${(rawRange as any).min ?? "?"} – ${(rawRange as any).max ?? "?"}`
+            : String(rawRange);
           const detail = b.interpretation || b.action || "";
 
           return (
