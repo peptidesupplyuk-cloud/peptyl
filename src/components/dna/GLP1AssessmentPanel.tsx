@@ -43,7 +43,7 @@ const GLP1AssessmentPanel = ({ glp1 }: Props) => {
       <div className="flex items-center gap-3 flex-wrap">
         <div className="flex items-center gap-2">
           <Stethoscope className="h-5 w-5 text-foreground" />
-          <h2 className="text-xl font-heading font-bold text-foreground">GP Discussion — Metabolic</h2>
+          <h2 className="text-xl font-heading font-bold text-foreground">GP Discussion: Metabolic</h2>
         </div>
         <span className="text-xs font-medium px-2.5 py-1 rounded-full bg-muted text-muted-foreground">
           Prescription only
