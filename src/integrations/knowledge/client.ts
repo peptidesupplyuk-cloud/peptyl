@@ -8,8 +8,10 @@ export const knowledgeDB = createClient(KNOWLEDGE_URL, KNOWLEDGE_ANON_KEY, {
 });
 
 /** Normalise a compound name to a knowledge DB compound_id for lookup */
-export function normaliseCompoundId(name: string): string {
-  return name
+export function normaliseCompoundId(name: unknown): string {
+  const safeName = typeof name === 'string' ? name : '';
+
+  return safeName
     .toLowerCase()
     .trim()
     .replace(/[()]/g, '')
