@@ -20,6 +20,7 @@ export default defineConfig(({ mode }) => ({
     react(),
     mode === "development" && componentTagger(),
     VitePWA({
+      selfDestroying: true,
       registerType: "autoUpdate",
       includeAssets: ["favicon-v2.png", "app-icon-v2.png", "splash.png"],
       manifest: {
