@@ -851,6 +851,22 @@ export function getUnifiedRecommendations(input: UnifiedRecommendationInput): Un
   const results: UnifiedRecommendation[] = [];
   const seen = new Set<string>();
 
+  const normalizeText = (value: unknown) =>
+    typeof value === "string" ? value.trim() : "";
+
+  const getGeneMatchData = (geneResult: any) => {
+    const gene = normalizeText(geneResult?.gene);
+    const variant = normalizeText(geneResult?.variant);
+
+    return {
+      gene,
+      variant,
+      geneKey: gene.toLowerCase(),
+      variantKey: variant.toLowerCase(),
+      label: [gene, variant].filter(Boolean).join(" "),
+    };
+  };
+
   // ─── STEP 1: Bloodwork-triggered recommendations ───────────────────────────
   const bloodRecs = input.markers ? getRecommendations(input.markers) : [];
 
@@ -859,24 +875,27 @@ export function getUnifiedRecommendations(input: UnifiedRecommendationInput): Un
     seen.add(rec.id);
 
     let supplements = [...(rec.supplements || [])];
-    const signalLabels = [rec.triggerDescription];
+    const signalLabels = [rec.triggerDescription].filter(Boolean) as string[];
     let signalSources: SignalSource[] = ["bloodwork"];
 
     // ─── STEP 2: DNA enhancement of bloodwork recs ─────────────────────────
     if (input.dnaReport?.gene_results) {
       for (const geneResult of input.dnaReport.gene_results) {
+        const { gene, variant, geneKey, variantKey, label } = getGeneMatchData(geneResult);
+        if (!geneKey || !variantKey) continue;
+
         for (const signal of DNA_SUPPLEMENT_SIGNALS) {
           if (
-            geneResult.gene.toLowerCase().includes(signal.gene.toLowerCase()) &&
-            geneResult.variant.toLowerCase().includes(signal.variantPattern.toLowerCase())
+            geneKey.includes(signal.gene.toLowerCase()) &&
+            variantKey.includes(signal.variantPattern.toLowerCase())
           ) {
             for (const dnaSup of signal.supplements) {
-              if (!supplements.find(s => s.name === dnaSup.name)) {
+              if (!supplements.find((s) => s.name === dnaSup.name)) {
                 supplements.push(dnaSup);
               }
             }
-            if (!signalLabels.includes(`${geneResult.gene} ${geneResult.variant}`)) {
-              signalLabels.push(`${geneResult.gene} ${geneResult.variant}`);
+            if (label && !signalLabels.includes(label)) {
+              signalLabels.push(label);
             }
             if (!signalSources.includes("dna")) signalSources.push("dna");
           }
@@ -910,12 +929,15 @@ export function getUnifiedRecommendations(input: UnifiedRecommendationInput): Un
   // ─── STEP 3: DNA-only standalone supplement recommendations ────────────────
   if (input.dnaReport?.gene_results) {
     for (const geneResult of input.dnaReport.gene_results) {
+      const { geneKey, variantKey, label } = getGeneMatchData(geneResult);
+      if (!geneKey || !variantKey) continue;
+
       for (const signal of DNA_SUPPLEMENT_SIGNALS) {
         if (!signal.standalone || !signal.standaloneRec) continue;
 
         if (
-          geneResult.gene.toLowerCase().includes(signal.gene.toLowerCase()) &&
-          geneResult.variant.toLowerCase().includes(signal.variantPattern.toLowerCase())
+          geneKey.includes(signal.gene.toLowerCase()) &&
+          variantKey.includes(signal.variantPattern.toLowerCase())
         ) {
           const id = `dna_${signal.gene.toLowerCase()}_${signal.variantPattern.toLowerCase().replace(/\//g, "_")}`;
           if (seen.has(id)) continue;
@@ -925,7 +947,7 @@ export function getUnifiedRecommendations(input: UnifiedRecommendationInput): Un
             id,
             ...signal.standaloneRec,
             signalSources: ["dna"],
-            signalLabels: [`${geneResult.gene} ${geneResult.variant}`],
+            signalLabels: label ? [label] : [],
             confidenceLevel: "high",
           });
         }
@@ -947,8 +969,8 @@ export function getUnifiedRecommendations(input: UnifiedRecommendationInput): Un
       const id = `dna_protocol_${groupKey.replace(/\s+/g, "_").toLowerCase().slice(0, 40)}`;
       if (seen.has(id)) continue;
 
-      const alreadyCovered = sups.every(sup =>
-        results.some(r => r.supplements.some(s => s.name === sup.supplement))
+      const alreadyCovered = sups.every((sup) =>
+        results.some((r) => r.supplements.some((s) => s.name === sup.supplement))
       );
       if (alreadyCovered) continue;
       seen.add(id);
@@ -961,10 +983,10 @@ export function getUnifiedRecommendations(input: UnifiedRecommendationInput): Un
         goal: `Support based on DNA analysis: ${(sups[0].driven_by || []).join(", ")}`,
         type: "supplements_only",
         signalSources: ["dna"],
-        signalLabels: sups.flatMap(s => s.driven_by || []).filter((v, i, a) => a.indexOf(v) === i),
+        signalLabels: sups.flatMap((s) => s.driven_by || []).filter((v, i, a) => a.indexOf(v) === i),
         confidenceLevel: "high",
         peptides: [],
-        supplements: sups.map(s => ({
+        supplements: sups.map((s) => ({
           name: s.supplement,
           dose: s.dose,
           frequency: s.timing,
@@ -984,17 +1006,20 @@ export function getUnifiedRecommendations(input: UnifiedRecommendationInput): Un
       if (seen.has(rec.id)) continue;
       seen.add(rec.id);
 
-      const supplements = (rec.supplements || []).map(s => ({ ...s }));
+      const supplements = (rec.supplements || []).map((s) => ({ ...s }));
 
       if (input.dnaReport?.gene_results) {
         for (const geneResult of input.dnaReport.gene_results) {
+          const { geneKey, variantKey } = getGeneMatchData(geneResult);
+          if (!geneKey || !variantKey) continue;
+
           for (const signal of DNA_SUPPLEMENT_SIGNALS) {
             if (
-              geneResult.gene.toLowerCase().includes(signal.gene.toLowerCase()) &&
-              geneResult.variant.toLowerCase().includes(signal.variantPattern.toLowerCase())
+              geneKey.includes(signal.gene.toLowerCase()) &&
+              variantKey.includes(signal.variantPattern.toLowerCase())
             ) {
               for (const dnaSup of signal.supplements) {
-                if (!supplements.find(s => s.name === dnaSup.name)) {
+                if (!supplements.find((s) => s.name === dnaSup.name)) {
                   supplements.push(dnaSup);
                 }
               }
