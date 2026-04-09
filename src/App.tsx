@@ -14,6 +14,7 @@ import { useActivityTracker } from "@/hooks/use-activity-tracker";
 const SitewideDisclaimer = lazy(() => import("@/components/SitewideDisclaimer"));
 import ScrollToTop from "@/components/ScrollToTop";
 import GeoGate from "@/components/GeoGate";
+import PWACrashRecovery from "@/components/PWACrashRecovery";
 const GlobalMobileNav = lazy(() => import("@/components/GlobalMobileNav"));
 
 // Lazy-load ALL pages for faster initial load
@@ -191,19 +192,21 @@ const AppContent = () => {
 };
 
 const App = () => (
-  <GeoGate>
-  <QueryClientProvider client={queryClient}>
-    <AuthProvider>
-      <TooltipProvider>
-        <Toaster />
-        <Sonner />
-        <BrowserRouter>
-          <AppContent />
-        </BrowserRouter>
-      </TooltipProvider>
-    </AuthProvider>
-  </QueryClientProvider>
-  </GeoGate>
+  <PWACrashRecovery>
+    <GeoGate>
+      <QueryClientProvider client={queryClient}>
+        <AuthProvider>
+          <TooltipProvider>
+            <Toaster />
+            <Sonner />
+            <BrowserRouter>
+              <AppContent />
+            </BrowserRouter>
+          </TooltipProvider>
+        </AuthProvider>
+      </QueryClientProvider>
+    </GeoGate>
+  </PWACrashRecovery>
 );
 
 export default App;
