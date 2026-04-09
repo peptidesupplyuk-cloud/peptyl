@@ -200,7 +200,9 @@ const App = () => (
             <Toaster />
             <Sonner />
             <BrowserRouter>
-              <AppContent />
+              <Suspense fallback={<div className="min-h-screen bg-background" />}>
+                <AppContent />
+              </Suspense>
             </BrowserRouter>
           </TooltipProvider>
         </AuthProvider>
