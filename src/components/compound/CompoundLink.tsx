@@ -2,7 +2,7 @@ import { useNavigate } from 'react-router-dom';
 import { normaliseCompoundId } from '@/integrations/knowledge/client';
 
 interface CompoundLinkProps {
-  name: string;
+  name?: string | null;
   className?: string;
 }
 
@@ -10,16 +10,20 @@ interface CompoundLinkProps {
 const CompoundLink = ({ name, className = '' }: CompoundLinkProps) => {
   const navigate = useNavigate();
   const compoundId = normaliseCompoundId(name);
+  const label = typeof name === 'string' && name.trim() ? name : 'Unknown compound';
+  const isDisabled = !compoundId;
 
   return (
     <button
       onClick={(e) => {
         e.stopPropagation();
+        if (isDisabled) return;
         navigate(`/compound/${compoundId}`);
       }}
-      className={`text-primary hover:underline cursor-pointer transition-colors text-left ${className}`}
+      disabled={isDisabled}
+      className={`text-primary transition-colors text-left ${isDisabled ? 'cursor-default opacity-70' : 'cursor-pointer hover:underline'} ${className}`}
     >
-      {name}
+      {label}
     </button>
   );
 };
