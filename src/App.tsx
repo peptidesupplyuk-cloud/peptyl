@@ -14,6 +14,7 @@ import { useActivityTracker } from "@/hooks/use-activity-tracker";
 const SitewideDisclaimer = lazy(() => import("@/components/SitewideDisclaimer"));
 import ScrollToTop from "@/components/ScrollToTop";
 import GeoGate from "@/components/GeoGate";
+import PWACrashRecovery from "@/components/PWACrashRecovery";
 const GlobalMobileNav = lazy(() => import("@/components/GlobalMobileNav"));
 
 // Lazy-load ALL pages for faster initial load
