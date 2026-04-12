@@ -37,7 +37,6 @@ const GlobalMobileNav = () => {
     { href: "/improve", label: t("nav.improve"), icon: Zap },
     { href: dnaHref, label: t("nav.dna"), icon: Dna },
     { href: "/education", label: t("nav.learn"), icon: BookOpen },
-    { href: "/shop", label: t("nav.shop"), icon: Store },
   ], [t, dnaHref]);
 
   if (!isMobile) return null;
