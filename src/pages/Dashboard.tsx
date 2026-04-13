@@ -62,6 +62,38 @@ import PipMemoryCard from "@/components/dashboard/PipMemoryCard";
 import GpSummarySection from "@/components/dashboard/GpSummarySection";
 import { useAdherence } from "@/hooks/use-adherence";
 
+const safeSessionGet = (key: string) => {
+  try {
+    return sessionStorage.getItem(key);
+  } catch {
+    return null;
+  }
+};
+
+const safeSessionRemove = (key: string) => {
+  try {
+    sessionStorage.removeItem(key);
+  } catch {
+    // ignore storage failures in PWA/private contexts
+  }
+};
+
+const safeLocalGet = (key: string) => {
+  try {
+    return localStorage.getItem(key);
+  } catch {
+    return null;
+  }
+};
+
+const safeLocalSet = (key: string, value: string) => {
+  try {
+    localStorage.setItem(key, value);
+  } catch {
+    // ignore storage failures in PWA/private contexts
+  }
+};
+
 /* ─── Compact Journal for Overview ─── */
 const CompactJournal = ({ onExpandJournal }: { onExpandJournal: () => void }) => {
   const [note, setNote] = useState("");
@@ -285,10 +317,10 @@ const Dashboard = () => {
   const onboardingBannerKey = user ? `peptyl_onboarding_seen_${user.id}` : null;
   const [showOnboardingBanner, setShowOnboardingBanner] = useState(() => {
     if (!onboardingBannerKey) return false;
-    return localStorage.getItem(onboardingBannerKey) !== "true";
+    return safeLocalGet(onboardingBannerKey) !== "true";
   });
   const dismissOnboardingBanner = () => {
-    if (onboardingBannerKey) localStorage.setItem(onboardingBannerKey, "true");
+    if (onboardingBannerKey) safeLocalSet(onboardingBannerKey, "true");
     setShowOnboardingBanner(false);
   };
   const [selectedDate, setSelectedDate] = useState(new Date());
@@ -311,7 +343,7 @@ const Dashboard = () => {
 
   useEffect(() => {
     const tab = searchParams.get("tab");
-    const peptide = searchParams.get("peptide") || sessionStorage.getItem("pending_peptide");
+    const peptide = searchParams.get("peptide") || safeSessionGet("pending_peptide");
     const retest = searchParams.get("retest");
     const protocolIdParam = searchParams.get("protocolId");
     if (tab) {
@@ -319,7 +351,7 @@ const Dashboard = () => {
     }
     if (peptide) {
       setInitialPeptide(peptide);
-      sessionStorage.removeItem("pending_peptide");
+      safeSessionRemove("pending_peptide");
     }
     if (retest === "true") {
       setDefaultIsRetest(true);
