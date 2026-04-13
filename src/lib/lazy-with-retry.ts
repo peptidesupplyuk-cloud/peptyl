@@ -1,5 +1,7 @@
 import { lazy, type ComponentType } from "react";
 
+const RELOAD_GUARD_KEY = "peptyl-lazy-reload";
+
 /**
  * Wrapper around React.lazy that retries failed dynamic imports once
  * after clearing module cache. Prevents blank screens when the PWA
@@ -10,7 +12,9 @@ export function lazyWithRetry<T extends ComponentType<any>>(
 ): React.LazyExoticComponent<T> {
   return lazy(async () => {
     try {
-      return await factory();
+      const mod = await factory();
+      sessionStorage.removeItem(RELOAD_GUARD_KEY);
+      return mod;
     } catch (err) {
       console.warn("[lazyWithRetry] Chunk load failed, retrying…", err);
 
@@ -31,13 +35,30 @@ export function lazyWithRetry<T extends ComponentType<any>>(
       await new Promise((r) => setTimeout(r, 500));
 
       try {
-        return await factory();
+        const mod = await factory();
+        sessionStorage.removeItem(RELOAD_GUARD_KEY);
+        return mod;
       } catch (retryErr) {
-        // Last resort: hard reload
+        // Last resort: hard reload once, then throw so the error boundary can render.
         console.error("[lazyWithRetry] Retry failed, reloading page", retryErr);
-        window.location.reload();
-        // Return a never-resolving promise so React doesn't try to render
-        return new Promise(() => {});
+
+        try {
+          const hasReloaded = sessionStorage.getItem(RELOAD_GUARD_KEY) === "1";
+          if (!hasReloaded) {
+            sessionStorage.setItem(RELOAD_GUARD_KEY, "1");
+            const url = new URL(window.location.href);
+            url.searchParams.set("_lr", Date.now().toString());
+            window.location.replace(url.toString());
+          } else {
+            sessionStorage.removeItem(RELOAD_GUARD_KEY);
+          }
+        } catch {
+          window.location.reload();
+        }
+
+        throw retryErr instanceof Error
+          ? retryErr
+          : new Error("Failed to load application code.");
       }
     }
   });

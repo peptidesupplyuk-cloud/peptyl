@@ -7,26 +7,27 @@ import { Suspense } from "react";
 import { lazyWithRetry } from "@/lib/lazy-with-retry";
 import { AuthProvider } from "@/contexts/AuthContext";
 import ProtectedRoute from "@/components/ProtectedRoute";
-const PeptideChat = lazyWithRetry(() => import("@/components/PeptideChat"));
+import PeptideChat from "@/components/PeptideChat";
 
-const PWAUpdatePrompt = lazyWithRetry(() => import("@/components/PWAUpdatePrompt"));
+import PWAUpdatePrompt from "@/components/PWAUpdatePrompt";
 import { useActivityTracker } from "@/hooks/use-activity-tracker";
 
-const SitewideDisclaimer = lazyWithRetry(() => import("@/components/SitewideDisclaimer"));
+import SitewideDisclaimer from "@/components/SitewideDisclaimer";
 import ScrollToTop from "@/components/ScrollToTop";
 import GeoGate from "@/components/GeoGate";
 import PWACrashRecovery from "@/components/PWACrashRecovery";
-const GlobalMobileNav = lazyWithRetry(() => import("@/components/GlobalMobileNav"));
+import GlobalMobileNav from "@/components/GlobalMobileNav";
+import Auth from "./pages/Auth";
+import ResetPassword from "./pages/ResetPassword";
+import CompleteProfile from "./pages/CompleteProfile";
+import Dashboard from "./pages/Dashboard";
+import PipFloatingButton from "./components/pip/PipFloatingButton";
 
 // Lazy-load ALL pages for faster initial load
 const Index = lazyWithRetry(() => import("./pages/Index"));
-const Auth = lazyWithRetry(() => import("./pages/Auth"));
-const ResetPassword = lazyWithRetry(() => import("./pages/ResetPassword"));
-const CompleteProfile = lazyWithRetry(() => import("./pages/CompleteProfile"));
 const Peptides = lazyWithRetry(() => import("./pages/Peptides"));
 const Calculators = lazyWithRetry(() => import("./pages/Calculators"));
 const Education = lazyWithRetry(() => import("./pages/Education"));
-const Dashboard = lazyWithRetry(() => import("./pages/Dashboard"));
 const Improve = lazyWithRetry(() => import("./pages/Improve"));
 const ShopHub = lazyWithRetry(() => import("./pages/ShopHub"));
 const Testing = lazyWithRetry(() => import("./pages/Testing"));
@@ -93,16 +94,21 @@ const DNADashboard = lazyWithRetry(() => import("./pages/dna/DNADashboard"));
 const JoinReferral = lazyWithRetry(() => import("./pages/JoinReferral"));
 const CompoundIntelligence = lazyWithRetry(() => import("./pages/CompoundIntelligence"));
 const PipChatPage = lazyWithRetry(() => import("./pages/PipChat"));
-const PipFloatingButton = lazyWithRetry(() => import("./components/pip/PipFloatingButton"));
 
 const queryClient = new QueryClient();
+
+const RouteFallback = () => (
+  <div className="min-h-screen bg-background flex items-center justify-center">
+    <div className="text-sm text-muted-foreground">Loading…</div>
+  </div>
+);
 
 const AppContent = () => {
   useActivityTracker();
   return (
     <>
       <ScrollToTop />
-      <Suspense fallback={<div className="min-h-screen bg-background" />}>
+      <Suspense fallback={<RouteFallback />}>
         <Routes>
           <Route path="/" element={<Index />} />
           <Route path="/home" element={<Index />} />
@@ -184,8 +190,6 @@ const AppContent = () => {
       <GlobalMobileNav />
       <PeptideChat />
       <PipFloatingButton />
-      
-      
       <SitewideDisclaimer />
       <PWAUpdatePrompt />
     </>
@@ -201,9 +205,7 @@ const App = () => (
             <Toaster />
             <Sonner />
             <BrowserRouter>
-              <Suspense fallback={<div className="min-h-screen bg-background" />}>
-                <AppContent />
-              </Suspense>
+              <AppContent />
             </BrowserRouter>
           </TooltipProvider>
         </AuthProvider>
