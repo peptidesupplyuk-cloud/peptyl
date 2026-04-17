@@ -275,7 +275,22 @@ const CoachPlanBuilder = () => {
         start_date: startDate || null,
         end_date: endDate || null,
         status: "draft",
-        peptides: peptides.map((p) => ({ ...p, calc: calcClicks(p) })) as any,
+        peptides: peptides.map((p) => {
+          const lib = peptideLibrary?.find((l) => l.peptyl_id === p.peptyl_id);
+          return {
+            ...p,
+            calc: calcClicks(p),
+            benefits: lib?.primary_effects || [],
+            mechanism: lib?.mechanism_of_action || null,
+            side_effects_common: lib?.side_effects_common || [],
+            side_effects_rare: lib?.side_effects_rare || [],
+            contraindications: lib?.contraindications || [],
+            drug_interactions: lib?.drug_interactions || [],
+            evidence_grade: lib?.evidence_grade || null,
+            category: lib?.category || null,
+            cycle_duration: lib?.cycle_duration || null,
+          };
+        }) as any,
         supplements: supplements as any,
         titration_schedule: titration as any,
         injection_sites: sites,
