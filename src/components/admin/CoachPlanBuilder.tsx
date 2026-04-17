@@ -17,88 +17,264 @@ import {
 } from "lucide-react";
 
 function exportPlanToPrintable(plan: any) {
-  const peptidesHtml = (plan.peptides as any[] || []).map((p: any) => `
-    <div class="block">
-      <h4>${p.peptide_name} <span class="badge">${p.frequency}</span></h4>
-      <table>
-        <tr><td>Dose per administration</td><td><strong>${p.dose_mg} mg</strong></td></tr>
-        <tr><td>Vial strength</td><td>${p.vial_strength_mg} mg</td></tr>
-        <tr><td>BAC water</td><td>${p.bac_water_ml} ml</td></tr>
-        <tr><td>Concentration</td><td>${p.calc?.concentration ?? "—"} mg/ml</td></tr>
-        <tr><td>Volume per dose</td><td>${p.calc?.volumeMl ?? "—"} ml</td></tr>
-        <tr><td>Clicks per dose (${p.ml_per_click} ml/click)</td><td><strong style="color:#0d9488">${p.calc?.clicks ?? "—"} clicks</strong></td></tr>
-        <tr><td>Doses per vial</td><td>${p.calc?.dosesPerVial ?? "—"}</td></tr>
-        <tr><td>Timing / Route</td><td>${p.timing || "—"} • ${p.route || "—"}</td></tr>
-      </table>
-      ${p.notes ? `<p class="muted"><em>${p.notes}</em></p>` : ""}
-    </div>
-  `).join("");
+  const peptidesHtml = (plan.peptides as any[] || []).map((p: any) => {
+    const benefitsHtml = p.benefits?.length
+      ? `<div class="chips-row">
+          <div class="chips-label">Benefits</div>
+          <div class="chips">${p.benefits.map((b: string) => `<span class="chip chip-primary">${b}</span>`).join("")}</div>
+        </div>` : "";
+    const sideHtml = p.side_effects_common?.length
+      ? `<div class="chips-row">
+          <div class="chips-label warn">Common Side Effects</div>
+          <div class="chips">${p.side_effects_common.map((s: string) => `<span class="chip chip-warn">${s}</span>`).join("")}</div>
+        </div>` : "";
+    const contraHtml = p.contraindications?.length
+      ? `<div class="chips-row">
+          <div class="chips-label danger">Contraindications</div>
+          <div class="chips">${p.contraindications.map((c: string) => `<span class="chip chip-danger">${c}</span>`).join("")}</div>
+        </div>` : "";
+    return `
+      <div class="peptide-card">
+        <div class="peptide-head">
+          <div>
+            <div class="peptide-name">${p.peptide_name}</div>
+            ${p.category ? `<div class="peptide-cat">${p.category}</div>` : ""}
+          </div>
+          <div class="peptide-tags">
+            <span class="tag tag-outline">${p.frequency}</span>
+            ${p.evidence_grade ? `<span class="tag">Evidence: ${p.evidence_grade}</span>` : ""}
+          </div>
+        </div>
+
+        <div class="metrics">
+          <div class="metric"><div class="metric-label">Dose</div><div class="metric-value">${p.dose_mg} <span>mg</span></div></div>
+          <div class="metric"><div class="metric-label">Vial</div><div class="metric-value">${p.vial_strength_mg}<span> mg</span></div><div class="metric-sub">${p.bac_water_ml} ml BAC</div></div>
+          <div class="metric metric-hero"><div class="metric-label">Clicks / dose</div><div class="metric-value">${p.calc?.clicks ?? "—"}</div><div class="metric-sub">${p.calc?.volumeMl ?? "—"} ml</div></div>
+          <div class="metric"><div class="metric-label">Doses / vial</div><div class="metric-value">${p.calc?.dosesPerVial ?? "—"}</div></div>
+        </div>
+
+        ${benefitsHtml}
+        ${p.mechanism ? `<div class="text-block"><div class="block-label">Mechanism of Action</div><p>${p.mechanism}</p></div>` : ""}
+        ${sideHtml}
+        ${contraHtml}
+        ${p.notes ? `<div class="coach-note"><strong>Coach note:</strong> ${p.notes}</div>` : ""}
+      </div>
+    `;
+  }).join("");
 
   const supplementsHtml = (plan.supplements as any[] || []).length
-    ? `<h3>Supplements</h3><table class="full">
-        <tr><th>Name</th><th>Dose</th><th>Frequency</th><th>Timing</th></tr>
-        ${(plan.supplements as any[]).map((s: any) => `<tr><td>${s.name}</td><td>${s.dose}</td><td>${s.frequency}</td><td>${s.timing}</td></tr>`).join("")}
-      </table>` : "";
+    ? `<section><h2>Supplement Stack</h2>
+        <table class="data-table">
+          <thead><tr><th>Supplement</th><th>Dose</th><th>Frequency</th><th>Timing</th></tr></thead>
+          <tbody>${(plan.supplements as any[]).map((s: any) => `<tr><td><strong>${s.name}</strong></td><td>${s.dose}</td><td>${s.frequency}</td><td>${s.timing}</td></tr>`).join("")}</tbody>
+        </table></section>` : "";
 
   const titrationHtml = (plan.titration_schedule as any[] || []).length
-    ? `<h3>Titration Schedule</h3><table class="full">
-        <tr><th>Week</th><th>Dose</th><th>Note</th></tr>
-        ${(plan.titration_schedule as any[]).map((t: any) => `<tr><td>Week ${t.week}</td><td>${t.dose_mg} mg</td><td>${t.note || ""}</td></tr>`).join("")}
-      </table>` : "";
+    ? `<section><h2>Titration Schedule</h2>
+        <table class="data-table">
+          <thead><tr><th>Week</th><th>Dose</th><th>Note</th></tr></thead>
+          <tbody>${(plan.titration_schedule as any[]).map((t: any) => `<tr><td><strong>Week ${t.week}</strong></td><td>${t.dose_mg} mg</td><td>${t.note || "—"}</td></tr>`).join("")}</tbody>
+        </table></section>` : "";
 
   const html = `<!DOCTYPE html>
-<html><head><meta charset="utf-8"><title>${plan.client_name} — Bespoke Plan</title>
+<html lang="en"><head><meta charset="utf-8"><title>${plan.client_name} — Bespoke Plan • Peptyl</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
-  @page { margin: 20mm; }
-  body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; color: #111; max-width: 780px; margin: 24px auto; padding: 0 24px; line-height: 1.5; }
-  h1 { font-size: 26px; margin: 0 0 4px; color: #0d9488; }
-  h2 { font-size: 14px; font-weight: 500; color: #555; margin: 0 0 24px; text-transform: uppercase; letter-spacing: 1px; }
-  h3 { font-size: 16px; margin: 28px 0 10px; padding-bottom: 6px; border-bottom: 2px solid #0d9488; }
-  h4 { font-size: 14px; margin: 0 0 8px; display: flex; justify-content: space-between; align-items: center; }
-  .badge { background: #0d9488; color: white; padding: 2px 8px; border-radius: 4px; font-size: 11px; font-weight: 500; }
-  .block { border: 1px solid #e5e7eb; border-radius: 8px; padding: 12px 16px; margin-bottom: 12px; page-break-inside: avoid; }
-  table { width: 100%; border-collapse: collapse; font-size: 13px; }
-  table.full td, table.full th { border: 1px solid #e5e7eb; padding: 6px 10px; text-align: left; }
-  table.full th { background: #f9fafb; font-weight: 600; }
-  table:not(.full) td { padding: 3px 0; }
-  table:not(.full) td:first-child { color: #666; width: 55%; }
-  .muted { color: #666; font-size: 12px; }
-  .meta { color: #555; font-size: 13px; margin-bottom: 4px; }
-  .safety { background: #fffbeb; border: 1px solid #fbbf24; border-radius: 8px; padding: 12px 16px; margin-top: 16px; }
-  .safety h3 { color: #b45309; border: 0; margin-top: 0; }
-  .footer { margin-top: 36px; padding-top: 16px; border-top: 1px solid #e5e7eb; font-size: 11px; color: #888; }
-  .actions { margin-bottom: 20px; }
-  .actions button { background: #0d9488; color: white; border: 0; padding: 8px 16px; border-radius: 6px; cursor: pointer; font-size: 13px; margin-right: 8px; }
-  @media print { .actions { display: none; } body { margin: 0; } }
+  :root {
+    --teal: #14b8a6;
+    --teal-dark: #0d9488;
+    --teal-light: #5eead4;
+    --bg: #fafafa;
+    --ink: #0a0a0a;
+    --ink-soft: #404040;
+    --muted: #737373;
+    --border: #e5e5e5;
+    --surface: #ffffff;
+    --warn: #d97706;
+    --danger: #dc2626;
+  }
+  @page { size: A4; margin: 0; }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Inter', -apple-system, sans-serif; color: var(--ink); background: var(--bg); line-height: 1.55; -webkit-font-smoothing: antialiased; }
+
+  .page { max-width: 210mm; margin: 0 auto; background: var(--surface); }
+
+  /* ==== HERO ==== */
+  .hero {
+    background: linear-gradient(135deg, #0f172a 0%, #134e4a 60%, #0d9488 100%);
+    color: white;
+    padding: 48px 56px 56px;
+    position: relative;
+    overflow: hidden;
+  }
+  .hero::before {
+    content: ""; position: absolute; top: -50%; right: -20%; width: 600px; height: 600px;
+    background: radial-gradient(circle, rgba(94,234,212,0.25) 0%, transparent 70%);
+    pointer-events: none;
+  }
+  .brand {
+    display: flex; align-items: center; gap: 10px; font-size: 13px;
+    letter-spacing: 3px; text-transform: uppercase; font-weight: 600;
+    color: var(--teal-light); margin-bottom: 32px; position: relative;
+  }
+  .brand-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--teal-light); box-shadow: 0 0 12px var(--teal-light); }
+  .hero h1 { font-size: 42px; font-weight: 800; letter-spacing: -1px; margin-bottom: 8px; position: relative; }
+  .hero-sub { font-size: 14px; color: rgba(255,255,255,0.7); text-transform: uppercase; letter-spacing: 2px; font-weight: 500; margin-bottom: 28px; position: relative; }
+  .hero-meta { display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; position: relative; padding-top: 24px; border-top: 1px solid rgba(255,255,255,0.15); }
+  .hero-meta-item .label { font-size: 10px; text-transform: uppercase; letter-spacing: 2px; color: rgba(255,255,255,0.55); margin-bottom: 4px; }
+  .hero-meta-item .value { font-size: 15px; font-weight: 600; color: white; }
+  .hero-goal { display: inline-block; padding: 6px 14px; background: rgba(94,234,212,0.15); border: 1px solid rgba(94,234,212,0.4); color: var(--teal-light); border-radius: 999px; font-size: 12px; font-weight: 600; margin-top: 12px; position: relative; }
+
+  /* ==== CONTENT ==== */
+  .content { padding: 48px 56px; }
+  section { margin-bottom: 40px; page-break-inside: avoid; }
+  section h2 {
+    font-size: 11px; text-transform: uppercase; letter-spacing: 3px; font-weight: 700;
+    color: var(--teal-dark); margin-bottom: 16px;
+    padding-bottom: 10px; border-bottom: 2px solid var(--teal);
+    display: flex; align-items: center; gap: 8px;
+  }
+
+  /* ==== PEPTIDE CARDS ==== */
+  .peptide-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-left: 4px solid var(--teal);
+    border-radius: 12px;
+    padding: 24px;
+    margin-bottom: 16px;
+    page-break-inside: avoid;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+  }
+  .peptide-head { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 20px; gap: 12px; }
+  .peptide-name { font-size: 20px; font-weight: 700; letter-spacing: -0.3px; }
+  .peptide-cat { font-size: 10px; text-transform: uppercase; letter-spacing: 2px; color: var(--muted); margin-top: 2px; }
+  .peptide-tags { display: flex; gap: 6px; flex-wrap: wrap; }
+  .tag { padding: 4px 10px; background: #f5f5f5; color: var(--ink-soft); border-radius: 6px; font-size: 11px; font-weight: 600; }
+  .tag-outline { background: transparent; border: 1px solid var(--teal); color: var(--teal-dark); }
+
+  .metrics {
+    display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 20px;
+    padding: 16px; background: #fafafa; border-radius: 10px;
+  }
+  .metric-label { font-size: 9px; text-transform: uppercase; letter-spacing: 1.5px; color: var(--muted); margin-bottom: 4px; font-weight: 600; }
+  .metric-value { font-size: 22px; font-weight: 700; letter-spacing: -0.5px; color: var(--ink); }
+  .metric-value span { font-size: 12px; font-weight: 500; color: var(--muted); }
+  .metric-sub { font-size: 10px; color: var(--muted); margin-top: 2px; }
+  .metric-hero { background: linear-gradient(135deg, var(--teal) 0%, var(--teal-dark) 100%); border-radius: 8px; padding: 12px; margin: -4px; color: white; }
+  .metric-hero .metric-label { color: rgba(255,255,255,0.8); }
+  .metric-hero .metric-value { color: white; font-size: 26px; }
+  .metric-hero .metric-sub { color: rgba(255,255,255,0.85); }
+
+  .chips-row { margin-top: 14px; }
+  .chips-label { font-size: 10px; text-transform: uppercase; letter-spacing: 1.5px; color: var(--teal-dark); font-weight: 700; margin-bottom: 6px; }
+  .chips-label.warn { color: var(--warn); }
+  .chips-label.danger { color: var(--danger); }
+  .chips { display: flex; flex-wrap: wrap; gap: 6px; }
+  .chip { padding: 4px 10px; border-radius: 6px; font-size: 11px; font-weight: 500; background: #f5f5f5; color: var(--ink-soft); }
+  .chip-primary { background: rgba(20,184,166,0.1); color: var(--teal-dark); border: 1px solid rgba(20,184,166,0.2); }
+  .chip-warn { background: rgba(217,119,6,0.08); color: var(--warn); border: 1px solid rgba(217,119,6,0.2); }
+  .chip-danger { background: rgba(220,38,38,0.08); color: var(--danger); border: 1px solid rgba(220,38,38,0.2); }
+
+  .text-block { margin-top: 14px; }
+  .block-label { font-size: 10px; text-transform: uppercase; letter-spacing: 1.5px; color: var(--muted); font-weight: 700; margin-bottom: 4px; }
+  .text-block p { font-size: 13px; color: var(--ink-soft); line-height: 1.6; }
+
+  .coach-note {
+    margin-top: 14px; padding: 12px 14px; background: rgba(20,184,166,0.06);
+    border-left: 3px solid var(--teal); border-radius: 4px; font-size: 13px; color: var(--ink-soft);
+  }
+
+  /* ==== TABLES ==== */
+  .data-table { width: 100%; border-collapse: collapse; background: var(--surface); border-radius: 8px; overflow: hidden; border: 1px solid var(--border); }
+  .data-table th { background: #fafafa; padding: 10px 14px; text-align: left; font-size: 10px; text-transform: uppercase; letter-spacing: 1.5px; color: var(--muted); font-weight: 700; border-bottom: 1px solid var(--border); }
+  .data-table td { padding: 12px 14px; font-size: 13px; border-bottom: 1px solid var(--border); }
+  .data-table tr:last-child td { border-bottom: 0; }
+
+  /* ==== INFO BLOCKS ==== */
+  .info-block { padding: 18px 20px; border-radius: 10px; background: #fafafa; border: 1px solid var(--border); white-space: pre-wrap; font-size: 13px; color: var(--ink-soft); line-height: 1.6; }
+  .info-block.safety { background: linear-gradient(135deg, rgba(217,119,6,0.04), rgba(217,119,6,0.08)); border: 1px solid rgba(217,119,6,0.3); border-left: 4px solid var(--warn); }
+  .info-block.safety .safety-title { font-size: 11px; text-transform: uppercase; letter-spacing: 2px; color: var(--warn); font-weight: 700; margin-bottom: 8px; display: flex; align-items: center; gap: 6px; }
+
+  .pill-list { display: flex; flex-wrap: wrap; gap: 6px; }
+  .pill-list .chip { background: rgba(20,184,166,0.1); color: var(--teal-dark); border: 1px solid rgba(20,184,166,0.2); }
+
+  /* ==== FOOTER ==== */
+  .footer {
+    margin-top: 48px; padding: 24px 56px 36px; background: #0a0a0a; color: rgba(255,255,255,0.6);
+    font-size: 11px; line-height: 1.6;
+  }
+  .footer-brand { color: var(--teal-light); font-weight: 700; letter-spacing: 2px; text-transform: uppercase; font-size: 10px; margin-bottom: 6px; }
+  .footer-disclaim { font-size: 10px; color: rgba(255,255,255,0.4); margin-top: 8px; }
+
+  /* ==== ACTIONS (hidden on print) ==== */
+  .actions {
+    position: sticky; top: 0; z-index: 100; background: rgba(10,10,10,0.95); backdrop-filter: blur(10px);
+    padding: 14px 56px; display: flex; gap: 10px; align-items: center; justify-content: space-between;
+    border-bottom: 1px solid rgba(255,255,255,0.1);
+  }
+  .actions-brand { color: var(--teal-light); font-size: 12px; letter-spacing: 2px; text-transform: uppercase; font-weight: 700; }
+  .actions-buttons { display: flex; gap: 8px; }
+  .btn { background: var(--teal); color: white; border: 0; padding: 9px 18px; border-radius: 8px; cursor: pointer; font-size: 13px; font-weight: 600; font-family: inherit; transition: all 0.15s; }
+  .btn:hover { background: var(--teal-dark); }
+  .btn-ghost { background: transparent; border: 1px solid rgba(255,255,255,0.2); color: white; }
+  .btn-ghost:hover { background: rgba(255,255,255,0.1); }
+
+  @media print {
+    .actions { display: none; }
+    body { background: white; }
+    .page { max-width: 100%; }
+    .footer { background: #0a0a0a !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+    .hero { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+    .metric-hero { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+    .chip-primary, .chip-warn, .chip-danger { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  }
 </style></head>
 <body>
   <div class="actions">
-    <button onclick="window.print()">🖨️ Print / Save as PDF</button>
-    <button onclick="window.close()">Close</button>
+    <span class="actions-brand">◆ Peptyl</span>
+    <div class="actions-buttons">
+      <button class="btn" onclick="window.print()">Save as PDF</button>
+      <button class="btn btn-ghost" onclick="window.close()">Close</button>
+    </div>
   </div>
-  <h1>${plan.client_name}</h1>
-  <h2>Bespoke Protocol Plan</h2>
-  ${plan.client_email ? `<p class="meta"><strong>Email:</strong> ${plan.client_email}</p>` : ""}
-  ${plan.goal ? `<p class="meta"><strong>Goal:</strong> ${plan.goal}</p>` : ""}
-  ${(plan.start_date || plan.end_date) ? `<p class="meta"><strong>Duration:</strong> ${plan.start_date || "—"} → ${plan.end_date || "ongoing"}</p>` : ""}
-  <p class="meta"><strong>Status:</strong> ${plan.status}</p>
 
-  ${peptidesHtml ? `<h3>Peptide Protocol</h3>${peptidesHtml}` : ""}
-  ${supplementsHtml}
-  ${titrationHtml}
+  <div class="page">
+    <header class="hero">
+      <div class="brand"><span class="brand-dot"></span> Peptyl • Bespoke Coach Plan</div>
+      <h1>${plan.client_name}</h1>
+      <div class="hero-sub">Personalised Protocol</div>
+      ${plan.goal ? `<div class="hero-goal">◆ ${plan.goal}</div>` : ""}
+      <div class="hero-meta">
+        <div class="hero-meta-item"><div class="label">Status</div><div class="value">${(plan.status || "draft").toUpperCase()}</div></div>
+        <div class="hero-meta-item"><div class="label">Start</div><div class="value">${plan.start_date || "—"}</div></div>
+        <div class="hero-meta-item"><div class="label">End</div><div class="value">${plan.end_date || "Ongoing"}</div></div>
+      </div>
+    </header>
 
-  ${plan.injection_sites?.length ? `<h3>Injection Sites</h3><p>${plan.injection_sites.join(" • ")}</p>` : ""}
-  ${plan.timing_notes ? `<h3>Timing Instructions</h3><p style="white-space:pre-wrap">${plan.timing_notes}</p>` : ""}
-  ${plan.safety_notes ? `<div class="safety"><h3>⚠️ Safety Notes</h3><p style="white-space:pre-wrap">${plan.safety_notes}</p></div>` : ""}
-  ${plan.coach_rationale ? `<h3>Coach Rationale</h3><p style="white-space:pre-wrap">${plan.coach_rationale}</p>` : ""}
-  ${plan.client_notes ? `<h3>Client Notes</h3><p style="white-space:pre-wrap">${plan.client_notes}</p>` : ""}
+    <main class="content">
+      ${peptidesHtml ? `<section><h2>◆ Peptide Protocol</h2>${peptidesHtml}</section>` : ""}
+      ${supplementsHtml}
+      ${titrationHtml}
 
-  <div class="footer">
-    Generated ${new Date().toLocaleString()} • Peptyl Coach Plan • For research and educational purposes only. Not medical advice.
+      ${plan.injection_sites?.length ? `<section><h2>◆ Injection Sites</h2><div class="pill-list">${plan.injection_sites.map((s: string) => `<span class="chip">${s}</span>`).join("")}</div></section>` : ""}
+      ${plan.timing_notes ? `<section><h2>◆ Timing Instructions</h2><div class="info-block">${plan.timing_notes}</div></section>` : ""}
+      ${plan.safety_notes ? `<section><div class="info-block safety"><div class="safety-title">⚠ Safety Notes</div>${plan.safety_notes}</div></section>` : ""}
+      ${plan.coach_rationale ? `<section><h2>◆ Coach Rationale</h2><div class="info-block">${plan.coach_rationale}</div></section>` : ""}
+      ${plan.client_notes ? `<section><h2>◆ Notes for Client</h2><div class="info-block">${plan.client_notes}</div></section>` : ""}
+    </main>
+
+    <footer class="footer">
+      <div class="footer-brand">◆ Peptyl • Health Intelligence</div>
+      <div>Generated ${new Date().toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric" })} at ${new Date().toLocaleTimeString("en-GB", { hour: "2-digit", minute: "2-digit" })}</div>
+      <div class="footer-disclaim">This protocol is provided for research and educational purposes only and does not constitute medical advice. All compounds referenced are intended for in-vitro research use under the Human Medicines Regulations 2012 (UK). Consult a qualified healthcare professional before commencing any protocol.</div>
+    </footer>
   </div>
 </body></html>`;
 
-  const win = window.open("", "_blank", "width=900,height=1000");
+  const win = window.open("", "_blank", "width=1000,height=1200");
   if (!win) {
     alert("Please allow pop-ups to export the plan.");
     return;
@@ -275,7 +451,22 @@ const CoachPlanBuilder = () => {
         start_date: startDate || null,
         end_date: endDate || null,
         status: "draft",
-        peptides: peptides.map((p) => ({ ...p, calc: calcClicks(p) })) as any,
+        peptides: peptides.map((p) => {
+          const lib = peptideLibrary?.find((l) => l.peptyl_id === p.peptyl_id);
+          return {
+            ...p,
+            calc: calcClicks(p),
+            benefits: lib?.primary_effects || [],
+            mechanism: lib?.mechanism_of_action || null,
+            side_effects_common: lib?.side_effects_common || [],
+            side_effects_rare: lib?.side_effects_rare || [],
+            contraindications: lib?.contraindications || [],
+            drug_interactions: lib?.drug_interactions || [],
+            evidence_grade: lib?.evidence_grade || null,
+            category: lib?.category || null,
+            cycle_duration: lib?.cycle_duration || null,
+          };
+        }) as any,
         supplements: supplements as any,
         titration_schedule: titration as any,
         injection_sites: sites,
@@ -434,10 +625,16 @@ const CoachPlanBuilder = () => {
             <h3 className="font-semibold mb-3 flex items-center gap-2"><Syringe className="h-4 w-4 text-primary" /> Peptide Protocol</h3>
             <div className="space-y-3">
               {(plan.peptides as any[]).map((p, i) => (
-                <div key={i} className="border border-border rounded-lg p-3 space-y-2">
-                  <div className="flex items-center justify-between">
-                    <h4 className="font-medium">{p.peptide_name}</h4>
-                    <Badge variant="outline">{p.frequency}</Badge>
+                <div key={i} className="border border-border rounded-lg p-4 space-y-3">
+                  <div className="flex items-center justify-between flex-wrap gap-2">
+                    <div>
+                      <h4 className="font-semibold">{p.peptide_name}</h4>
+                      {p.category && <p className="text-[10px] uppercase tracking-wider text-muted-foreground">{p.category}</p>}
+                    </div>
+                    <div className="flex gap-1.5 flex-wrap">
+                      <Badge variant="outline">{p.frequency}</Badge>
+                      {p.evidence_grade && <Badge variant="secondary" className="text-[10px]">Evidence: {p.evidence_grade}</Badge>}
+                    </div>
                   </div>
                   <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 text-xs">
                     <div><p className="text-muted-foreground">Dose</p><p className="font-semibold">{p.dose_mg} mg</p></div>
@@ -445,7 +642,29 @@ const CoachPlanBuilder = () => {
                     <div><p className="text-muted-foreground">Clicks/dose</p><p className="font-semibold text-primary">{p.calc?.clicks ?? "—"}</p></div>
                     <div><p className="text-muted-foreground">Doses/vial</p><p className="font-semibold">{p.calc?.dosesPerVial ?? "—"}</p></div>
                   </div>
-                  {p.notes && <p className="text-xs text-muted-foreground italic">{p.notes}</p>}
+                  {p.benefits?.length > 0 && (
+                    <div className="pt-2 border-t border-border/50">
+                      <p className="text-[11px] uppercase tracking-wider text-muted-foreground mb-1.5">Benefits</p>
+                      <div className="flex flex-wrap gap-1.5">
+                        {p.benefits.map((b: string, k: number) => (
+                          <Badge key={k} variant="secondary" className="text-[11px] bg-primary/10 text-primary border-0">{b}</Badge>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                  {p.mechanism && (
+                    <div>
+                      <p className="text-[11px] uppercase tracking-wider text-muted-foreground mb-1">Mechanism</p>
+                      <p className="text-xs text-foreground/80">{p.mechanism}</p>
+                    </div>
+                  )}
+                  {p.side_effects_common?.length > 0 && (
+                    <div>
+                      <p className="text-[11px] uppercase tracking-wider text-amber-600 dark:text-amber-400 mb-1">Common Side Effects</p>
+                      <p className="text-xs text-muted-foreground">{p.side_effects_common.join(" • ")}</p>
+                    </div>
+                  )}
+                  {p.notes && <p className="text-xs text-muted-foreground italic pt-1 border-t border-border/50">{p.notes}</p>}
                 </div>
               ))}
             </div>
