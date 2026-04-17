@@ -668,14 +668,14 @@ const CoachPlanBuilder = () => {
                   )}
                 </div>
                 <code className="block text-xs text-muted-foreground bg-background border border-border rounded px-2 py-1.5 font-mono break-all">
-                  {`${window.location.origin}/plan/${plan.share_token}`}
+                  {`https://peptyl.co.uk/plan/${plan.share_token}`}
                 </code>
               </div>
               <div className="flex gap-2">
                 <Button
                   size="sm"
                   onClick={async () => {
-                    await navigator.clipboard.writeText(`${window.location.origin}/plan/${plan.share_token}`);
+                    await navigator.clipboard.writeText(`https://peptyl.co.uk/plan/${plan.share_token}`);
                     toast({ title: "Link copied", description: "Send it to your client via any channel." });
                   }}
                   className="gap-1.5"
