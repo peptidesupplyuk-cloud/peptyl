@@ -94,6 +94,7 @@ const DNADashboard = lazyWithRetry(() => import("./pages/dna/DNADashboard"));
 const JoinReferral = lazyWithRetry(() => import("./pages/JoinReferral"));
 const CompoundIntelligence = lazyWithRetry(() => import("./pages/CompoundIntelligence"));
 const PipChatPage = lazyWithRetry(() => import("./pages/PipChat"));
+const SharedCoachPlan = lazyWithRetry(() => import("./pages/SharedCoachPlan"));
 
 const queryClient = new QueryClient();
 
@@ -183,6 +184,7 @@ const AppContent = () => {
           <Route path="/compound/:compoundId" element={<ProtectedRoute><CompoundIntelligence /></ProtectedRoute>} />
           <Route path="/pip" element={<ProtectedRoute><PipChatPage /></ProtectedRoute>} />
           <Route path="/join/:code" element={<JoinReferral />} />
+          <Route path="/plan/:token" element={<SharedCoachPlan />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>
