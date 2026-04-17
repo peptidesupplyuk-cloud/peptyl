@@ -14,6 +14,7 @@ import { useToast } from "@/hooks/use-toast";
 import {
   Plus, Trash2, Loader2, Save, Calculator, AlertTriangle, FileText,
   Beaker, Calendar, User, Pill, Syringe, Eye, ArrowLeft, Printer, Copy, Mail,
+  Link2, Share2, Check, RefreshCw, X,
 } from "lucide-react";
 
 function exportPlanToPrintable(plan: any) {
