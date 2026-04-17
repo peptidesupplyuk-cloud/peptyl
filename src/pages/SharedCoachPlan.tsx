@@ -28,11 +28,42 @@ const SharedCoachPlan = () => {
       } else if (data.share_expires_at && new Date(data.share_expires_at) < new Date()) {
         setError("This share link has expired. Please request a new link from your coach.");
       } else {
+        // Hydrate peptides with enrichment library so older plans show benefits/mechanism/etc.
+        const peptides = (data.peptides as any[]) || [];
+        const names = peptides.map((p: any) => p.peptide_name).filter(Boolean);
+        if (names.length) {
+          const { data: lib } = await supabase
+            .from("peptides_enriched")
+            .select("name, primary_effects, mechanism_of_action, side_effects_common, contraindications, drug_interactions, evidence_grade, category")
+            .in("name", names);
+          const libMap = new Map((lib || []).map((l: any) => [l.name, l]));
+          data.peptides = peptides.map((p: any) => {
+            const l: any = libMap.get(p.peptide_name) || {};
+            return {
+              ...p,
+              benefits: p.benefits?.length ? p.benefits : l.primary_effects || [],
+              mechanism: p.mechanism || l.mechanism_of_action || null,
+              side_effects_common: p.side_effects_common?.length ? p.side_effects_common : l.side_effects_common || [],
+              contraindications: p.contraindications?.length ? p.contraindications : l.contraindications || [],
+              drug_interactions: p.drug_interactions?.length ? p.drug_interactions : l.drug_interactions || [],
+              evidence_grade: p.evidence_grade || l.evidence_grade || null,
+              category: p.category || l.category || null,
+            };
+          });
+        }
         setPlan(data);
       }
       setLoading(false);
     })();
   }, [token]);
+
+  // Round clicks for display: users can only take whole clicks (>=18.5 → 19)
+  const displayClicks = (n: any) => {
+    if (n === null || n === undefined || n === "") return "—";
+    const num = Number(n);
+    if (!isFinite(num)) return "—";
+    return Math.round(num);
+  };
 
   if (loading) {
     return (
