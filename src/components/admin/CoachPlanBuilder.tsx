@@ -394,6 +394,24 @@ const CoachPlanBuilder = () => {
         <Button variant="ghost" size="sm" onClick={() => { setMode("list"); setViewingId(null); }} className="gap-2">
           <ArrowLeft className="h-4 w-4" /> Back to plans
         </Button>
+        <div className="flex flex-wrap gap-2">
+          <Button size="sm" variant="default" onClick={() => exportPlanToPrintable(plan)} className="gap-2">
+            <Printer className="h-4 w-4" /> Export / Print PDF
+          </Button>
+          <Button size="sm" variant="outline" onClick={async () => {
+            await navigator.clipboard.writeText(planToPlainText(plan));
+            toast({ title: "Copied to clipboard", description: "Plan copied as plain text — paste into any message." });
+          }} className="gap-2">
+            <Copy className="h-4 w-4" /> Copy as Text
+          </Button>
+          {plan.client_email && (
+            <Button size="sm" variant="outline" asChild className="gap-2">
+              <a href={`mailto:${plan.client_email}?subject=${encodeURIComponent(`Your bespoke plan — ${plan.client_name}`)}&body=${encodeURIComponent(planToPlainText(plan))}`}>
+                <Mail className="h-4 w-4" /> Email Client
+              </a>
+            </Button>
+          )}
+        </div>
         <Card className="p-6">
           <div className="flex items-start justify-between mb-4">
             <div>
