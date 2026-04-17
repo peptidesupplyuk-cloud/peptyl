@@ -1792,6 +1792,9 @@ const AdminDashboard = () => {
                 <TabsTrigger value="marker-requests" className="gap-1.5">
                   <Droplets className="h-4 w-4" /> Marker Requests
                 </TabsTrigger>
+                <TabsTrigger value="coach-plans" className="gap-1.5">
+                  <FlaskConical className="h-4 w-4" /> Coach Plans
+                </TabsTrigger>
               </TabsList>
 
               <TabsContent value="analytics">
