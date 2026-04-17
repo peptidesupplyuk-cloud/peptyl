@@ -73,10 +73,8 @@ const BiomarkerBars = ({ biomarkers }: Props) => {
           const detail = b.interpretation || b.action || "";
           const displayStatus = humanizeStatus(b.status);
 
-          const valueStr =
-            b.value !== undefined && b.value !== null && b.value !== ""
-              ? String(b.value)
-              : "—";
+          const hasValue = b.value !== undefined && b.value !== null && (b.value as unknown) !== "";
+          const valueStr = hasValue ? String(b.value) : "—";
 
           return (
             <div key={i} className={`rounded-2xl p-4 md:p-5 border border-border ${statusBg(b.status)}`}>
