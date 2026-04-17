@@ -248,9 +248,9 @@ function exportPlanToPrintable(plan: any) {
       <div class="hero-sub">Personalised Protocol</div>
       ${plan.goal ? `<div class="hero-goal">◆ ${plan.goal}</div>` : ""}
       <div class="hero-meta">
-        <div class="hero-meta-item"><div class="label">Status</div><div class="value">${(plan.status || "draft").toUpperCase()}</div></div>
         <div class="hero-meta-item"><div class="label">Start</div><div class="value">${plan.start_date || "—"}</div></div>
         <div class="hero-meta-item"><div class="label">End</div><div class="value">${plan.end_date || "Ongoing"}</div></div>
+        <div class="hero-meta-item"><div class="label">Prepared</div><div class="value">${new Date(plan.created_at).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" })}</div></div>
       </div>
     </header>
 
@@ -427,7 +427,7 @@ const CoachPlanBuilder = () => {
     },
   });
 
-  const { data: viewingPlan } = useQuery({
+  const { data: viewingPlanRaw } = useQuery({
     queryKey: ["coach-plan", viewingId],
     enabled: !!viewingId,
     queryFn: async () => {
@@ -436,6 +436,32 @@ const CoachPlanBuilder = () => {
       return data;
     },
   });
+
+  // Hydrate peptides with enrichment data from the library so older plans
+  // (saved before enrichment was added) still show benefits / mechanism / side effects.
+  const viewingPlan = useMemo(() => {
+    if (!viewingPlanRaw) return null;
+    const plan: any = { ...viewingPlanRaw };
+    plan.peptides = ((plan.peptides as any[]) || []).map((p: any) => {
+      const lib = peptideLibrary?.find(
+        (l) => l.peptyl_id === p.peptyl_id || l.name?.toLowerCase() === p.peptide_name?.toLowerCase()
+      );
+      if (!lib) return p;
+      return {
+        ...p,
+        benefits: p.benefits?.length ? p.benefits : lib.primary_effects || [],
+        mechanism: p.mechanism || lib.mechanism_of_action || null,
+        side_effects_common: p.side_effects_common?.length ? p.side_effects_common : lib.side_effects_common || [],
+        side_effects_rare: p.side_effects_rare?.length ? p.side_effects_rare : lib.side_effects_rare || [],
+        contraindications: p.contraindications?.length ? p.contraindications : lib.contraindications || [],
+        drug_interactions: p.drug_interactions?.length ? p.drug_interactions : lib.drug_interactions || [],
+        evidence_grade: p.evidence_grade || lib.evidence_grade || null,
+        category: p.category || lib.category || null,
+        cycle_duration: p.cycle_duration || lib.cycle_duration || null,
+      };
+    });
+    return plan;
+  }, [viewingPlanRaw, peptideLibrary]);
 
   const createMutation = useMutation({
     mutationFn: async () => {
@@ -554,7 +580,6 @@ const CoachPlanBuilder = () => {
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2 flex-wrap">
                     <h3 className="font-semibold text-foreground">{plan.client_name}</h3>
-                    <Badge variant="secondary" className="text-[10px]">{plan.status}</Badge>
                     {plan.goal && <Badge variant="outline" className="text-[10px]">{plan.goal}</Badge>}
                   </div>
                   <p className="text-xs text-muted-foreground mt-1">
@@ -610,7 +635,6 @@ const CoachPlanBuilder = () => {
               {plan.client_email && <p className="text-sm text-muted-foreground">{plan.client_email}</p>}
               {plan.goal && <Badge className="mt-2">{plan.goal}</Badge>}
             </div>
-            <Badge variant="secondary">{plan.status}</Badge>
           </div>
           {(plan.start_date || plan.end_date) && (
             <p className="text-sm text-muted-foreground flex items-center gap-2">
