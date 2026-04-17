@@ -301,6 +301,10 @@ export type Database = {
           injection_sites: string[] | null
           peptides: Json
           safety_notes: string | null
+          share_created_at: string | null
+          share_enabled: boolean
+          share_expires_at: string | null
+          share_token: string | null
           start_date: string | null
           status: string
           supplements: Json
@@ -321,6 +325,10 @@ export type Database = {
           injection_sites?: string[] | null
           peptides?: Json
           safety_notes?: string | null
+          share_created_at?: string | null
+          share_enabled?: boolean
+          share_expires_at?: string | null
+          share_token?: string | null
           start_date?: string | null
           status?: string
           supplements?: Json
@@ -341,6 +349,10 @@ export type Database = {
           injection_sites?: string[] | null
           peptides?: Json
           safety_notes?: string | null
+          share_created_at?: string | null
+          share_enabled?: boolean
+          share_expires_at?: string | null
+          share_token?: string | null
           start_date?: string | null
           status?: string
           supplements?: Json
