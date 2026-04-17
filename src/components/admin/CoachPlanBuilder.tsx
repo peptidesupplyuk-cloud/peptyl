@@ -248,9 +248,9 @@ function exportPlanToPrintable(plan: any) {
       <div class="hero-sub">Personalised Protocol</div>
       ${plan.goal ? `<div class="hero-goal">◆ ${plan.goal}</div>` : ""}
       <div class="hero-meta">
-        <div class="hero-meta-item"><div class="label">Status</div><div class="value">${(plan.status || "draft").toUpperCase()}</div></div>
         <div class="hero-meta-item"><div class="label">Start</div><div class="value">${plan.start_date || "—"}</div></div>
         <div class="hero-meta-item"><div class="label">End</div><div class="value">${plan.end_date || "Ongoing"}</div></div>
+        <div class="hero-meta-item"><div class="label">Prepared</div><div class="value">${new Date(plan.created_at).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" })}</div></div>
       </div>
     </header>
 
