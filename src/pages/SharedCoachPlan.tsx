@@ -28,11 +28,42 @@ const SharedCoachPlan = () => {
       } else if (data.share_expires_at && new Date(data.share_expires_at) < new Date()) {
         setError("This share link has expired. Please request a new link from your coach.");
       } else {
+        // Hydrate peptides with enrichment library so older plans show benefits/mechanism/etc.
+        const peptides = (data.peptides as any[]) || [];
+        const names = peptides.map((p: any) => p.peptide_name).filter(Boolean);
+        if (names.length) {
+          const { data: lib } = await supabase
+            .from("peptides_enriched")
+            .select("name, primary_effects, mechanism_of_action, side_effects_common, contraindications, drug_interactions, evidence_grade, category")
+            .in("name", names);
+          const libMap = new Map((lib || []).map((l: any) => [l.name, l]));
+          data.peptides = peptides.map((p: any) => {
+            const l: any = libMap.get(p.peptide_name) || {};
+            return {
+              ...p,
+              benefits: p.benefits?.length ? p.benefits : l.primary_effects || [],
+              mechanism: p.mechanism || l.mechanism_of_action || null,
+              side_effects_common: p.side_effects_common?.length ? p.side_effects_common : l.side_effects_common || [],
+              contraindications: p.contraindications?.length ? p.contraindications : l.contraindications || [],
+              drug_interactions: p.drug_interactions?.length ? p.drug_interactions : l.drug_interactions || [],
+              evidence_grade: p.evidence_grade || l.evidence_grade || null,
+              category: p.category || l.category || null,
+            };
+          });
+        }
         setPlan(data);
       }
       setLoading(false);
     })();
   }, [token]);
+
+  // Round clicks for display: users can only take whole clicks (>=18.5 → 19)
+  const displayClicks = (n: any) => {
+    if (n === null || n === undefined || n === "") return "—";
+    const num = Number(n);
+    if (!isFinite(num)) return "—";
+    return Math.round(num);
+  };
 
   if (loading) {
     return (
@@ -133,7 +164,7 @@ const SharedCoachPlan = () => {
                       <div>
                         <p className="text-[11px] uppercase tracking-[0.25em] text-primary font-bold mb-1">Clicks per dose</p>
                         <div className="flex items-baseline gap-3">
-                          <span className="text-6xl font-heading font-bold text-primary leading-none tabular-nums">{p.calc?.clicks ?? "—"}</span>
+                          <span className="text-6xl font-heading font-bold text-primary leading-none tabular-nums">{displayClicks(p.calc?.clicks)}</span>
                           <span className="text-base text-muted-foreground">clicks</span>
                         </div>
                       </div>
@@ -183,6 +214,26 @@ const SharedCoachPlan = () => {
                       <div className="rounded-lg bg-amber-500/5 border border-amber-500/20 p-4">
                         <p className="text-[11px] uppercase tracking-[0.2em] text-amber-600 dark:text-amber-400 font-bold mb-1.5">Common Side Effects</p>
                         <p className="text-sm text-foreground/85">{p.side_effects_common.join(" • ")}</p>
+                      </div>
+                    )}
+
+                    {p.contraindications?.length > 0 && (
+                      <div className="rounded-lg bg-destructive/5 border border-destructive/20 p-4">
+                        <p className="text-[11px] uppercase tracking-[0.2em] text-destructive font-bold mb-2">Contraindications</p>
+                        <div className="flex flex-wrap gap-2">
+                          {p.contraindications.map((c: string, k: number) => (
+                            <span key={k} className="text-sm px-3 py-1.5 rounded-full bg-destructive/10 text-destructive border border-destructive/20 font-medium">
+                              {c}
+                            </span>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+
+                    {p.drug_interactions?.length > 0 && (
+                      <div>
+                        <p className="text-[11px] uppercase tracking-[0.2em] text-muted-foreground font-semibold mb-2">Drug Interactions</p>
+                        <p className="text-sm text-foreground/85 leading-relaxed">{p.drug_interactions.join(" • ")}</p>
                       </div>
                     )}
 
