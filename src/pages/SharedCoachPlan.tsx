@@ -217,6 +217,26 @@ const SharedCoachPlan = () => {
                       </div>
                     )}
 
+                    {p.contraindications?.length > 0 && (
+                      <div className="rounded-lg bg-destructive/5 border border-destructive/20 p-4">
+                        <p className="text-[11px] uppercase tracking-[0.2em] text-destructive font-bold mb-2">Contraindications</p>
+                        <div className="flex flex-wrap gap-2">
+                          {p.contraindications.map((c: string, k: number) => (
+                            <span key={k} className="text-sm px-3 py-1.5 rounded-full bg-destructive/10 text-destructive border border-destructive/20 font-medium">
+                              {c}
+                            </span>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+
+                    {p.drug_interactions?.length > 0 && (
+                      <div>
+                        <p className="text-[11px] uppercase tracking-[0.2em] text-muted-foreground font-semibold mb-2">Drug Interactions</p>
+                        <p className="text-sm text-foreground/85 leading-relaxed">{p.drug_interactions.join(" • ")}</p>
+                      </div>
+                    )}
+
                     {p.notes && (
                       <div className="pt-4 border-t border-border/50">
                         <p className="text-[11px] uppercase tracking-[0.2em] text-muted-foreground font-semibold mb-1.5 flex items-center gap-1.5">
