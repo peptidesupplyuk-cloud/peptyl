@@ -22,6 +22,7 @@ import { campaigns } from "@/data/campaigns";
 const LazyResearchQueue = lazy(() => import("@/pages/ResearchQueue"));
 import IngestChat from "@/components/admin/IngestChat";
 import UserDetailPanel from "@/components/admin/UserDetailPanel";
+import CoachPlanBuilder from "@/components/admin/CoachPlanBuilder";
 
 const ADMIN_EMAIL = "peptidesupplyuk@gmail.com";
 
