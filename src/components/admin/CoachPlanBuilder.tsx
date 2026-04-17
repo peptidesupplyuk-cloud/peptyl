@@ -626,8 +626,18 @@ const CoachPlanBuilder = () => {
           <ArrowLeft className="h-4 w-4" /> Back to plans
         </Button>
         <div className="flex flex-wrap gap-2">
-          <Button size="sm" variant="default" onClick={() => exportPlanToPrintable(plan)} className="gap-2">
-            <Printer className="h-4 w-4" /> Export / Print PDF
+          <Button
+            size="sm"
+            variant={plan.share_enabled && plan.share_token ? "outline" : "default"}
+            onClick={() => shareMutation.mutate({ id: plan.id, action: plan.share_token ? "regenerate" : "enable" })}
+            disabled={shareMutation.isPending}
+            className="gap-2"
+          >
+            {shareMutation.isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : <Share2 className="h-4 w-4" />}
+            {plan.share_enabled && plan.share_token ? "Regenerate Link" : "Generate Share Link"}
+          </Button>
+          <Button size="sm" variant="outline" onClick={() => exportPlanToPrintable(plan)} className="gap-2">
+            <Printer className="h-4 w-4" /> Print PDF
           </Button>
           <Button size="sm" variant="outline" onClick={async () => {
             await navigator.clipboard.writeText(planToPlainText(plan));
@@ -643,6 +653,47 @@ const CoachPlanBuilder = () => {
             </Button>
           )}
         </div>
+
+        {plan.share_enabled && plan.share_token && (
+          <Card className="p-4 bg-primary/5 border-primary/20">
+            <div className="flex items-start justify-between gap-3 flex-wrap">
+              <div className="flex-1 min-w-0">
+                <div className="flex items-center gap-2 mb-1.5">
+                  <Link2 className="h-4 w-4 text-primary" />
+                  <span className="text-sm font-semibold">Public share link active</span>
+                  {plan.share_expires_at && (
+                    <Badge variant="secondary" className="text-[10px]">
+                      Expires {new Date(plan.share_expires_at).toLocaleDateString()}
+                    </Badge>
+                  )}
+                </div>
+                <code className="block text-xs text-muted-foreground bg-background border border-border rounded px-2 py-1.5 font-mono break-all">
+                  {`${window.location.origin}/plan/${plan.share_token}`}
+                </code>
+              </div>
+              <div className="flex gap-2">
+                <Button
+                  size="sm"
+                  onClick={async () => {
+                    await navigator.clipboard.writeText(`${window.location.origin}/plan/${plan.share_token}`);
+                    toast({ title: "Link copied", description: "Send it to your client via any channel." });
+                  }}
+                  className="gap-1.5"
+                >
+                  <Copy className="h-3.5 w-3.5" /> Copy
+                </Button>
+                <Button
+                  size="sm"
+                  variant="outline"
+                  onClick={() => { if (confirm("Revoke this share link? It will stop working immediately.")) shareMutation.mutate({ id: plan.id, action: "revoke" }); }}
+                  className="gap-1.5"
+                >
+                  <X className="h-3.5 w-3.5" /> Revoke
+                </Button>
+              </div>
+            </div>
+          </Card>
+        )}
         <Card className="p-6">
           <div className="flex items-start justify-between mb-4">
             <div>
