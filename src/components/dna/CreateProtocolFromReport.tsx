@@ -94,13 +94,16 @@ const CreateProtocolFromReport = ({ supplements, peptides = [], reportId, isPaid
   const [showSuppSuggestions, setShowSuppSuggestions] = useState(false);
   const [showPepSuggestions, setShowPepSuggestions] = useState(false);
 
-  const hasSuppFlag = supplements.some(s => s.is_priority !== undefined);
-  const prioritySupps = hasSuppFlag ? supplements.filter(s => s.is_priority) : supplements.slice(0, 5);
-  const suggestionSupps = hasSuppFlag ? supplements.filter(s => !s.is_priority) : supplements.slice(5);
+  const normSupps = (supplements || []).map(normaliseSupp);
+  const normPeps = (peptides || []).map(normalisePep);
 
-  const hasPepFlag = peptides.some(p => p.is_priority !== undefined);
-  const priorityPeps = hasPepFlag ? peptides.filter(p => p.is_priority) : peptides.slice(0, 3);
-  const suggestionPeps = hasPepFlag ? peptides.filter(p => !p.is_priority) : peptides.slice(3);
+  const hasSuppFlag = normSupps.some(s => s.is_priority !== undefined);
+  const prioritySupps = hasSuppFlag ? normSupps.filter(s => s.is_priority) : normSupps.slice(0, 5);
+  const suggestionSupps = hasSuppFlag ? normSupps.filter(s => !s.is_priority) : normSupps.slice(5);
+
+  const hasPepFlag = normPeps.some(p => p.is_priority !== undefined);
+  const priorityPeps = hasPepFlag ? normPeps.filter(p => p.is_priority) : normPeps.slice(0, 3);
+  const suggestionPeps = hasPepFlag ? normPeps.filter(p => !p.is_priority) : normPeps.slice(3);
 
   const [suppSelected, setSuppSelected] = useState<boolean[]>(() => [
     ...prioritySupps.map(() => true),
