@@ -1,0 +1,594 @@
+import { useState, useMemo } from "react";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/contexts/AuthContext";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import { Badge } from "@/components/ui/badge";
+import { Card } from "@/components/ui/card";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Separator } from "@/components/ui/separator";
+import { useToast } from "@/hooks/use-toast";
+import {
+  Plus, Trash2, Loader2, Save, Calculator, AlertTriangle, FileText,
+  Beaker, Calendar, User, Pill, Syringe, Eye, ArrowLeft,
+} from "lucide-react";
+
+const FREQUENCIES = [
+  "Once daily", "Twice daily", "Once weekly", "Twice weekly", "3x per week",
+  "5x per week", "Every other day", "Once monthly",
+];
+
+const INJECTION_SITES = ["Abdomen", "Thigh", "Upper arm", "Glute", "Subcutaneous (any)"];
+
+interface PeptideEntry {
+  peptide_name: string;
+  peptyl_id?: string;
+  dose_mg: number;            // dose per administration in mg
+  frequency: string;
+  vial_strength_mg: number;   // total mg in vial
+  bac_water_ml: number;       // ml of BAC water used to reconstitute
+  ml_per_click: number;       // 0.01 by default
+  timing: string;
+  route: string;
+  notes: string;
+}
+
+interface SupplementEntry {
+  name: string;
+  dose: string;
+  frequency: string;
+  timing: string;
+}
+
+interface TitrationStep {
+  week: number;
+  dose_mg: number;
+  note: string;
+}
+
+const blankPeptide = (): PeptideEntry => ({
+  peptide_name: "",
+  peptyl_id: undefined,
+  dose_mg: 0,
+  frequency: "Once weekly",
+  vial_strength_mg: 0,
+  bac_water_ml: 2,
+  ml_per_click: 0.01,
+  timing: "AM",
+  route: "Subcutaneous",
+  notes: "",
+});
+
+/**
+ * Calculate clicks per dose for a pen where each click = ml_per_click ml.
+ * Concentration (mg/ml) = vial_strength_mg / bac_water_ml
+ * Volume needed (ml)    = dose_mg / concentration
+ * Clicks                = Volume / ml_per_click
+ */
+function calcClicks(p: PeptideEntry) {
+  if (!p.dose_mg || !p.vial_strength_mg || !p.bac_water_ml || !p.ml_per_click) return null;
+  const concentration = p.vial_strength_mg / p.bac_water_ml; // mg per ml
+  const volumeMl = p.dose_mg / concentration;
+  const clicks = volumeMl / p.ml_per_click;
+  return {
+    concentration: +concentration.toFixed(3),
+    volumeMl: +volumeMl.toFixed(4),
+    clicks: +clicks.toFixed(1),
+    dosesPerVial: Math.floor(p.vial_strength_mg / p.dose_mg),
+  };
+}
+
+const CoachPlanBuilder = () => {
+  const { user } = useAuth();
+  const { toast } = useToast();
+  const qc = useQueryClient();
+  const [mode, setMode] = useState<"list" | "create" | "view">("list");
+  const [viewingId, setViewingId] = useState<string | null>(null);
+
+  // Form state
+  const [clientName, setClientName] = useState("");
+  const [clientEmail, setClientEmail] = useState("");
+  const [goal, setGoal] = useState("");
+  const [startDate, setStartDate] = useState("");
+  const [endDate, setEndDate] = useState("");
+  const [peptides, setPeptides] = useState<PeptideEntry[]>([blankPeptide()]);
+  const [supplements, setSupplements] = useState<SupplementEntry[]>([]);
+  const [titration, setTitration] = useState<TitrationStep[]>([]);
+  const [sites, setSites] = useState<string[]>([]);
+  const [timingNotes, setTimingNotes] = useState("");
+  const [safetyNotes, setSafetyNotes] = useState("");
+  const [coachRationale, setCoachRationale] = useState("");
+  const [clientNotes, setClientNotes] = useState("");
+
+  // Pull peptide library for autocomplete + safety auto-fill
+  const { data: peptideLibrary } = useQuery({
+    queryKey: ["coach-peptide-library"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("peptides_enriched")
+        .select("peptyl_id, name, full_name, category, dose_range, frequency, dosing_notes, side_effects_common, side_effects_rare, contraindications, drug_interactions, mechanism_of_action, primary_effects, cycle_duration, evidence_grade")
+        .eq("is_active", true)
+        .order("name");
+      if (error) throw error;
+      return data ?? [];
+    },
+  });
+
+  const { data: plans, isLoading: plansLoading } = useQuery({
+    queryKey: ["coach-plans"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("coach_plans")
+        .select("*")
+        .order("created_at", { ascending: false });
+      if (error) throw error;
+      return data ?? [];
+    },
+  });
+
+  const { data: viewingPlan } = useQuery({
+    queryKey: ["coach-plan", viewingId],
+    enabled: !!viewingId,
+    queryFn: async () => {
+      const { data, error } = await supabase.from("coach_plans").select("*").eq("id", viewingId).single();
+      if (error) throw error;
+      return data;
+    },
+  });
+
+  const createMutation = useMutation({
+    mutationFn: async () => {
+      if (!user) throw new Error("Not authenticated");
+      if (!clientName.trim()) throw new Error("Client name is required");
+
+      const { error } = await supabase.from("coach_plans").insert({
+        created_by: user.id,
+        client_name: clientName.trim(),
+        client_email: clientEmail.trim() || null,
+        client_notes: clientNotes.trim() || null,
+        goal: goal.trim() || null,
+        start_date: startDate || null,
+        end_date: endDate || null,
+        status: "draft",
+        peptides: peptides.map((p) => ({ ...p, calc: calcClicks(p) })) as any,
+        supplements: supplements as any,
+        titration_schedule: titration as any,
+        injection_sites: sites,
+        timing_notes: timingNotes.trim() || null,
+        safety_notes: safetyNotes.trim() || null,
+        coach_rationale: coachRationale.trim() || null,
+      });
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      toast({ title: "Plan saved", description: `Bespoke plan created for ${clientName}.` });
+      qc.invalidateQueries({ queryKey: ["coach-plans"] });
+      resetForm();
+      setMode("list");
+    },
+    onError: (err: any) => {
+      toast({ title: "Failed to save plan", description: err.message, variant: "destructive" });
+    },
+  });
+
+  const deleteMutation = useMutation({
+    mutationFn: async (id: string) => {
+      const { error } = await supabase.from("coach_plans").delete().eq("id", id);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["coach-plans"] });
+      toast({ title: "Plan deleted" });
+    },
+  });
+
+  function resetForm() {
+    setClientName(""); setClientEmail(""); setGoal(""); setStartDate(""); setEndDate("");
+    setPeptides([blankPeptide()]); setSupplements([]); setTitration([]); setSites([]);
+    setTimingNotes(""); setSafetyNotes(""); setCoachRationale(""); setClientNotes("");
+  }
+
+  function applyPeptideTemplate(idx: number, peptylId: string) {
+    const lib = peptideLibrary?.find((p) => p.peptyl_id === peptylId);
+    if (!lib) return;
+    const next = [...peptides];
+    next[idx] = {
+      ...next[idx],
+      peptide_name: lib.name,
+      peptyl_id: lib.peptyl_id,
+    };
+    setPeptides(next);
+
+    // Auto-append safety info to safety_notes if empty
+    if (!safetyNotes && lib.side_effects_common?.length) {
+      const lines = [
+        `[${lib.name}] Common side effects: ${(lib.side_effects_common || []).join(", ")}.`,
+        lib.contraindications?.length ? `Contraindications: ${lib.contraindications.join(", ")}.` : "",
+        lib.drug_interactions?.length ? `Drug interactions: ${lib.drug_interactions.join(", ")}.` : "",
+      ].filter(Boolean).join(" ");
+      setSafetyNotes(lines);
+    }
+  }
+
+  // ===== LIST VIEW =====
+  if (mode === "list") {
+    return (
+      <div className="space-y-6">
+        <div className="flex items-center justify-between">
+          <div>
+            <h2 className="text-xl font-heading font-semibold text-foreground">Coach Plan Builder</h2>
+            <p className="text-sm text-muted-foreground">Bespoke client protocols with auto-calculated clicks per pen.</p>
+          </div>
+          <Button onClick={() => { resetForm(); setMode("create"); }} className="gap-2">
+            <Plus className="h-4 w-4" /> New Plan
+          </Button>
+        </div>
+
+        {plansLoading ? (
+          <div className="flex justify-center py-12"><Loader2 className="h-6 w-6 animate-spin text-muted-foreground" /></div>
+        ) : !plans?.length ? (
+          <Card className="p-12 text-center">
+            <FileText className="h-10 w-10 mx-auto text-muted-foreground mb-3" />
+            <p className="text-sm text-muted-foreground">No bespoke plans yet. Click "New Plan" to create one.</p>
+          </Card>
+        ) : (
+          <div className="grid gap-3">
+            {plans.map((plan: any) => (
+              <Card key={plan.id} className="p-4 flex items-center justify-between hover:bg-muted/30 transition-colors">
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <h3 className="font-semibold text-foreground">{plan.client_name}</h3>
+                    <Badge variant="secondary" className="text-[10px]">{plan.status}</Badge>
+                    {plan.goal && <Badge variant="outline" className="text-[10px]">{plan.goal}</Badge>}
+                  </div>
+                  <p className="text-xs text-muted-foreground mt-1">
+                    {(plan.peptides as any[])?.length || 0} peptide(s) • {(plan.supplements as any[])?.length || 0} supplement(s) • Created {new Date(plan.created_at).toLocaleDateString()}
+                  </p>
+                </div>
+                <div className="flex items-center gap-2">
+                  <Button size="sm" variant="ghost" onClick={() => { setViewingId(plan.id); setMode("view"); }} className="gap-1.5">
+                    <Eye className="h-3.5 w-3.5" /> View
+                  </Button>
+                  <Button size="sm" variant="ghost" onClick={() => { if (confirm(`Delete plan for ${plan.client_name}?`)) deleteMutation.mutate(plan.id); }} className="gap-1.5 text-destructive hover:text-destructive">
+                    <Trash2 className="h-3.5 w-3.5" />
+                  </Button>
+                </div>
+              </Card>
+            ))}
+          </div>
+        )}
+      </div>
+    );
+  }
+
+  // ===== VIEW MODE =====
+  if (mode === "view" && viewingPlan) {
+    const plan = viewingPlan as any;
+    return (
+      <div className="space-y-5">
+        <Button variant="ghost" size="sm" onClick={() => { setMode("list"); setViewingId(null); }} className="gap-2">
+          <ArrowLeft className="h-4 w-4" /> Back to plans
+        </Button>
+        <Card className="p-6">
+          <div className="flex items-start justify-between mb-4">
+            <div>
+              <h2 className="text-2xl font-heading font-semibold">{plan.client_name}</h2>
+              {plan.client_email && <p className="text-sm text-muted-foreground">{plan.client_email}</p>}
+              {plan.goal && <Badge className="mt-2">{plan.goal}</Badge>}
+            </div>
+            <Badge variant="secondary">{plan.status}</Badge>
+          </div>
+          {(plan.start_date || plan.end_date) && (
+            <p className="text-sm text-muted-foreground flex items-center gap-2">
+              <Calendar className="h-4 w-4" />
+              {plan.start_date || "—"} → {plan.end_date || "ongoing"}
+            </p>
+          )}
+        </Card>
+
+        {(plan.peptides as any[])?.length > 0 && (
+          <Card className="p-6">
+            <h3 className="font-semibold mb-3 flex items-center gap-2"><Syringe className="h-4 w-4 text-primary" /> Peptide Protocol</h3>
+            <div className="space-y-3">
+              {(plan.peptides as any[]).map((p, i) => (
+                <div key={i} className="border border-border rounded-lg p-3 space-y-2">
+                  <div className="flex items-center justify-between">
+                    <h4 className="font-medium">{p.peptide_name}</h4>
+                    <Badge variant="outline">{p.frequency}</Badge>
+                  </div>
+                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 text-xs">
+                    <div><p className="text-muted-foreground">Dose</p><p className="font-semibold">{p.dose_mg} mg</p></div>
+                    <div><p className="text-muted-foreground">Vial</p><p className="font-semibold">{p.vial_strength_mg} mg / {p.bac_water_ml} ml BAC</p></div>
+                    <div><p className="text-muted-foreground">Clicks/dose</p><p className="font-semibold text-primary">{p.calc?.clicks ?? "—"}</p></div>
+                    <div><p className="text-muted-foreground">Doses/vial</p><p className="font-semibold">{p.calc?.dosesPerVial ?? "—"}</p></div>
+                  </div>
+                  {p.notes && <p className="text-xs text-muted-foreground italic">{p.notes}</p>}
+                </div>
+              ))}
+            </div>
+          </Card>
+        )}
+
+        {(plan.supplements as any[])?.length > 0 && (
+          <Card className="p-6">
+            <h3 className="font-semibold mb-3 flex items-center gap-2"><Pill className="h-4 w-4 text-primary" /> Supplements</h3>
+            <ul className="space-y-2">
+              {(plan.supplements as any[]).map((s, i) => (
+                <li key={i} className="text-sm flex items-center justify-between border-b border-border/50 pb-2 last:border-0">
+                  <span className="font-medium">{s.name}</span>
+                  <span className="text-muted-foreground text-xs">{s.dose} • {s.frequency} • {s.timing}</span>
+                </li>
+              ))}
+            </ul>
+          </Card>
+        )}
+
+        {(plan.titration_schedule as any[])?.length > 0 && (
+          <Card className="p-6">
+            <h3 className="font-semibold mb-3">Titration Schedule</h3>
+            <div className="space-y-2">
+              {(plan.titration_schedule as any[]).map((t, i) => (
+                <div key={i} className="text-sm flex gap-3 items-center">
+                  <Badge variant="outline" className="w-20 justify-center">Week {t.week}</Badge>
+                  <span className="font-medium">{t.dose_mg} mg</span>
+                  {t.note && <span className="text-xs text-muted-foreground">— {t.note}</span>}
+                </div>
+              ))}
+            </div>
+          </Card>
+        )}
+
+        {plan.injection_sites?.length > 0 && (
+          <Card className="p-6">
+            <h3 className="font-semibold mb-2">Injection Sites</h3>
+            <div className="flex gap-2 flex-wrap">{plan.injection_sites.map((s: string) => <Badge key={s} variant="secondary">{s}</Badge>)}</div>
+          </Card>
+        )}
+
+        {plan.timing_notes && <Card className="p-6"><h3 className="font-semibold mb-2">Timing</h3><p className="text-sm whitespace-pre-wrap">{plan.timing_notes}</p></Card>}
+        {plan.safety_notes && (
+          <Card className="p-6 border-amber-500/30 bg-amber-500/5">
+            <h3 className="font-semibold mb-2 flex items-center gap-2 text-amber-700 dark:text-amber-400"><AlertTriangle className="h-4 w-4" /> Safety Notes</h3>
+            <p className="text-sm whitespace-pre-wrap">{plan.safety_notes}</p>
+          </Card>
+        )}
+        {plan.coach_rationale && <Card className="p-6"><h3 className="font-semibold mb-2">Coach Rationale</h3><p className="text-sm whitespace-pre-wrap">{plan.coach_rationale}</p></Card>}
+        {plan.client_notes && <Card className="p-6"><h3 className="font-semibold mb-2">Client Notes</h3><p className="text-sm whitespace-pre-wrap">{plan.client_notes}</p></Card>}
+      </div>
+    );
+  }
+
+  // ===== CREATE FORM =====
+  return (
+    <div className="space-y-6">
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-3">
+          <Button variant="ghost" size="sm" onClick={() => setMode("list")} className="gap-2">
+            <ArrowLeft className="h-4 w-4" /> Back
+          </Button>
+          <h2 className="text-xl font-heading font-semibold">New Bespoke Plan</h2>
+        </div>
+        <Button onClick={() => createMutation.mutate()} disabled={createMutation.isPending || !clientName} className="gap-2">
+          {createMutation.isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}
+          Save Plan
+        </Button>
+      </div>
+
+      {/* CLIENT */}
+      <Card className="p-5 space-y-4">
+        <h3 className="font-semibold flex items-center gap-2"><User className="h-4 w-4 text-primary" /> Client</h3>
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div>
+            <Label>Client name *</Label>
+            <Input value={clientName} onChange={(e) => setClientName(e.target.value)} placeholder="e.g. John Smith" />
+          </div>
+          <div>
+            <Label>Client email (optional)</Label>
+            <Input type="email" value={clientEmail} onChange={(e) => setClientEmail(e.target.value)} placeholder="client@example.com" />
+          </div>
+          <div>
+            <Label>Goal</Label>
+            <Input value={goal} onChange={(e) => setGoal(e.target.value)} placeholder="e.g. Fat loss, recovery, longevity" />
+          </div>
+          <div className="grid grid-cols-2 gap-2">
+            <div><Label>Start date</Label><Input type="date" value={startDate} onChange={(e) => setStartDate(e.target.value)} /></div>
+            <div><Label>End date</Label><Input type="date" value={endDate} onChange={(e) => setEndDate(e.target.value)} /></div>
+          </div>
+        </div>
+      </Card>
+
+      {/* PEPTIDES */}
+      <Card className="p-5 space-y-4">
+        <div className="flex items-center justify-between">
+          <h3 className="font-semibold flex items-center gap-2"><Syringe className="h-4 w-4 text-primary" /> Peptides & Click Calculator</h3>
+          <Button size="sm" variant="outline" onClick={() => setPeptides([...peptides, blankPeptide()])} className="gap-1.5">
+            <Plus className="h-3.5 w-3.5" /> Add peptide
+          </Button>
+        </div>
+
+        {peptides.map((p, i) => {
+          const calc = calcClicks(p);
+          const lib = peptideLibrary?.find((l) => l.peptyl_id === p.peptyl_id);
+          return (
+            <div key={i} className="border border-border rounded-lg p-4 space-y-3 bg-muted/20">
+              <div className="flex items-center justify-between">
+                <span className="text-xs font-semibold text-muted-foreground">Peptide #{i + 1}</span>
+                {peptides.length > 1 && (
+                  <Button size="sm" variant="ghost" onClick={() => setPeptides(peptides.filter((_, x) => x !== i))} className="h-7 w-7 p-0 text-destructive">
+                    <Trash2 className="h-3.5 w-3.5" />
+                  </Button>
+                )}
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div className="sm:col-span-2">
+                  <Label className="text-xs">Peptide (from library)</Label>
+                  <Select value={p.peptyl_id} onValueChange={(v) => applyPeptideTemplate(i, v)}>
+                    <SelectTrigger><SelectValue placeholder="Select peptide..." /></SelectTrigger>
+                    <SelectContent className="max-h-72">
+                      {peptideLibrary?.map((lp) => (
+                        <SelectItem key={lp.peptyl_id} value={lp.peptyl_id}>
+                          {lp.name} {lp.full_name && lp.full_name !== lp.name ? `— ${lp.full_name}` : ""}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  {lib?.dose_range && <p className="text-[10px] text-muted-foreground mt-1">Reference dose range: {lib.dose_range}{lib.frequency ? ` • ${lib.frequency}` : ""}</p>}
+                </div>
+                <div>
+                  <Label className="text-xs">Dose per administration (mg)</Label>
+                  <Input type="number" step="0.01" value={p.dose_mg || ""} onChange={(e) => { const n = [...peptides]; n[i].dose_mg = parseFloat(e.target.value) || 0; setPeptides(n); }} />
+                </div>
+                <div>
+                  <Label className="text-xs">Frequency</Label>
+                  <Select value={p.frequency} onValueChange={(v) => { const n = [...peptides]; n[i].frequency = v; setPeptides(n); }}>
+                    <SelectTrigger><SelectValue /></SelectTrigger>
+                    <SelectContent>{FREQUENCIES.map((f) => <SelectItem key={f} value={f}>{f}</SelectItem>)}</SelectContent>
+                  </Select>
+                </div>
+                <div>
+                  <Label className="text-xs">Vial strength (mg)</Label>
+                  <Input type="number" step="0.1" value={p.vial_strength_mg || ""} onChange={(e) => { const n = [...peptides]; n[i].vial_strength_mg = parseFloat(e.target.value) || 0; setPeptides(n); }} placeholder="e.g. 10" />
+                </div>
+                <div>
+                  <Label className="text-xs">BAC water (ml)</Label>
+                  <Input type="number" step="0.1" value={p.bac_water_ml || ""} onChange={(e) => { const n = [...peptides]; n[i].bac_water_ml = parseFloat(e.target.value) || 0; setPeptides(n); }} placeholder="e.g. 2" />
+                </div>
+                <div>
+                  <Label className="text-xs">ml per click</Label>
+                  <Input type="number" step="0.001" value={p.ml_per_click || ""} onChange={(e) => { const n = [...peptides]; n[i].ml_per_click = parseFloat(e.target.value) || 0; setPeptides(n); }} />
+                </div>
+                <div>
+                  <Label className="text-xs">Timing</Label>
+                  <Select value={p.timing} onValueChange={(v) => { const n = [...peptides]; n[i].timing = v; setPeptides(n); }}>
+                    <SelectTrigger><SelectValue /></SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="AM">AM (morning)</SelectItem>
+                      <SelectItem value="PM">PM (evening)</SelectItem>
+                      <SelectItem value="Pre-workout">Pre-workout</SelectItem>
+                      <SelectItem value="Post-workout">Post-workout</SelectItem>
+                      <SelectItem value="Bedtime">Bedtime</SelectItem>
+                      <SelectItem value="Anytime">Anytime</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+
+              {/* CALCULATOR OUTPUT */}
+              <div className="rounded-lg bg-primary/5 border border-primary/20 p-3">
+                <p className="text-[10px] uppercase font-semibold text-primary mb-2 flex items-center gap-1.5">
+                  <Calculator className="h-3 w-3" /> Auto-calculated
+                </p>
+                {calc ? (
+                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 text-xs">
+                    <div><p className="text-muted-foreground">Concentration</p><p className="font-semibold">{calc.concentration} mg/ml</p></div>
+                    <div><p className="text-muted-foreground">Volume per dose</p><p className="font-semibold">{calc.volumeMl} ml</p></div>
+                    <div><p className="text-muted-foreground">Clicks per dose</p><p className="font-bold text-primary text-base">{calc.clicks}</p></div>
+                    <div><p className="text-muted-foreground">Doses per vial</p><p className="font-semibold">{calc.dosesPerVial}</p></div>
+                  </div>
+                ) : (
+                  <p className="text-xs text-muted-foreground">Fill dose, vial strength & BAC water to calculate.</p>
+                )}
+              </div>
+
+              <Textarea placeholder="Notes for this peptide…" value={p.notes} onChange={(e) => { const n = [...peptides]; n[i].notes = e.target.value; setPeptides(n); }} rows={2} />
+
+              {lib && (
+                <details className="text-xs">
+                  <summary className="cursor-pointer text-muted-foreground hover:text-foreground">View clinical reference for {lib.name}</summary>
+                  <div className="mt-2 space-y-1.5 pl-3 border-l-2 border-border">
+                    {lib.mechanism_of_action && <p><span className="font-semibold">Mechanism:</span> {lib.mechanism_of_action}</p>}
+                    {lib.primary_effects?.length > 0 && <p><span className="font-semibold">Primary effects:</span> {lib.primary_effects.join(", ")}</p>}
+                    {lib.side_effects_common?.length > 0 && <p><span className="font-semibold">Common side effects:</span> {lib.side_effects_common.join(", ")}</p>}
+                    {lib.contraindications?.length > 0 && <p className="text-destructive"><span className="font-semibold">Contraindications:</span> {lib.contraindications.join(", ")}</p>}
+                    {lib.cycle_duration && <p><span className="font-semibold">Cycle:</span> {lib.cycle_duration}</p>}
+                    {lib.evidence_grade && <p><span className="font-semibold">Evidence grade:</span> {lib.evidence_grade}</p>}
+                  </div>
+                </details>
+              )}
+            </div>
+          );
+        })}
+      </Card>
+
+      {/* TITRATION */}
+      <Card className="p-5 space-y-3">
+        <div className="flex items-center justify-between">
+          <h3 className="font-semibold">Titration Schedule (optional)</h3>
+          <Button size="sm" variant="outline" onClick={() => setTitration([...titration, { week: titration.length + 1, dose_mg: 0, note: "" }])} className="gap-1.5">
+            <Plus className="h-3.5 w-3.5" /> Add step
+          </Button>
+        </div>
+        {titration.map((t, i) => (
+          <div key={i} className="grid grid-cols-12 gap-2 items-center">
+            <Input className="col-span-2" type="number" placeholder="Week" value={t.week} onChange={(e) => { const n = [...titration]; n[i].week = parseInt(e.target.value) || 0; setTitration(n); }} />
+            <Input className="col-span-3" type="number" step="0.01" placeholder="Dose mg" value={t.dose_mg || ""} onChange={(e) => { const n = [...titration]; n[i].dose_mg = parseFloat(e.target.value) || 0; setTitration(n); }} />
+            <Input className="col-span-6" placeholder="Note (e.g. titrate up if tolerated)" value={t.note} onChange={(e) => { const n = [...titration]; n[i].note = e.target.value; setTitration(n); }} />
+            <Button size="sm" variant="ghost" onClick={() => setTitration(titration.filter((_, x) => x !== i))} className="col-span-1 h-8 w-8 p-0 text-destructive"><Trash2 className="h-3.5 w-3.5" /></Button>
+          </div>
+        ))}
+      </Card>
+
+      {/* SUPPLEMENTS */}
+      <Card className="p-5 space-y-3">
+        <div className="flex items-center justify-between">
+          <h3 className="font-semibold flex items-center gap-2"><Pill className="h-4 w-4 text-primary" /> Supplements</h3>
+          <Button size="sm" variant="outline" onClick={() => setSupplements([...supplements, { name: "", dose: "", frequency: "Once daily", timing: "AM" }])} className="gap-1.5">
+            <Plus className="h-3.5 w-3.5" /> Add
+          </Button>
+        </div>
+        {supplements.map((s, i) => (
+          <div key={i} className="grid grid-cols-12 gap-2 items-center">
+            <Input className="col-span-4" placeholder="Name" value={s.name} onChange={(e) => { const n = [...supplements]; n[i].name = e.target.value; setSupplements(n); }} />
+            <Input className="col-span-3" placeholder="Dose (e.g. 500mg)" value={s.dose} onChange={(e) => { const n = [...supplements]; n[i].dose = e.target.value; setSupplements(n); }} />
+            <Input className="col-span-2" placeholder="Frequency" value={s.frequency} onChange={(e) => { const n = [...supplements]; n[i].frequency = e.target.value; setSupplements(n); }} />
+            <Input className="col-span-2" placeholder="Timing" value={s.timing} onChange={(e) => { const n = [...supplements]; n[i].timing = e.target.value; setSupplements(n); }} />
+            <Button size="sm" variant="ghost" onClick={() => setSupplements(supplements.filter((_, x) => x !== i))} className="col-span-1 h-8 w-8 p-0 text-destructive"><Trash2 className="h-3.5 w-3.5" /></Button>
+          </div>
+        ))}
+      </Card>
+
+      {/* SITES & TIMING */}
+      <Card className="p-5 space-y-3">
+        <h3 className="font-semibold">Injection Sites & Timing</h3>
+        <div className="flex flex-wrap gap-2">
+          {INJECTION_SITES.map((site) => (
+            <Button key={site} type="button" size="sm" variant={sites.includes(site) ? "default" : "outline"}
+              onClick={() => setSites(sites.includes(site) ? sites.filter((s) => s !== site) : [...sites, site])}>
+              {site}
+            </Button>
+          ))}
+        </div>
+        <Textarea placeholder="Timing & rotation guidance (e.g. rotate sites weekly, inject at same time daily)…" value={timingNotes} onChange={(e) => setTimingNotes(e.target.value)} rows={2} />
+      </Card>
+
+      {/* SAFETY & RATIONALE */}
+      <Card className="p-5 space-y-3 border-amber-500/30">
+        <h3 className="font-semibold flex items-center gap-2 text-amber-700 dark:text-amber-400"><AlertTriangle className="h-4 w-4" /> Safety Notes</h3>
+        <Textarea placeholder="Side effects, contraindications, drug interactions, monitoring requirements… (auto-filled from peptide library)" value={safetyNotes} onChange={(e) => setSafetyNotes(e.target.value)} rows={4} />
+      </Card>
+
+      <Card className="p-5 space-y-3">
+        <h3 className="font-semibold">Coach Rationale</h3>
+        <Textarea placeholder="Why this protocol was chosen for this client…" value={coachRationale} onChange={(e) => setCoachRationale(e.target.value)} rows={3} />
+      </Card>
+
+      <Card className="p-5 space-y-3">
+        <h3 className="font-semibold">Client Notes</h3>
+        <Textarea placeholder="Client background, goals, history, restrictions…" value={clientNotes} onChange={(e) => setClientNotes(e.target.value)} rows={3} />
+      </Card>
+
+      <div className="flex justify-end">
+        <Button onClick={() => createMutation.mutate()} disabled={createMutation.isPending || !clientName} className="gap-2" size="lg">
+          {createMutation.isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}
+          Save Bespoke Plan
+        </Button>
+      </div>
+    </div>
+  );
+};
+
+export default CoachPlanBuilder;
