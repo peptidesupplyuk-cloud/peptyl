@@ -17,260 +17,233 @@ import {
 } from "lucide-react";
 
 function exportPlanToPrintable(plan: any) {
+  const esc = (s: any) => String(s ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c] as string));
+
   const peptidesHtml = (plan.peptides as any[] || []).map((p: any) => {
     const benefitsHtml = p.benefits?.length
-      ? `<div class="chips-row">
-          <div class="chips-label">Benefits</div>
-          <div class="chips">${p.benefits.map((b: string) => `<span class="chip chip-primary">${b}</span>`).join("")}</div>
-        </div>` : "";
+      ? `<div class="row"><div class="row-label">Benefits</div>
+          <div class="chips">${p.benefits.map((b: string) => `<span class="chip chip-primary">${esc(b)}</span>`).join("")}</div></div>` : "";
+    const mechHtml = p.mechanism
+      ? `<div class="row"><div class="row-label">Mechanism</div>
+          <p class="row-body">${esc(p.mechanism)}</p></div>` : "";
     const sideHtml = p.side_effects_common?.length
-      ? `<div class="chips-row">
-          <div class="chips-label warn">Common Side Effects</div>
-          <div class="chips">${p.side_effects_common.map((s: string) => `<span class="chip chip-warn">${s}</span>`).join("")}</div>
-        </div>` : "";
+      ? `<div class="row"><div class="row-label warn">Common Side Effects</div>
+          <p class="row-body muted">${p.side_effects_common.map(esc).join(" • ")}</p></div>` : "";
     const contraHtml = p.contraindications?.length
-      ? `<div class="chips-row">
-          <div class="chips-label danger">Contraindications</div>
-          <div class="chips">${p.contraindications.map((c: string) => `<span class="chip chip-danger">${c}</span>`).join("")}</div>
-        </div>` : "";
+      ? `<div class="row"><div class="row-label danger">Contraindications</div>
+          <div class="chips">${p.contraindications.map((c: string) => `<span class="chip chip-danger">${esc(c)}</span>`).join("")}</div></div>` : "";
+    const evidenceTag = p.evidence_grade ? `<span class="badge badge-secondary">Evidence: ${esc(p.evidence_grade)}</span>` : "";
+
     return `
       <div class="peptide-card">
         <div class="peptide-head">
           <div>
-            <div class="peptide-name">${p.peptide_name}</div>
-            ${p.category ? `<div class="peptide-cat">${p.category}</div>` : ""}
+            <div class="peptide-name">${esc(p.peptide_name)}</div>
+            ${p.category ? `<div class="peptide-cat">${esc(p.category)}</div>` : ""}
           </div>
           <div class="peptide-tags">
-            <span class="tag tag-outline">${p.frequency}</span>
-            ${p.evidence_grade ? `<span class="tag">Evidence: ${p.evidence_grade}</span>` : ""}
+            <span class="badge badge-outline">${esc(p.frequency)}</span>
+            ${evidenceTag}
           </div>
         </div>
 
         <div class="metrics">
-          <div class="metric"><div class="metric-label">Dose</div><div class="metric-value">${p.dose_mg} <span>mg</span></div></div>
-          <div class="metric"><div class="metric-label">Vial</div><div class="metric-value">${p.vial_strength_mg}<span> mg</span></div><div class="metric-sub">${p.bac_water_ml} ml BAC</div></div>
-          <div class="metric metric-hero"><div class="metric-label">Clicks / dose</div><div class="metric-value">${p.calc?.clicks ?? "—"}</div><div class="metric-sub">${p.calc?.volumeMl ?? "—"} ml</div></div>
-          <div class="metric"><div class="metric-label">Doses / vial</div><div class="metric-value">${p.calc?.dosesPerVial ?? "—"}</div></div>
+          <div class="metric"><div class="metric-label">Dose</div><div class="metric-value">${esc(p.dose_mg)} mg</div></div>
+          <div class="metric"><div class="metric-label">Vial</div><div class="metric-value">${esc(p.vial_strength_mg)} mg / ${esc(p.bac_water_ml)} ml BAC</div></div>
+          <div class="metric"><div class="metric-label">Clicks/dose</div><div class="metric-value accent">${p.calc?.clicks ?? "—"}</div></div>
+          <div class="metric"><div class="metric-label">Doses/vial</div><div class="metric-value">${p.calc?.dosesPerVial ?? "—"}</div></div>
         </div>
 
         ${benefitsHtml}
-        ${p.mechanism ? `<div class="text-block"><div class="block-label">Mechanism of Action</div><p>${p.mechanism}</p></div>` : ""}
+        ${mechHtml}
         ${sideHtml}
         ${contraHtml}
-        ${p.notes ? `<div class="coach-note"><strong>Coach note:</strong> ${p.notes}</div>` : ""}
+        ${p.notes ? `<div class="coach-note">${esc(p.notes)}</div>` : ""}
       </div>
     `;
   }).join("");
 
   const supplementsHtml = (plan.supplements as any[] || []).length
-    ? `<section><h2>Supplement Stack</h2>
-        <table class="data-table">
-          <thead><tr><th>Supplement</th><th>Dose</th><th>Frequency</th><th>Timing</th></tr></thead>
-          <tbody>${(plan.supplements as any[]).map((s: any) => `<tr><td><strong>${s.name}</strong></td><td>${s.dose}</td><td>${s.frequency}</td><td>${s.timing}</td></tr>`).join("")}</tbody>
-        </table></section>` : "";
+    ? `<div class="card">
+        <h3 class="card-title"><span class="ico">💊</span> Supplements</h3>
+        <ul class="supp-list">
+          ${(plan.supplements as any[]).map((s: any) => `
+            <li><span class="supp-name">${esc(s.name)}</span><span class="supp-meta">${esc(s.dose)} • ${esc(s.frequency)} • ${esc(s.timing)}</span></li>
+          `).join("")}
+        </ul>
+       </div>` : "";
 
   const titrationHtml = (plan.titration_schedule as any[] || []).length
-    ? `<section><h2>Titration Schedule</h2>
-        <table class="data-table">
-          <thead><tr><th>Week</th><th>Dose</th><th>Note</th></tr></thead>
-          <tbody>${(plan.titration_schedule as any[]).map((t: any) => `<tr><td><strong>Week ${t.week}</strong></td><td>${t.dose_mg} mg</td><td>${t.note || "—"}</td></tr>`).join("")}</tbody>
-        </table></section>` : "";
+    ? `<div class="card">
+        <h3 class="card-title">Titration Schedule</h3>
+        <div class="titration">
+          ${(plan.titration_schedule as any[]).map((t: any) => `
+            <div class="titration-row">
+              <span class="badge badge-outline week">Week ${esc(t.week)}</span>
+              <span class="t-dose">${esc(t.dose_mg)} mg</span>
+              ${t.note ? `<span class="t-note">— ${esc(t.note)}</span>` : ""}
+            </div>
+          `).join("")}
+        </div>
+       </div>` : "";
+
+  const sitesHtml = plan.injection_sites?.length
+    ? `<div class="card">
+        <h3 class="card-title">Injection Sites</h3>
+        <div class="chips">${plan.injection_sites.map((s: string) => `<span class="chip chip-secondary">${esc(s)}</span>`).join("")}</div>
+       </div>` : "";
+
+  const timingHtml = plan.timing_notes
+    ? `<div class="card"><h3 class="card-title">Timing</h3><p class="card-body">${esc(plan.timing_notes)}</p></div>` : "";
+
+  const safetyHtml = plan.safety_notes
+    ? `<div class="card card-warn">
+        <h3 class="card-title warn"><span class="ico">⚠</span> Safety Notes</h3>
+        <p class="card-body">${esc(plan.safety_notes)}</p>
+       </div>` : "";
+
+  const rationaleHtml = plan.coach_rationale
+    ? `<div class="card"><h3 class="card-title">Coach Rationale</h3><p class="card-body">${esc(plan.coach_rationale)}</p></div>` : "";
+
+  const clientNotesHtml = plan.client_notes
+    ? `<div class="card"><h3 class="card-title">Notes for Client</h3><p class="card-body">${esc(plan.client_notes)}</p></div>` : "";
 
   const html = `<!DOCTYPE html>
-<html lang="en"><head><meta charset="utf-8"><title>${plan.client_name} — Bespoke Plan • Peptyl</title>
+<html lang="en"><head><meta charset="utf-8"><title>${esc(plan.client_name)} — Bespoke Plan • Peptyl</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
   :root {
-    --teal: #14b8a6;
-    --teal-dark: #0d9488;
-    --teal-light: #5eead4;
-    --bg: #fafafa;
-    --ink: #0a0a0a;
-    --ink-soft: #404040;
-    --muted: #737373;
-    --border: #e5e5e5;
-    --surface: #ffffff;
-    --warn: #d97706;
-    --danger: #dc2626;
+    --bg:        hsl(220, 25%, 6%);
+    --surface:   hsl(220, 22%, 9%);
+    --surface-2: hsl(220, 18%, 12%);
+    --border:    hsl(220, 15%, 18%);
+    --border-soft: hsl(220, 15%, 16%);
+    --foreground: hsl(0, 0%, 98%);
+    --muted-fg:  hsl(220, 10%, 60%);
+    --primary:   hsl(175, 85%, 40%);
+    --primary-soft: hsla(175, 85%, 40%, 0.12);
+    --primary-border: hsla(175, 85%, 40%, 0.30);
+    --warn:      hsl(38, 92%, 55%);
+    --warn-soft: hsla(38, 92%, 55%, 0.08);
+    --warn-border: hsla(38, 92%, 55%, 0.30);
+    --danger:    hsl(0, 75%, 60%);
+    --danger-soft: hsla(0, 75%, 60%, 0.08);
+    --danger-border: hsla(0, 75%, 60%, 0.30);
   }
-  @page { size: A4; margin: 0; }
+  @page { size: A4; margin: 12mm; }
   * { box-sizing: border-box; margin: 0; padding: 0; }
-  body { font-family: 'Inter', -apple-system, sans-serif; color: var(--ink); background: var(--bg); line-height: 1.55; -webkit-font-smoothing: antialiased; }
+  html, body { background: var(--bg); }
+  body { font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif; color: var(--foreground); line-height: 1.55; -webkit-font-smoothing: antialiased; padding: 24px; }
+  .page { max-width: 900px; margin: 0 auto; }
 
-  .page { max-width: 210mm; margin: 0 auto; background: var(--surface); }
-
-  /* ==== HERO ==== */
-  .hero {
-    background: linear-gradient(135deg, #0f172a 0%, #134e4a 60%, #0d9488 100%);
-    color: white;
-    padding: 48px 56px 56px;
-    position: relative;
-    overflow: hidden;
-  }
-  .hero::before {
-    content: ""; position: absolute; top: -50%; right: -20%; width: 600px; height: 600px;
-    background: radial-gradient(circle, rgba(94,234,212,0.25) 0%, transparent 70%);
-    pointer-events: none;
-  }
-  .brand {
-    display: flex; align-items: center; gap: 10px; font-size: 13px;
-    letter-spacing: 3px; text-transform: uppercase; font-weight: 600;
-    color: var(--teal-light); margin-bottom: 32px; position: relative;
-  }
-  .brand-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--teal-light); box-shadow: 0 0 12px var(--teal-light); }
-  .hero h1 { font-size: 42px; font-weight: 800; letter-spacing: -1px; margin-bottom: 8px; position: relative; }
-  .hero-sub { font-size: 14px; color: rgba(255,255,255,0.7); text-transform: uppercase; letter-spacing: 2px; font-weight: 500; margin-bottom: 28px; position: relative; }
-  .hero-meta { display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; position: relative; padding-top: 24px; border-top: 1px solid rgba(255,255,255,0.15); }
-  .hero-meta-item .label { font-size: 10px; text-transform: uppercase; letter-spacing: 2px; color: rgba(255,255,255,0.55); margin-bottom: 4px; }
-  .hero-meta-item .value { font-size: 15px; font-weight: 600; color: white; }
-  .hero-goal { display: inline-block; padding: 6px 14px; background: rgba(94,234,212,0.15); border: 1px solid rgba(94,234,212,0.4); color: var(--teal-light); border-radius: 999px; font-size: 12px; font-weight: 600; margin-top: 12px; position: relative; }
-
-  /* ==== CONTENT ==== */
-  .content { padding: 48px 56px; }
-  section { margin-bottom: 40px; page-break-inside: avoid; }
-  section h2 {
-    font-size: 11px; text-transform: uppercase; letter-spacing: 3px; font-weight: 700;
-    color: var(--teal-dark); margin-bottom: 16px;
-    padding-bottom: 10px; border-bottom: 2px solid var(--teal);
-    display: flex; align-items: center; gap: 8px;
-  }
-
-  /* ==== PEPTIDE CARDS ==== */
-  .peptide-card {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-left: 4px solid var(--teal);
-    border-radius: 12px;
-    padding: 24px;
-    margin-bottom: 16px;
-    page-break-inside: avoid;
-    box-shadow: 0 1px 3px rgba(0,0,0,0.04);
-  }
-  .peptide-head { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 20px; gap: 12px; }
-  .peptide-name { font-size: 20px; font-weight: 700; letter-spacing: -0.3px; }
-  .peptide-cat { font-size: 10px; text-transform: uppercase; letter-spacing: 2px; color: var(--muted); margin-top: 2px; }
-  .peptide-tags { display: flex; gap: 6px; flex-wrap: wrap; }
-  .tag { padding: 4px 10px; background: #f5f5f5; color: var(--ink-soft); border-radius: 6px; font-size: 11px; font-weight: 600; }
-  .tag-outline { background: transparent; border: 1px solid var(--teal); color: var(--teal-dark); }
-
-  .metrics {
-    display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 20px;
-    padding: 16px; background: #fafafa; border-radius: 10px;
-  }
-  .metric-label { font-size: 9px; text-transform: uppercase; letter-spacing: 1.5px; color: var(--muted); margin-bottom: 4px; font-weight: 600; }
-  .metric-value { font-size: 22px; font-weight: 700; letter-spacing: -0.5px; color: var(--ink); }
-  .metric-value span { font-size: 12px; font-weight: 500; color: var(--muted); }
-  .metric-sub { font-size: 10px; color: var(--muted); margin-top: 2px; }
-  .metric-hero { background: linear-gradient(135deg, var(--teal) 0%, var(--teal-dark) 100%); border-radius: 8px; padding: 12px; margin: -4px; color: white; }
-  .metric-hero .metric-label { color: rgba(255,255,255,0.8); }
-  .metric-hero .metric-value { color: white; font-size: 26px; }
-  .metric-hero .metric-sub { color: rgba(255,255,255,0.85); }
-
-  .chips-row { margin-top: 14px; }
-  .chips-label { font-size: 10px; text-transform: uppercase; letter-spacing: 1.5px; color: var(--teal-dark); font-weight: 700; margin-bottom: 6px; }
-  .chips-label.warn { color: var(--warn); }
-  .chips-label.danger { color: var(--danger); }
-  .chips { display: flex; flex-wrap: wrap; gap: 6px; }
-  .chip { padding: 4px 10px; border-radius: 6px; font-size: 11px; font-weight: 500; background: #f5f5f5; color: var(--ink-soft); }
-  .chip-primary { background: rgba(20,184,166,0.1); color: var(--teal-dark); border: 1px solid rgba(20,184,166,0.2); }
-  .chip-warn { background: rgba(217,119,6,0.08); color: var(--warn); border: 1px solid rgba(217,119,6,0.2); }
-  .chip-danger { background: rgba(220,38,38,0.08); color: var(--danger); border: 1px solid rgba(220,38,38,0.2); }
-
-  .text-block { margin-top: 14px; }
-  .block-label { font-size: 10px; text-transform: uppercase; letter-spacing: 1.5px; color: var(--muted); font-weight: 700; margin-bottom: 4px; }
-  .text-block p { font-size: 13px; color: var(--ink-soft); line-height: 1.6; }
-
-  .coach-note {
-    margin-top: 14px; padding: 12px 14px; background: rgba(20,184,166,0.06);
-    border-left: 3px solid var(--teal); border-radius: 4px; font-size: 13px; color: var(--ink-soft);
-  }
-
-  /* ==== TABLES ==== */
-  .data-table { width: 100%; border-collapse: collapse; background: var(--surface); border-radius: 8px; overflow: hidden; border: 1px solid var(--border); }
-  .data-table th { background: #fafafa; padding: 10px 14px; text-align: left; font-size: 10px; text-transform: uppercase; letter-spacing: 1.5px; color: var(--muted); font-weight: 700; border-bottom: 1px solid var(--border); }
-  .data-table td { padding: 12px 14px; font-size: 13px; border-bottom: 1px solid var(--border); }
-  .data-table tr:last-child td { border-bottom: 0; }
-
-  /* ==== INFO BLOCKS ==== */
-  .info-block { padding: 18px 20px; border-radius: 10px; background: #fafafa; border: 1px solid var(--border); white-space: pre-wrap; font-size: 13px; color: var(--ink-soft); line-height: 1.6; }
-  .info-block.safety { background: linear-gradient(135deg, rgba(217,119,6,0.04), rgba(217,119,6,0.08)); border: 1px solid rgba(217,119,6,0.3); border-left: 4px solid var(--warn); }
-  .info-block.safety .safety-title { font-size: 11px; text-transform: uppercase; letter-spacing: 2px; color: var(--warn); font-weight: 700; margin-bottom: 8px; display: flex; align-items: center; gap: 6px; }
-
-  .pill-list { display: flex; flex-wrap: wrap; gap: 6px; }
-  .pill-list .chip { background: rgba(20,184,166,0.1); color: var(--teal-dark); border: 1px solid rgba(20,184,166,0.2); }
-
-  /* ==== FOOTER ==== */
-  .footer {
-    margin-top: 48px; padding: 24px 56px 36px; background: #0a0a0a; color: rgba(255,255,255,0.6);
-    font-size: 11px; line-height: 1.6;
-  }
-  .footer-brand { color: var(--teal-light); font-weight: 700; letter-spacing: 2px; text-transform: uppercase; font-size: 10px; margin-bottom: 6px; }
-  .footer-disclaim { font-size: 10px; color: rgba(255,255,255,0.4); margin-top: 8px; }
-
-  /* ==== ACTIONS (hidden on print) ==== */
-  .actions {
-    position: sticky; top: 0; z-index: 100; background: rgba(10,10,10,0.95); backdrop-filter: blur(10px);
-    padding: 14px 56px; display: flex; gap: 10px; align-items: center; justify-content: space-between;
-    border-bottom: 1px solid rgba(255,255,255,0.1);
-  }
-  .actions-brand { color: var(--teal-light); font-size: 12px; letter-spacing: 2px; text-transform: uppercase; font-weight: 700; }
+  .actions { position: sticky; top: 0; z-index: 100; background: rgba(10,12,16,0.92); backdrop-filter: blur(10px); padding: 12px 18px; display: flex; gap: 10px; align-items: center; justify-content: space-between; border: 1px solid var(--border); border-radius: 10px; margin-bottom: 24px; }
+  .actions-brand { color: var(--primary); font-size: 12px; letter-spacing: 2px; text-transform: uppercase; font-weight: 700; }
   .actions-buttons { display: flex; gap: 8px; }
-  .btn { background: var(--teal); color: white; border: 0; padding: 9px 18px; border-radius: 8px; cursor: pointer; font-size: 13px; font-weight: 600; font-family: inherit; transition: all 0.15s; }
-  .btn:hover { background: var(--teal-dark); }
-  .btn-ghost { background: transparent; border: 1px solid rgba(255,255,255,0.2); color: white; }
-  .btn-ghost:hover { background: rgba(255,255,255,0.1); }
+  .btn { background: var(--primary); color: hsl(220, 25%, 6%); border: 0; padding: 9px 18px; border-radius: 8px; cursor: pointer; font-size: 13px; font-weight: 700; font-family: inherit; }
+  .btn-ghost { background: transparent; border: 1px solid var(--border); color: var(--foreground); }
+
+  .card { background: var(--surface); border: 1px solid var(--border); border-radius: 14px; padding: 22px; margin-bottom: 16px; page-break-inside: avoid; }
+  .card-title { font-size: 14px; font-weight: 600; color: var(--foreground); display: flex; align-items: center; gap: 8px; margin-bottom: 14px; }
+  .card-title .ico { color: var(--primary); }
+  .card-title.warn { color: var(--warn); }
+  .card-body { font-size: 13px; color: var(--foreground); white-space: pre-wrap; line-height: 1.6; }
+  .card.card-warn { border-color: var(--warn-border); background: var(--warn-soft); }
+
+  .header-card { display: flex; justify-content: space-between; align-items: flex-start; gap: 16px; }
+  .header-card .client-name { font-size: 26px; font-weight: 700; letter-spacing: -0.5px; margin-bottom: 4px; }
+  .header-card .client-email { font-size: 13px; color: var(--muted-fg); }
+  .header-card .goal-badge { display: inline-block; margin-top: 10px; padding: 5px 12px; background: var(--primary); color: hsl(220, 25%, 6%); border-radius: 999px; font-size: 11px; font-weight: 700; }
+  .header-card .meta { display: flex; align-items: center; gap: 6px; font-size: 12px; color: var(--muted-fg); margin-top: 12px; }
+
+  .peptide-card { background: var(--surface-2); border: 1px solid var(--border-soft); border-radius: 10px; padding: 16px; margin-bottom: 12px; page-break-inside: avoid; }
+  .peptide-card:last-child { margin-bottom: 0; }
+  .peptide-head { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; margin-bottom: 14px; flex-wrap: wrap; }
+  .peptide-name { font-size: 16px; font-weight: 600; color: var(--foreground); }
+  .peptide-cat { font-size: 9px; text-transform: uppercase; letter-spacing: 2px; color: var(--muted-fg); margin-top: 2px; }
+  .peptide-tags { display: flex; gap: 6px; flex-wrap: wrap; }
+
+  .badge { display: inline-flex; align-items: center; padding: 3px 9px; border-radius: 999px; font-size: 11px; font-weight: 600; line-height: 1.4; }
+  .badge-outline { background: transparent; border: 1px solid var(--border); color: var(--foreground); }
+  .badge-secondary { background: var(--surface); border: 1px solid var(--border); color: var(--muted-fg); font-size: 10px; }
+
+  .metrics { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; padding-bottom: 12px; border-bottom: 1px solid var(--border-soft); }
+  .metric-label { font-size: 11px; color: var(--muted-fg); margin-bottom: 4px; font-weight: 500; }
+  .metric-value { font-size: 13px; font-weight: 600; color: var(--foreground); }
+  .metric-value.accent { color: var(--primary); }
+
+  .row { padding-top: 12px; }
+  .row-label { font-size: 10px; text-transform: uppercase; letter-spacing: 1.5px; color: var(--muted-fg); font-weight: 600; margin-bottom: 6px; }
+  .row-label.warn { color: var(--warn); }
+  .row-label.danger { color: var(--danger); }
+  .row-body { font-size: 12.5px; color: var(--foreground); line-height: 1.6; }
+  .row-body.muted { color: var(--muted-fg); }
+
+  .chips { display: flex; flex-wrap: wrap; gap: 6px; }
+  .chip { padding: 4px 10px; border-radius: 6px; font-size: 11px; font-weight: 500; }
+  .chip-primary  { background: var(--primary-soft);  color: var(--primary); border: 1px solid var(--primary-border); }
+  .chip-secondary{ background: var(--surface);       color: var(--foreground); border: 1px solid var(--border); }
+  .chip-warn     { background: var(--warn-soft);     color: var(--warn);    border: 1px solid var(--warn-border); }
+  .chip-danger   { background: var(--danger-soft);   color: var(--danger);  border: 1px solid var(--danger-border); }
+
+  .coach-note { margin-top: 12px; padding: 10px 12px; background: var(--primary-soft); border-left: 3px solid var(--primary); border-radius: 6px; font-size: 12px; color: var(--foreground); font-style: italic; }
+
+  .supp-list { list-style: none; }
+  .supp-list li { display: flex; justify-content: space-between; align-items: center; padding: 10px 0; border-bottom: 1px solid var(--border-soft); font-size: 13px; }
+  .supp-list li:last-child { border-bottom: 0; }
+  .supp-name { font-weight: 500; color: var(--foreground); }
+  .supp-meta { color: var(--muted-fg); font-size: 12px; }
+
+  .titration { display: flex; flex-direction: column; gap: 8px; }
+  .titration-row { display: flex; align-items: center; gap: 12px; font-size: 13px; }
+  .titration-row .week { min-width: 80px; justify-content: center; }
+  .t-dose { font-weight: 600; color: var(--foreground); }
+  .t-note { font-size: 12px; color: var(--muted-fg); }
+
+  .footer { margin-top: 28px; padding: 18px; text-align: center; color: var(--muted-fg); font-size: 10px; line-height: 1.6; border-top: 1px solid var(--border); }
+  .footer-brand { color: var(--primary); font-weight: 700; letter-spacing: 2px; text-transform: uppercase; font-size: 10px; margin-bottom: 4px; }
 
   @media print {
     .actions { display: none; }
-    body { background: white; }
+    body { padding: 0; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
     .page { max-width: 100%; }
-    .footer { background: #0a0a0a !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
-    .hero { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
-    .metric-hero { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
-    .chip-primary, .chip-warn, .chip-danger { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+    * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
   }
 </style></head>
 <body>
-  <div class="actions">
-    <span class="actions-brand">◆ Peptyl</span>
-    <div class="actions-buttons">
-      <button class="btn" onclick="window.print()">Save as PDF</button>
-      <button class="btn btn-ghost" onclick="window.close()">Close</button>
-    </div>
-  </div>
-
   <div class="page">
-    <header class="hero">
-      <div class="brand"><span class="brand-dot"></span> Peptyl • Bespoke Coach Plan</div>
-      <h1>${plan.client_name}</h1>
-      <div class="hero-sub">Personalised Protocol</div>
-      ${plan.goal ? `<div class="hero-goal">◆ ${plan.goal}</div>` : ""}
-      <div class="hero-meta">
-        <div class="hero-meta-item"><div class="label">Start</div><div class="value">${plan.start_date || "—"}</div></div>
-        <div class="hero-meta-item"><div class="label">End</div><div class="value">${plan.end_date || "Ongoing"}</div></div>
-        <div class="hero-meta-item"><div class="label">Prepared</div><div class="value">${new Date(plan.created_at).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" })}</div></div>
+    <div class="actions">
+      <span class="actions-brand">◆ Peptyl • Bespoke Plan</span>
+      <div class="actions-buttons">
+        <button class="btn" onclick="window.print()">Save as PDF</button>
+        <button class="btn btn-ghost" onclick="window.close()">Close</button>
       </div>
-    </header>
+    </div>
 
-    <main class="content">
-      ${peptidesHtml ? `<section><h2>◆ Peptide Protocol</h2>${peptidesHtml}</section>` : ""}
-      ${supplementsHtml}
-      ${titrationHtml}
+    <div class="card header-card">
+      <div>
+        <div class="client-name">${esc(plan.client_name)}</div>
+        ${plan.client_email ? `<div class="client-email">${esc(plan.client_email)}</div>` : ""}
+        ${plan.goal ? `<div class="goal-badge">${esc(plan.goal)}</div>` : ""}
+        ${(plan.start_date || plan.end_date) ? `<div class="meta">📅 ${esc(plan.start_date || "—")} → ${esc(plan.end_date || "ongoing")}</div>` : ""}
+      </div>
+    </div>
 
-      ${plan.injection_sites?.length ? `<section><h2>◆ Injection Sites</h2><div class="pill-list">${plan.injection_sites.map((s: string) => `<span class="chip">${s}</span>`).join("")}</div></section>` : ""}
-      ${plan.timing_notes ? `<section><h2>◆ Timing Instructions</h2><div class="info-block">${plan.timing_notes}</div></section>` : ""}
-      ${plan.safety_notes ? `<section><div class="info-block safety"><div class="safety-title">⚠ Safety Notes</div>${plan.safety_notes}</div></section>` : ""}
-      ${plan.coach_rationale ? `<section><h2>◆ Coach Rationale</h2><div class="info-block">${plan.coach_rationale}</div></section>` : ""}
-      ${plan.client_notes ? `<section><h2>◆ Notes for Client</h2><div class="info-block">${plan.client_notes}</div></section>` : ""}
-    </main>
+    ${peptidesHtml ? `<div class="card"><h3 class="card-title"><span class="ico">💉</span> Peptide Protocol</h3>${peptidesHtml}</div>` : ""}
+    ${supplementsHtml}
+    ${titrationHtml}
+    ${sitesHtml}
+    ${timingHtml}
+    ${safetyHtml}
+    ${rationaleHtml}
+    ${clientNotesHtml}
 
-    <footer class="footer">
+    <div class="footer">
       <div class="footer-brand">◆ Peptyl • Health Intelligence</div>
       <div>Generated ${new Date().toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric" })} at ${new Date().toLocaleTimeString("en-GB", { hour: "2-digit", minute: "2-digit" })}</div>
-      <div class="footer-disclaim">This protocol is provided for research and educational purposes only and does not constitute medical advice. All compounds referenced are intended for in-vitro research use under the Human Medicines Regulations 2012 (UK). Consult a qualified healthcare professional before commencing any protocol.</div>
-    </footer>
+      <div style="margin-top:6px;">For research and educational purposes only. Not medical advice. Consult a qualified healthcare professional before commencing any protocol.</div>
+    </div>
   </div>
 </body></html>`;
 
