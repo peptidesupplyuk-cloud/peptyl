@@ -13,8 +13,130 @@ import { Separator } from "@/components/ui/separator";
 import { useToast } from "@/hooks/use-toast";
 import {
   Plus, Trash2, Loader2, Save, Calculator, AlertTriangle, FileText,
-  Beaker, Calendar, User, Pill, Syringe, Eye, ArrowLeft,
+  Beaker, Calendar, User, Pill, Syringe, Eye, ArrowLeft, Printer, Copy, Mail,
 } from "lucide-react";
+
+function exportPlanToPrintable(plan: any) {
+  const peptidesHtml = (plan.peptides as any[] || []).map((p: any) => `
+    <div class="block">
+      <h4>${p.peptide_name} <span class="badge">${p.frequency}</span></h4>
+      <table>
+        <tr><td>Dose per administration</td><td><strong>${p.dose_mg} mg</strong></td></tr>
+        <tr><td>Vial strength</td><td>${p.vial_strength_mg} mg</td></tr>
+        <tr><td>BAC water</td><td>${p.bac_water_ml} ml</td></tr>
+        <tr><td>Concentration</td><td>${p.calc?.concentration ?? "—"} mg/ml</td></tr>
+        <tr><td>Volume per dose</td><td>${p.calc?.volumeMl ?? "—"} ml</td></tr>
+        <tr><td>Clicks per dose (${p.ml_per_click} ml/click)</td><td><strong style="color:#0d9488">${p.calc?.clicks ?? "—"} clicks</strong></td></tr>
+        <tr><td>Doses per vial</td><td>${p.calc?.dosesPerVial ?? "—"}</td></tr>
+        <tr><td>Timing / Route</td><td>${p.timing || "—"} • ${p.route || "—"}</td></tr>
+      </table>
+      ${p.notes ? `<p class="muted"><em>${p.notes}</em></p>` : ""}
+    </div>
+  `).join("");
+
+  const supplementsHtml = (plan.supplements as any[] || []).length
+    ? `<h3>Supplements</h3><table class="full">
+        <tr><th>Name</th><th>Dose</th><th>Frequency</th><th>Timing</th></tr>
+        ${(plan.supplements as any[]).map((s: any) => `<tr><td>${s.name}</td><td>${s.dose}</td><td>${s.frequency}</td><td>${s.timing}</td></tr>`).join("")}
+      </table>` : "";
+
+  const titrationHtml = (plan.titration_schedule as any[] || []).length
+    ? `<h3>Titration Schedule</h3><table class="full">
+        <tr><th>Week</th><th>Dose</th><th>Note</th></tr>
+        ${(plan.titration_schedule as any[]).map((t: any) => `<tr><td>Week ${t.week}</td><td>${t.dose_mg} mg</td><td>${t.note || ""}</td></tr>`).join("")}
+      </table>` : "";
+
+  const html = `<!DOCTYPE html>
+<html><head><meta charset="utf-8"><title>${plan.client_name} — Bespoke Plan</title>
+<style>
+  @page { margin: 20mm; }
+  body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; color: #111; max-width: 780px; margin: 24px auto; padding: 0 24px; line-height: 1.5; }
+  h1 { font-size: 26px; margin: 0 0 4px; color: #0d9488; }
+  h2 { font-size: 14px; font-weight: 500; color: #555; margin: 0 0 24px; text-transform: uppercase; letter-spacing: 1px; }
+  h3 { font-size: 16px; margin: 28px 0 10px; padding-bottom: 6px; border-bottom: 2px solid #0d9488; }
+  h4 { font-size: 14px; margin: 0 0 8px; display: flex; justify-content: space-between; align-items: center; }
+  .badge { background: #0d9488; color: white; padding: 2px 8px; border-radius: 4px; font-size: 11px; font-weight: 500; }
+  .block { border: 1px solid #e5e7eb; border-radius: 8px; padding: 12px 16px; margin-bottom: 12px; page-break-inside: avoid; }
+  table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  table.full td, table.full th { border: 1px solid #e5e7eb; padding: 6px 10px; text-align: left; }
+  table.full th { background: #f9fafb; font-weight: 600; }
+  table:not(.full) td { padding: 3px 0; }
+  table:not(.full) td:first-child { color: #666; width: 55%; }
+  .muted { color: #666; font-size: 12px; }
+  .meta { color: #555; font-size: 13px; margin-bottom: 4px; }
+  .safety { background: #fffbeb; border: 1px solid #fbbf24; border-radius: 8px; padding: 12px 16px; margin-top: 16px; }
+  .safety h3 { color: #b45309; border: 0; margin-top: 0; }
+  .footer { margin-top: 36px; padding-top: 16px; border-top: 1px solid #e5e7eb; font-size: 11px; color: #888; }
+  .actions { margin-bottom: 20px; }
+  .actions button { background: #0d9488; color: white; border: 0; padding: 8px 16px; border-radius: 6px; cursor: pointer; font-size: 13px; margin-right: 8px; }
+  @media print { .actions { display: none; } body { margin: 0; } }
+</style></head>
+<body>
+  <div class="actions">
+    <button onclick="window.print()">🖨️ Print / Save as PDF</button>
+    <button onclick="window.close()">Close</button>
+  </div>
+  <h1>${plan.client_name}</h1>
+  <h2>Bespoke Protocol Plan</h2>
+  ${plan.client_email ? `<p class="meta"><strong>Email:</strong> ${plan.client_email}</p>` : ""}
+  ${plan.goal ? `<p class="meta"><strong>Goal:</strong> ${plan.goal}</p>` : ""}
+  ${(plan.start_date || plan.end_date) ? `<p class="meta"><strong>Duration:</strong> ${plan.start_date || "—"} → ${plan.end_date || "ongoing"}</p>` : ""}
+  <p class="meta"><strong>Status:</strong> ${plan.status}</p>
+
+  ${peptidesHtml ? `<h3>Peptide Protocol</h3>${peptidesHtml}` : ""}
+  ${supplementsHtml}
+  ${titrationHtml}
+
+  ${plan.injection_sites?.length ? `<h3>Injection Sites</h3><p>${plan.injection_sites.join(" • ")}</p>` : ""}
+  ${plan.timing_notes ? `<h3>Timing Instructions</h3><p style="white-space:pre-wrap">${plan.timing_notes}</p>` : ""}
+  ${plan.safety_notes ? `<div class="safety"><h3>⚠️ Safety Notes</h3><p style="white-space:pre-wrap">${plan.safety_notes}</p></div>` : ""}
+  ${plan.coach_rationale ? `<h3>Coach Rationale</h3><p style="white-space:pre-wrap">${plan.coach_rationale}</p>` : ""}
+  ${plan.client_notes ? `<h3>Client Notes</h3><p style="white-space:pre-wrap">${plan.client_notes}</p>` : ""}
+
+  <div class="footer">
+    Generated ${new Date().toLocaleString()} • Peptyl Coach Plan • For research and educational purposes only. Not medical advice.
+  </div>
+</body></html>`;
+
+  const win = window.open("", "_blank", "width=900,height=1000");
+  if (!win) {
+    alert("Please allow pop-ups to export the plan.");
+    return;
+  }
+  win.document.write(html);
+  win.document.close();
+}
+
+function planToPlainText(plan: any): string {
+  const lines: string[] = [];
+  lines.push(`BESPOKE PLAN — ${plan.client_name}`);
+  lines.push("=".repeat(50));
+  if (plan.goal) lines.push(`Goal: ${plan.goal}`);
+  if (plan.start_date || plan.end_date) lines.push(`Duration: ${plan.start_date || "—"} → ${plan.end_date || "ongoing"}`);
+  lines.push("");
+  if ((plan.peptides as any[])?.length) {
+    lines.push("PEPTIDES");
+    lines.push("-".repeat(50));
+    (plan.peptides as any[]).forEach((p: any) => {
+      lines.push(`• ${p.peptide_name} — ${p.dose_mg} mg ${p.frequency}`);
+      lines.push(`  Vial: ${p.vial_strength_mg} mg in ${p.bac_water_ml} ml BAC`);
+      if (p.calc) lines.push(`  → ${p.calc.clicks} clicks per dose (${p.calc.volumeMl} ml) • ${p.calc.dosesPerVial} doses/vial`);
+      if (p.notes) lines.push(`  Notes: ${p.notes}`);
+      lines.push("");
+    });
+  }
+  if ((plan.supplements as any[])?.length) {
+    lines.push("SUPPLEMENTS");
+    lines.push("-".repeat(50));
+    (plan.supplements as any[]).forEach((s: any) => lines.push(`• ${s.name} — ${s.dose}, ${s.frequency} (${s.timing})`));
+    lines.push("");
+  }
+  if (plan.safety_notes) { lines.push("SAFETY NOTES"); lines.push("-".repeat(50)); lines.push(plan.safety_notes); lines.push(""); }
+  if (plan.coach_rationale) { lines.push("COACH RATIONALE"); lines.push("-".repeat(50)); lines.push(plan.coach_rationale); lines.push(""); }
+  lines.push("---");
+  lines.push("For research and educational purposes only. Not medical advice.");
+  return lines.join("\n");
+}
 
 const FREQUENCIES = [
   "Once daily", "Twice daily", "Once weekly", "Twice weekly", "3x per week",
@@ -272,6 +394,24 @@ const CoachPlanBuilder = () => {
         <Button variant="ghost" size="sm" onClick={() => { setMode("list"); setViewingId(null); }} className="gap-2">
           <ArrowLeft className="h-4 w-4" /> Back to plans
         </Button>
+        <div className="flex flex-wrap gap-2">
+          <Button size="sm" variant="default" onClick={() => exportPlanToPrintable(plan)} className="gap-2">
+            <Printer className="h-4 w-4" /> Export / Print PDF
+          </Button>
+          <Button size="sm" variant="outline" onClick={async () => {
+            await navigator.clipboard.writeText(planToPlainText(plan));
+            toast({ title: "Copied to clipboard", description: "Plan copied as plain text — paste into any message." });
+          }} className="gap-2">
+            <Copy className="h-4 w-4" /> Copy as Text
+          </Button>
+          {plan.client_email && (
+            <Button size="sm" variant="outline" asChild className="gap-2">
+              <a href={`mailto:${plan.client_email}?subject=${encodeURIComponent(`Your bespoke plan — ${plan.client_name}`)}&body=${encodeURIComponent(planToPlainText(plan))}`}>
+                <Mail className="h-4 w-4" /> Email Client
+              </a>
+            </Button>
+          )}
+        </div>
         <Card className="p-6">
           <div className="flex items-start justify-between mb-4">
             <div>
