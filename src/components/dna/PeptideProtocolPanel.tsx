@@ -175,9 +175,10 @@ const PeptideProtocolPanel = ({ peptides }: Props) => {
 
   if (!peptides || peptides.length === 0) return null;
 
-  const hasPriorityFlag = peptides.some(p => p.is_priority !== undefined);
-  const priority = hasPriorityFlag ? peptides.filter(p => p.is_priority) : peptides.slice(0, 3);
-  const suggestions = hasPriorityFlag ? peptides.filter(p => !p.is_priority) : peptides.slice(3);
+  const normalised = peptides.map(normalisePeptide);
+  const hasPriorityFlag = normalised.some(p => p.is_priority !== undefined);
+  const priority = hasPriorityFlag ? normalised.filter(p => p.is_priority) : normalised.slice(0, 3);
+  const suggestions = hasPriorityFlag ? normalised.filter(p => !p.is_priority) : normalised.slice(3);
 
   return (
     <div className="space-y-4">
