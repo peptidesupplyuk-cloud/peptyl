@@ -3,7 +3,7 @@ import { useParams, useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import SEO from "@/components/SEO";
 import { Loader2 } from "lucide-react";
-import ReportCardNav, { type ReportCard } from "@/components/dna/report/ReportCardNav";
+import ReportScrollLayout, { type ReportSection } from "@/components/dna/report/ReportScrollLayout";
 import HeroCard from "@/components/dna/report/HeroCard";
 import UpgradeCTA from "@/components/dna/report/UpgradeCTA";
 import TopFindings from "@/components/dna/TopFindings";
@@ -76,14 +76,14 @@ const DNAReport = () => {
     return parts.length > 0 ? parts.join('+') : null;
   };
 
-  const cards = useMemo<ReportCard[]>(() => {
+  const cards = useMemo<ReportSection[]>(() => {
     if (!report) return [];
     const r = report.report_json || {};
     const isPro = report.assessment_tier === "pro";
     const isAdvanced = report.assessment_tier === "advanced" || isPro;
     const score = report.overall_score ?? r.health_score?.overall ?? 0;
 
-    const result: ReportCard[] = [];
+    const result: ReportSection[] = [];
 
     // CARD 1 — Hero
     result.push({
@@ -333,7 +333,7 @@ const DNAReport = () => {
   return (
     <>
       <SEO title="Your DNA Report | Peptyl" description="Personalised genetic health assessment report." path={`/dna/report/${id}`} />
-      <ReportCardNav cards={cards} />
+      <ReportScrollLayout sections={cards} />
     </>
   );
 };
