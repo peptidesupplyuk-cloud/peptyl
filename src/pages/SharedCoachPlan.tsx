@@ -164,7 +164,7 @@ const SharedCoachPlan = () => {
                       <div>
                         <p className="text-[11px] uppercase tracking-[0.25em] text-primary font-bold mb-1">Clicks per dose</p>
                         <div className="flex items-baseline gap-3">
-                          <span className="text-6xl font-heading font-bold text-primary leading-none tabular-nums">{p.calc?.clicks ?? "—"}</span>
+                          <span className="text-6xl font-heading font-bold text-primary leading-none tabular-nums">{displayClicks(p.calc?.clicks)}</span>
                           <span className="text-base text-muted-foreground">clicks</span>
                         </div>
                       </div>
