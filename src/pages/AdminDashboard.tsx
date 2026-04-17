@@ -1826,6 +1826,9 @@ const AdminDashboard = () => {
               <TabsContent value="marker-requests">
                 <MarkerRequestsTab />
               </TabsContent>
+              <TabsContent value="coach-plans">
+                <CoachPlanBuilder />
+              </TabsContent>
             </Tabs>
           </UserDetailContext.Provider>
         </div>
