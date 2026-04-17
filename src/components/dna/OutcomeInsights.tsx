@@ -105,8 +105,14 @@ const OutcomeInsights = ({ reportId, genotypeKey }: OutcomeInsightsProps) => {
   }
 
   // STATE 3: Completed
-  const outcomeMarkers = (record.outcome_markers ?? {}) as unknown as Record<string, OutcomeMarker>;
-  const markerEntries = Object.entries(outcomeMarkers);
+  const rawMarkers = record.outcome_markers;
+  const outcomeMarkers: Record<string, OutcomeMarker> =
+    rawMarkers && typeof rawMarkers === "object" && !Array.isArray(rawMarkers)
+      ? (rawMarkers as unknown as Record<string, OutcomeMarker>)
+      : {};
+  const markerEntries = Object.entries(outcomeMarkers).filter(
+    ([, m]) => m && typeof m === "object",
+  );
 
   const responderLabel =
     record.overall_responder_status === "strong_responder"

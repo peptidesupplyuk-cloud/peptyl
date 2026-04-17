@@ -73,27 +73,32 @@ const BiomarkerBars = ({ biomarkers }: Props) => {
           const detail = b.interpretation || b.action || "";
           const displayStatus = humanizeStatus(b.status);
 
+          const valueStr =
+            b.value !== undefined && b.value !== null && b.value !== ""
+              ? String(b.value)
+              : "—";
+
           return (
-            <div key={i} className={`rounded-xl p-4 border border-border ${statusBg(b.status)}`}>
-              <div className="flex items-center justify-between mb-2">
-                <div>
-                  <span className="font-heading font-semibold text-foreground text-sm">{label}</span>
-                  {range && <span className="text-xs text-muted-foreground ml-2">Optimal: {range}</span>}
+            <div key={i} className={`rounded-2xl p-4 md:p-5 border border-border ${statusBg(b.status)}`}>
+              <div className="flex items-start justify-between gap-3 mb-2">
+                <div className="min-w-0 flex-1">
+                  <h3 className="font-heading font-semibold text-foreground text-base">{label}</h3>
+                  {range && <p className="text-xs md:text-sm text-muted-foreground mt-0.5">Optimal: {range}</p>}
                 </div>
-                <span className={`text-xs font-medium px-2.5 py-1 rounded-full ${statusColor(b.status)}`}>
+                <span className={`text-xs font-semibold px-2.5 py-1 rounded-full whitespace-nowrap ${statusColor(b.status)}`}>
                   {displayStatus}
                 </span>
               </div>
 
-              <div className="flex items-baseline gap-1 mb-2">
-                <span className="text-lg font-heading font-bold text-foreground tabular-nums">{b.value}</span>
-                <span className="text-xs text-muted-foreground">{b.unit}</span>
+              <div className="flex items-baseline gap-1.5 mb-2">
+                <span className="text-2xl md:text-3xl font-heading font-bold text-foreground tabular-nums">{valueStr}</span>
+                {b.unit && <span className="text-sm text-muted-foreground">{b.unit}</span>}
               </div>
 
-              {detail && <p className="text-xs text-foreground mb-1">{detail}</p>}
+              {detail && <p className="text-sm text-foreground/90 leading-relaxed">{detail}</p>}
 
               {b.gene_interaction && (
-                <p className="text-xs text-primary font-medium mt-1">🧬 {b.gene_interaction}</p>
+                <p className="text-sm text-primary font-medium mt-2">🧬 {b.gene_interaction}</p>
               )}
             </div>
           );
