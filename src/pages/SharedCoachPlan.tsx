@@ -56,7 +56,7 @@ const SharedCoachPlan = () => {
 
   return (
     <div className="min-h-screen bg-background">
-      <SEO title={`${plan.client_name} — Bespoke Plan • Peptyl`} description="Your personalised peptide protocol." noIndex />
+      <SEO title={`${plan.client_name} — Bespoke Plan • Peptyl`} description="Your personalised peptide protocol." />
 
       {/* Top bar */}
       <header className="border-b border-border/50 bg-card/30 backdrop-blur sticky top-0 z-10">
