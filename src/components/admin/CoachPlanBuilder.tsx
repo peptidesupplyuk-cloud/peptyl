@@ -449,10 +449,16 @@ const CoachPlanBuilder = () => {
             <h3 className="font-semibold mb-3 flex items-center gap-2"><Syringe className="h-4 w-4 text-primary" /> Peptide Protocol</h3>
             <div className="space-y-3">
               {(plan.peptides as any[]).map((p, i) => (
-                <div key={i} className="border border-border rounded-lg p-3 space-y-2">
-                  <div className="flex items-center justify-between">
-                    <h4 className="font-medium">{p.peptide_name}</h4>
-                    <Badge variant="outline">{p.frequency}</Badge>
+                <div key={i} className="border border-border rounded-lg p-4 space-y-3">
+                  <div className="flex items-center justify-between flex-wrap gap-2">
+                    <div>
+                      <h4 className="font-semibold">{p.peptide_name}</h4>
+                      {p.category && <p className="text-[10px] uppercase tracking-wider text-muted-foreground">{p.category}</p>}
+                    </div>
+                    <div className="flex gap-1.5 flex-wrap">
+                      <Badge variant="outline">{p.frequency}</Badge>
+                      {p.evidence_grade && <Badge variant="secondary" className="text-[10px]">Evidence: {p.evidence_grade}</Badge>}
+                    </div>
                   </div>
                   <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 text-xs">
                     <div><p className="text-muted-foreground">Dose</p><p className="font-semibold">{p.dose_mg} mg</p></div>
@@ -460,7 +466,29 @@ const CoachPlanBuilder = () => {
                     <div><p className="text-muted-foreground">Clicks/dose</p><p className="font-semibold text-primary">{p.calc?.clicks ?? "—"}</p></div>
                     <div><p className="text-muted-foreground">Doses/vial</p><p className="font-semibold">{p.calc?.dosesPerVial ?? "—"}</p></div>
                   </div>
-                  {p.notes && <p className="text-xs text-muted-foreground italic">{p.notes}</p>}
+                  {p.benefits?.length > 0 && (
+                    <div className="pt-2 border-t border-border/50">
+                      <p className="text-[11px] uppercase tracking-wider text-muted-foreground mb-1.5">Benefits</p>
+                      <div className="flex flex-wrap gap-1.5">
+                        {p.benefits.map((b: string, k: number) => (
+                          <Badge key={k} variant="secondary" className="text-[11px] bg-primary/10 text-primary border-0">{b}</Badge>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                  {p.mechanism && (
+                    <div>
+                      <p className="text-[11px] uppercase tracking-wider text-muted-foreground mb-1">Mechanism</p>
+                      <p className="text-xs text-foreground/80">{p.mechanism}</p>
+                    </div>
+                  )}
+                  {p.side_effects_common?.length > 0 && (
+                    <div>
+                      <p className="text-[11px] uppercase tracking-wider text-amber-600 dark:text-amber-400 mb-1">Common Side Effects</p>
+                      <p className="text-xs text-muted-foreground">{p.side_effects_common.join(" • ")}</p>
+                    </div>
+                  )}
+                  {p.notes && <p className="text-xs text-muted-foreground italic pt-1 border-t border-border/50">{p.notes}</p>}
                 </div>
               ))}
             </div>
