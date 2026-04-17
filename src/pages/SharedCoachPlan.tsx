@@ -3,7 +3,7 @@ import { useParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Calendar, Syringe, Pill, AlertTriangle, Loader2, Lock } from "lucide-react";
+import { Calendar, Syringe, Pill, AlertTriangle, Loader2, Lock, Sparkles, Target, Clock } from "lucide-react";
 import Logo from "@/components/Logo";
 import SEO from "@/components/SEO";
 
@@ -59,163 +59,240 @@ const SharedCoachPlan = () => {
       <SEO title={`${plan.client_name} — Bespoke Plan • Peptyl`} description="Your personalised peptide protocol." path={`/plan/${token}`} />
 
       {/* Top bar */}
-      <header className="border-b border-border/50 bg-card/30 backdrop-blur sticky top-0 z-10">
-        <div className="max-w-3xl mx-auto px-4 py-3 flex items-center justify-between">
+      <header className="border-b border-border/50 bg-card/40 backdrop-blur-xl sticky top-0 z-10">
+        <div className="max-w-4xl mx-auto px-6 py-4 flex items-center justify-between">
           <Logo />
-          <span className="text-[10px] uppercase tracking-widest text-muted-foreground">Bespoke Plan</span>
+          <div className="flex items-center gap-2">
+            <Sparkles className="h-3.5 w-3.5 text-primary" />
+            <span className="text-[11px] uppercase tracking-[0.2em] text-muted-foreground font-medium">Bespoke Plan</span>
+          </div>
         </div>
       </header>
 
-      <main className="max-w-3xl mx-auto px-4 py-6 space-y-5">
-        {/* Header */}
-        <Card className="p-6">
-          <div className="flex items-start justify-between gap-4">
-            <div>
-              <h1 className="text-2xl font-heading font-semibold">{plan.client_name}</h1>
-              {plan.goal && <Badge className="mt-2">{plan.goal}</Badge>}
-            </div>
+      <main className="max-w-4xl mx-auto px-6 py-10 space-y-8">
+        {/* Hero header */}
+        <section className="relative overflow-hidden rounded-2xl border border-border bg-gradient-to-br from-primary/10 via-card to-card p-8 sm:p-10">
+          <div className="absolute -top-24 -right-24 w-64 h-64 rounded-full bg-primary/10 blur-3xl" />
+          <div className="relative">
+            <p className="text-[11px] uppercase tracking-[0.25em] text-primary font-semibold mb-3">Personalised Protocol</p>
+            <h1 className="text-4xl sm:text-5xl font-heading font-bold tracking-tight mb-4">{plan.client_name}</h1>
+            {plan.goal && (
+              <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/15 border border-primary/30 mb-5">
+                <Target className="h-3.5 w-3.5 text-primary" />
+                <span className="text-sm font-semibold text-primary">{plan.goal}</span>
+              </div>
+            )}
+            {(plan.start_date || plan.end_date) && (
+              <p className="text-base text-muted-foreground flex items-center gap-2.5">
+                <Calendar className="h-4 w-4" />
+                <span className="font-medium text-foreground">{plan.start_date || "—"}</span>
+                <span className="text-muted-foreground">→</span>
+                <span className="font-medium text-foreground">{plan.end_date || "ongoing"}</span>
+              </p>
+            )}
           </div>
-          {(plan.start_date || plan.end_date) && (
-            <p className="text-sm text-muted-foreground flex items-center gap-2 mt-3">
-              <Calendar className="h-4 w-4" />
-              {plan.start_date || "—"} → {plan.end_date || "ongoing"}
-            </p>
-          )}
-        </Card>
+        </section>
 
         {/* Peptides */}
         {(plan.peptides as any[])?.length > 0 && (
-          <Card className="p-6">
-            <h3 className="font-semibold mb-3 flex items-center gap-2">
-              <Syringe className="h-4 w-4 text-primary" /> Peptide Protocol
-            </h3>
-            <div className="space-y-3">
+          <section>
+            <div className="flex items-center gap-3 mb-5">
+              <div className="h-10 w-10 rounded-xl bg-primary/15 flex items-center justify-center">
+                <Syringe className="h-5 w-5 text-primary" />
+              </div>
+              <div>
+                <h2 className="text-2xl font-heading font-bold">Peptide Protocol</h2>
+                <p className="text-sm text-muted-foreground">{(plan.peptides as any[]).length} compound{(plan.peptides as any[]).length > 1 ? "s" : ""} prescribed</p>
+              </div>
+            </div>
+
+            <div className="space-y-5">
               {(plan.peptides as any[]).map((p, i) => (
-                <div key={i} className="border border-border rounded-lg p-4 space-y-3">
-                  <div className="flex items-center justify-between flex-wrap gap-2">
-                    <div>
-                      <h4 className="font-semibold">{p.peptide_name}</h4>
-                      {p.category && (
-                        <p className="text-[10px] uppercase tracking-wider text-muted-foreground">{p.category}</p>
-                      )}
-                    </div>
-                    <div className="flex gap-1.5 flex-wrap">
-                      <Badge variant="outline">{p.frequency}</Badge>
-                      {p.evidence_grade && (
-                        <Badge variant="secondary" className="text-[10px]">Evidence: {p.evidence_grade}</Badge>
-                      )}
-                    </div>
-                  </div>
-                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 text-xs">
-                    <div><p className="text-muted-foreground">Dose</p><p className="font-semibold">{p.dose_mg} mg</p></div>
-                    <div><p className="text-muted-foreground">Vial</p><p className="font-semibold">{p.vial_strength_mg} mg / {p.bac_water_ml} ml BAC</p></div>
-                    <div><p className="text-muted-foreground">Clicks/dose</p><p className="font-semibold text-primary">{p.calc?.clicks ?? "—"}</p></div>
-                    <div><p className="text-muted-foreground">Doses/vial</p><p className="font-semibold">{p.calc?.dosesPerVial ?? "—"}</p></div>
-                  </div>
-                  {p.benefits?.length > 0 && (
-                    <div className="pt-2 border-t border-border/50">
-                      <p className="text-[11px] uppercase tracking-wider text-muted-foreground mb-1.5">Benefits</p>
-                      <div className="flex flex-wrap gap-1.5">
-                        {p.benefits.map((b: string, k: number) => (
-                          <Badge key={k} variant="secondary" className="text-[11px] bg-primary/10 text-primary border-0">{b}</Badge>
-                        ))}
+                <Card key={i} className="overflow-hidden border-border/60">
+                  {/* Peptide header */}
+                  <div className="p-6 pb-5 border-b border-border/50">
+                    <div className="flex items-start justify-between gap-4 flex-wrap">
+                      <div>
+                        <h3 className="text-2xl font-heading font-bold tracking-tight">{p.peptide_name}</h3>
+                        {p.category && (
+                          <p className="text-[11px] uppercase tracking-[0.2em] text-muted-foreground mt-1.5 font-medium">{p.category}</p>
+                        )}
+                      </div>
+                      <div className="flex gap-2 flex-wrap">
+                        <Badge className="text-sm px-3 py-1 bg-primary text-primary-foreground hover:bg-primary">{p.frequency}</Badge>
+                        {p.evidence_grade && (
+                          <Badge variant="outline" className="text-xs px-3 py-1">Evidence: {p.evidence_grade}</Badge>
+                        )}
                       </div>
                     </div>
-                  )}
-                  {p.mechanism && (
-                    <div>
-                      <p className="text-[11px] uppercase tracking-wider text-muted-foreground mb-1">Mechanism</p>
-                      <p className="text-xs text-foreground/80">{p.mechanism}</p>
+                  </div>
+
+                  {/* Hero metric: Clicks */}
+                  <div className="px-6 py-6 bg-gradient-to-br from-primary/10 to-transparent border-b border-border/50">
+                    <div className="flex items-center justify-between gap-6 flex-wrap">
+                      <div>
+                        <p className="text-[11px] uppercase tracking-[0.25em] text-primary font-bold mb-1">Clicks per dose</p>
+                        <div className="flex items-baseline gap-3">
+                          <span className="text-6xl font-heading font-bold text-primary leading-none tabular-nums">{p.calc?.clicks ?? "—"}</span>
+                          <span className="text-base text-muted-foreground">clicks</span>
+                        </div>
+                      </div>
+                      <div className="text-right">
+                        <p className="text-[11px] uppercase tracking-[0.25em] text-muted-foreground font-semibold mb-1">Doses per vial</p>
+                        <span className="text-4xl font-heading font-bold tabular-nums">{p.calc?.dosesPerVial ?? "—"}</span>
+                      </div>
                     </div>
-                  )}
-                  {p.side_effects_common?.length > 0 && (
-                    <div>
-                      <p className="text-[11px] uppercase tracking-wider text-amber-600 dark:text-amber-400 mb-1">Common Side Effects</p>
-                      <p className="text-xs text-muted-foreground">{p.side_effects_common.join(" • ")}</p>
+                  </div>
+
+                  {/* Dose & vial details */}
+                  <div className="grid grid-cols-2 divide-x divide-border/50 border-b border-border/50">
+                    <div className="p-5">
+                      <p className="text-[11px] uppercase tracking-[0.2em] text-muted-foreground font-semibold mb-1.5">Dose</p>
+                      <p className="text-xl font-bold tabular-nums">{p.dose_mg} <span className="text-base font-normal text-muted-foreground">mg</span></p>
                     </div>
-                  )}
-                  {p.notes && (
-                    <p className="text-xs text-muted-foreground italic pt-1 border-t border-border/50">{p.notes}</p>
-                  )}
-                </div>
+                    <div className="p-5">
+                      <p className="text-[11px] uppercase tracking-[0.2em] text-muted-foreground font-semibold mb-1.5">Vial</p>
+                      <p className="text-xl font-bold tabular-nums">{p.vial_strength_mg} <span className="text-base font-normal text-muted-foreground">mg</span></p>
+                      <p className="text-xs text-muted-foreground mt-0.5">+ {p.bac_water_ml} ml BAC water</p>
+                    </div>
+                  </div>
+
+                  {/* Benefits + clinical content */}
+                  <div className="p-6 space-y-5">
+                    {p.benefits?.length > 0 && (
+                      <div>
+                        <p className="text-[11px] uppercase tracking-[0.2em] text-muted-foreground font-semibold mb-2.5">Benefits</p>
+                        <div className="flex flex-wrap gap-2">
+                          {p.benefits.map((b: string, k: number) => (
+                            <span key={k} className="text-sm px-3 py-1.5 rounded-full bg-primary/10 text-primary border border-primary/20 font-medium">
+                              {b}
+                            </span>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+
+                    {p.mechanism && (
+                      <div>
+                        <p className="text-[11px] uppercase tracking-[0.2em] text-muted-foreground font-semibold mb-2">Mechanism of Action</p>
+                        <p className="text-base text-foreground/90 leading-relaxed">{p.mechanism}</p>
+                      </div>
+                    )}
+
+                    {p.side_effects_common?.length > 0 && (
+                      <div className="rounded-lg bg-amber-500/5 border border-amber-500/20 p-4">
+                        <p className="text-[11px] uppercase tracking-[0.2em] text-amber-600 dark:text-amber-400 font-bold mb-1.5">Common Side Effects</p>
+                        <p className="text-sm text-foreground/85">{p.side_effects_common.join(" • ")}</p>
+                      </div>
+                    )}
+
+                    {p.notes && (
+                      <div className="pt-4 border-t border-border/50">
+                        <p className="text-[11px] uppercase tracking-[0.2em] text-muted-foreground font-semibold mb-1.5 flex items-center gap-1.5">
+                          <Clock className="h-3 w-3" /> Coach notes
+                        </p>
+                        <p className="text-sm text-foreground/85 italic leading-relaxed">{p.notes}</p>
+                      </div>
+                    )}
+                  </div>
+                </Card>
               ))}
             </div>
-          </Card>
+          </section>
         )}
 
         {/* Supplements */}
         {(plan.supplements as any[])?.length > 0 && (
-          <Card className="p-6">
-            <h3 className="font-semibold mb-3 flex items-center gap-2">
-              <Pill className="h-4 w-4 text-primary" /> Supplements
-            </h3>
-            <ul className="space-y-2">
-              {(plan.supplements as any[]).map((s: any, i: number) => (
-                <li key={i} className="text-sm flex items-center justify-between border-b border-border/50 pb-2 last:border-0">
-                  <span className="font-medium">{s.name}</span>
-                  <span className="text-muted-foreground text-xs">{s.dose} • {s.frequency} • {s.timing}</span>
-                </li>
-              ))}
-            </ul>
-          </Card>
+          <section>
+            <div className="flex items-center gap-3 mb-5">
+              <div className="h-10 w-10 rounded-xl bg-primary/15 flex items-center justify-center">
+                <Pill className="h-5 w-5 text-primary" />
+              </div>
+              <h2 className="text-2xl font-heading font-bold">Supplements</h2>
+            </div>
+            <Card className="p-6">
+              <ul className="divide-y divide-border/50">
+                {(plan.supplements as any[]).map((s: any, i: number) => (
+                  <li key={i} className="py-3.5 first:pt-0 last:pb-0 flex items-center justify-between gap-4 flex-wrap">
+                    <span className="text-base font-semibold">{s.name}</span>
+                    <span className="text-sm text-muted-foreground">{s.dose} • {s.frequency} • {s.timing}</span>
+                  </li>
+                ))}
+              </ul>
+            </Card>
+          </section>
         )}
 
         {/* Titration */}
         {(plan.titration_schedule as any[])?.length > 0 && (
-          <Card className="p-6">
-            <h3 className="font-semibold mb-3">Titration Schedule</h3>
-            <div className="space-y-2">
-              {(plan.titration_schedule as any[]).map((t: any, i: number) => (
-                <div key={i} className="text-sm flex gap-3 items-center">
-                  <Badge variant="outline" className="w-20 justify-center">Week {t.week}</Badge>
-                  <span className="font-medium">{t.dose_mg} mg</span>
-                  {t.note && <span className="text-xs text-muted-foreground">— {t.note}</span>}
-                </div>
-              ))}
-            </div>
-          </Card>
+          <section>
+            <h2 className="text-2xl font-heading font-bold mb-5">Titration Schedule</h2>
+            <Card className="p-6">
+              <div className="space-y-3">
+                {(plan.titration_schedule as any[]).map((t: any, i: number) => (
+                  <div key={i} className="flex gap-4 items-center">
+                    <Badge variant="outline" className="w-24 justify-center text-sm py-1">Week {t.week}</Badge>
+                    <span className="text-lg font-bold tabular-nums">{t.dose_mg} <span className="text-sm font-normal text-muted-foreground">mg</span></span>
+                    {t.note && <span className="text-sm text-muted-foreground">— {t.note}</span>}
+                  </div>
+                ))}
+              </div>
+            </Card>
+          </section>
         )}
 
         {plan.injection_sites?.length > 0 && (
-          <Card className="p-6">
-            <h3 className="font-semibold mb-2">Injection Sites</h3>
-            <div className="flex gap-2 flex-wrap">
-              {plan.injection_sites.map((s: string) => <Badge key={s} variant="secondary">{s}</Badge>)}
-            </div>
-          </Card>
+          <section>
+            <h2 className="text-2xl font-heading font-bold mb-5">Injection Sites</h2>
+            <Card className="p-6">
+              <div className="flex gap-2 flex-wrap">
+                {plan.injection_sites.map((s: string) => (
+                  <Badge key={s} variant="secondary" className="text-sm px-3 py-1.5">{s}</Badge>
+                ))}
+              </div>
+            </Card>
+          </section>
         )}
 
         {plan.timing_notes && (
-          <Card className="p-6">
-            <h3 className="font-semibold mb-2">Timing</h3>
-            <p className="text-sm whitespace-pre-wrap">{plan.timing_notes}</p>
-          </Card>
+          <section>
+            <h2 className="text-2xl font-heading font-bold mb-5">Timing</h2>
+            <Card className="p-6">
+              <p className="text-base whitespace-pre-wrap leading-relaxed">{plan.timing_notes}</p>
+            </Card>
+          </section>
         )}
 
         {plan.safety_notes && (
-          <Card className="p-6 border-amber-500/30 bg-amber-500/5">
-            <h3 className="font-semibold mb-2 flex items-center gap-2 text-amber-700 dark:text-amber-400">
-              <AlertTriangle className="h-4 w-4" /> Safety Notes
-            </h3>
-            <p className="text-sm whitespace-pre-wrap">{plan.safety_notes}</p>
-          </Card>
+          <section>
+            <Card className="p-6 border-amber-500/40 bg-amber-500/5">
+              <h2 className="text-xl font-heading font-bold mb-3 flex items-center gap-2.5 text-amber-700 dark:text-amber-400">
+                <AlertTriangle className="h-5 w-5" /> Safety Notes
+              </h2>
+              <p className="text-base whitespace-pre-wrap leading-relaxed text-foreground/90">{plan.safety_notes}</p>
+            </Card>
+          </section>
         )}
 
         {plan.coach_rationale && (
-          <Card className="p-6">
-            <h3 className="font-semibold mb-2">Coach Rationale</h3>
-            <p className="text-sm whitespace-pre-wrap">{plan.coach_rationale}</p>
-          </Card>
+          <section>
+            <h2 className="text-2xl font-heading font-bold mb-5">Coach Rationale</h2>
+            <Card className="p-6">
+              <p className="text-base whitespace-pre-wrap leading-relaxed">{plan.coach_rationale}</p>
+            </Card>
+          </section>
         )}
 
         {plan.client_notes && (
-          <Card className="p-6">
-            <h3 className="font-semibold mb-2">Notes for You</h3>
-            <p className="text-sm whitespace-pre-wrap">{plan.client_notes}</p>
-          </Card>
+          <section>
+            <h2 className="text-2xl font-heading font-bold mb-5">Notes for You</h2>
+            <Card className="p-6">
+              <p className="text-base whitespace-pre-wrap leading-relaxed">{plan.client_notes}</p>
+            </Card>
+          </section>
         )}
 
-        <p className="text-[10px] text-center text-muted-foreground pt-4 pb-8">
+        <p className="text-xs text-center text-muted-foreground pt-6 pb-12 leading-relaxed">
           For research and educational purposes only. Not medical advice.<br />
           Consult a qualified healthcare professional before commencing any protocol.
         </p>
