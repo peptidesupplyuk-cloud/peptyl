@@ -580,7 +580,6 @@ const CoachPlanBuilder = () => {
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2 flex-wrap">
                     <h3 className="font-semibold text-foreground">{plan.client_name}</h3>
-                    <Badge variant="secondary" className="text-[10px]">{plan.status}</Badge>
                     {plan.goal && <Badge variant="outline" className="text-[10px]">{plan.goal}</Badge>}
                   </div>
                   <p className="text-xs text-muted-foreground mt-1">
