@@ -427,7 +427,7 @@ const CoachPlanBuilder = () => {
     },
   });
 
-  const { data: viewingPlan } = useQuery({
+  const { data: viewingPlanRaw } = useQuery({
     queryKey: ["coach-plan", viewingId],
     enabled: !!viewingId,
     queryFn: async () => {
@@ -436,6 +436,32 @@ const CoachPlanBuilder = () => {
       return data;
     },
   });
+
+  // Hydrate peptides with enrichment data from the library so older plans
+  // (saved before enrichment was added) still show benefits / mechanism / side effects.
+  const viewingPlan = useMemo(() => {
+    if (!viewingPlanRaw) return null;
+    const plan: any = { ...viewingPlanRaw };
+    plan.peptides = ((plan.peptides as any[]) || []).map((p: any) => {
+      const lib = peptideLibrary?.find(
+        (l) => l.peptyl_id === p.peptyl_id || l.name?.toLowerCase() === p.peptide_name?.toLowerCase()
+      );
+      if (!lib) return p;
+      return {
+        ...p,
+        benefits: p.benefits?.length ? p.benefits : lib.primary_effects || [],
+        mechanism: p.mechanism || lib.mechanism_of_action || null,
+        side_effects_common: p.side_effects_common?.length ? p.side_effects_common : lib.side_effects_common || [],
+        side_effects_rare: p.side_effects_rare?.length ? p.side_effects_rare : lib.side_effects_rare || [],
+        contraindications: p.contraindications?.length ? p.contraindications : lib.contraindications || [],
+        drug_interactions: p.drug_interactions?.length ? p.drug_interactions : lib.drug_interactions || [],
+        evidence_grade: p.evidence_grade || lib.evidence_grade || null,
+        category: p.category || lib.category || null,
+        cycle_duration: p.cycle_duration || lib.cycle_duration || null,
+      };
+    });
+    return plan;
+  }, [viewingPlanRaw, peptideLibrary]);
 
   const createMutation = useMutation({
     mutationFn: async () => {
