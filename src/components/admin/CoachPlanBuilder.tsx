@@ -635,7 +635,6 @@ const CoachPlanBuilder = () => {
               {plan.client_email && <p className="text-sm text-muted-foreground">{plan.client_email}</p>}
               {plan.goal && <Badge className="mt-2">{plan.goal}</Badge>}
             </div>
-            <Badge variant="secondary">{plan.status}</Badge>
           </div>
           {(plan.start_date || plan.end_date) && (
             <p className="text-sm text-muted-foreground flex items-center gap-2">
