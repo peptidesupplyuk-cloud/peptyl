@@ -26,17 +26,44 @@ interface PeptideItem {
   route: string;
   duration: string;
   evidence_grade: string;
-  driven_by?: string[];
+  driven_by?: string[] | string;
   use_case?: string;
   is_priority?: boolean;
 }
 
 interface Props {
-  supplements: Supplement[];
-  peptides?: PeptideItem[];
+  supplements: any[];
+  peptides?: any[];
   reportId: string;
   isPaid?: boolean;
 }
+
+const toArr = (v: any): string[] => {
+  if (!v) return [];
+  if (Array.isArray(v)) return v.map(String).filter(Boolean);
+  return [String(v)];
+};
+
+const normaliseSupp = (s: any): Supplement => ({
+  supplement: s?.supplement ?? s?.name ?? s?.compound ?? "Unnamed supplement",
+  dose: s?.dose ?? s?.dosage ?? s?.dosage_range ?? s?.amount ?? "—",
+  timing: s?.timing ?? s?.frequency ?? s?.when ?? "daily",
+  evidence_grade: s?.evidence_grade ?? s?.grade ?? s?.evidence ?? "B",
+  driven_by: toArr(s?.driven_by ?? s?.drivers ?? s?.rationale_genes),
+  caution: s?.caution,
+  is_priority: s?.is_priority,
+});
+
+const normalisePep = (p: any): PeptideItem => ({
+  peptide: p?.peptide ?? p?.name ?? p?.peptide_name ?? p?.compound ?? "Unnamed peptide",
+  dose: p?.dose ?? p?.dosage ?? p?.dosage_range ?? p?.amount ?? "—",
+  route: p?.route ?? p?.administration ?? "Subcutaneous injection",
+  duration: p?.duration ?? p?.cycle_duration ?? p?.cycle ?? "",
+  evidence_grade: p?.evidence_grade ?? p?.grade ?? p?.evidence ?? "B",
+  driven_by: toArr(p?.driven_by ?? p?.drivers),
+  use_case: p?.use_case ?? p?.indication ?? "",
+  is_priority: p?.is_priority,
+});
 
 const gradeColor = (g: string) => {
   if (g === "A") return "bg-primary/10 text-primary";
