@@ -1,6 +1,31 @@
 import { useState } from "react";
 import { AlertTriangle, ChevronDown, ChevronUp, Shield, Info, Sparkles } from "lucide-react";
 
+interface RawPeptideItem {
+  // Either / or — pipeline schema varies
+  peptide?: string;
+  name?: string;
+  dose?: string;
+  dosage_range?: string;
+  route?: string;
+  frequency?: string;
+  duration?: string;
+  evidence_grade?: string;
+  evidence_basis?: string;
+  mechanism?: string;
+  driven_by?: string[];
+  use_case?: string;
+  indication?: string;
+  caution?: string;
+  disclaimer?: string;
+  interactions?: string;
+  monitoring?: string[];
+  peptyl_product_tag?: string;
+  research_only_disclaimer?: boolean;
+  is_priority?: boolean;
+  suggestion_note?: string;
+}
+
 interface PeptideItem {
   peptide: string;
   dose: string;
@@ -12,14 +37,33 @@ interface PeptideItem {
   use_case: string;
   caution?: string;
   interactions?: string;
+  monitoring?: string[];
   peptyl_product_tag?: string;
   research_only_disclaimer?: boolean;
   is_priority?: boolean;
   suggestion_note?: string;
 }
 
+const normalisePeptide = (p: RawPeptideItem): PeptideItem => ({
+  peptide: p.peptide ?? p.name ?? "Unknown",
+  dose: p.dose ?? p.dosage_range ?? "—",
+  route: p.route ?? p.frequency ?? "—",
+  duration: p.duration ?? "—",
+  evidence_grade: p.evidence_grade ?? "C",
+  evidence_basis: p.evidence_basis ?? p.mechanism ?? "Mechanism and supporting evidence pending.",
+  driven_by: Array.isArray(p.driven_by) ? p.driven_by : [],
+  use_case: p.use_case ?? p.indication ?? "",
+  caution: p.caution ?? p.disclaimer,
+  interactions: p.interactions,
+  monitoring: Array.isArray(p.monitoring) ? p.monitoring : undefined,
+  peptyl_product_tag: p.peptyl_product_tag,
+  research_only_disclaimer: p.research_only_disclaimer,
+  is_priority: p.is_priority,
+  suggestion_note: p.suggestion_note,
+});
+
 interface Props {
-  peptides: PeptideItem[] | undefined;
+  peptides: RawPeptideItem[] | undefined;
 }
 
 const gradeStyle: Record<string, string> = {
