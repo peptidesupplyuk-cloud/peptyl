@@ -22,6 +22,7 @@ import { campaigns } from "@/data/campaigns";
 const LazyResearchQueue = lazy(() => import("@/pages/ResearchQueue"));
 import IngestChat from "@/components/admin/IngestChat";
 import UserDetailPanel from "@/components/admin/UserDetailPanel";
+import CoachPlanBuilder from "@/components/admin/CoachPlanBuilder";
 
 const ADMIN_EMAIL = "peptidesupplyuk@gmail.com";
 
@@ -1791,6 +1792,9 @@ const AdminDashboard = () => {
                 <TabsTrigger value="marker-requests" className="gap-1.5">
                   <Droplets className="h-4 w-4" /> Marker Requests
                 </TabsTrigger>
+                <TabsTrigger value="coach-plans" className="gap-1.5">
+                  <FlaskConical className="h-4 w-4" /> Coach Plans
+                </TabsTrigger>
               </TabsList>
 
               <TabsContent value="analytics">
@@ -1821,6 +1825,9 @@ const AdminDashboard = () => {
               </TabsContent>
               <TabsContent value="marker-requests">
                 <MarkerRequestsTab />
+              </TabsContent>
+              <TabsContent value="coach-plans">
+                <CoachPlanBuilder />
               </TabsContent>
             </Tabs>
           </UserDetailContext.Provider>

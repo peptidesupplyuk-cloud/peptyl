@@ -287,6 +287,69 @@ export type Database = {
           },
         ]
       }
+      coach_plans: {
+        Row: {
+          client_email: string | null
+          client_name: string
+          client_notes: string | null
+          coach_rationale: string | null
+          created_at: string
+          created_by: string
+          end_date: string | null
+          goal: string | null
+          id: string
+          injection_sites: string[] | null
+          peptides: Json
+          safety_notes: string | null
+          start_date: string | null
+          status: string
+          supplements: Json
+          timing_notes: string | null
+          titration_schedule: Json | null
+          updated_at: string
+        }
+        Insert: {
+          client_email?: string | null
+          client_name: string
+          client_notes?: string | null
+          coach_rationale?: string | null
+          created_at?: string
+          created_by: string
+          end_date?: string | null
+          goal?: string | null
+          id?: string
+          injection_sites?: string[] | null
+          peptides?: Json
+          safety_notes?: string | null
+          start_date?: string | null
+          status?: string
+          supplements?: Json
+          timing_notes?: string | null
+          titration_schedule?: Json | null
+          updated_at?: string
+        }
+        Update: {
+          client_email?: string | null
+          client_name?: string
+          client_notes?: string | null
+          coach_rationale?: string | null
+          created_at?: string
+          created_by?: string
+          end_date?: string | null
+          goal?: string | null
+          id?: string
+          injection_sites?: string[] | null
+          peptides?: Json
+          safety_notes?: string | null
+          start_date?: string | null
+          status?: string
+          supplements?: Json
+          timing_notes?: string | null
+          titration_schedule?: Json | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       contact_submissions: {
         Row: {
           created_at: string
