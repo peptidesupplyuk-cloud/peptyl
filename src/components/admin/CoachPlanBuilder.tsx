@@ -538,6 +538,8 @@ const CoachPlanBuilder = () => {
     },
     onError: (err: any) => toast({ title: "Share failed", description: err.message, variant: "destructive" }),
   });
+
+  function resetForm() {
     setClientName(""); setClientEmail(""); setGoal(""); setStartDate(""); setEndDate("");
     setPeptides([blankPeptide()]); setSupplements([]); setTitration([]); setSites([]);
     setTimingNotes(""); setSafetyNotes(""); setCoachRationale(""); setClientNotes("");
