@@ -498,7 +498,46 @@ const CoachPlanBuilder = () => {
     },
   });
 
-  function resetForm() {
+  // Generate or revoke a public share link
+  const shareMutation = useMutation({
+    mutationFn: async ({ id, action }: { id: string; action: "enable" | "regenerate" | "revoke" }) => {
+      if (action === "revoke") {
+        const { error } = await supabase
+          .from("coach_plans")
+          .update({ share_enabled: false })
+          .eq("id", id);
+        if (error) throw error;
+        return { token: null };
+      }
+      // Generate a 32-char URL-safe token
+      const bytes = new Uint8Array(24);
+      crypto.getRandomValues(bytes);
+      const token = btoa(String.fromCharCode(...bytes))
+        .replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
+      const expiresAt = new Date();
+      expiresAt.setDate(expiresAt.getDate() + 90);
+      const { error } = await supabase
+        .from("coach_plans")
+        .update({
+          share_token: token,
+          share_enabled: true,
+          share_expires_at: expiresAt.toISOString(),
+          share_created_at: new Date().toISOString(),
+        })
+        .eq("id", id);
+      if (error) throw error;
+      return { token };
+    },
+    onSuccess: (_data, vars) => {
+      qc.invalidateQueries({ queryKey: ["coach-plan", vars.id] });
+      qc.invalidateQueries({ queryKey: ["coach-plans"] });
+      toast({
+        title: vars.action === "revoke" ? "Share link revoked" : vars.action === "regenerate" ? "New link generated" : "Share link created",
+        description: vars.action === "revoke" ? "The previous link no longer works." : "Valid for 90 days. Anyone with the link can view.",
+      });
+    },
+    onError: (err: any) => toast({ title: "Share failed", description: err.message, variant: "destructive" }),
+  });
     setClientName(""); setClientEmail(""); setGoal(""); setStartDate(""); setEndDate("");
     setPeptides([blankPeptide()]); setSupplements([]); setTitration([]); setSites([]);
     setTimingNotes(""); setSafetyNotes(""); setCoachRationale(""); setClientNotes("");
