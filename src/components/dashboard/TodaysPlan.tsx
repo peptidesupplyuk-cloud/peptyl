@@ -640,15 +640,19 @@ const TodaysPlan = ({ onActivate, slim = false, selectedDate }: TodaysPlanProps)
   const showMilestone30 = daysActive === 30 && !dismissed30 && actionPlan?.["30_days"]?.[0];
   const showMilestone90 = daysActive === 90 && !dismissed90 && actionPlan?.["90_days"]?.[0];
 
-  // Build maps from peptide name → goal + protocol info for active protocols
+  // Build maps from peptide name → goal + protocol info for active protocols.
+  // We track peptide-name occurrences across ALL active protocols so we can detect
+  // duplicates and avoid silently attributing them to the first one we saw.
   const peptideGoalMap = new Map<string, string>();
   const peptideProtocolMap = new Map<string, { protocolName: string; protocolId: string; goal: string }>();
+  const peptideNameOccurrences = new Map<string, number>();
   const protocolPeptideMap = new Map<string, { protocolName: string; protocolId: string; goal: string }>();
   const activeProtocolPeptideIds = new Set<string>();
 
   for (const protocol of protocols.filter((p) => p.status === "active")) {
     for (const pep of protocol.peptides) {
       const key = pep.peptide_name.toLowerCase();
+      peptideNameOccurrences.set(key, (peptideNameOccurrences.get(key) || 0) + 1);
       if (!peptideGoalMap.has(key)) {
         peptideGoalMap.set(key, protocol.goal ? formatGoalLabel(protocol.goal) : "");
       }
@@ -659,6 +663,8 @@ const TodaysPlan = ({ onActivate, slim = false, selectedDate }: TodaysPlanProps)
           goal: protocol.goal ? formatGoalLabel(protocol.goal) : "",
         });
       }
+      // Always overwrite — protocol_peptide_id is unique per row, so this is a
+      // 1:1 deterministic map regardless of duplicate peptide names.
       protocolPeptideMap.set(pep.id, {
         protocolName: protocol.name,
         protocolId: protocol.id,
@@ -666,6 +672,13 @@ const TodaysPlan = ({ onActivate, slim = false, selectedDate }: TodaysPlanProps)
       });
       activeProtocolPeptideIds.add(pep.id);
     }
+  }
+
+  // Strip ambiguous entries from the name-only map: if a peptide appears in 2+
+  // active protocols, we cannot safely guess which protocol an injection without
+  // a protocol_peptide_id belongs to — leave it ungrouped instead of mis-attributed.
+  for (const [key, count] of peptideNameOccurrences) {
+    if (count > 1) peptideProtocolMap.delete(key);
   }
 
   // Collect supplements from active protocols

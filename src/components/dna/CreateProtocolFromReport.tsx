@@ -1,7 +1,8 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
-import { useCreateProtocol, type ProtocolSupplement } from "@/hooks/use-protocols";
+import { useCreateProtocol, useProtocols, type ProtocolSupplement } from "@/hooks/use-protocols";
+import { isSameSupplement, normaliseSupplementName } from "@/lib/supplement-normalise";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -86,6 +87,7 @@ const CreateProtocolFromReport = ({ supplements, peptides = [], reportId, isPaid
   const { user } = useAuth();
   const navigate = useNavigate();
   const createProtocol = useCreateProtocol();
+  const { data: existingProtocols = [] } = useProtocols();
   const today = format(new Date(), "yyyy-MM-dd");
 
   const [open, setOpen] = useState(false);
@@ -147,18 +149,60 @@ const CreateProtocolFromReport = ({ supplements, peptides = [], reportId, isPaid
       return;
     }
 
-    const supps: ProtocolSupplement[] = chosenSupps.map(s => ({
-      name: s.supplement,
+    // ─── Cross-protocol duplicate guard ───────────────────────────────
+    const activeOrPaused = existingProtocols.filter(
+      (p) => p.status === "active" || p.status === "paused"
+    );
+    const existingSupps = activeOrPaused.flatMap((p) =>
+      (p.supplements || []).map((s: any) => ({
+        name: normaliseSupplementName(s?.name || ""),
+        protocolName: p.name,
+      })),
+    );
+    const existingPeps = activeOrPaused.flatMap((p) =>
+      p.peptides.map((pp) => ({
+        name: pp.peptide_name.trim().toLowerCase(),
+        protocolName: p.name,
+      })),
+    );
+
+    const suppConflicts = chosenSupps
+      .map((s) => {
+        const match = existingSupps.find((es) => isSameSupplement(es.name, s.supplement));
+        return match ? `${s.supplement} (in "${match.protocolName}")` : null;
+      })
+      .filter(Boolean) as string[];
+
+    const pepConflicts = chosenPeps
+      .map((p) => {
+        const match = existingPeps.find((ep) => ep.name === p.peptide.trim().toLowerCase());
+        return match ? `${p.peptide} (in "${match.protocolName}")` : null;
+      })
+      .filter(Boolean) as string[];
+
+    if (suppConflicts.length > 0 || pepConflicts.length > 0) {
+      const lines = [...suppConflicts, ...pepConflicts].join(", ");
+      toast({
+        title: "Already in another active protocol",
+        description: `${lines}. Uncheck these or update the existing protocol's dose instead of creating a duplicate.`,
+        variant: "destructive",
+      });
+      return;
+    }
+
+    const supps: ProtocolSupplement[] = chosenSupps.map((s) => ({
+      name: normaliseSupplementName(s.supplement),
       dose: s.dose,
       frequency: "daily",
+      timing: "AM",
       drivenBy: s.driven_by || [],
     }));
 
-    const pepsPayload = chosenPeps.map(p => ({
-      peptide_name: p.peptide,
+    const pepsPayload = chosenPeps.map((p) => ({
+      peptide_name: p.peptide.trim(),
       dose_mcg: parseDoseMcg(p.dose),
       frequency: "daily",
-      timing: null as string | null,
+      timing: "AM",
       route: p.route || "Subcutaneous injection",
     }));
 
