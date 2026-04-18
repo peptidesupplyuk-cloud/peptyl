@@ -1,7 +1,8 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
-import { useCreateProtocol, type ProtocolSupplement } from "@/hooks/use-protocols";
+import { useCreateProtocol, useProtocols, type ProtocolSupplement } from "@/hooks/use-protocols";
+import { isSameSupplement, normaliseSupplementName } from "@/lib/supplement-normalise";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
