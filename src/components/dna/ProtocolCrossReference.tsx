@@ -1,15 +1,20 @@
 import { Link2, CheckCircle2, AlertTriangle } from "lucide-react";
+import { toStringArray, toText } from "@/lib/dna-normalise";
 
 interface Props {
   data?: {
-    reinforcements?: string[];
-    conflicts?: string[];
-    note?: string;
+    reinforcements?: unknown;
+    conflicts?: unknown;
+    note?: unknown;
   };
 }
 
 const ProtocolCrossReference = ({ data }: Props) => {
-  if (!data || (!data.reinforcements?.length && !data.conflicts?.length)) return null;
+  if (!data) return null;
+  const reinforcements = toStringArray(data.reinforcements);
+  const conflicts = toStringArray(data.conflicts);
+  const note = toText(data.note);
+  if (!reinforcements.length && !conflicts.length) return null;
 
   return (
     <div className="bg-card border border-border rounded-2xl p-6 space-y-4">

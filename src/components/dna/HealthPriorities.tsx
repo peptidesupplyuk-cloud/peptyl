@@ -1,8 +1,10 @@
+import { toStringArray, toText } from "@/lib/dna-normalise";
+
 interface Priority {
-  priority: string;
-  timeline?: string;
-  why?: string;
-  actions?: string[];
+  priority?: unknown;
+  timeline?: unknown;
+  why?: unknown;
+  actions?: unknown;
 }
 
 interface Props {

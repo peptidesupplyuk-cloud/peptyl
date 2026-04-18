@@ -1,13 +1,14 @@
 import { Zap, Clock, Calendar, Stethoscope, MessageSquare, CheckCircle2 } from "lucide-react";
+import { toStringArray } from "@/lib/dna-normalise";
 
 interface Props {
   plan?: {
-    immediate?: string[];
-    thirty_days?: string[];
-    "30_days"?: string[];
-    ninety_days?: string[];
-    "90_days"?: string[];
-    gp_conversations?: string[];
+    immediate?: unknown;
+    thirty_days?: unknown;
+    "30_days"?: unknown;
+    ninety_days?: unknown;
+    "90_days"?: unknown;
+    gp_conversations?: unknown;
   };
 }
 
@@ -49,11 +50,10 @@ const columns = [
 ] as const;
 
 const getItems = (plan: any, col: typeof columns[number]): string[] => {
-  const items = plan[col.key];
-  if (items?.length) return items;
+  const primary = toStringArray(plan?.[col.key]);
+  if (primary.length) return primary;
   if ('legacyKey' in col && col.legacyKey) {
-    const legacy = plan[col.legacyKey];
-    if (legacy?.length) return legacy;
+    return toStringArray(plan?.[col.legacyKey]);
   }
   return [];
 };
