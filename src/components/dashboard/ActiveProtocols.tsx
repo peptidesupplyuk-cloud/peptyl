@@ -262,27 +262,39 @@ const ActiveProtocols = () => {
         {isExpanded && (
           <div className="px-4 pb-4 space-y-3 border-t border-border/50 pt-3">
             {p.peptides.length > 0 && (
-              <div className="space-y-1">
-                {p.peptides.map((pp) => (
-                  <div key={pp.id} className="flex items-center justify-between text-xs gap-2 min-w-0">
-                    <span className="text-foreground shrink-0"><CompoundLink name={pp.peptide_name} className="text-xs font-medium" /></span>
-                    <span className="text-muted-foreground truncate text-right min-w-0">{pp.dose_mcg}mcg · {pp.frequency} · {pp.timing}</span>
-                  </div>
-                ))}
+              <div className="space-y-1.5">
+                <p className="text-[10px] font-medium text-muted-foreground uppercase tracking-wider flex items-center gap-1">
+                  <FlaskConical className="h-3 w-3" /> Peptides
+                </p>
+                {p.peptides.map((pp) => {
+                  const doseLabel = pp.dose_mcg >= 1000
+                    ? `${(pp.dose_mcg / 1000).toLocaleString(undefined, { maximumFractionDigits: 2 })} mg`
+                    : `${pp.dose_mcg} mcg`;
+                  const meta = [doseLabel, pp.frequency, pp.timing].filter(Boolean).join(" · ");
+                  return (
+                    <div key={pp.id} className="flex flex-wrap items-baseline justify-between gap-x-2 gap-y-0.5 text-xs">
+                      <CompoundLink name={pp.peptide_name} className="text-xs font-medium text-foreground" />
+                      <span className="text-muted-foreground text-right break-words">{meta}</span>
+                    </div>
+                  );
+                })}
               </div>
             )}
 
             {p.supplements && p.supplements.length > 0 && (
-              <div className="space-y-1">
+              <div className="space-y-1.5">
                 <p className="text-[10px] font-medium text-muted-foreground uppercase tracking-wider flex items-center gap-1">
                   <Pill className="h-3 w-3" /> Supplements
                 </p>
-                {p.supplements.map((s, i) => (
-                  <div key={i} className="flex items-center justify-between text-xs gap-2 min-w-0">
-                    <span className="text-foreground shrink-0"><CompoundLink name={s.name} className="text-xs font-medium" /></span>
-                    <span className="text-muted-foreground truncate text-right min-w-0">{s.dose} · {s.frequency}</span>
-                  </div>
-                ))}
+                {p.supplements.map((s, i) => {
+                  const meta = [s.dose, s.frequency].filter(Boolean).join(" · ");
+                  return (
+                    <div key={i} className="flex flex-wrap items-baseline justify-between gap-x-2 gap-y-0.5 text-xs">
+                      <CompoundLink name={s.name} className="text-xs font-medium text-foreground" />
+                      <span className="text-muted-foreground text-right break-words">{meta}</span>
+                    </div>
+                  );
+                })}
               </div>
             )}
 
