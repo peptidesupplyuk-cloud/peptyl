@@ -149,18 +149,60 @@ const CreateProtocolFromReport = ({ supplements, peptides = [], reportId, isPaid
       return;
     }
 
-    const supps: ProtocolSupplement[] = chosenSupps.map(s => ({
-      name: s.supplement,
+    // ─── Cross-protocol duplicate guard ───────────────────────────────
+    const activeOrPaused = existingProtocols.filter(
+      (p) => p.status === "active" || p.status === "paused"
+    );
+    const existingSupps = activeOrPaused.flatMap((p) =>
+      (p.supplements || []).map((s: any) => ({
+        name: normaliseSupplementName(s?.name || ""),
+        protocolName: p.name,
+      })),
+    );
+    const existingPeps = activeOrPaused.flatMap((p) =>
+      p.peptides.map((pp) => ({
+        name: pp.peptide_name.trim().toLowerCase(),
+        protocolName: p.name,
+      })),
+    );
+
+    const suppConflicts = chosenSupps
+      .map((s) => {
+        const match = existingSupps.find((es) => isSameSupplement(es.name, s.supplement));
+        return match ? `${s.supplement} (in "${match.protocolName}")` : null;
+      })
+      .filter(Boolean) as string[];
+
+    const pepConflicts = chosenPeps
+      .map((p) => {
+        const match = existingPeps.find((ep) => ep.name === p.peptide.trim().toLowerCase());
+        return match ? `${p.peptide} (in "${match.protocolName}")` : null;
+      })
+      .filter(Boolean) as string[];
+
+    if (suppConflicts.length > 0 || pepConflicts.length > 0) {
+      const lines = [...suppConflicts, ...pepConflicts].join(", ");
+      toast({
+        title: "Already in another active protocol",
+        description: `${lines}. Uncheck these or update the existing protocol's dose instead of creating a duplicate.`,
+        variant: "destructive",
+      });
+      return;
+    }
+
+    const supps: ProtocolSupplement[] = chosenSupps.map((s) => ({
+      name: normaliseSupplementName(s.supplement),
       dose: s.dose,
       frequency: "daily",
+      timing: "AM",
       drivenBy: s.driven_by || [],
     }));
 
-    const pepsPayload = chosenPeps.map(p => ({
-      peptide_name: p.peptide,
+    const pepsPayload = chosenPeps.map((p) => ({
+      peptide_name: p.peptide.trim(),
       dose_mcg: parseDoseMcg(p.dose),
       frequency: "daily",
-      timing: null as string | null,
+      timing: "AM",
       route: p.route || "Subcutaneous injection",
     }));
 
