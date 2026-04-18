@@ -87,6 +87,7 @@ const CreateProtocolFromReport = ({ supplements, peptides = [], reportId, isPaid
   const { user } = useAuth();
   const navigate = useNavigate();
   const createProtocol = useCreateProtocol();
+  const { data: existingProtocols = [] } = useProtocols();
   const today = format(new Date(), "yyyy-MM-dd");
 
   const [open, setOpen] = useState(false);
