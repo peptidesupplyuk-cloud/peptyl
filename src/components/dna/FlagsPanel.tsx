@@ -1,17 +1,22 @@
 import { AlertTriangle, Stethoscope, Eye, Shield } from "lucide-react";
+import { toStringArray } from "@/lib/dna-normalise";
 
 interface Props {
   flags?: {
-    urgent?: string[];
-    discuss_with_gp?: string[];
-    monitor?: string[];
-    peptide_cautions?: string[];
+    urgent?: unknown;
+    discuss_with_gp?: unknown;
+    monitor?: unknown;
+    peptide_cautions?: unknown;
   };
 }
 
 const FlagsPanel = ({ flags }: Props) => {
   if (!flags) return null;
-  const hasAny = (flags.urgent?.length || 0) + (flags.discuss_with_gp?.length || 0) + (flags.monitor?.length || 0) + (flags.peptide_cautions?.length || 0) > 0;
+  const urgent = toStringArray(flags.urgent);
+  const discussWithGp = toStringArray(flags.discuss_with_gp);
+  const monitor = toStringArray(flags.monitor);
+  const peptideCautions = toStringArray(flags.peptide_cautions);
+  const hasAny = urgent.length + discussWithGp.length + monitor.length + peptideCautions.length > 0;
   if (!hasAny) return null;
 
   return (
