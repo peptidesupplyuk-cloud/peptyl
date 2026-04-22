@@ -128,9 +128,13 @@ export default defineConfig(({ mode }) => ({
       renderer: "@prerenderer/renderer-puppeteer",
       rendererOptions: {
         renderAfterDocumentEvent: "render-event",
-        renderAfterTime: 5000,
-        maxConcurrentRoutes: 4,
+        renderAfterTime: 8000,
+        maxConcurrentRoutes: 2,
         headless: true,
+        // Sentinel UA so GeoGate / scraper checks let the prerender through.
+        // Must match PRERENDER_UA_TOKEN in src/lib/runtime-host.ts.
+        userAgent:
+          "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36 PeptylPrerender/1.0",
         args: ["--no-sandbox", "--disable-setuid-sandbox"],
       },
       postProcess(renderedRoute: any) {
