@@ -1,417 +1,524 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
+        xmlns:xhtml="http://www.w3.org/1999/xhtml">
   <url>
     <loc>https://peptyl.co.uk/</loc>
-    <lastmod>2026-02-23</lastmod>
+    <lastmod>2026-04-22</lastmod>
     <changefreq>weekly</changefreq>
     <priority>1.0</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://peptyl.co.uk/" />
+    <xhtml:link rel="alternate" hreflang="de" href="https://peptyl.de/" />
+    <xhtml:link rel="alternate" hreflang="fr" href="https://peptyl.fr/" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://peptyl.co.uk/" />
   </url>
   <url>
     <loc>https://peptyl.co.uk/peptides</loc>
-    <lastmod>2026-02-23</lastmod>
+    <lastmod>2026-04-22</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.9</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://peptyl.co.uk/peptides" />
+    <xhtml:link rel="alternate" hreflang="de" href="https://peptyl.de/peptides" />
+    <xhtml:link rel="alternate" hreflang="fr" href="https://peptyl.fr/peptides" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://peptyl.co.uk/peptides" />
   </url>
   <url>
     <loc>https://peptyl.co.uk/calculators</loc>
-    <lastmod>2026-02-23</lastmod>
+    <lastmod>2026-04-22</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.9</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://peptyl.co.uk/calculators" />
+    <xhtml:link rel="alternate" hreflang="de" href="https://peptyl.de/calculators" />
+    <xhtml:link rel="alternate" hreflang="fr" href="https://peptyl.fr/calculators" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://peptyl.co.uk/calculators" />
   </url>
   <url>
     <loc>https://peptyl.co.uk/education</loc>
-    <lastmod>2026-02-23</lastmod>
-    <changefreq>weekly</changefreq>
+    <lastmod>2026-04-22</lastmod>
+    <changefreq>daily</changefreq>
     <priority>0.9</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://peptyl.co.uk/education" />
+    <xhtml:link rel="alternate" hreflang="de" href="https://peptyl.de/education" />
+    <xhtml:link rel="alternate" hreflang="fr" href="https://peptyl.fr/education" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://peptyl.co.uk/education" />
   </url>
   <url>
     <loc>https://peptyl.co.uk/suppliers</loc>
-    <lastmod>2026-02-23</lastmod>
+    <lastmod>2026-04-22</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://peptyl.co.uk/suppliers" />
+    <xhtml:link rel="alternate" hreflang="de" href="https://peptyl.de/suppliers" />
+    <xhtml:link rel="alternate" hreflang="fr" href="https://peptyl.fr/suppliers" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://peptyl.co.uk/suppliers" />
   </url>
   <url>
     <loc>https://peptyl.co.uk/improve</loc>
-    <lastmod>2026-02-23</lastmod>
+    <lastmod>2026-04-22</lastmod>
     <changefreq>weekly</changefreq>
-    <priority>0.7</priority>
+    <priority>0.8</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://peptyl.co.uk/improve" />
+    <xhtml:link rel="alternate" hreflang="de" href="https://peptyl.de/improve" />
+    <xhtml:link rel="alternate" hreflang="fr" href="https://peptyl.fr/improve" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://peptyl.co.uk/improve" />
   </url>
   <url>
     <loc>https://peptyl.co.uk/shop</loc>
-    <lastmod>2026-02-23</lastmod>
+    <lastmod>2026-04-22</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
-  </url>
-  <url>
-    <loc>https://peptyl.co.uk/about</loc>
-    <lastmod>2026-02-23</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.7</priority>
-  </url>
-  <url>
-    <loc>https://peptyl.co.uk/testing</loc>
-    <lastmod>2026-02-23</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
-    <loc>https://peptyl.co.uk/privacy-policy</loc>
-    <lastmod>2026-02-23</lastmod>
-    <changefreq>yearly</changefreq>
-    <priority>0.3</priority>
-  </url>
-  <url>
-    <loc>https://peptyl.co.uk/terms-of-service</loc>
-    <lastmod>2026-02-23</lastmod>
-    <changefreq>yearly</changefreq>
-    <priority>0.3</priority>
-  </url>
-
-  <!-- Education Articles -->
-  <url>
-    <loc>https://peptyl.co.uk/education/peptide-craze-biohacking</loc>
-    <lastmod>2026-03-05</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.9</priority>
-  </url>
-  <url>
-    <loc>https://peptyl.co.uk/education/bloodwork-comes-first</loc>
-    <lastmod>2026-02-27</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.9</priority>
-  </url>
-  <url>
-    <loc>https://peptyl.co.uk/education/gut-health-peptides</loc>
-    <lastmod>2026-02-27</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
-    <loc>https://peptyl.co.uk/education/nad-longevity-stack</loc>
-    <lastmod>2026-02-27</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
-    <loc>https://peptyl.co.uk/education/peptide-cycling-guide</loc>
-    <lastmod>2026-02-27</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
-    <loc>https://peptyl.co.uk/education/thymosin-alpha-1-immune-peptide</loc>
-    <lastmod>2026-02-27</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
-    <loc>https://peptyl.co.uk/education/peptide-research-europe-guide</loc>
-    <lastmod>2026-02-27</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.9</priority>
-  </url>
-  <url>
-    <loc>https://peptyl.co.uk/education/peptides-cancer-therapy-2026</loc>
-    <lastmod>2026-02-28</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.9</priority>
-  </url>
-  <url>
-    <loc>https://peptyl.co.uk/education/beginners-guide-peptides</loc>
-    <lastmod>2026-02-23</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
-    <loc>https://peptyl.co.uk/education/how-to-reconstitute-peptides</loc>
-    <lastmod>2026-02-23</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
-    <loc>https://peptyl.co.uk/education/bpc157-vs-tb500</loc>
-    <lastmod>2026-02-23</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
-    <loc>https://peptyl.co.uk/education/peptide-storage-guide</loc>
-    <lastmod>2026-02-23</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
-    <loc>https://peptyl.co.uk/education/understanding-glp1-peptides</loc>
-    <lastmod>2026-02-23</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
-    <loc>https://peptyl.co.uk/education/retatrutide-triple-agonist-review</loc>
-    <lastmod>2026-02-23</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
-    <loc>https://peptyl.co.uk/education/ghk-cu-pretty-peptide</loc>
-    <lastmod>2026-02-23</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
-    <loc>https://peptyl.co.uk/education/russia-cognitive-peptides</loc>
-    <lastmod>2026-02-23</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
-    <loc>https://peptyl.co.uk/education/what-is-peptyl</loc>
-    <lastmod>2026-02-23</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
-    <loc>https://peptyl.co.uk/education/bp-supplement-stack</loc>
-    <lastmod>2026-02-23</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
-    <loc>https://peptyl.co.uk/education/longevity-supplement-stack</loc>
-    <lastmod>2026-02-23</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
-    <loc>https://peptyl.co.uk/education/recovery-supplement-stack</loc>
-    <lastmod>2026-02-23</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
-    <loc>https://peptyl.co.uk/education/cognitive-supplement-stack</loc>
-    <lastmod>2026-02-23</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
-    <loc>https://peptyl.co.uk/education/mt1-vs-mt2</loc>
-    <lastmod>2026-02-23</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
-    <loc>https://peptyl.co.uk/education/oral-glp1-boom-2026</loc>
-    <lastmod>2026-02-23</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.8</priority>
-  </url>
-
-  <!-- Campaign Landing Pages -->
-  <url>
-    <loc>https://peptyl.co.uk/start/wegovy-mounjaro-prices</loc>
-    <lastmod>2026-02-23</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
-    <loc>https://peptyl.co.uk/start/bloodwork-prices</loc>
-    <lastmod>2026-02-23</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
-    <loc>https://peptyl.co.uk/start/glp1-weight-loss</loc>
-    <lastmod>2026-02-23</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.7</priority>
-  </url>
-  <url>
-    <loc>https://peptyl.co.uk/start/healing-recovery</loc>
-    <lastmod>2026-02-23</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.7</priority>
-  </url>
-  <url>
-    <loc>https://peptyl.co.uk/start/beginner-start</loc>
-    <lastmod>2026-02-23</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.7</priority>
-  </url>
-  <url>
-    <loc>https://peptyl.co.uk/start/dose-calculator</loc>
-    <lastmod>2026-02-23</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.7</priority>
-  </url>
-  <url>
-    <loc>https://peptyl.co.uk/start/reconstitution-guide</loc>
-    <lastmod>2026-02-23</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.7</priority>
-  </url>
-  <url>
-    <loc>https://peptyl.co.uk/start/longevity-peptides</loc>
-    <lastmod>2026-02-23</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.7</priority>
-  </url>
-  <url>
-    <loc>https://peptyl.co.uk/start/cognitive-peptides</loc>
-    <lastmod>2026-02-23</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.7</priority>
-  </url>
-  <url>
-    <loc>https://peptyl.co.uk/start/stack-builder</loc>
-    <lastmod>2026-02-23</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.7</priority>
-  </url>
-  <url>
-    <loc>https://peptyl.co.uk/start/biomarker-tracking</loc>
-    <lastmod>2026-02-23</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.7</priority>
-  </url>
-  <url>
-    <loc>https://peptyl.co.uk/start/retatrutide</loc>
-    <lastmod>2026-02-23</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.7</priority>
-  </url>
-  <url>
-    <loc>https://peptyl.co.uk/start/peptide-cheat-sheet</loc>
-    <lastmod>2026-02-23</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.7</priority>
-  </url>
-  <url>
-    <loc>https://peptyl.co.uk/start/pretty-peptide</loc>
-    <lastmod>2026-02-23</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.7</priority>
-  </url>
-  <url>
-    <loc>https://peptyl.co.uk/education/mots-c-mitochondrial-peptide</loc>
-    <lastmod>2026-03-11</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
-    <loc>https://peptyl.co.uk/education/ss31-elamipretide-mitochondrial-ageing</loc>
-    <lastmod>2026-03-11</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
-    <loc>https://peptyl.co.uk/education/bpc-157-dosage-guide</loc>
-    <lastmod>2026-03-15</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.9</priority>
-  </url>
-  <url>
-    <loc>https://peptyl.co.uk/education/bpc-157-oral-vs-injection</loc>
-    <lastmod>2026-03-15</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
-    <loc>https://peptyl.co.uk/education/bpc-157-side-effects</loc>
-    <lastmod>2026-03-15</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
-    <loc>https://peptyl.co.uk/education/semaglutide-uk-guide</loc>
-    <lastmod>2026-03-15</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.9</priority>
-  </url>
-  <url>
-    <loc>https://peptyl.co.uk/education/tirzepatide-vs-semaglutide</loc>
-    <lastmod>2026-03-15</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.9</priority>
-  </url>
-  <url>
-    <loc>https://peptyl.co.uk/education/glp1-muscle-loss-prevention</loc>
-    <lastmod>2026-03-15</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.9</priority>
-  </url>
-  <url>
-    <loc>https://peptyl.co.uk/education/peptides-bodybuilders-use</loc>
-    <lastmod>2026-03-15</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
-    <loc>https://peptyl.co.uk/education/humanin-longevity-peptide</loc>
-    <lastmod>2026-03-15</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
-    <loc>https://peptyl.co.uk/education/myostatin-blockers-bimagrumab</loc>
-    <lastmod>2026-03-15</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.9</priority>
-  </url>
-  <url>
-    <loc>https://peptyl.co.uk/education/fgf21-metabolic-longevity</loc>
-    <lastmod>2026-03-15</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
-    <loc>https://peptyl.co.uk/education/peptide-stacking-guide</loc>
-    <lastmod>2026-03-15</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
-    <loc>https://peptyl.co.uk/education/semax-selank-dosage-guide</loc>
-    <lastmod>2026-03-15</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
-    <loc>https://peptyl.co.uk/education/endotoxin-purity-peptides</loc>
-    <lastmod>2026-03-23</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
-    <loc>https://peptyl.co.uk/education/glp1-side-effects-supplements</loc>
-    <lastmod>2026-04-07</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.9</priority>
-  </url>
-
-  <!-- Utility / Authority Pages -->
-  <url>
-    <loc>https://peptyl.co.uk/glossary</loc>
-    <lastmod>2026-03-11</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.7</priority>
-  </url>
-  <url>
-    <loc>https://peptyl.co.uk/sitemap</loc>
-    <lastmod>2026-03-11</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.4</priority>
-  </url>
-  <url>
-    <loc>https://peptyl.co.uk/faq</loc>
-    <lastmod>2026-03-11</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://peptyl.co.uk/shop" />
+    <xhtml:link rel="alternate" hreflang="de" href="https://peptyl.de/shop" />
+    <xhtml:link rel="alternate" hreflang="fr" href="https://peptyl.fr/shop" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://peptyl.co.uk/shop" />
   </url>
   <url>
     <loc>https://peptyl.co.uk/dna</loc>
-    <lastmod>2026-03-11</lastmod>
+    <lastmod>2026-04-22</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://peptyl.co.uk/dna" />
+    <xhtml:link rel="alternate" hreflang="de" href="https://peptyl.de/dna" />
+    <xhtml:link rel="alternate" hreflang="fr" href="https://peptyl.fr/dna" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://peptyl.co.uk/dna" />
+  </url>
+  <url>
+    <loc>https://peptyl.co.uk/about</loc>
+    <lastmod>2026-04-22</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://peptyl.co.uk/about" />
+    <xhtml:link rel="alternate" hreflang="de" href="https://peptyl.de/about" />
+    <xhtml:link rel="alternate" hreflang="fr" href="https://peptyl.fr/about" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://peptyl.co.uk/about" />
+  </url>
+  <url>
+    <loc>https://peptyl.co.uk/faq</loc>
+    <lastmod>2026-04-22</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://peptyl.co.uk/faq" />
+    <xhtml:link rel="alternate" hreflang="de" href="https://peptyl.de/faq" />
+    <xhtml:link rel="alternate" hreflang="fr" href="https://peptyl.fr/faq" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://peptyl.co.uk/faq" />
+  </url>
+  <url>
+    <loc>https://peptyl.co.uk/glossary</loc>
+    <lastmod>2026-04-22</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://peptyl.co.uk/glossary" />
+    <xhtml:link rel="alternate" hreflang="de" href="https://peptyl.de/glossary" />
+    <xhtml:link rel="alternate" hreflang="fr" href="https://peptyl.fr/glossary" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://peptyl.co.uk/glossary" />
+  </url>
+  <url>
+    <loc>https://peptyl.co.uk/sitemap</loc>
+    <lastmod>2026-04-22</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.5</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://peptyl.co.uk/sitemap" />
+    <xhtml:link rel="alternate" hreflang="de" href="https://peptyl.de/sitemap" />
+    <xhtml:link rel="alternate" hreflang="fr" href="https://peptyl.fr/sitemap" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://peptyl.co.uk/sitemap" />
+  </url>
+  <url>
+    <loc>https://peptyl.co.uk/privacy-policy</loc>
+    <lastmod>2026-04-22</lastmod>
+    <changefreq>yearly</changefreq>
+    <priority>0.3</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://peptyl.co.uk/privacy-policy" />
+    <xhtml:link rel="alternate" hreflang="de" href="https://peptyl.de/privacy-policy" />
+    <xhtml:link rel="alternate" hreflang="fr" href="https://peptyl.fr/privacy-policy" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://peptyl.co.uk/privacy-policy" />
+  </url>
+  <url>
+    <loc>https://peptyl.co.uk/terms-of-service</loc>
+    <lastmod>2026-04-22</lastmod>
+    <changefreq>yearly</changefreq>
+    <priority>0.3</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://peptyl.co.uk/terms-of-service" />
+    <xhtml:link rel="alternate" hreflang="de" href="https://peptyl.de/terms-of-service" />
+    <xhtml:link rel="alternate" hreflang="fr" href="https://peptyl.fr/terms-of-service" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://peptyl.co.uk/terms-of-service" />
+  </url>
+  <url>
+    <loc>https://peptyl.co.uk/education/endotoxin-purity-peptides</loc>
+    <lastmod>2026-04-22</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://peptyl.co.uk/education/endotoxin-purity-peptides" />
+    <xhtml:link rel="alternate" hreflang="de" href="https://peptyl.de/education/endotoxin-purity-peptides" />
+    <xhtml:link rel="alternate" hreflang="fr" href="https://peptyl.fr/education/endotoxin-purity-peptides" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://peptyl.co.uk/education/endotoxin-purity-peptides" />
+  </url>
+  <url>
+    <loc>https://peptyl.co.uk/education/peptide-craze-biohacking</loc>
+    <lastmod>2026-04-22</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://peptyl.co.uk/education/peptide-craze-biohacking" />
+    <xhtml:link rel="alternate" hreflang="de" href="https://peptyl.de/education/peptide-craze-biohacking" />
+    <xhtml:link rel="alternate" hreflang="fr" href="https://peptyl.fr/education/peptide-craze-biohacking" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://peptyl.co.uk/education/peptide-craze-biohacking" />
+  </url>
+  <url>
+    <loc>https://peptyl.co.uk/education/what-is-peptyl</loc>
+    <lastmod>2026-04-22</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://peptyl.co.uk/education/what-is-peptyl" />
+    <xhtml:link rel="alternate" hreflang="de" href="https://peptyl.de/education/what-is-peptyl" />
+    <xhtml:link rel="alternate" hreflang="fr" href="https://peptyl.fr/education/what-is-peptyl" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://peptyl.co.uk/education/what-is-peptyl" />
+  </url>
+  <url>
+    <loc>https://peptyl.co.uk/education/beginners-guide-peptides</loc>
+    <lastmod>2026-04-22</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://peptyl.co.uk/education/beginners-guide-peptides" />
+    <xhtml:link rel="alternate" hreflang="de" href="https://peptyl.de/education/beginners-guide-peptides" />
+    <xhtml:link rel="alternate" hreflang="fr" href="https://peptyl.fr/education/beginners-guide-peptides" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://peptyl.co.uk/education/beginners-guide-peptides" />
+  </url>
+  <url>
+    <loc>https://peptyl.co.uk/education/how-to-reconstitute-peptides</loc>
+    <lastmod>2026-04-22</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://peptyl.co.uk/education/how-to-reconstitute-peptides" />
+    <xhtml:link rel="alternate" hreflang="de" href="https://peptyl.de/education/how-to-reconstitute-peptides" />
+    <xhtml:link rel="alternate" hreflang="fr" href="https://peptyl.fr/education/how-to-reconstitute-peptides" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://peptyl.co.uk/education/how-to-reconstitute-peptides" />
+  </url>
+  <url>
+    <loc>https://peptyl.co.uk/education/bpc157-vs-tb500</loc>
+    <lastmod>2026-04-22</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://peptyl.co.uk/education/bpc157-vs-tb500" />
+    <xhtml:link rel="alternate" hreflang="de" href="https://peptyl.de/education/bpc157-vs-tb500" />
+    <xhtml:link rel="alternate" hreflang="fr" href="https://peptyl.fr/education/bpc157-vs-tb500" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://peptyl.co.uk/education/bpc157-vs-tb500" />
+  </url>
+  <url>
+    <loc>https://peptyl.co.uk/education/peptide-storage-guide</loc>
+    <lastmod>2026-04-22</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://peptyl.co.uk/education/peptide-storage-guide" />
+    <xhtml:link rel="alternate" hreflang="de" href="https://peptyl.de/education/peptide-storage-guide" />
+    <xhtml:link rel="alternate" hreflang="fr" href="https://peptyl.fr/education/peptide-storage-guide" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://peptyl.co.uk/education/peptide-storage-guide" />
+  </url>
+  <url>
+    <loc>https://peptyl.co.uk/education/understanding-glp1-peptides</loc>
+    <lastmod>2026-04-22</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://peptyl.co.uk/education/understanding-glp1-peptides" />
+    <xhtml:link rel="alternate" hreflang="de" href="https://peptyl.de/education/understanding-glp1-peptides" />
+    <xhtml:link rel="alternate" hreflang="fr" href="https://peptyl.fr/education/understanding-glp1-peptides" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://peptyl.co.uk/education/understanding-glp1-peptides" />
+  </url>
+  <url>
+    <loc>https://peptyl.co.uk/education/retatrutide-triple-agonist-review</loc>
+    <lastmod>2026-04-22</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://peptyl.co.uk/education/retatrutide-triple-agonist-review" />
+    <xhtml:link rel="alternate" hreflang="de" href="https://peptyl.de/education/retatrutide-triple-agonist-review" />
+    <xhtml:link rel="alternate" hreflang="fr" href="https://peptyl.fr/education/retatrutide-triple-agonist-review" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://peptyl.co.uk/education/retatrutide-triple-agonist-review" />
+  </url>
+  <url>
+    <loc>https://peptyl.co.uk/education/ghk-cu-pretty-peptide</loc>
+    <lastmod>2026-04-22</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://peptyl.co.uk/education/ghk-cu-pretty-peptide" />
+    <xhtml:link rel="alternate" hreflang="de" href="https://peptyl.de/education/ghk-cu-pretty-peptide" />
+    <xhtml:link rel="alternate" hreflang="fr" href="https://peptyl.fr/education/ghk-cu-pretty-peptide" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://peptyl.co.uk/education/ghk-cu-pretty-peptide" />
+  </url>
+  <url>
+    <loc>https://peptyl.co.uk/education/russia-cognitive-peptides</loc>
+    <lastmod>2026-04-22</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://peptyl.co.uk/education/russia-cognitive-peptides" />
+    <xhtml:link rel="alternate" hreflang="de" href="https://peptyl.de/education/russia-cognitive-peptides" />
+    <xhtml:link rel="alternate" hreflang="fr" href="https://peptyl.fr/education/russia-cognitive-peptides" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://peptyl.co.uk/education/russia-cognitive-peptides" />
+  </url>
+  <url>
+    <loc>https://peptyl.co.uk/education/bp-supplement-stack</loc>
+    <lastmod>2026-04-22</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://peptyl.co.uk/education/bp-supplement-stack" />
+    <xhtml:link rel="alternate" hreflang="de" href="https://peptyl.de/education/bp-supplement-stack" />
+    <xhtml:link rel="alternate" hreflang="fr" href="https://peptyl.fr/education/bp-supplement-stack" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://peptyl.co.uk/education/bp-supplement-stack" />
+  </url>
+  <url>
+    <loc>https://peptyl.co.uk/education/longevity-supplement-stack</loc>
+    <lastmod>2026-04-22</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://peptyl.co.uk/education/longevity-supplement-stack" />
+    <xhtml:link rel="alternate" hreflang="de" href="https://peptyl.de/education/longevity-supplement-stack" />
+    <xhtml:link rel="alternate" hreflang="fr" href="https://peptyl.fr/education/longevity-supplement-stack" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://peptyl.co.uk/education/longevity-supplement-stack" />
+  </url>
+  <url>
+    <loc>https://peptyl.co.uk/education/recovery-supplement-stack</loc>
+    <lastmod>2026-04-22</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://peptyl.co.uk/education/recovery-supplement-stack" />
+    <xhtml:link rel="alternate" hreflang="de" href="https://peptyl.de/education/recovery-supplement-stack" />
+    <xhtml:link rel="alternate" hreflang="fr" href="https://peptyl.fr/education/recovery-supplement-stack" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://peptyl.co.uk/education/recovery-supplement-stack" />
+  </url>
+  <url>
+    <loc>https://peptyl.co.uk/education/cognitive-supplement-stack</loc>
+    <lastmod>2026-04-22</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://peptyl.co.uk/education/cognitive-supplement-stack" />
+    <xhtml:link rel="alternate" hreflang="de" href="https://peptyl.de/education/cognitive-supplement-stack" />
+    <xhtml:link rel="alternate" hreflang="fr" href="https://peptyl.fr/education/cognitive-supplement-stack" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://peptyl.co.uk/education/cognitive-supplement-stack" />
+  </url>
+  <url>
+    <loc>https://peptyl.co.uk/education/mt1-vs-mt2</loc>
+    <lastmod>2026-04-22</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://peptyl.co.uk/education/mt1-vs-mt2" />
+    <xhtml:link rel="alternate" hreflang="de" href="https://peptyl.de/education/mt1-vs-mt2" />
+    <xhtml:link rel="alternate" hreflang="fr" href="https://peptyl.fr/education/mt1-vs-mt2" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://peptyl.co.uk/education/mt1-vs-mt2" />
+  </url>
+  <url>
+    <loc>https://peptyl.co.uk/education/oral-glp1-boom-2026</loc>
+    <lastmod>2026-04-22</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://peptyl.co.uk/education/oral-glp1-boom-2026" />
+    <xhtml:link rel="alternate" hreflang="de" href="https://peptyl.de/education/oral-glp1-boom-2026" />
+    <xhtml:link rel="alternate" hreflang="fr" href="https://peptyl.fr/education/oral-glp1-boom-2026" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://peptyl.co.uk/education/oral-glp1-boom-2026" />
+  </url>
+  <url>
+    <loc>https://peptyl.co.uk/education/bloodwork-comes-first</loc>
+    <lastmod>2026-04-22</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://peptyl.co.uk/education/bloodwork-comes-first" />
+    <xhtml:link rel="alternate" hreflang="de" href="https://peptyl.de/education/bloodwork-comes-first" />
+    <xhtml:link rel="alternate" hreflang="fr" href="https://peptyl.fr/education/bloodwork-comes-first" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://peptyl.co.uk/education/bloodwork-comes-first" />
+  </url>
+  <url>
+    <loc>https://peptyl.co.uk/education/nad-longevity-stack</loc>
+    <lastmod>2026-04-22</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://peptyl.co.uk/education/nad-longevity-stack" />
+    <xhtml:link rel="alternate" hreflang="de" href="https://peptyl.de/education/nad-longevity-stack" />
+    <xhtml:link rel="alternate" hreflang="fr" href="https://peptyl.fr/education/nad-longevity-stack" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://peptyl.co.uk/education/nad-longevity-stack" />
+  </url>
+  <url>
+    <loc>https://peptyl.co.uk/education/thymosin-alpha-1-immune-peptide</loc>
+    <lastmod>2026-04-22</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://peptyl.co.uk/education/thymosin-alpha-1-immune-peptide" />
+    <xhtml:link rel="alternate" hreflang="de" href="https://peptyl.de/education/thymosin-alpha-1-immune-peptide" />
+    <xhtml:link rel="alternate" hreflang="fr" href="https://peptyl.fr/education/thymosin-alpha-1-immune-peptide" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://peptyl.co.uk/education/thymosin-alpha-1-immune-peptide" />
+  </url>
+  <url>
+    <loc>https://peptyl.co.uk/education/peptide-cycling-guide</loc>
+    <lastmod>2026-04-22</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://peptyl.co.uk/education/peptide-cycling-guide" />
+    <xhtml:link rel="alternate" hreflang="de" href="https://peptyl.de/education/peptide-cycling-guide" />
+    <xhtml:link rel="alternate" hreflang="fr" href="https://peptyl.fr/education/peptide-cycling-guide" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://peptyl.co.uk/education/peptide-cycling-guide" />
+  </url>
+  <url>
+    <loc>https://peptyl.co.uk/education/gut-health-peptides</loc>
+    <lastmod>2026-04-22</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://peptyl.co.uk/education/gut-health-peptides" />
+    <xhtml:link rel="alternate" hreflang="de" href="https://peptyl.de/education/gut-health-peptides" />
+    <xhtml:link rel="alternate" hreflang="fr" href="https://peptyl.fr/education/gut-health-peptides" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://peptyl.co.uk/education/gut-health-peptides" />
+  </url>
+  <url>
+    <loc>https://peptyl.co.uk/education/peptides-cancer-therapy-2026</loc>
+    <lastmod>2026-04-22</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://peptyl.co.uk/education/peptides-cancer-therapy-2026" />
+    <xhtml:link rel="alternate" hreflang="de" href="https://peptyl.de/education/peptides-cancer-therapy-2026" />
+    <xhtml:link rel="alternate" hreflang="fr" href="https://peptyl.fr/education/peptides-cancer-therapy-2026" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://peptyl.co.uk/education/peptides-cancer-therapy-2026" />
+  </url>
+  <url>
+    <loc>https://peptyl.co.uk/education/mots-c-mitochondrial-peptide</loc>
+    <lastmod>2026-04-22</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://peptyl.co.uk/education/mots-c-mitochondrial-peptide" />
+    <xhtml:link rel="alternate" hreflang="de" href="https://peptyl.de/education/mots-c-mitochondrial-peptide" />
+    <xhtml:link rel="alternate" hreflang="fr" href="https://peptyl.fr/education/mots-c-mitochondrial-peptide" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://peptyl.co.uk/education/mots-c-mitochondrial-peptide" />
+  </url>
+  <url>
+    <loc>https://peptyl.co.uk/education/ss31-elamipretide-mitochondrial-ageing</loc>
+    <lastmod>2026-04-22</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://peptyl.co.uk/education/ss31-elamipretide-mitochondrial-ageing" />
+    <xhtml:link rel="alternate" hreflang="de" href="https://peptyl.de/education/ss31-elamipretide-mitochondrial-ageing" />
+    <xhtml:link rel="alternate" hreflang="fr" href="https://peptyl.fr/education/ss31-elamipretide-mitochondrial-ageing" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://peptyl.co.uk/education/ss31-elamipretide-mitochondrial-ageing" />
+  </url>
+  <url>
+    <loc>https://peptyl.co.uk/education/bpc-157-dosage-guide</loc>
+    <lastmod>2026-04-22</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://peptyl.co.uk/education/bpc-157-dosage-guide" />
+    <xhtml:link rel="alternate" hreflang="de" href="https://peptyl.de/education/bpc-157-dosage-guide" />
+    <xhtml:link rel="alternate" hreflang="fr" href="https://peptyl.fr/education/bpc-157-dosage-guide" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://peptyl.co.uk/education/bpc-157-dosage-guide" />
+  </url>
+  <url>
+    <loc>https://peptyl.co.uk/education/bpc-157-oral-vs-injection</loc>
+    <lastmod>2026-04-22</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://peptyl.co.uk/education/bpc-157-oral-vs-injection" />
+    <xhtml:link rel="alternate" hreflang="de" href="https://peptyl.de/education/bpc-157-oral-vs-injection" />
+    <xhtml:link rel="alternate" hreflang="fr" href="https://peptyl.fr/education/bpc-157-oral-vs-injection" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://peptyl.co.uk/education/bpc-157-oral-vs-injection" />
+  </url>
+  <url>
+    <loc>https://peptyl.co.uk/education/bpc-157-side-effects</loc>
+    <lastmod>2026-04-22</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://peptyl.co.uk/education/bpc-157-side-effects" />
+    <xhtml:link rel="alternate" hreflang="de" href="https://peptyl.de/education/bpc-157-side-effects" />
+    <xhtml:link rel="alternate" hreflang="fr" href="https://peptyl.fr/education/bpc-157-side-effects" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://peptyl.co.uk/education/bpc-157-side-effects" />
+  </url>
+  <url>
+    <loc>https://peptyl.co.uk/education/semaglutide-uk-guide</loc>
+    <lastmod>2026-04-22</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://peptyl.co.uk/education/semaglutide-uk-guide" />
+    <xhtml:link rel="alternate" hreflang="de" href="https://peptyl.de/education/semaglutide-uk-guide" />
+    <xhtml:link rel="alternate" hreflang="fr" href="https://peptyl.fr/education/semaglutide-uk-guide" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://peptyl.co.uk/education/semaglutide-uk-guide" />
+  </url>
+  <url>
+    <loc>https://peptyl.co.uk/education/tirzepatide-vs-semaglutide</loc>
+    <lastmod>2026-04-22</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://peptyl.co.uk/education/tirzepatide-vs-semaglutide" />
+    <xhtml:link rel="alternate" hreflang="de" href="https://peptyl.de/education/tirzepatide-vs-semaglutide" />
+    <xhtml:link rel="alternate" hreflang="fr" href="https://peptyl.fr/education/tirzepatide-vs-semaglutide" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://peptyl.co.uk/education/tirzepatide-vs-semaglutide" />
+  </url>
+  <url>
+    <loc>https://peptyl.co.uk/education/glp1-muscle-loss-prevention</loc>
+    <lastmod>2026-04-22</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://peptyl.co.uk/education/glp1-muscle-loss-prevention" />
+    <xhtml:link rel="alternate" hreflang="de" href="https://peptyl.de/education/glp1-muscle-loss-prevention" />
+    <xhtml:link rel="alternate" hreflang="fr" href="https://peptyl.fr/education/glp1-muscle-loss-prevention" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://peptyl.co.uk/education/glp1-muscle-loss-prevention" />
+  </url>
+  <url>
+    <loc>https://peptyl.co.uk/education/peptides-bodybuilders-use</loc>
+    <lastmod>2026-04-22</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://peptyl.co.uk/education/peptides-bodybuilders-use" />
+    <xhtml:link rel="alternate" hreflang="de" href="https://peptyl.de/education/peptides-bodybuilders-use" />
+    <xhtml:link rel="alternate" hreflang="fr" href="https://peptyl.fr/education/peptides-bodybuilders-use" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://peptyl.co.uk/education/peptides-bodybuilders-use" />
+  </url>
+  <url>
+    <loc>https://peptyl.co.uk/education/humanin-longevity-peptide</loc>
+    <lastmod>2026-04-22</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://peptyl.co.uk/education/humanin-longevity-peptide" />
+    <xhtml:link rel="alternate" hreflang="de" href="https://peptyl.de/education/humanin-longevity-peptide" />
+    <xhtml:link rel="alternate" hreflang="fr" href="https://peptyl.fr/education/humanin-longevity-peptide" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://peptyl.co.uk/education/humanin-longevity-peptide" />
+  </url>
+  <url>
+    <loc>https://peptyl.co.uk/education/myostatin-blockers-bimagrumab</loc>
+    <lastmod>2026-04-22</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://peptyl.co.uk/education/myostatin-blockers-bimagrumab" />
+    <xhtml:link rel="alternate" hreflang="de" href="https://peptyl.de/education/myostatin-blockers-bimagrumab" />
+    <xhtml:link rel="alternate" hreflang="fr" href="https://peptyl.fr/education/myostatin-blockers-bimagrumab" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://peptyl.co.uk/education/myostatin-blockers-bimagrumab" />
+  </url>
+  <url>
+    <loc>https://peptyl.co.uk/education/fgf21-metabolic-longevity</loc>
+    <lastmod>2026-04-22</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://peptyl.co.uk/education/fgf21-metabolic-longevity" />
+    <xhtml:link rel="alternate" hreflang="de" href="https://peptyl.de/education/fgf21-metabolic-longevity" />
+    <xhtml:link rel="alternate" hreflang="fr" href="https://peptyl.fr/education/fgf21-metabolic-longevity" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://peptyl.co.uk/education/fgf21-metabolic-longevity" />
+  </url>
+  <url>
+    <loc>https://peptyl.co.uk/education/peptide-stacking-guide</loc>
+    <lastmod>2026-04-22</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://peptyl.co.uk/education/peptide-stacking-guide" />
+    <xhtml:link rel="alternate" hreflang="de" href="https://peptyl.de/education/peptide-stacking-guide" />
+    <xhtml:link rel="alternate" hreflang="fr" href="https://peptyl.fr/education/peptide-stacking-guide" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://peptyl.co.uk/education/peptide-stacking-guide" />
+  </url>
+  <url>
+    <loc>https://peptyl.co.uk/education/semax-selank-dosage-guide</loc>
+    <lastmod>2026-04-22</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://peptyl.co.uk/education/semax-selank-dosage-guide" />
+    <xhtml:link rel="alternate" hreflang="de" href="https://peptyl.de/education/semax-selank-dosage-guide" />
+    <xhtml:link rel="alternate" hreflang="fr" href="https://peptyl.fr/education/semax-selank-dosage-guide" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://peptyl.co.uk/education/semax-selank-dosage-guide" />
+  </url>
+  <url>
+    <loc>https://peptyl.co.uk/education/glp1-side-effects-supplements</loc>
+    <lastmod>2026-04-22</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://peptyl.co.uk/education/glp1-side-effects-supplements" />
+    <xhtml:link rel="alternate" hreflang="de" href="https://peptyl.de/education/glp1-side-effects-supplements" />
+    <xhtml:link rel="alternate" hreflang="fr" href="https://peptyl.fr/education/glp1-side-effects-supplements" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://peptyl.co.uk/education/glp1-side-effects-supplements" />
   </url>
 </urlset>
