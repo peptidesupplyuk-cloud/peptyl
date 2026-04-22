@@ -71,26 +71,29 @@
   <body>
     <div id="root"></div>
     <noscript>
-      <h1>Peptyl: Your Health, One Platform</h1>
-      <p>Track your health, supplements, peptides, and biomarkers in one app. Peptyl offers free precision calculators, a database of 56+ compounds, community-driven insights, and personalised health protocols.</p>
-      <h2>Features</h2>
+      <h1>Peptyl — Health Tracking, Peptides, Supplements, Bloodwork &amp; Wearables</h1>
+      <p>Peptyl is a free health intelligence platform. Track peptide and supplement protocols, analyse bloodwork, sync wearables (WHOOP, Fitbit, HealthKit), and get AI-driven optimisation insights across 56+ compounds including BPC-157, Tirzepatide, Semaglutide, GHK-Cu, MOTS-c, GLP-1s, and longevity peptides.</p>
+      <h2>Core tools</h2>
       <ul>
-        <li><a href="/peptides">Peptide Database: 56+ compounds with community experiences</a></li>
-        <li><a href="/calculators">Precision Calculators: Reconstitution and dosing tools</a></li>
-        <li><a href="/education">Education Hub: Guides, comparisons, and supplement stacks</a></li>
-        <li><a href="/suppliers">Supplier Comparison: UK pharmacy pricing</a></li>
-        <li><a href="/glossary">Peptide Glossary: Key terms and definitions</a></li>
+        <li><a href="/peptides">Peptide Database — 56+ compounds with dosing, mechanism &amp; community experiences</a></li>
+        <li><a href="/calculators">Reconstitution &amp; Dose Calculators — precision tools for research</a></li>
+        <li><a href="/improve">Peptides &amp; Supplements — protocol stacks and recommendations</a></li>
+        <li><a href="/dna">DNA Health Assessment — genetic personalisation reports</a></li>
+        <li><a href="/suppliers">UK Supplier Comparison — verified pharmacy pricing</a></li>
+        <li><a href="/shop">Supplement Shop</a></li>
+        <li><a href="/education">Education Hub — research-backed peptide guides</a></li>
+        <li><a href="/glossary">Peptide Glossary</a></li>
         <li><a href="/faq">Frequently Asked Questions</a></li>
         <li><a href="/about">About Peptyl</a></li>
         <li><a href="/sitemap">Full Sitemap</a></li>
       </ul>
-      <h2>Articles</h2>
+      <h2>Featured research articles</h2>
       <ul>
         <li><a href="/education/mots-c-mitochondrial-peptide">MOTS-c: The Mitochondrial Peptide Rewriting the Rules on Ageing</a></li>
         <li><a href="/education/ss31-elamipretide-mitochondrial-ageing">SS-31 (Elamipretide): Targeting Cellular Ageing</a></li>
-        <li><a href="/education/peptide-craze-biohacking">Inside the Peptide Craze Sweeping the Biohacking World</a></li>
+        <li><a href="/education/peptide-craze-biohacking">Inside the Peptide Craze Sweeping Biohacking</a></li>
         <li><a href="/education/peptides-cancer-therapy-2026">Peptides in Cancer Therapy (2026)</a></li>
-        <li><a href="/education/peptide-research-europe-guide">European Peptide Research Guide</a></li>
+        <li><a href="/education/european-peptide-guide">European Peptide Research Guide</a></li>
         <li><a href="/education/beginners-guide-peptides">Beginner's Guide to Peptides</a></li>
         <li><a href="/education/how-to-reconstitute-peptides">How to Reconstitute Peptides</a></li>
         <li><a href="/education/bpc157-vs-tb500">BPC-157 vs TB-500</a></li>
@@ -117,25 +120,17 @@
         <li><a href="/education/semaglutide-uk-guide">Semaglutide UK Guide</a></li>
         <li><a href="/education/tirzepatide-vs-semaglutide">Tirzepatide vs Semaglutide</a></li>
         <li><a href="/education/glp1-muscle-loss-prevention">GLP-1 Muscle Loss Prevention</a></li>
+        <li><a href="/education/glp1-side-effects-supplements">GLP-1 Side Effects &amp; Supplements</a></li>
         <li><a href="/education/peptides-bodybuilders-use">Peptides Bodybuilders Use</a></li>
         <li><a href="/education/humanin-longevity-peptide">Humanin Longevity Peptide</a></li>
-        <li><a href="/education/myostatin-blockers-bimagrumab">Myostatin Blockers & Bimagrumab</a></li>
+        <li><a href="/education/myostatin-blockers-bimagrumab">Myostatin Blockers &amp; Bimagrumab</a></li>
         <li><a href="/education/fgf21-metabolic-longevity">FGF21 Metabolic Longevity</a></li>
         <li><a href="/education/peptide-stacking-guide">Peptide Stacking Guide</a></li>
-        <li><a href="/education/semax-selank-dosage-guide">Semax & Selank Dosage Guide</a></li>
+        <li><a href="/education/semax-selank-dosage-guide">Semax &amp; Selank Dosage Guide</a></li>
         <li><a href="/education/endotoxin-purity-peptides">Endotoxin Purity: Why It Is Non-Negotiable</a></li>
       </ul>
     </noscript>
     <script type="module" src="/src/main.tsx"></script>
-    <script>
-      // Anti-copy protection
-      document.addEventListener('contextmenu', function(e) { e.preventDefault(); });
-      document.addEventListener('keydown', function(e) {
-        if ((e.ctrlKey || e.metaKey) && (e.key === 'u' || e.key === 'U' || e.key === 's' || e.key === 'S')) {
-          e.preventDefault();
-        }
-      });
-    </script>
     <script>
       // Defer OneSignal load until after page is interactive
       var productionHosts = new Set(['peptyl.co.uk', 'www.peptyl.co.uk', 'peptyl.lovable.app']);
