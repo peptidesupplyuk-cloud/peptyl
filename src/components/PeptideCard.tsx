@@ -121,6 +121,15 @@ const PeptideCard = ({ peptide, index }: PeptideCardProps) => {
               {/* Description */}
               <p className="text-sm text-muted-foreground leading-relaxed">{peptide.description}</p>
 
+              {/* Full page link (SEO + accessibility) */}
+              <Link
+                to={`/peptides/${toSlug(peptide.name)}`}
+                onClick={(e) => e.stopPropagation()}
+                className="inline-flex items-center gap-1 text-[11px] font-medium text-primary hover:text-primary/80 transition-colors"
+              >
+                Read full {peptide.name} guide <ExternalLink className="h-3 w-3" />
+              </Link>
+
               {/* Benefits */}
               {peptide.benefits.length > 0 && (
                 <div className="flex flex-wrap gap-1.5">

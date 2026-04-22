@@ -62,6 +62,15 @@ const SupplementCard = ({ supplement: s, index }: Props) => {
               {/* Description */}
               <p className="text-sm text-muted-foreground leading-relaxed">{s.description}</p>
 
+              {/* Full page link (SEO + accessibility) */}
+              <Link
+                to={`/supplements/${toSlug(s.name)}`}
+                onClick={(e) => e.stopPropagation()}
+                className="inline-flex items-center gap-1 text-[11px] font-medium text-primary hover:text-primary/80 transition-colors"
+              >
+                Read full {s.name} guide <ExternalLink className="h-3 w-3" />
+              </Link>
+
               {/* Benefits */}
               {s.benefits.length > 0 && (
                 <div className="flex flex-wrap gap-1.5">
