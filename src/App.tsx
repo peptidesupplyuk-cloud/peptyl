@@ -65,6 +65,7 @@ const EuropeanPeptideGuide = lazyWithRetry(() => import("./pages/articles/Europe
 const PeptidesCancer2026 = lazyWithRetry(() => import("./pages/articles/PeptidesCancer2026"));
 const PeptideCrazeBiohacking = lazyWithRetry(() => import("./pages/articles/PeptideCrazeBiohacking"));
 const MotsCMitochondrial = lazyWithRetry(() => import("./pages/articles/MotsCMitochondrial"));
+const MotsCDoseResponse = lazyWithRetry(() => import("./pages/articles/MotsCDoseResponse"));
 const Ss31Elamipretide = lazyWithRetry(() => import("./pages/articles/Ss31Elamipretide"));
 const Bpc157Dosage = lazyWithRetry(() => import("./pages/articles/Bpc157Dosage"));
 const Bpc157OralVsInjection = lazyWithRetry(() => import("./pages/articles/Bpc157OralVsInjection"));
@@ -159,6 +160,7 @@ const AppContent = () => {
           <Route path="/education/peptides-cancer-therapy-2026" element={<PeptidesCancer2026 />} />
           <Route path="/education/peptide-craze-biohacking" element={<PeptideCrazeBiohacking />} />
           <Route path="/education/mots-c-mitochondrial-peptide" element={<MotsCMitochondrial />} />
+          <Route path="/education/mots-c-dose-response-tiktok" element={<MotsCDoseResponse />} />
           <Route path="/education/ss31-elamipretide-mitochondrial-ageing" element={<Ss31Elamipretide />} />
           <Route path="/education/bpc-157-dosage-guide" element={<Bpc157Dosage />} />
           <Route path="/education/bpc-157-oral-vs-injection" element={<Bpc157OralVsInjection />} />
