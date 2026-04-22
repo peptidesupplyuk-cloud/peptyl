@@ -13,4 +13,15 @@ createRoot(document.getElementById("root")!).render(
   </HelmetProvider>
 );
 
+// Signal to the prerenderer (Puppeteer) that React has hydrated and
+// the DOM is ready to be captured as static HTML for SEO.
+if (typeof window !== "undefined") {
+  // Wait one frame so Helmet has flushed <title>/<meta> into <head>.
+  requestAnimationFrame(() => {
+    requestAnimationFrame(() => {
+      document.dispatchEvent(new Event("render-event"));
+    });
+  });
+}
+
 // PWA registration handled by vite-plugin-pwa
