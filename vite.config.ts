@@ -130,7 +130,7 @@ export default defineConfig(({ mode }) => ({
         renderAfterDocumentEvent: "render-event",
         renderAfterTime: 5000,
         maxConcurrentRoutes: 4,
-        headless: "new",
+        headless: true,
         args: ["--no-sandbox", "--disable-setuid-sandbox"],
       },
       postProcess(renderedRoute: any) {
