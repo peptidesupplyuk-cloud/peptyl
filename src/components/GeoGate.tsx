@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import RegionBlocked from "@/pages/RegionBlocked";
-import { isEditorPreviewHost } from "@/lib/runtime-host";
+import { isEditorPreviewHost, isPrerenderEnvironment } from "@/lib/runtime-host";
 
 const BLOCKED_USER_AGENTS = [
   "httrack", "wget", "curl", "scrapy", "python-requests",
@@ -29,6 +29,12 @@ const GeoGate = ({ children }: { children: React.ReactNode }) => {
   const [status, setStatus] = useState<"checking" | "allowed" | "blocked">("checking");
 
   useEffect(() => {
+    // Allow build-time prerender (Puppeteer) so SEO HTML captures real content.
+    if (isPrerenderEnvironment()) {
+      setStatus("allowed");
+      return;
+    }
+
     if (isEditorPreviewHost()) {
       setStatus("allowed");
       return;
