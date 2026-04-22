@@ -1,7 +1,9 @@
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { ChevronDown, ChevronUp, CheckCircle2, AlertTriangle, BookOpen, FlaskConical, Beaker } from "lucide-react";
+import { ChevronDown, ChevronUp, CheckCircle2, AlertTriangle, BookOpen, FlaskConical, Beaker, ExternalLink } from "lucide-react";
+import { Link } from "react-router-dom";
 import type { SupplementData } from "@/data/supplements";
+import { toSlug } from "@/lib/seo-slug";
 
 interface Props {
   supplement: SupplementData;
