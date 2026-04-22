@@ -95,6 +95,8 @@ const JoinReferral = lazyWithRetry(() => import("./pages/JoinReferral"));
 const CompoundIntelligence = lazyWithRetry(() => import("./pages/CompoundIntelligence"));
 const PipChatPage = lazyWithRetry(() => import("./pages/PipChat"));
 const SharedCoachPlan = lazyWithRetry(() => import("./pages/SharedCoachPlan"));
+const PeptideDetail = lazyWithRetry(() => import("./pages/PeptideDetail"));
+const SupplementDetail = lazyWithRetry(() => import("./pages/SupplementDetail"));
 
 const queryClient = new QueryClient();
 
@@ -117,6 +119,8 @@ const AppContent = () => {
           <Route path="/reset-password" element={<ResetPassword />} />
           <Route path="/complete-profile" element={<ProtectedRoute><CompleteProfile /></ProtectedRoute>} />
           <Route path="/peptides" element={<Peptides />} />
+          <Route path="/peptides/:slug" element={<PeptideDetail />} />
+          <Route path="/supplements/:slug" element={<SupplementDetail />} />
           <Route path="/calculators" element={<Calculators />} />
           <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
           <Route path="/improve" element={<Improve />} />

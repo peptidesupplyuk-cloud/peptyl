@@ -2,7 +2,9 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { motion, AnimatePresence } from "framer-motion";
-import { ThumbsUp, ThumbsDown, TrendingUp, AlertTriangle, Clock, ChevronDown, ChevronUp, Syringe, CalendarDays, Sparkles, CheckCircle2, FlaskConical, Plus, ArrowRight, Users, FileText, MessageSquarePlus } from "lucide-react";
+import { ThumbsUp, ThumbsDown, TrendingUp, AlertTriangle, Clock, ChevronDown, ChevronUp, Syringe, CalendarDays, Sparkles, CheckCircle2, FlaskConical, Plus, ArrowRight, Users, FileText, MessageSquarePlus, ExternalLink } from "lucide-react";
+import { Link } from "react-router-dom";
+import { toSlug } from "@/lib/seo-slug";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/contexts/AuthContext";
 import OnboardingModal from "@/components/OnboardingModal";
@@ -118,6 +120,15 @@ const PeptideCard = ({ peptide, index }: PeptideCardProps) => {
             <div className="ml-4 mr-0 border-l-2 border-primary/20 pl-4 pb-4 pt-2 space-y-3">
               {/* Description */}
               <p className="text-sm text-muted-foreground leading-relaxed">{peptide.description}</p>
+
+              {/* Full page link (SEO + accessibility) */}
+              <Link
+                to={`/peptides/${toSlug(peptide.name)}`}
+                onClick={(e) => e.stopPropagation()}
+                className="inline-flex items-center gap-1 text-[11px] font-medium text-primary hover:text-primary/80 transition-colors"
+              >
+                Read full {peptide.name} guide <ExternalLink className="h-3 w-3" />
+              </Link>
 
               {/* Benefits */}
               {peptide.benefits.length > 0 && (

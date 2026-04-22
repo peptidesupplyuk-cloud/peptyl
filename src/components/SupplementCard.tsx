@@ -1,7 +1,9 @@
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { ChevronDown, ChevronUp, CheckCircle2, AlertTriangle, BookOpen, FlaskConical, Beaker } from "lucide-react";
+import { ChevronDown, ChevronUp, CheckCircle2, AlertTriangle, BookOpen, FlaskConical, Beaker, ExternalLink } from "lucide-react";
+import { Link } from "react-router-dom";
 import type { SupplementData } from "@/data/supplements";
+import { toSlug } from "@/lib/seo-slug";
 
 interface Props {
   supplement: SupplementData;
@@ -59,6 +61,15 @@ const SupplementCard = ({ supplement: s, index }: Props) => {
             <div className="ml-4 mr-0 border-l-2 border-primary/20 pl-4 pb-4 pt-2 space-y-3">
               {/* Description */}
               <p className="text-sm text-muted-foreground leading-relaxed">{s.description}</p>
+
+              {/* Full page link (SEO + accessibility) */}
+              <Link
+                to={`/supplements/${toSlug(s.name)}`}
+                onClick={(e) => e.stopPropagation()}
+                className="inline-flex items-center gap-1 text-[11px] font-medium text-primary hover:text-primary/80 transition-colors"
+              >
+                Read full {s.name} guide <ExternalLink className="h-3 w-3" />
+              </Link>
 
               {/* Benefits */}
               {s.benefits.length > 0 && (
