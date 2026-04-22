@@ -9,6 +9,14 @@ export interface BlogPost {
 
 export const blogPosts: BlogPost[] = [
   {
+    slug: "mots-c-dose-response-tiktok",
+    title: "MOTS-c on TikTok: Why 1–2 mg Pre-Workout Works and 5 mg Often Doesn't",
+    category: "Dose Response",
+    excerpt: "MOTS-c is having a viral moment in 2026. We unpack the actual clinical research, the hormetic dose-response curve, and why community reports of 1–2 mg pre-workout consistently beat 5 mg standalone protocols.",
+    readTime: "11 min read",
+    date: "April 2026",
+  },
+  {
     slug: "endotoxin-purity-peptides",
     title: "Endotoxin Purity: Why It Is Non-Negotiable for Peptides and Supplements",
     category: "Purity & Safety",
