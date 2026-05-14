@@ -9,6 +9,14 @@ export interface BlogPost {
 
 export const blogPosts: BlogPost[] = [
   {
+    slug: "china-supply-crisis-2026",
+    title: "China Peptide Supply Crisis 2026: Retatrutide Coming Back as BPC-157, DOA Notices and What Buyers Need to Know",
+    category: "Supply Chain Alert",
+    excerpt: "A wave of mislabelled, substituted and contaminated peptide batches from Chinese contract manufacturers is hitting research suppliers across the UK, EU and US. We break down what is actually happening, why Retatrutide keeps coming back as BPC-157, and how to verify what you have.",
+    readTime: "12 min read",
+    date: "May 2026",
+  },
+  {
     slug: "mots-c-dose-response-tiktok",
     title: "MOTS-c on TikTok: Why 1–2 mg Pre-Workout Works and 5 mg Often Doesn't",
     category: "Dose Response",

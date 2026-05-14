@@ -137,6 +137,22 @@ Deno.serve(async (req) => {
           continue;
         }
 
+        // Race-safe reservation: claim the (user_id, nudge_type) slot via the
+        // unique index BEFORE sending. If a parallel cron invocation already
+        // inserted, this errors and we skip — preventing duplicate emails.
+        const { error: reserveErr } = await supabase
+          .from("nudge_log")
+          .insert({
+            user_id: userId,
+            nudge_type: nudgeType,
+            email_sent: false,
+            push_sent: false,
+          } as any);
+        if (reserveErr) {
+          console.log(`Skipping ${nudgeType} for ${userId}: slot already reserved (${reserveErr.message})`);
+          continue;
+        }
+
         // Get user email
         const { data: authUser } = await supabase.auth.admin.getUserById(userId);
         const userEmail = authUser?.user?.email;
@@ -398,14 +414,12 @@ Deno.serve(async (req) => {
             }
           }
 
-          // Log the follow-up nudge with delivery status
-          await supabase.from("nudge_log").insert({
-            user_id: userId,
-            nudge_type: nudgeType,
-            email_sent: emailSent,
-            push_sent: pushSent,
-            error_message: null,
-          } as any);
+          // Update the reservation row with delivery status
+          await supabase
+            .from("nudge_log")
+            .update({ email_sent: emailSent, push_sent: pushSent })
+            .eq("user_id", userId)
+            .eq("nudge_type", nudgeType);
 
           results.push({
             user_id: userId,
@@ -508,14 +522,16 @@ Deno.serve(async (req) => {
           ...reminders.map(r => `💉 ${r.peptide_name} ${r.dose_mcg}mcg [${r.doseWindow}] (${r.protocol_name})`),
           ...supplementReminders.map(s => `💊 ${s.name} ${s.dose} [${s.doseWindow}] (${s.protocol_name})`),
         ].join(" | ");
-        await supabase.from("nudge_log").insert({
-          user_id: userId,
-          nudge_type: nudgeType,
-          email_sent: emailSent,
-          push_sent: pushSent,
-          error_message: errorMsg || null,
-          message_content: contentSummary.slice(0, 1000),
-        } as any);
+        await supabase
+          .from("nudge_log")
+          .update({
+            email_sent: emailSent,
+            push_sent: pushSent,
+            error_message: errorMsg || null,
+            message_content: contentSummary.slice(0, 1000),
+          })
+          .eq("user_id", userId)
+          .eq("nudge_type", nudgeType);
 
         results.push({
           user_id: userId,

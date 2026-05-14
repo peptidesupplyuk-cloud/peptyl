@@ -81,6 +81,7 @@ const PeptideStackingGuide = lazyWithRetry(() => import("./pages/articles/Peptid
 const SemaxSelankGuide = lazyWithRetry(() => import("./pages/articles/SemaxSelankGuide"));
 const EndotoxinPurity = lazyWithRetry(() => import("./pages/articles/EndotoxinPurity"));
 const Glp1SideEffects = lazyWithRetry(() => import("./pages/articles/Glp1SideEffects"));
+const ChinaSupplyCrisis2026 = lazyWithRetry(() => import("./pages/articles/ChinaSupplyCrisis2026"));
 const Glossary = lazyWithRetry(() => import("./pages/Glossary"));
 const SiteMapPage = lazyWithRetry(() => import("./pages/SiteMap"));
 const CampaignPage = lazyWithRetry(() => import("./pages/CampaignPage"));
@@ -176,6 +177,7 @@ const AppContent = () => {
           <Route path="/education/semax-selank-dosage-guide" element={<SemaxSelankGuide />} />
           <Route path="/education/endotoxin-purity-peptides" element={<EndotoxinPurity />} />
           <Route path="/education/glp1-side-effects-supplements" element={<Glp1SideEffects />} />
+          <Route path="/education/china-supply-crisis-2026" element={<ChinaSupplyCrisis2026 />} />
           <Route path="/glossary" element={<Glossary />} />
           <Route path="/sitemap" element={<SiteMapPage />} />
           <Route path="/whoop-callback" element={<WhoopCallback />} />
