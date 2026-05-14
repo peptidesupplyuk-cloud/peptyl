@@ -137,6 +137,22 @@ Deno.serve(async (req) => {
           continue;
         }
 
+        // Race-safe reservation: claim the (user_id, nudge_type) slot via the
+        // unique index BEFORE sending. If a parallel cron invocation already
+        // inserted, this errors and we skip — preventing duplicate emails.
+        const { error: reserveErr } = await supabase
+          .from("nudge_log")
+          .insert({
+            user_id: userId,
+            nudge_type: nudgeType,
+            email_sent: false,
+            push_sent: false,
+          } as any);
+        if (reserveErr) {
+          console.log(`Skipping ${nudgeType} for ${userId}: slot already reserved (${reserveErr.message})`);
+          continue;
+        }
+
         // Get user email
         const { data: authUser } = await supabase.auth.admin.getUserById(userId);
         const userEmail = authUser?.user?.email;
