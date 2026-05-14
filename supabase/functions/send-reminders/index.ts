@@ -414,14 +414,12 @@ Deno.serve(async (req) => {
             }
           }
 
-          // Log the follow-up nudge with delivery status
-          await supabase.from("nudge_log").insert({
-            user_id: userId,
-            nudge_type: nudgeType,
-            email_sent: emailSent,
-            push_sent: pushSent,
-            error_message: null,
-          } as any);
+          // Update the reservation row with delivery status
+          await supabase
+            .from("nudge_log")
+            .update({ email_sent: emailSent, push_sent: pushSent })
+            .eq("user_id", userId)
+            .eq("nudge_type", nudgeType);
 
           results.push({
             user_id: userId,
@@ -524,14 +522,16 @@ Deno.serve(async (req) => {
           ...reminders.map(r => `💉 ${r.peptide_name} ${r.dose_mcg}mcg [${r.doseWindow}] (${r.protocol_name})`),
           ...supplementReminders.map(s => `💊 ${s.name} ${s.dose} [${s.doseWindow}] (${s.protocol_name})`),
         ].join(" | ");
-        await supabase.from("nudge_log").insert({
-          user_id: userId,
-          nudge_type: nudgeType,
-          email_sent: emailSent,
-          push_sent: pushSent,
-          error_message: errorMsg || null,
-          message_content: contentSummary.slice(0, 1000),
-        } as any);
+        await supabase
+          .from("nudge_log")
+          .update({
+            email_sent: emailSent,
+            push_sent: pushSent,
+            error_message: errorMsg || null,
+            message_content: contentSummary.slice(0, 1000),
+          })
+          .eq("user_id", userId)
+          .eq("nudge_type", nudgeType);
 
         results.push({
           user_id: userId,
