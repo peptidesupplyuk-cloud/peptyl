@@ -13,20 +13,46 @@
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
     <meta name="apple-mobile-web-app-title" content="Peptyl" />
+    <!-- Prevent browser HTTP cache from serving stale app shell -->
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
+    <meta http-equiv="Pragma" content="no-cache" />
+    <meta http-equiv="Expires" content="0" />
     <link rel="preconnect" href="https://cdn.onesignal.com" />
-    <!-- Pre-React SW cleanup: nuke stale service workers before any JS modules load -->
+    <!-- Pre-React SW cleanup: nuke stale service workers + caches, then hard-reload ONCE
+         if any were found so the freshly-fetched shell takes over. Guarded by sessionStorage
+         to prevent reload loops. -->
     <script>
       (function(){
-        if('serviceWorker' in navigator){
-          navigator.serviceWorker.getRegistrations().then(function(regs){
-            regs.forEach(function(r){r.unregister()});
-          });
-        }
-        if('caches' in window){
-          caches.keys().then(function(names){
-            names.forEach(function(n){caches.delete(n)});
-          });
-        }
+        try {
+          var RELOAD_KEY = 'peptyl-sw-purge-reload';
+          var hasSW = 'serviceWorker' in navigator;
+          var hasCaches = 'caches' in window;
+          if (!hasSW && !hasCaches) return;
+
+          Promise.all([
+            hasSW ? navigator.serviceWorker.getRegistrations() : Promise.resolve([]),
+            hasCaches ? caches.keys() : Promise.resolve([])
+          ]).then(function(results){
+            var regs = results[0] || [];
+            var cacheNames = results[1] || [];
+            var foundSomething = regs.length > 0 || cacheNames.length > 0;
+
+            return Promise.all([
+              Promise.all(regs.map(function(r){ return r.unregister().catch(function(){}); })),
+              Promise.all(cacheNames.map(function(n){ return caches.delete(n).catch(function(){}); }))
+            ]).then(function(){
+              if (!foundSomething) return;
+              var alreadyReloaded = false;
+              try { alreadyReloaded = sessionStorage.getItem(RELOAD_KEY) === '1'; } catch(_) {}
+              if (alreadyReloaded) {
+                try { sessionStorage.removeItem(RELOAD_KEY); } catch(_) {}
+                return;
+              }
+              try { sessionStorage.setItem(RELOAD_KEY, '1'); } catch(_) {}
+              window.location.reload();
+            });
+          }).catch(function(){});
+        } catch(_) {}
       })();
     </script>
     <link rel="dns-prefetch" href="https://cdn.onesignal.com" />
