@@ -290,7 +290,7 @@ function planToPlainText(plan: any): string {
 
 const FREQUENCIES = [
   "Once daily", "Twice daily", "Once weekly", "Twice weekly", "3x per week",
-  "5x per week", "5 days on, 2 off", "Every other day", "Once monthly",
+  "5x per week", "5 days on, 2 off", "Every other day", "Every 5 days", "Once monthly",
 ];
 
 const INJECTION_SITES = ["Abdomen", "Thigh", "Upper arm", "Glute", "Subcutaneous (any)"];
